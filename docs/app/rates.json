@@ -1,0 +1,155 @@
+{
+ "Usd": 3.9251,
+ "Eur": 4.3955,
+ "ExchangeDate": "2026-10-30",
+ "ReferenceRate": 3.75,
+ "ReferenceSince": "2026-03-05",
+ "Bonds": [
+  {
+   "Code": "OTS",
+   "Rate": 2
+  },
+  {
+   "Code": "ROR",
+   "Rate": 4
+  },
+  {
+   "Code": "DOR",
+   "Rate": 4.15
+  },
+  {
+   "Code": "TOS",
+   "Rate": 4.4
+  },
+  {
+   "Code": "COI",
+   "Rate": 4.75
+  },
+  {
+   "Code": "EDO",
+   "Rate": 5.35
+  },
+  {
+   "Code": "ROS",
+   "Rate": 5
+  },
+  {
+   "Code": "ROD",
+   "Rate": 5.6
+  }
+ ],
+ "SavingsOffers": [
+  {
+   "Url": "",
+   "Bank": "Erste Bank Polska",
+   "Name": "Konto Multi oszczędnościowe",
+   "Rate": 4.5,
+   "MaxAmount": 200000,
+   "Days": 90,
+   "Details": "do 200 tys. zł · od dnia przystąpienia do 29.11.2026 r. · Oferta na nowe środki Dzień bazowy 27.08.2026 r.; Przystąpienie do 20.11.2026 r."
+  },
+  {
+   "Url": "",
+   "Bank": "Volkswagen Bank GmbH Sp. z o.o.",
+   "Name": "Rachunek oszczędnościowy Plus Konto",
+   "Rate": 4,
+   "MaxAmount": 0,
+   "Days": 365,
+   "Details": "bez limitu kwoty · bezterminowo · Brak dodatkowych warunków aktywności Oferta ważna do odwołania"
+  },
+  {
+   "Url": "",
+   "Bank": "ING Bank Śląski",
+   "Name": "Otwarte Konto Oszczędnościowe",
+   "Rate": 4,
+   "MaxAmount": 400000,
+   "Days": 90,
+   "Details": "do kwoty niższej niż 400 tys. zł · 3 miesiące · Oferta dla nowych lub nieaktywnych posiadaczy rachunku oszczędnościowego Odsetki standardowe naliczane są co…"
+  },
+  {
+   "Url": "",
+   "Bank": "PKO Bank Polski",
+   "Name": "Konto Oszczędnościowe Plus",
+   "Rate": 4,
+   "MaxAmount": 250000,
+   "Days": 90,
+   "Details": "do 250 tys. zł dla kont otwartych od 27.06.2025 r. · 90 dni od pierwszej wpłaty nowych środków · Oferta na nowe środki promocja trwa do 07.01.2027 r."
+  },
+  {
+   "Url": "",
+   "Bank": "Toyota Bank",
+   "Name": "Indeksowane Konto Oszczędnościowe",
+   "Rate": 3.85,
+   "MaxAmount": 400000,
+   "Days": 90,
+   "Details": "do 400 tys. zł 0,85% powyżej 400 tys. zł · Stawka aktualizowana kwartalnie według WIBOR 3M · Oprocentowanie zmienne, oparte o WIBOR 3M, wyliczane na podstawi…"
+  },
+  {
+   "Url": "",
+   "Bank": "Renault Bank / RCI Banque S.A. Oddział w Polsce",
+   "Name": "Elastyczny produkt oszczędnościowy",
+   "Rate": 3.8,
+   "MaxAmount": 400000,
+   "Days": 365,
+   "Details": "do 400 tys. zł · Oferta obowiązuje bezterminowo · Wymagane bezpłatne konto na platformie Raisin do obsługi środków Kwartalna kapitalizacja odsetek Bank odpro…"
+  }
+ ],
+ "DepositOffers": [
+  {
+   "Url": "",
+   "Bank": "Raiffeisen Digital Bank",
+   "Name": "Lokata dla nowych Klientów",
+   "Rate": 4.6,
+   "MaxAmount": 150000,
+   "Days": 365,
+   "Details": "100 - 150 000 zł · Dla nowych klientów Konto osobiste Aktualna promocja trwa od 12.10.2026 r."
+  },
+  {
+   "Url": "",
+   "Bank": "Toyota Bank",
+   "Name": "Lokata Standard",
+   "Rate": 4.3,
+   "MaxAmount": 100000,
+   "Days": 365,
+   "Details": "2 000 - 100 000 zł · Bez konta"
+  },
+  {
+   "Url": "https://rankomat.pl/finanse/redirect/lokaty/inbank-lokata-standardowa/12/",
+   "Bank": "Inbank",
+   "Name": "Lokata standardowa",
+   "Rate": 4.15,
+   "MaxAmount": 1000000,
+   "Days": 365,
+   "Details": "1 000 - 50 000 zł (limit lokat do 1 000 000 zł) · Brak dodatkowych warunków"
+  },
+  {
+   "Url": "",
+   "Bank": "BFF Banking Group (Facto)",
+   "Name": "Lokata Facto",
+   "Rate": 4,
+   "MaxAmount": 12000000,
+   "Days": 365,
+   "Details": "5 000 - 12 000 000 zł · Rachunek depozytowy Facto"
+  },
+  {
+   "Url": "",
+   "Bank": "Credit Agricole",
+   "Name": "Lokata na Nowe pieniądze",
+   "Rate": 3.8,
+   "MaxAmount": 250000,
+   "Days": 365,
+   "Details": "1 000 - 250 000 zł · Konto dla Ciebie Prime"
+  },
+  {
+   "Url": "",
+   "Bank": "Nest Bank",
+   "Name": "Nest Lokata Nowe Środki",
+   "Rate": 3.7,
+   "MaxAmount": 2000000,
+   "Days": 365,
+   "Details": "1 000 - 2 000 000 zł · Konto osobiste Nowe środki"
+  }
+ ],
+ "OffersChecked": "2026-10-31T21:52:03.326Z",
+ "Updated": "2026-10-31T21:52:03.326Z"
+}
