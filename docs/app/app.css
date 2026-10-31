@@ -51,9 +51,12 @@ hr { border: 0; border-top: 1px solid var(--border); margin: 14px 0; }
 
 /* ---------- page ---------- */
 #page { max-width: 1400px; margin: 0 auto; padding: 18px 16px 90px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start; }
-.grid > .tiles, .grid > .btn, .grid > .tip, .grid > .wide { grid-column: 1 / -1; }
-.card { background: var(--card); border: 1px solid var(--border); border-top: 3px solid var(--accent); border-radius: 14px; padding: 18px; box-shadow: 0 1px 3px rgba(15,23,42,.06); min-width: 0; }
+/* Cards flow in columns like the app: no empty gaps under short cards */
+.grid { column-width: 400px; column-gap: 16px; }
+.grid > * { break-inside: avoid; margin: 0 0 16px; }
+.grid > .btn, .grid > .tip { display: flex; width: 100%; }
+.grid > .tiles, .grid > .btn, .grid > .tip, .grid > .wide { column-span: all; }
+.card { container-type: inline-size; display: block; background: var(--card); border: 1px solid var(--border); border-top: 3px solid var(--accent); border-radius: 14px; padding: 18px; box-shadow: 0 1px 3px rgba(15,23,42,.06); min-width: 0; }
 .card.link, .link { cursor: pointer; }
 .card.link:hover { box-shadow: 0 4px 14px rgba(15,23,42,.12); }
 .row { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; border-bottom: 1px dashed var(--border); }
@@ -132,11 +135,12 @@ textarea { font-family: Consolas, monospace; font-size: 13px; resize: vertical; 
 .hbar-track { background: var(--grid); border-radius: 6px; height: 18px; overflow: hidden; }
 .hbar-track span { display: block; height: 100%; border-radius: 6px; }
 .hbar-value { font-weight: 700; white-space: nowrap; }
-.chart-row { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+.chart-row { display: flex; gap: 18px; align-items: center; }
+@container (max-width: 560px) { .chart-row { flex-direction: column; align-items: stretch; } .chart-row .donut { align-self: center; } }
 .donut { flex: none; max-width: 100%; }
 .donut-top { font-size: 15px; font-weight: 800; fill: var(--ink); }
 .donut-bottom { font-size: 11px; fill: var(--muted); }
-.legend { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 3px; font-size: 14px; }
+.legend { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; font-size: 14px; }
 .legend-row { display: grid; grid-template-columns: 12px 1fr auto 42px; gap: 8px; align-items: center; padding: 2px 4px; border-radius: 6px; }
 .legend-row.clickable { cursor: pointer; }
 .legend-row.clickable:hover { background: var(--soft); }
@@ -168,12 +172,12 @@ textarea { font-family: Consolas, monospace; font-size: 13px; resize: vertical; 
 .locked p { font-size: 15px; color: var(--muted); }
 
 /* ---------- pop-ups ---------- */
-.popup-back { position: fixed; inset: 0; z-index: 100; background: rgba(15,23,42,0); display: grid; place-items: center; padding: 16px; overflow: auto; transition: background .18s; }
-.popup-back.open { background: rgba(15,23,42,.45); }
+.popup-back { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0); display: grid; place-items: center; padding: 16px; overflow: auto; transition: background .18s; }
+.popup-back.open { background: rgba(0,0,0,.55); }
 .popup { width: 100%; background: var(--page); border: 1px solid var(--border); border-radius: 18px; padding: 22px; box-shadow: 0 24px 60px rgba(0,0,0,.3);
   opacity: 0; transform: translateY(14px) scale(.96); transition: opacity .18s, transform .18s; max-height: calc(100vh - 32px); overflow: auto; }
 .popup:not(.wide-popup) { background: var(--card); }
-.popup-back.open .popup { opacity: 1; transform: none; }
+.popup-back.open .popup { opacity: 1; transform: none; transition: opacity .2s, transform .28s cubic-bezier(.34,1.56,.64,1); }
 .popup-back.closing .popup { opacity: 0; transform: translateY(8px) scale(.97); }
 .popup-title { margin: 0 0 12px; font-size: 22px; }
 .popup-text { white-space: normal; }
@@ -189,3 +193,15 @@ textarea { font-family: Consolas, monospace; font-size: 13px; resize: vertical; 
 #toast { position: fixed; left: 50%; top: 70px; transform: translate(-50%, -20px); opacity: 0; z-index: 200; background: #111827; color: #fff; padding: 10px 18px; border-radius: 10px; font-weight: 600; transition: .2s; pointer-events: none; max-width: calc(100% - 32px); }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
 #toast.bad { background: #B91C1C; }
+
+/* Small boxes like the app's "Welcome back" and "Save before closing?" */
+.popup.box { padding: 22px 22px 18px; }
+.box-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.box-head h2 { margin: 0; font-size: 20px; }
+.box-icon { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; font-weight: 800; color: #fff; background: var(--primary); }
+.box-icon.danger { background: #B91C1C; }
+.box-icon.go { background: #15803D; }
+.box p { margin: 6px 0; }
+.box-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.box-buttons .btn { width: 100%; padding: 12px 16px; }
+.box .check { font-size: 14px; }

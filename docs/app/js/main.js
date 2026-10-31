@@ -1,11 +1,11 @@
 // MoneyCompass web: the window, the tabs and starting up.
-import { T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed } from "./core.js";
+import { T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed, summary, fmtDate } from "./core.js";
 import { esc, popup, toast } from "./ui.js";
 import { App, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
 import { Overview, Income, Expenses, Emergency, Portfolio } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
-import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar } from "./dialogs.js";
+import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile } from "./dialogs.js";
 
 const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", savings: "#7E22CE" };
 const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget };
@@ -92,6 +92,30 @@ async function install() {
     <div class="popup-buttons"><button class="btn main" data-close>${esc(T("OK"))}</button></div>`, { width: 480 });
 }
 
+// ---------- "Welcome back" when MoneyCompass opens (same as the Windows app) ----------
+function welcome() {
+  const d = State.data, s = d.Settings;
+  if (!s.AskOnStart) return;
+  if (d.Incomes.length + d.Expenses.length + d.Holdings.length + d.Offers.length + d.Loans.length + d.Goals.length === 0) return;
+  let details = T("Your data: {0}.", summary(d));
+  if (s.LastProfileSaved) details += "\n" + T("Last saved: {0}", fmtDate(s.LastProfileSaved) + " " + String(s.LastProfileSaved).slice(11, 16));
+  const p = popup(`<div class="box-head"><span class="box-icon go">👋</span><h2>${esc(T("Welcome back!"))}</h2></div>
+    <p class="hint">${esc(details).replace(/\n/g, "<br>")}</p>
+    <div class="box-buttons">
+      <button class="btn go" data-w="continue">✔ ${esc(T("Continue with my data"))}</button>
+      <button class="btn second" data-w="load">📂 ${esc(T("Load a profile…"))}</button>
+      <button class="btn danger" data-w="fresh">🗑 ${esc(T("Start fresh…"))}</button></div>
+    <p class="hint">${esc(T("Choose exactly what to delete."))}</p>
+    <label class="check"><input type="checkbox" name="dontask"><span>${esc(T("Don't ask again when MoneyCompass starts"))}</span></label>
+    <p class="hint">${esc(T("You can switch this question back on in Options → Backup & restore."))}</p>`, { width: 440, cls: "box" });
+  p.el.querySelectorAll("[data-w]").forEach(b => b.onclick = async () => {
+    if (p.el.querySelector('[name="dontask"]').checked) { s.AskOnStart = false; save(); }
+    p.close();
+    if (b.dataset.w === "load") await loadProfileFile();
+    else if (b.dataset.w === "fresh") openDelete();
+  });
+}
+
 function about() {
   popup(`<div class="about"><img src="../logo.svg" alt="" width="72"><h2>MoneyCompass</h2><p>${esc(T("Your personal money overview"))}</p>
     <p class="hint">${esc(T("Web version"))} · ${esc(license.status)}</p>
@@ -140,6 +164,7 @@ async function start() {
   const hash = location.hash.slice(1);
   if (hash) current = hash;
   buildShell();
+  welcome();
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
   Rates.listeners.push(() => { if (!document.querySelector(".popup-back")) render(); });
   Rates.refresh();

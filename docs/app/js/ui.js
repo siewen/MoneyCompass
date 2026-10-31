@@ -62,11 +62,13 @@ export function popup(html, { width = 560, onClose, cls = "" } = {}) {
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape" && stack.length) stack[stack.length - 1].close(); });
 
-export function confirmBox(title, text, ok = T("OK"), cancel = T("Cancel"), danger = false) {
+export function confirmBox(title, text, ok = T("OK"), cancel = T("Cancel"), danger = false, icon = null) {
   return new Promise(resolve => {
-    const p = popup(`<h2 class="popup-title">${esc(title)}</h2><p class="popup-text">${esc(text).replace(/\n/g, "<br>")}</p>
-      <div class="popup-buttons">${cancel ? `<button class="btn second" data-r="0">${esc(cancel)}</button>` : ""}<button class="btn ${danger ? "danger" : "main"}" data-r="1">${esc(ok)}</button></div>`,
-      { width: 460, onClose: r => resolve(!!r) });
+    const ic = icon || (danger ? "!" : cancel ? "?" : "i");
+    const p = popup(`<div class="box-head"><span class="box-icon${danger ? " danger" : ""}">${esc(ic)}</span><h2>${esc(title)}</h2></div>
+      <p class="popup-text">${esc(text).replace(/\n/g, "<br>")}</p>
+      <div class="box-buttons"><button class="btn ${danger ? "danger" : "main"}" data-r="1">${esc(ok)}</button>${cancel ? `<button class="btn second" data-r="0">${esc(cancel)}</button>` : ""}</div>`,
+      { width: 440, cls: "box", onClose: r => resolve(!!r) });
     p.el.querySelectorAll("[data-r]").forEach(b => b.onclick = () => p.close(b.dataset.r === "1"));
   });
 }
@@ -74,9 +76,9 @@ export const alertBox = (title, text) => confirmBox(title, text, T("OK"), null);
 
 export function promptBox(title, label, value = "") {
   return new Promise(resolve => {
-    const p = popup(`<h2 class="popup-title">${esc(title)}</h2>${field(label, textInput("v", value))}
-      <div class="popup-buttons"><button class="btn second" data-r="0">${esc(T("Cancel"))}</button><button class="btn main" data-r="1">${esc(T("OK"))}</button></div>`,
-      { width: 440, onClose: r => resolve(r) });
+    const p = popup(`<div class="box-head"><span class="box-icon">✎</span><h2>${esc(title)}</h2></div>${field(label, textInput("v", value))}
+      <div class="box-buttons"><button class="btn main" data-r="1">${esc(T("OK"))}</button><button class="btn second" data-r="0">${esc(T("Cancel"))}</button></div>`,
+      { width: 440, cls: "box", onClose: r => resolve(r) });
     const input = p.el.querySelector("input");
     const done = ok => p.close(ok ? input.value : null);
     p.el.querySelectorAll("[data-r]").forEach(b => b.onclick = () => done(b.dataset.r === "1"));
