@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MoneyCompass – your money, in the right direction</title>
+<meta name="description" content="MoneyCompass: personal finance for Windows. Income, expenses, emergency fund, savings advice and bank import – private, on your own computer.">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<style>
+  :root {
+    --bg: #F4F6F9; --card: #FFFFFF; --ink: #0F172A; --muted: #475569; --line: #E2E8F0;
+    --teal: #0F766E; --teal2: #14B8A6; --green: #15803D; --gold: #F59E0B; --red: #B91C1C;
+    --soft: #E6F4F1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0B1220; --card: #111A2E; --ink: #E5E7EB; --muted: #9CA3AF; --line: #1F2A44; --soft: #0F2A2A; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; }
+  a { color: var(--teal2); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+
+  /* Top bar */
+  header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .top { display: flex; align-items: center; gap: 12px; height: 60px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; color: var(--ink); text-decoration: none; }
+  .brand img { width: 34px; height: 34px; }
+  nav { margin-left: auto; display: flex; gap: 18px; align-items: center; }
+  nav a.link { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 15px; }
+  nav a.link:hover { color: var(--ink); }
+  select.lang { background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font: inherit; font-size: 14px; }
+  @media (max-width: 760px) { nav a.link { display: none; } }
+
+  /* Hero */
+  .hero { padding: 64px 0 40px; display: grid; grid-template-columns: 1.05fr 1fr; gap: 40px; align-items: center; }
+  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; padding-top: 36px; } }
+  h1 { font-size: clamp(32px, 5vw, 50px); line-height: 1.1; margin: 0 0 16px; letter-spacing: -0.5px; }
+  h1 em { font-style: normal; background: linear-gradient(90deg, var(--teal2), var(--green)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { font-size: 19px; color: var(--muted); margin: 0 0 26px; }
+  .cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 12px; font-weight: 700; font-size: 17px; text-decoration: none; border: 0; cursor: pointer; }
+  .btn.go { background: var(--green); color: #fff; box-shadow: 0 6px 18px rgba(21,128,61,.3); }
+  .btn.go:hover { background: #166534; }
+  .btn.second { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
+  .small { font-size: 14px; color: var(--muted); margin-top: 12px; }
+
+  /* App preview (drawn, with example numbers) */
+  .preview { background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 20px 50px rgba(15,23,42,.15); overflow: hidden; }
+  .pv-bar { display: flex; gap: 14px; padding: 12px 16px; border-bottom: 3px solid var(--teal2); font-size: 13px; font-weight: 700; flex-wrap: wrap; }
+  .pv-bar span:nth-child(1){color:#0F766E}.pv-bar span:nth-child(2){color:#2563EB}.pv-bar span:nth-child(3){color:#EA580C}.pv-bar span:nth-child(4){color:#CA8A04}.pv-bar span:nth-child(5){color:#16A34A}
+  .pv-body { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tile { border: 1.5px solid; border-radius: 12px; padding: 10px 12px; }
+  .tile b { display: block; font-size: 20px; }
+  .tile small { font-size: 12px; }
+  .t1 { border-color: #2A78D6; color: #2A78D6; } .t2 { border-color: #EB6834; color: #EB6834; }
+  .t3 { border-color: #1BAF7A; color: #1BAF7A; } .t4 { border-color: #A855F7; color: #A855F7; }
+  .pv-go { grid-column: 1 / -1; background: var(--green); color: #fff; border-radius: 12px; text-align: center; padding: 12px; font-weight: 800; }
+  .pv-chart { grid-column: 1 / -1; display: flex; gap: 16px; align-items: center; padding: 6px 4px; }
+  .donut { width: 110px; height: 110px; border-radius: 50%; flex: none;
+    background: conic-gradient(#2a78d6 0 24%, #eb6834 24% 42%, #1baf7a 42% 58%, #eda100 58% 70%, #e87ba4 70% 80%, #a3a3a0 80% 100%);
+    -webkit-mask: radial-gradient(circle, transparent 52%, #000 53%); mask: radial-gradient(circle, transparent 52%, #000 53%); }
+  .legend { font-size: 13px; display: grid; gap: 3px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
+  .note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; }
+
+  section { padding: 56px 0; }
+  h2 { font-size: clamp(26px, 3.4vw, 36px); margin: 0 0 10px; letter-spacing: -0.3px; }
+  .sub { color: var(--muted); font-size: 17px; margin: 0 0 30px; max-width: 760px; }
+
+  /* Features */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+  .card .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 22px; margin-bottom: 10px; }
+  .card h3 { margin: 0 0 6px; font-size: 18px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .pro-tag { display: inline-block; font-size: 11px; font-weight: 800; color: #fff; background: var(--green); border-radius: 6px; padding: 1px 6px; vertical-align: middle; margin-left: 6px; }
+
+  /* Pricing */
+  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 860px; }
+  @media (max-width: 760px) { .plans { grid-template-columns: 1fr; } }
+  .plan { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 26px; }
+  .plan.pro { border: 2px solid var(--green); box-shadow: 0 10px 30px rgba(21,128,61,.15); }
+  .plan h3 { margin: 0; font-size: 22px; }
+  .price { font-size: 38px; font-weight: 800; margin: 8px 0 4px; }
+  .price small { font-size: 16px; color: var(--muted); font-weight: 600; }
+  .plan ul { padding: 0; list-style: none; margin: 16px 0 22px; }
+  .plan li { padding: 6px 0 6px 28px; position: relative; }
+  .plan li::before { content: "✓"; position: absolute; left: 0; color: var(--green); font-weight: 800; }
+
+  /* Privacy band */
+  .band { background: linear-gradient(135deg, #0F766E, #14532D); color: #fff; border-radius: 22px; padding: 36px; display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; }
+  .band .big { font-size: 54px; }
+  .band p { margin: 6px 0 0; opacity: .9; }
+  @media (max-width: 640px) { .band { grid-template-columns: 1fr; } }
+
+  /* FAQ */
+  details { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 20px; margin-bottom: 10px; }
+  summary { font-weight: 700; cursor: pointer; font-size: 17px; }
+  details p { color: var(--muted); margin: 10px 0 0; }
+
+  footer { border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--muted); font-size: 14px; }
+  .foot { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+  .foot .right { margin-left: auto; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap top">
+    <a class="brand" href="#"><img src="logo.svg" alt=""> MoneyCompass</a>
+    <nav>
+      <a class="link" href="#features" data-t="nav_features">Funkcje</a>
+      <a class="link" href="#pricing" data-t="nav_pricing">Cennik</a>
+      <a class="link" href="#faq" data-t="nav_faq">Pytania</a>
+      <select class="lang" id="lang" aria-label="Language">
+        <option value="pl">Polski</option>
+        <option value="en">English</option>
+        <option value="de">Deutsch</option>
+        <option value="fr">Français</option>
+      </select>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <h1 data-t="hero_title" data-html>Twoje pieniądze, <em>we właściwym kierunku</em>.</h1>
+      <p class="lead" data-t="hero_lead">Dochody, wydatki, poduszka finansowa i porady, jak lepiej oszczędzać – wszystko w jednej aplikacji na Windows. Twoje dane zostają na Twoim komputerze.</p>
+      <div class="cta">
+        <a class="btn go" id="download" href="https://github.com/siewen/MoneyCompass/releases/latest">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg>
+          <span data-t="download">Pobierz za darmo</span>
+        </a>
+        <a class="btn second" href="#pricing" data-t="see_pro">Zobacz Pro</a>
+      </div>
+      <p class="small"><span id="version"></span><span data-t="requirements">Windows 10 i 11 · polski, angielski, niemiecki, francuski</span></p>
+    </div>
+    <div>
+      <div class="preview" aria-hidden="true">
+        <div class="pv-bar"><span data-t="tab_overview">Przegląd</span><span data-t="tab_income">Dochody</span><span data-t="tab_expenses">Wydatki</span><span data-t="tab_emergency">Poduszka</span><span data-t="tab_savings">Oszczędności</span></div>
+        <div class="pv-body">
+          <div class="tile t1"><small data-t="pv_income">Dochód miesięcznie</small><b>8 200 zł</b></div>
+          <div class="tile t2"><small data-t="pv_spending">Wydatki miesięcznie</small><b>5 640 zł</b></div>
+          <div class="tile t3"><small data-t="pv_left">Zostaje miesięcznie</small><b>2 560 zł</b></div>
+          <div class="tile t4"><small data-t="pv_rate">Stopa oszczędności</small><b>31%</b></div>
+          <div class="pv-go" data-t="pv_optimize">⚡ Optymalizuj oszczędności</div>
+          <div class="pv-chart">
+            <div class="donut"></div>
+            <div class="legend">
+              <div><i style="background:#2a78d6"></i><span data-t="c_food">Jedzenie</span></div>
+              <div><i style="background:#eb6834"></i><span data-t="c_home">Mieszkanie</span></div>
+              <div><i style="background:#1baf7a"></i><span data-t="c_transport">Transport</span></div>
+              <div><i style="background:#eda100"></i><span data-t="c_subs">Subskrypcje</span></div>
+              <div><i style="background:#e87ba4"></i><span data-t="c_shopping">Zakupy</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="note" data-t="pv_note">Przykładowe liczby</p>
+    </div>
+  </div>
+
+  <section id="features">
+    <div class="wrap">
+      <h2 data-t="f_title">Wszystko, czego potrzebujesz – bez arkuszy</h2>
+      <p class="sub" data-t="f_sub">MoneyCompass pokazuje, ile zarabiasz, ile wydajesz i co zrobić z resztą. Stworzony dla Polski: stopy NBP, obligacje skarbowe, IKE/IKZE i aktualne oferty banków.</p>
+      <div class="grid">
+        <div class="card"><div class="ic" style="background:#DBEAFE">💰</div><h3 data-t="f1_t">Dochody i wydatki</h3><p data-t="f1_p">Pensja, dodatkowe wpływy i wszystkie wydatki w kategoriach – ze średnimi miesięcznymi i wykresami.</p></div>
+        <div class="card"><div class="ic" style="background:#DCFCE7">🛟</div><h3 data-t="f2_t">Poduszka finansowa</h3><p data-t="f2_p">Ile potrzebujesz na 3–6 miesięcy i jak szybko tam dojdziesz.</p></div>
+        <div class="card"><div class="ic" style="background:#FEF3C7">⚡</div><h3><span data-t="f3_t">Optymalizuj oszczędności</span><span class="pro-tag">PRO</span></h3><p data-t="f3_p">Osobisty plan krok po kroku, najlepsze konta oszczędnościowe i lokaty dnia, obligacje i IKE/IKZE.</p></div>
+        <div class="card"><div class="ic" style="background:#E0E7FF">🏦</div><h3><span data-t="f4_t">Import z banku</span><span class="pro-tag">PRO</span></h3><p data-t="f4_p">Plik CSV z PKO BP, mBanku, ING, Millennium, Pekao, Santandera i innych – wydatki same trafiają do kategorii.</p></div>
+        <div class="card"><div class="ic" style="background:#FCE7F3">👥</div><h3 data-t="f5_t">Profile</h3><p data-t="f5_p">Osobne dane dla każdej osoby lub gospodarstwa – przełączanie jednym kliknięciem.</p></div>
+        <div class="card"><div class="ic" style="background:#F3E8FF">🎯</div><h3><span data-t="f6_t">Cele, kredyty, budżet</span><span class="pro-tag">PRO</span></h3><p data-t="f6_p">Cele oszczędnościowe, kredyty z ratami i datą spłaty, miesięczne limity na kategorie.</p></div>
+        <div class="card"><div class="ic" style="background:#DCFCE7">📊</div><h3 data-t="f7_t">Raporty</h3><p data-t="f7_p">Eksport do Excela, PDF i Worda – z wykresami.</p></div>
+        <div class="card"><div class="ic" style="background:#E6F4F1">🔄</div><h3 data-t="f8_t">Aktualizacje jednym kliknięciem</h3><p data-t="f8_p">MoneyCompass sam informuje o nowej wersji i instaluje ją w tle.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="band">
+        <div class="big">🔒</div>
+        <div>
+          <h2 style="margin:0" data-t="p_title">Twoje dane zostają u Ciebie</h2>
+          <p data-t="p_text">Bez konta, bez logowania, bez chmury. MoneyCompass zapisuje wszystko tylko na Twoim komputerze. Z internetu pobiera jedynie publiczne dane: kursy walut i stopy NBP, oprocentowanie obligacji i oferty banków.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="wrap">
+      <h2 data-t="pr_title">Cennik</h2>
+      <p class="sub" data-t="pr_sub">Zacznij za darmo. Pro odblokowuje porady, import z banku i moduły.</p>
+      <div class="plans">
+        <div class="plan">
+          <h3 data-t="free">Darmowa</h3>
+          <div class="price">0 zł</div>
+          <ul>
+            <li data-t="fr1">Dochody, wydatki i wykresy</li>
+            <li data-t="fr2">Poduszka finansowa i oszczędności</li>
+            <li data-t="fr3">Profile</li>
+            <li data-t="fr4">3 eksporty raportów</li>
+            <li data-t="fr5">Aktualizacje</li>
+          </ul>
+          <a class="btn second" id="download2" href="https://github.com/siewen/MoneyCompass/releases/latest" data-t="download">Pobierz za darmo</a>
+        </div>
+        <div class="plan pro">
+          <h3>Pro</h3>
+          <div class="price">9,99 zł <small data-t="per_month">/ miesiąc</small></div>
+          <ul>
+            <li data-t="pr1">Wszystko z wersji darmowej</li>
+            <li data-t="pr2">Optymalizuj oszczędności z aktualnymi stopami i ofertami banków</li>
+            <li data-t="pr3">Import wyciągu z banku (CSV)</li>
+            <li data-t="pr4">Porównanie ofert</li>
+            <li data-t="pr5">Cele, kredyty i plan budżetu</li>
+            <li data-t="pr6">Własne kategorie z ikonami</li>
+            <li data-t="pr7">Nieograniczone raporty i motywy ciemny, kolorowy, systemowy</li>
+          </ul>
+          <a class="btn go" id="buy" href="#" data-t="get_pro">Zamów Pro</a>
+          <p class="small" id="buy-note" data-t="buy_note">Po płatności otrzymasz klucz licencyjny e-mailem. Wpisz go w swoim profilu (prawy górny róg aplikacji).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <h2 data-t="q_title">Pytania</h2>
+      <details><summary data-t="q1">Windows pokazuje „System Windows ochronił ten komputer”. Czy to bezpieczne?</summary><p data-t="a1">Tak. Instalator nie jest jeszcze podpisany certyfikatem, więc Windows go nie zna. Kliknij „Więcej informacji”, a potem „Uruchom mimo to”. Później aplikacja aktualizuje się sama.</p></details>
+      <details><summary data-t="q2">Gdzie są zapisane moje dane?</summary><p data-t="a2">Tylko na Twoim komputerze, w folderze C:\Program Files\MoneyCompass (Data, Profiles, Reports, License). Aktualizacje i odinstalowanie nigdy ich nie usuwają.</p></details>
+      <details><summary data-t="q3">Które banki obsługuje import?</summary><p data-t="a3">PKO BP, mBank, ING, Millennium, Pekao, Santander i większość innych – wystarczy plik CSV z historii konta w bankowości internetowej.</p></details>
+      <details><summary data-t="q4">Jak działają aktualizacje?</summary><p data-t="a4">Przy każdym uruchomieniu MoneyCompass sprawdza, czy jest nowa wersja. Kliknij „Aktualizuj teraz” – pobiera ją, instaluje w tle i uruchamia się ponownie. Twoje dane zostają.</p></details>
+      <details><summary data-t="q5">Czy MoneyCompass to porada finansowa?</summary><p data-t="a5">Nie. Wszystkie wyniki to szacunki na podstawie tego, co wpiszesz. Oprocentowanie i oferty się zmieniają – zawsze sprawdź warunki banku.</p></details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>© <span id="year"></span> MoneyCompass</span>
+    <a href="privacy.html" id="privacy-link" data-t="privacy">Polityka prywatności</a>
+    <a href="https://github.com/siewen/MoneyCompass/releases" data-t="all_versions">Wszystkie wersje</a>
+    <span class="right" id="contact"></span>
+  </div>
+</footer>
+
+<script>
+// The e-mail address for buying Pro and for questions. Empty: "coming soon" is shown.
+const CONTACT = "";
+
+const T = {
+  en: {
+    nav_features: "Features", nav_pricing: "Pricing", nav_faq: "FAQ",
+    hero_title: "Your money, <em>in the right direction</em>.",
+    hero_lead: "Income, expenses, emergency fund and advice on saving better – all in one Windows app. Your data stays on your own computer.",
+    download: "Download free", see_pro: "See Pro", requirements: "Windows 10 and 11 · English, Polish, German, French",
+    tab_overview: "Overview", tab_income: "Income", tab_expenses: "Expenses", tab_emergency: "Emergency fund", tab_savings: "My savings",
+    pv_income: "Income per month", pv_spending: "Spending per month", pv_left: "Left over per month", pv_rate: "Savings rate",
+    pv_optimize: "⚡ Optimize my savings", c_food: "Food", c_home: "Housing", c_transport: "Transport", c_subs: "Subscriptions", c_shopping: "Shopping",
+    pv_note: "Example numbers",
+    f_title: "Everything you need – without spreadsheets",
+    f_sub: "MoneyCompass shows what you earn, what you spend and what to do with the rest. Made for Poland: NBP rates, treasury bonds, IKE/IKZE and today's bank offers.",
+    f1_t: "Income & expenses", f1_p: "Salary, extra money and all your expenses in categories – with monthly averages and charts.",
+    f2_t: "Emergency fund", f2_p: "How much you need for 3–6 months, and how fast you get there.",
+    f3_t: "Optimize my savings", f3_p: "A personal step-by-step plan, today's best savings accounts and deposits, bonds and IKE/IKZE.",
+    f4_t: "Bank import", f4_p: "A CSV file from PKO BP, mBank, ING, Millennium, Pekao, Santander and others – expenses sort themselves into categories.",
+    f5_t: "Profiles", f5_p: "Separate data for each person or household – switch with one click.",
+    f6_t: "Goals, loans, budget", f6_p: "Savings goals, loans with payments and debt-free date, monthly limits per category.",
+    f7_t: "Reports", f7_p: "Export to Excel, PDF and Word – with charts.",
+    f8_t: "One-click updates", f8_p: "MoneyCompass tells you about a new version and installs it in the background.",
+    p_title: "Your data stays with you",
+    p_text: "No account, no sign-in, no cloud. MoneyCompass saves everything only on your computer. From the internet it only downloads public numbers: NBP exchange and interest rates, bond rates and bank offers.",
+    pr_title: "Pricing", pr_sub: "Start for free. Pro unlocks the advice, bank import and modules.",
+    free: "Free", fr1: "Income, expenses and charts", fr2: "Emergency fund and savings", fr3: "Profiles", fr4: "3 report exports", fr5: "Updates",
+    per_month: "/ month", pr1: "Everything in Free", pr2: "Optimize my savings with current rates and bank offers", pr3: "Bank statement import (CSV)",
+    pr4: "Compare offers", pr5: "Goals, loans and budget plan", pr6: "Own categories with icons", pr7: "Unlimited reports and the Dark, Colourful and System themes",
+    get_pro: "Get Pro", buy_note: "After payment you receive your license key by e-mail. Enter it in your profile (top right in the app).",
+    q_title: "FAQ",
+    q1: "Windows shows “Windows protected your PC”. Is it safe?", a1: "Yes. The installer is not signed with a certificate yet, so Windows doesn't know it. Click “More info”, then “Run anyway”. After that, the app updates itself.",
+    q2: "Where is my data saved?", a2: "Only on your computer, in C:\\Program Files\\MoneyCompass (Data, Profiles, Reports, License). Updates and uninstalling never delete it.",
+    q3: "Which banks does the import support?", a3: "PKO BP, mBank, ING, Millennium, Pekao, Santander and most others – just the CSV file of your account history from online banking.",
+    q4: "How do updates work?", a4: "Every time it starts, MoneyCompass checks for a new version. Click “Update now” – it downloads it, installs it in the background and starts again. Your data stays.",
+    q5: "Is MoneyCompass financial advice?", a5: "No. All results are estimates based on what you enter. Rates and offers change – always check the bank's own terms.",
+    privacy: "Privacy policy", all_versions: "All versions", contact_soon: "Contact address coming soon", latest: "Version {0} · "
+  },
+  pl: {
+    nav_features: "Funkcje", nav_pricing: "Cennik", nav_faq: "Pytania",
+    hero_title: "Twoje pieniądze, <em>we właściwym kierunku</em>.",
+    hero_lead: "Dochody, wydatki, poduszka finansowa i porady, jak lepiej oszczędzać – wszystko w jednej aplikacji na Windows. Twoje dane zostają na Twoim komputerze.",
+    download: "Pobierz za darmo", see_pro: "Zobacz Pro", requirements: "Windows 10 i 11 · polski, angielski, niemiecki, francuski",
+    tab_overview: "Przegląd", tab_income: "Dochody", tab_expenses: "Wydatki", tab_emergency: "Poduszka", tab_savings: "Oszczędności",
+    pv_income: "Dochód miesięcznie", pv_spending: "Wydatki miesięcznie", pv_left: "Zostaje miesięcznie", pv_rate: "Stopa oszczędności",
+    pv_optimize: "⚡ Optymalizuj oszczędności", c_food: "Jedzenie", c_home: "Mieszkanie", c_transport: "Transport", c_subs: "Subskrypcje", c_shopping: "Zakupy",
+    pv_note: "Przykładowe liczby",
+    f_title: "Wszystko, czego potrzebujesz – bez arkuszy",
+    f_sub: "MoneyCompass pokazuje, ile zarabiasz, ile wydajesz i co zrobić z resztą. Stworzony dla Polski: stopy NBP, obligacje skarbowe, IKE/IKZE i aktualne oferty banków.",
+    f1_t: "Dochody i wydatki", f1_p: "Pensja, dodatkowe wpływy i wszystkie wydatki w kategoriach – ze średnimi miesięcznymi i wykresami.",
+    f2_t: "Poduszka finansowa", f2_p: "Ile potrzebujesz na 3–6 miesięcy i jak szybko tam dojdziesz.",
+    f3_t: "Optymalizuj oszczędności", f3_p: "Osobisty plan krok po kroku, najlepsze konta oszczędnościowe i lokaty dnia, obligacje i IKE/IKZE.",
+    f4_t: "Import z banku", f4_p: "Plik CSV z PKO BP, mBanku, ING, Millennium, Pekao, Santandera i innych – wydatki same trafiają do kategorii.",
+    f5_t: "Profile", f5_p: "Osobne dane dla każdej osoby lub gospodarstwa – przełączanie jednym kliknięciem.",
+    f6_t: "Cele, kredyty, budżet", f6_p: "Cele oszczędnościowe, kredyty z ratami i datą spłaty, miesięczne limity na kategorie.",
+    f7_t: "Raporty", f7_p: "Eksport do Excela, PDF i Worda – z wykresami.",
+    f8_t: "Aktualizacje jednym kliknięciem", f8_p: "MoneyCompass sam informuje o nowej wersji i instaluje ją w tle.",
+    p_title: "Twoje dane zostają u Ciebie",
+    p_text: "Bez konta, bez logowania, bez chmury. MoneyCompass zapisuje wszystko tylko na Twoim komputerze. Z internetu pobiera jedynie publiczne dane: kursy walut i stopy NBP, oprocentowanie obligacji i oferty banków.",
+    pr_title: "Cennik", pr_sub: "Zacznij za darmo. Pro odblokowuje porady, import z banku i moduły.",
+    free: "Darmowa", fr1: "Dochody, wydatki i wykresy", fr2: "Poduszka finansowa i oszczędności", fr3: "Profile", fr4: "3 eksporty raportów", fr5: "Aktualizacje",
+    per_month: "/ miesiąc", pr1: "Wszystko z wersji darmowej", pr2: "Optymalizuj oszczędności z aktualnymi stopami i ofertami banków", pr3: "Import wyciągu z banku (CSV)",
+    pr4: "Porównanie ofert", pr5: "Cele, kredyty i plan budżetu", pr6: "Własne kategorie z ikonami", pr7: "Nieograniczone raporty i motywy ciemny, kolorowy, systemowy",
+    get_pro: "Zamów Pro", buy_note: "Po płatności otrzymasz klucz licencyjny e-mailem. Wpisz go w swoim profilu (prawy górny róg aplikacji).",
+    q_title: "Pytania",
+    q1: "Windows pokazuje „System Windows ochronił ten komputer”. Czy to bezpieczne?", a1: "Tak. Instalator nie jest jeszcze podpisany certyfikatem, więc Windows go nie zna. Kliknij „Więcej informacji”, a potem „Uruchom mimo to”. Później aplikacja aktualizuje się sama.",
+    q2: "Gdzie są zapisane moje dane?", a2: "Tylko na Twoim komputerze, w folderze C:\\Program Files\\MoneyCompass (Data, Profiles, Reports, License). Aktualizacje i odinstalowanie nigdy ich nie usuwają.",
+    q3: "Które banki obsługuje import?", a3: "PKO BP, mBank, ING, Millennium, Pekao, Santander i większość innych – wystarczy plik CSV z historii konta w bankowości internetowej.",
+    q4: "Jak działają aktualizacje?", a4: "Przy każdym uruchomieniu MoneyCompass sprawdza, czy jest nowa wersja. Kliknij „Aktualizuj teraz” – pobiera ją, instaluje w tle i uruchamia się ponownie. Twoje dane zostają.",
+    q5: "Czy MoneyCompass to porada finansowa?", a5: "Nie. Wszystkie wyniki to szacunki na podstawie tego, co wpiszesz. Oprocentowanie i oferty się zmieniają – zawsze sprawdź warunki banku.",
+    privacy: "Polityka prywatności", all_versions: "Wszystkie wersje", contact_soon: "Adres kontaktowy wkrótce", latest: "Wersja {0} · "
+  },
+  de: {
+    nav_features: "Funktionen", nav_pricing: "Preise", nav_faq: "Fragen",
+    hero_title: "Ihr Geld, <em>in die richtige Richtung</em>.",
+    hero_lead: "Einnahmen, Ausgaben, Notgroschen und Tipps zum besseren Sparen – alles in einer Windows-App. Ihre Daten bleiben auf Ihrem eigenen Computer.",
+    download: "Kostenlos herunterladen", see_pro: "Pro ansehen", requirements: "Windows 10 und 11 · Deutsch, Englisch, Polnisch, Französisch",
+    tab_overview: "Übersicht", tab_income: "Einnahmen", tab_expenses: "Ausgaben", tab_emergency: "Notgroschen", tab_savings: "Ersparnisse",
+    pv_income: "Einnahmen pro Monat", pv_spending: "Ausgaben pro Monat", pv_left: "Übrig pro Monat", pv_rate: "Sparquote",
+    pv_optimize: "⚡ Ersparnisse optimieren", c_food: "Lebensmittel", c_home: "Wohnen", c_transport: "Verkehr", c_subs: "Abos", c_shopping: "Einkäufe",
+    pv_note: "Beispielzahlen",
+    f_title: "Alles, was Sie brauchen – ohne Tabellen",
+    f_sub: "MoneyCompass zeigt, was Sie verdienen, was Sie ausgeben und was Sie mit dem Rest tun können. Gemacht für Polen: NBP-Zinsen, Staatsanleihen, IKE/IKZE und aktuelle Bankangebote.",
+    f1_t: "Einnahmen & Ausgaben", f1_p: "Gehalt, zusätzliches Geld und alle Ausgaben in Kategorien – mit Monatsdurchschnitt und Diagrammen.",
+    f2_t: "Notgroschen", f2_p: "Wie viel Sie für 3–6 Monate brauchen und wie schnell Sie dorthin kommen.",
+    f3_t: "Ersparnisse optimieren", f3_p: "Ein persönlicher Plan Schritt für Schritt, die besten Sparkonten und Festgelder des Tages, Anleihen und IKE/IKZE.",
+    f4_t: "Bankimport", f4_p: "Eine CSV-Datei von PKO BP, mBank, ING, Millennium, Pekao, Santander und anderen – Ausgaben sortieren sich selbst in Kategorien.",
+    f5_t: "Profile", f5_p: "Eigene Daten für jede Person oder jeden Haushalt – Wechsel mit einem Klick.",
+    f6_t: "Ziele, Kredite, Budget", f6_p: "Sparziele, Kredite mit Raten und schuldenfreiem Datum, Monatslimits pro Kategorie.",
+    f7_t: "Berichte", f7_p: "Export nach Excel, PDF und Word – mit Diagrammen.",
+    f8_t: "Updates mit einem Klick", f8_p: "MoneyCompass meldet eine neue Version und installiert sie im Hintergrund.",
+    p_title: "Ihre Daten bleiben bei Ihnen",
+    p_text: "Kein Konto, keine Anmeldung, keine Cloud. MoneyCompass speichert alles nur auf Ihrem Computer. Aus dem Internet lädt es nur öffentliche Zahlen: NBP-Kurse und -Zinsen, Anleihezinsen und Bankangebote.",
+    pr_title: "Preise", pr_sub: "Kostenlos starten. Pro schaltet Tipps, Bankimport und Module frei.",
+    free: "Kostenlos", fr1: "Einnahmen, Ausgaben und Diagramme", fr2: "Notgroschen und Ersparnisse", fr3: "Profile", fr4: "3 Berichtsexporte", fr5: "Updates",
+    per_month: "/ Monat", pr1: "Alles aus der kostenlosen Version", pr2: "Ersparnisse optimieren mit aktuellen Zinsen und Bankangeboten", pr3: "Import von Kontoauszügen (CSV)",
+    pr4: "Angebote vergleichen", pr5: "Ziele, Kredite und Budgetplan", pr6: "Eigene Kategorien mit Symbolen", pr7: "Unbegrenzte Berichte und die Designs Dunkel, Farbig, System",
+    get_pro: "Pro bestellen", buy_note: "Nach der Zahlung erhalten Sie Ihren Lizenzschlüssel per E-Mail. Geben Sie ihn in Ihrem Profil ein (oben rechts in der App).",
+    q_title: "Fragen",
+    q1: "Windows zeigt „Der Computer wurde durch Windows geschützt“. Ist das sicher?", a1: "Ja. Das Installationsprogramm ist noch nicht mit einem Zertifikat signiert, daher kennt Windows es nicht. Klicken Sie auf „Weitere Informationen“ und dann „Trotzdem ausführen“. Danach aktualisiert sich die App selbst.",
+    q2: "Wo werden meine Daten gespeichert?", a2: "Nur auf Ihrem Computer, in C:\\Program Files\\MoneyCompass (Data, Profiles, Reports, License). Updates und Deinstallation löschen sie nie.",
+    q3: "Welche Banken unterstützt der Import?", a3: "PKO BP, mBank, ING, Millennium, Pekao, Santander und die meisten anderen – einfach die CSV-Datei Ihres Kontoverlaufs aus dem Online-Banking.",
+    q4: "Wie funktionieren Updates?", a4: "Bei jedem Start prüft MoneyCompass, ob es eine neue Version gibt. Klicken Sie auf „Jetzt aktualisieren“ – sie wird heruntergeladen, im Hintergrund installiert und die App startet neu. Ihre Daten bleiben.",
+    q5: "Ist MoneyCompass eine Finanzberatung?", a5: "Nein. Alle Ergebnisse sind Schätzungen auf Grundlage Ihrer Eingaben. Zinsen und Angebote ändern sich – prüfen Sie immer die Bedingungen der Bank.",
+    privacy: "Datenschutz", all_versions: "Alle Versionen", contact_soon: "Kontaktadresse folgt", latest: "Version {0} · "
+  },
+  fr: {
+    nav_features: "Fonctions", nav_pricing: "Tarifs", nav_faq: "Questions",
+    hero_title: "Votre argent, <em>dans la bonne direction</em>.",
+    hero_lead: "Revenus, dépenses, épargne de précaution et conseils pour mieux épargner – tout dans une application Windows. Vos données restent sur votre ordinateur.",
+    download: "Télécharger gratuitement", see_pro: "Voir Pro", requirements: "Windows 10 et 11 · français, anglais, polonais, allemand",
+    tab_overview: "Aperçu", tab_income: "Revenus", tab_expenses: "Dépenses", tab_emergency: "Précaution", tab_savings: "Épargne",
+    pv_income: "Revenus par mois", pv_spending: "Dépenses par mois", pv_left: "Reste par mois", pv_rate: "Taux d'épargne",
+    pv_optimize: "⚡ Optimiser mon épargne", c_food: "Alimentation", c_home: "Logement", c_transport: "Transport", c_subs: "Abonnements", c_shopping: "Achats",
+    pv_note: "Chiffres d'exemple",
+    f_title: "Tout ce qu'il vous faut – sans tableur",
+    f_sub: "MoneyCompass montre ce que vous gagnez, ce que vous dépensez et quoi faire du reste. Conçu pour la Pologne : taux NBP, obligations d'État, IKE/IKZE et offres bancaires du jour.",
+    f1_t: "Revenus et dépenses", f1_p: "Salaire, rentrées supplémentaires et toutes vos dépenses par catégorie – avec moyennes mensuelles et graphiques.",
+    f2_t: "Épargne de précaution", f2_p: "Combien il vous faut pour 3 à 6 mois, et en combien de temps vous y arrivez.",
+    f3_t: "Optimiser mon épargne", f3_p: "Un plan personnel étape par étape, les meilleurs comptes d'épargne et dépôts du jour, obligations et IKE/IKZE.",
+    f4_t: "Import bancaire", f4_p: "Un fichier CSV de PKO BP, mBank, ING, Millennium, Pekao, Santander et d'autres – les dépenses se classent toutes seules.",
+    f5_t: "Profils", f5_p: "Des données séparées pour chaque personne ou foyer – changement en un clic.",
+    f6_t: "Objectifs, prêts, budget", f6_p: "Objectifs d'épargne, prêts avec mensualités et date de fin, limites mensuelles par catégorie.",
+    f7_t: "Rapports", f7_p: "Export vers Excel, PDF et Word – avec graphiques.",
+    f8_t: "Mises à jour en un clic", f8_p: "MoneyCompass signale une nouvelle version et l'installe en arrière-plan.",
+    p_title: "Vos données restent chez vous",
+    p_text: "Pas de compte, pas de connexion, pas de cloud. MoneyCompass enregistre tout uniquement sur votre ordinateur. Depuis Internet, il ne télécharge que des chiffres publics : cours et taux NBP, taux des obligations et offres bancaires.",
+    pr_title: "Tarifs", pr_sub: "Commencez gratuitement. Pro débloque les conseils, l'import bancaire et les modules.",
+    free: "Gratuit", fr1: "Revenus, dépenses et graphiques", fr2: "Épargne de précaution et épargne", fr3: "Profils", fr4: "3 exports de rapports", fr5: "Mises à jour",
+    per_month: "/ mois", pr1: "Tout le gratuit", pr2: "Optimiser mon épargne avec les taux et offres bancaires actuels", pr3: "Import de relevés bancaires (CSV)",
+    pr4: "Comparer les offres", pr5: "Objectifs, prêts et plan budgétaire", pr6: "Catégories personnelles avec icônes", pr7: "Rapports illimités et thèmes Sombre, Coloré, Système",
+    get_pro: "Commander Pro", buy_note: "Après le paiement, vous recevez votre clé de licence par e-mail. Saisissez-la dans votre profil (en haut à droite de l'application).",
+    q_title: "Questions",
+    q1: "Windows affiche « Windows a protégé votre ordinateur ». Est-ce sûr ?", a1: "Oui. Le programme d'installation n'est pas encore signé par un certificat, donc Windows ne le connaît pas. Cliquez sur « Informations complémentaires » puis « Exécuter quand même ». Ensuite, l'application se met à jour seule.",
+    q2: "Où sont enregistrées mes données ?", a2: "Uniquement sur votre ordinateur, dans C:\\Program Files\\MoneyCompass (Data, Profiles, Reports, License). Les mises à jour et la désinstallation ne les suppriment jamais.",
+    q3: "Quelles banques l'import prend-il en charge ?", a3: "PKO BP, mBank, ING, Millennium, Pekao, Santander et la plupart des autres – il suffit du fichier CSV de l'historique de votre compte.",
+    q4: "Comment fonctionnent les mises à jour ?", a4: "À chaque démarrage, MoneyCompass vérifie s'il existe une nouvelle version. Cliquez sur « Mettre à jour maintenant » – elle est téléchargée, installée en arrière-plan et l'application redémarre. Vos données restent.",
+    q5: "MoneyCompass est-il un conseil financier ?", a5: "Non. Tous les résultats sont des estimations basées sur vos saisies. Les taux et offres changent – vérifiez toujours les conditions de la banque.",
+    privacy: "Confidentialité", all_versions: "Toutes les versions", contact_soon: "Adresse de contact bientôt", latest: "Version {0} · "
+  }
+};
+
+let latestVersion = "";
+
+function pickLanguage() {
+  try { const saved = localStorage.getItem("mc-lang"); if (saved && T[saved]) return saved; } catch (e) {}
+  const nav = (navigator.language || "pl").slice(0, 2).toLowerCase();
+  return T[nav] ? nav : "en";
+}
+
+function apply(lang) {
+  const t = T[lang];
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const v = t[el.dataset.t];
+    if (v === undefined) return;
+    if (el.hasAttribute("data-html")) el.innerHTML = v; else el.textContent = v;
+  });
+  document.getElementById("version").textContent = latestVersion ? t.latest.replace("{0}", latestVersion) : "";
+  const contact = document.getElementById("contact");
+  const buy = document.getElementById("buy");
+  if (CONTACT) {
+    contact.innerHTML = '<a href="mailto:' + CONTACT + '">' + CONTACT + '</a>';
+    buy.href = "mailto:" + CONTACT + "?subject=" + encodeURIComponent("MoneyCompass Pro");
+  } else {
+    contact.textContent = t.contact_soon;
+    buy.removeAttribute("href");
+    buy.style.opacity = "0.6";
+    buy.title = t.contact_soon;
+  }
+  document.getElementById("privacy-link").href = "privacy.html#" + lang;
+  try { localStorage.setItem("mc-lang", lang); } catch (e) {}
+}
+
+const select = document.getElementById("lang");
+const lang = pickLanguage();
+select.value = lang;
+select.addEventListener("change", () => apply(select.value));
+document.getElementById("year").textContent = new Date().getFullYear();
+apply(lang);
+
+// The Download buttons always point straight to the newest installer on GitHub
+fetch("https://api.github.com/repos/siewen/MoneyCompass/releases/latest")
+  .then(r => r.ok ? r.json() : null)
+  .then(release => {
+    if (!release) return;
+    const asset = (release.assets || []).find(a => /setup.*\.exe$/i.test(a.name));
+    if (asset) ["download", "download2"].forEach(id => document.getElementById(id).href = asset.browser_download_url);
+    const m = /(\d+(\.\d+)+)/.exec(release.tag_name || "");
+    if (m) { latestVersion = m[1]; apply(select.value); }
+  })
+  .catch(() => {});
+</script>
+</body>
+</html>

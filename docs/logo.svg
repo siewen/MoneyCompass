@@ -1,0 +1,32 @@
+<svg width="64" height="64" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="bgl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14B8A6"/><stop offset="1" stop-color="#0F766E"/></linearGradient></defs>
+  <rect x="4" y="4" width="248" height="248" rx="54" fill="url(#bgl)"/>
+  <!-- MoneyCompass: a stack of gold coins (money) and a compass (the direction) -->
+  <defs>
+    <linearGradient id="c" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#B45309"/>
+      <stop offset="0.5" stop-color="#FBBF24"/>
+      <stop offset="1" stop-color="#B45309"/>
+    </linearGradient>
+  </defs>
+  <g stroke="#78350F" stroke-width="3">
+    <ellipse cx="100" cy="202" rx="62" ry="17" fill="#92400E"/>
+    <rect x="38" y="184" width="124" height="18" fill="url(#c)" stroke="none"/>
+    <path d="M38 184 V202 M162 184 V202" fill="none"/>
+    <ellipse cx="100" cy="184" rx="62" ry="17" fill="#FCD34D"/>
+    <rect x="38" y="162" width="124" height="22" fill="url(#c)" stroke="none"/>
+    <path d="M38 162 V184 M162 162 V184" fill="none"/>
+    <ellipse cx="100" cy="162" rx="62" ry="17" fill="#FCD34D"/>
+    <rect x="38" y="140" width="124" height="22" fill="url(#c)" stroke="none"/>
+    <path d="M38 140 V162 M162 140 V162" fill="none"/>
+    <ellipse cx="100" cy="140" rx="62" ry="17" fill="#FDE68A"/>
+  </g>
+  <ellipse cx="100" cy="140" rx="42" ry="10" fill="none" stroke="#B45309" stroke-width="4"/>
+  <g transform="translate(176 88)">
+    <circle r="62" fill="#FFFFFF"/>
+    <circle r="53" fill="none" stroke="#0F766E" stroke-width="6"/>
+    <path d="M0 -44 L15 0 L0 7 L-15 0 Z" fill="#DC2626"/>
+    <path d="M0 44 L15 0 L0 -7 L-15 0 Z" fill="#334155"/>
+    <circle r="6" fill="#FFFFFF" stroke="#334155" stroke-width="3"/>
+  </g>
+</svg>
