@@ -28,7 +28,18 @@ export const EXTRA = {
 "Tip: save your profile first (your profile, top right), so you can load it again if you change your mind.": "Tipp: Speichern Sie zuerst Ihr Profil (Ihr Profil, oben rechts), um es bei Bedarf wieder laden zu können.",
 "Web version": "Webversion",
 "Windows app": "Windows-App",
-"in use": "aktiv"
+"in use": "aktiv",
+"Install app": "App installieren",
+"Choose \"Add to Home Screen\", then \"Add\".": "Wählen Sie „Zum Home-Bildschirm“ und dann „Hinzufügen“.",
+"Choose \"Install MoneyCompass\" or \"Add to Home screen\".": "Wählen Sie „MoneyCompass installieren“ oder „Zum Startbildschirm hinzufügen“.",
+"Click \"Add\". MoneyCompass then opens from the Dock like any app.": "Klicken Sie auf „Hinzufügen“. MoneyCompass öffnet sich dann wie jede App aus dem Dock.",
+"In the menu bar choose File → \"Add to Dock…\".": "Wählen Sie in der Menüleiste Ablage → „Zum Dock hinzufügen …“.",
+"Install MoneyCompass like an app: its own icon, full screen, and it also opens without internet.": "Installieren Sie MoneyCompass wie eine App: eigenes Symbol, Vollbild, und es öffnet sich auch ohne Internet.",
+"MoneyCompass is installed. Open it from your home screen or apps.": "MoneyCompass ist installiert. Öffnen Sie es über den Startbildschirm oder Ihre Apps.",
+"On iPhone and iPad the installed app has its own storage: if you already entered data in Safari, save your profile there first and load it in the app.": "Auf iPhone und iPad hat die installierte App einen eigenen Speicher: Wenn Sie schon Daten in Safari eingegeben haben, speichern Sie dort zuerst Ihr Profil und laden Sie es in der App.",
+"Open the browser menu (⋮ or …).": "Öffnen Sie das Browsermenü (⋮ oder …).",
+"Open this page in Safari.": "Öffnen Sie diese Seite in Safari.",
+"Tap the Share button (the square with the arrow).": "Tippen Sie auf „Teilen“ (das Quadrat mit dem Pfeil)."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -58,7 +69,18 @@ export const EXTRA = {
 "Tip: save your profile first (your profile, top right), so you can load it again if you change your mind.": "Astuce : enregistrez d'abord votre profil (votre profil, en haut à droite) pour pouvoir le recharger si vous changez d'avis.",
 "Web version": "Version web",
 "Windows app": "Application Windows",
-"in use": "en cours"
+"in use": "en cours",
+"Install app": "Installer l'application",
+"Choose \"Add to Home Screen\", then \"Add\".": "Choisissez « Sur l'écran d'accueil », puis « Ajouter ».",
+"Choose \"Install MoneyCompass\" or \"Add to Home screen\".": "Choisissez « Installer MoneyCompass » ou « Ajouter à l'écran d'accueil ».",
+"Click \"Add\". MoneyCompass then opens from the Dock like any app.": "Cliquez sur « Ajouter ». MoneyCompass s'ouvre alors depuis le Dock comme toute application.",
+"In the menu bar choose File → \"Add to Dock…\".": "Dans la barre des menus, choisissez Fichier → « Ajouter au Dock… ».",
+"Install MoneyCompass like an app: its own icon, full screen, and it also opens without internet.": "Installez MoneyCompass comme une application : sa propre icône, plein écran, et elle s'ouvre aussi sans Internet.",
+"MoneyCompass is installed. Open it from your home screen or apps.": "MoneyCompass est installé. Ouvrez-le depuis l'écran d'accueil ou vos applications.",
+"On iPhone and iPad the installed app has its own storage: if you already entered data in Safari, save your profile there first and load it in the app.": "Sur iPhone et iPad, l'application installée a son propre stockage : si vous avez déjà saisi des données dans Safari, enregistrez d'abord votre profil puis chargez-le dans l'application.",
+"Open the browser menu (⋮ or …).": "Ouvrez le menu du navigateur (⋮ ou …).",
+"Open this page in Safari.": "Ouvrez cette page dans Safari.",
+"Tap the Share button (the square with the arrow).": "Touchez le bouton Partager (le carré avec la flèche)."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -88,6 +110,17 @@ export const EXTRA = {
 "Tip: save your profile first (your profile, top right), so you can load it again if you change your mind.": "Wskazówka: najpierw zapisz profil (Twój profil, prawy górny róg), aby móc go wczytać, jeśli zmienisz zdanie.",
 "Web version": "Wersja internetowa",
 "Windows app": "Aplikacja na Windows",
-"in use": "w użyciu"
+"in use": "w użyciu",
+"Install app": "Zainstaluj aplikację",
+"Choose \"Add to Home Screen\", then \"Add\".": "Wybierz „Do ekranu początkowego”, a potem „Dodaj”.",
+"Choose \"Install MoneyCompass\" or \"Add to Home screen\".": "Wybierz „Zainstaluj MoneyCompass” lub „Dodaj do ekranu głównego”.",
+"Click \"Add\". MoneyCompass then opens from the Dock like any app.": "Kliknij „Dodaj”. MoneyCompass otworzysz wtedy z Docka jak każdą aplikację.",
+"In the menu bar choose File → \"Add to Dock…\".": "Na pasku menu wybierz Plik → „Dodaj do Docka…”.",
+"Install MoneyCompass like an app: its own icon, full screen, and it also opens without internet.": "Zainstaluj MoneyCompass jak aplikację: własna ikona, pełny ekran i działa także bez internetu.",
+"MoneyCompass is installed. Open it from your home screen or apps.": "MoneyCompass jest zainstalowany. Otwórz go z ekranu głównego lub listy aplikacji.",
+"On iPhone and iPad the installed app has its own storage: if you already entered data in Safari, save your profile there first and load it in the app.": "Na iPhonie i iPadzie zainstalowana aplikacja ma własną pamięć: jeśli masz już dane w Safari, najpierw zapisz tam profil, a potem wczytaj go w aplikacji.",
+"Open the browser menu (⋮ or …).": "Otwórz menu przeglądarki (⋮ lub …).",
+"Open this page in Safari.": "Otwórz tę stronę w Safari.",
+"Tap the Share button (the square with the arrow).": "Stuknij przycisk Udostępnij (kwadrat ze strzałką)."
 }
 };

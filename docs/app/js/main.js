@@ -39,6 +39,7 @@ function buildShell() {
         <button class="act red" data-act="delete" title="${esc(T("Delete data…"))}">🗑<span>${esc(T("Delete data…"))}</span></button>
         <button class="act blue" data-act="import" title="${esc(T("Import"))}">⬆<span>${esc(T("Import"))}</span></button>
         <button class="act green" data-act="export" title="${esc(T("Export"))}">⬇<span>${esc(T("Export"))}</span></button>
+        ${installed() ? "" : `<button class="act teal" data-act="install" title="${esc(T("Install app"))}">📲<span>${esc(T("Install app"))}</span></button>`}
         <button class="profile-btn" data-act="profile" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}</button>
       </div>
     </header>
@@ -46,7 +47,7 @@ function buildShell() {
     <main id="page"></main>
     <button class="help-fab" data-act="help-menu" title="${esc(T("Help & About"))}">?</button>`;
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => App.go(b.dataset.tab));
-  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, "help-menu": helpMenu };
+  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, "help-menu": helpMenu, install };
   document.querySelectorAll("[data-act]").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
   render();
 }
@@ -55,12 +56,42 @@ function helpMenu() {
   const p = popup(`<div class="buttons col">
     <button class="btn second" data-m="help">? ${esc(T("Help"))}</button>
     <button class="btn second" data-m="options">⚙ ${esc(T("Options"))}</button>
-    <button class="btn second" data-m="about">ℹ ${esc(T("About"))}</button></div>`, { width: 320 });
+    <button class="btn second" data-m="about">ℹ ${esc(T("About"))}</button>
+    ${installed() ? "" : `<button class="btn second" data-m="install">📲 ${esc(T("Install app"))}</button>`}</div>`, { width: 320 });
   p.el.querySelectorAll("[data-m]").forEach(b => b.onclick = () => {
     p.close();
-    if (b.dataset.m === "help") openHelp(); else if (b.dataset.m === "options") openOptions(); else about();
+    if (b.dataset.m === "help") openHelp(); else if (b.dataset.m === "options") openOptions(); else if (b.dataset.m === "install") install(); else about();
   });
 }
+// ---------- Install as an app (iPhone, iPad, Mac, Android, Windows) ----------
+let installPrompt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installPrompt = e; });
+window.addEventListener("appinstalled", () => { installPrompt = null; buildShell(); toast(T("MoneyCompass is installed. Open it from your home screen or apps.")); });
+function installed() {
+  return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+}
+async function install() {
+  if (installPrompt) {
+    installPrompt.prompt();
+    try { await installPrompt.userChoice; } catch { /* closed */ }
+    installPrompt = null;
+    return;
+  }
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const mac = /Macintosh/.test(ua) && !ios;
+  const safari = /Safari/.test(ua) && !/Chrome|Chromium|Edg|Firefox|FxiOS|CriOS/.test(ua);
+  let steps;
+  if (ios) steps = [T("Open this page in Safari."), T("Tap the Share button (the square with the arrow)."), T("Choose \"Add to Home Screen\", then \"Add\".")];
+  else if (mac && safari) steps = [T("In the menu bar choose File → \"Add to Dock…\"."), T("Click \"Add\". MoneyCompass then opens from the Dock like any app.")];
+  else steps = [T("Open the browser menu (⋮ or …)."), T("Choose \"Install MoneyCompass\" or \"Add to Home screen\".")];
+  popup(`<h2 class="popup-title">📲 ${esc(T("Install app"))}</h2>
+    <p>${esc(T("Install MoneyCompass like an app: its own icon, full screen, and it also opens without internet."))}</p>
+    <ol>${steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol>
+    <p class="hint">${esc(T("On iPhone and iPad the installed app has its own storage: if you already entered data in Safari, save your profile there first and load it in the app."))}</p>
+    <div class="popup-buttons"><button class="btn main" data-close>${esc(T("OK"))}</button></div>`, { width: 480 });
+}
+
 function about() {
   popup(`<div class="about"><img src="../logo.svg" alt="" width="72"><h2>MoneyCompass</h2><p>${esc(T("Your personal money overview"))}</p>
     <p class="hint">${esc(T("Web version"))} · ${esc(license.status)}</p>
@@ -112,6 +143,8 @@ async function start() {
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
   Rates.listeners.push(() => { if (!document.querySelector(".popup-back")) render(); });
   Rates.refresh();
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+  try { navigator.storage?.persist?.(); } catch { /* not supported */ }
   window.addEventListener("storage", e => { if (e.key && e.key.startsWith("mc-")) { loadCurrent(); buildShell(); } });
 }
 start();
