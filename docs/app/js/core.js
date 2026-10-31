@@ -1,0 +1,615 @@
+// MoneyCompass web: data, storage, translations, money maths and advice.
+// The data has exactly the same shape as the Windows app, so profile files work in both.
+import { TABLE } from "./lang-table.js";
+import { EXTRA } from "./lang-extra.js";
+
+// ---------------------------------------------------------------- storage helpers
+
+const store = {
+  get(key) { try { return localStorage.getItem(key); } catch { return null; } },
+  set(key, value) { try { localStorage.setItem(key, value); return true; } catch { return false; } },
+  remove(key) { try { localStorage.removeItem(key); } catch { /* ignore */ } },
+};
+export { store };
+
+export const uuid = () => (crypto.randomUUID ? crypto.randomUUID()
+  : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0; return (c === "x" ? r : (r & 3 | 8)).toString(16);
+    }));
+
+// ---------------------------------------------------------------- dates (saved like .NET: "2026-10-31T00:00:00")
+
+export function today() { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+export function parseDate(v) {
+  if (!v) return today();
+  if (v instanceof Date) return new Date(v.getFullYear(), v.getMonth(), v.getDate());
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(v));
+  return m ? new Date(+m[1], +m[2] - 1, +m[3]) : today();
+}
+const pad = n => String(n).padStart(2, "0");
+export const isoDate = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T00:00:00`;
+export const inputDate = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+export const fmtDate = d => { d = parseDate(d); return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`; };
+export const monthStart = d => new Date(d.getFullYear(), d.getMonth(), 1);
+export function addMonths(d, n) {
+  // Like .NET AddMonths: the 31st becomes the last day of a shorter month
+  const y = d.getFullYear(), m = d.getMonth() + n;
+  const last = new Date(y, m + 1, 0).getDate();
+  return new Date(y, m, Math.min(d.getDate(), last));
+}
+export const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+export const sameDay = (a, b) => a.getTime() === b.getTime();
+
+// ---------------------------------------------------------------- the data (same as Models.cs)
+
+export function newSettings() {
+  return {
+    MonthlyEssentials: 0, YearlyCosts: 0, EmergencyMonths: 3, BufferPercent: 10, UsdToPln: 0, EurToPln: 0,
+    HelpButtonX: 0, HelpButtonY: 0, Language: "", AutoSaveProfile: true, CloseChoice: "", AskOnStart: true,
+    MenuPosition: "top", ExportCharts: true, Design: "light", OnlineRates: true, CheckForUpdates: true,
+    LastUpdateCheck: null, AutoExchangeRates: true, LicenseKey: "", Modules: [], CardOrder: {},
+    LayoutIncluded: true, FreeExportsUsed: 0, LastProfileSaved: null, ProfileName: "", ProfilePicture: "",
+  };
+}
+export function newData() {
+  return { Incomes: [], Expenses: [], Holdings: [], Offers: [], Loans: [], Goals: [], Received: [],
+           Transfers: [], Categories: [], Budgets: [], Settings: newSettings() };
+}
+/** Fills in anything missing (older files, files from the Windows app). */
+export function normalise(d) {
+  const base = newData();
+  const out = Object.assign(base, d || {});
+  for (const k of ["Incomes", "Expenses", "Holdings", "Offers", "Loans", "Goals", "Received", "Transfers", "Categories", "Budgets"])
+    if (!Array.isArray(out[k])) out[k] = [];
+  out.Settings = Object.assign(newSettings(), out.Settings || {});
+  if (!Array.isArray(out.Settings.Modules)) out.Settings.Modules = [];
+  return out;
+}
+export const looksLikeProfile = d => d && typeof d === "object" && d.Settings && typeof d.Settings === "object"
+  && ["Incomes", "Expenses", "Holdings"].some(k => Array.isArray(d[k]));
+
+// ---------------------------------------------------------------- profiles in this browser
+
+const INDEX = "mc-index";
+function readIndex() {
+  try { const i = JSON.parse(store.get(INDEX)); if (i && Array.isArray(i.ids)) return i; } catch { /* new */ }
+  return { current: "", ids: [] };
+}
+function writeIndex(i) { store.set(INDEX, JSON.stringify(i)); }
+
+export const State = { data: newData(), id: "", listeners: [] };
+
+export function loadCurrent() {
+  const idx = readIndex();
+  if (!idx.current || !idx.ids.includes(idx.current)) {
+    const id = uuid();
+    idx.ids.push(id); idx.current = id; writeIndex(idx);
+    State.id = id; State.data = newData(); save(); return;
+  }
+  State.id = idx.current;
+  try { State.data = normalise(JSON.parse(store.get("mc-p:" + idx.current))); }
+  catch { State.data = newData(); }
+}
+let saveFailed = false;
+export function save() {
+  const ok = store.set("mc-p:" + State.id, JSON.stringify(State.data));
+  saveFailed = !ok;
+}
+export const lastSaveFailed = () => saveFailed;
+
+export function profiles() {
+  const idx = readIndex();
+  return idx.ids.map(id => {
+    let s = {};
+    try { s = JSON.parse(store.get("mc-p:" + id))?.Settings || {}; } catch { /* empty */ }
+    return { id, name: id === State.id ? currentName() : (s.ProfileName || T("Me")), current: id === State.id };
+  }).sort((a, b) => a.name.localeCompare(b.name));
+}
+export function switchTo(id) { save(); const idx = readIndex(); idx.current = id; writeIndex(idx); loadCurrent(); }
+export function createProfile(name, data) {
+  save();
+  const idx = readIndex(); const id = uuid();
+  const d = normalise(data || newData());
+  if (!data) { d.Settings.Language = State.data.Settings.Language; d.Settings.Design = State.data.Settings.Design; }
+  d.Settings.ProfileName = name;
+  store.set("mc-p:" + id, JSON.stringify(d));
+  idx.ids.push(id); idx.current = id; writeIndex(idx); loadCurrent();
+}
+export function deleteProfile(id) {
+  const idx = readIndex();
+  idx.ids = idx.ids.filter(x => x !== id);
+  store.remove("mc-p:" + id); store.remove("mc-pic:" + id);
+  if (idx.current === id) idx.current = idx.ids[0] || "";
+  writeIndex(idx); loadCurrent();
+}
+export function replaceData(d) { const name = State.data.Settings.ProfileName; State.data = normalise(d); if (!State.data.Settings.ProfileName) State.data.Settings.ProfileName = name; save(); }
+
+export const picture = () => store.get("mc-pic:" + State.id);
+export const setPicture = url => url ? store.set("mc-pic:" + State.id, url) : store.remove("mc-pic:" + State.id);
+
+export function currentName() {
+  const n = (State.data.Settings.ProfileName || "").trim();
+  if (n) return n;
+  return license.current?.name || T("Me");
+}
+export function initials(name) {
+  const w = name.split(" ").filter(Boolean);
+  if (!w.length) return "?";
+  if (w.length === 1) return w[0].slice(0, 2).toUpperCase();
+  return (w[0][0] + w[w.length - 1][0]).toUpperCase();
+}
+
+// ---------------------------------------------------------------- translations
+
+export const LANGS = [["en", "English"], ["de", "Deutsch"], ["fr", "Français"], ["pl", "Polski"]];
+export function lang() {
+  const s = State.data.Settings;
+  if (!LANGS.some(l => l[0] === s.Language)) {
+    let pick = "";
+    try { pick = store.get("mc-lang") || ""; } catch { /* none */ }
+    if (!LANGS.some(l => l[0] === pick)) pick = (navigator.language || "en").slice(0, 2).toLowerCase();
+    s.Language = LANGS.some(l => l[0] === pick) ? pick : "en";
+    save();
+  }
+  return s.Language;
+}
+export function T(english, ...args) {
+  const l = lang();
+  let text = english;
+  if (l !== "en") text = (TABLE[l] && TABLE[l][english]) || (EXTRA[l] && EXTRA[l][english]) || english;
+  return args.length ? text.replace(/\{(\d+)\}/g, (m, i) => (args[i] ?? m)) : text;
+}
+export function monthsCount(n) {
+  switch (lang()) {
+    case "pl": return n === 1 ? "1 miesiąc" : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? `${n} miesiące` : `${n} miesięcy`;
+    case "de": return n === 1 ? "1 Monat" : `${n} Monate`;
+    case "fr": return `${n} mois`;
+    default: return n === 1 ? "1 month" : `${n} months`;
+  }
+}
+const locales = { en: "en-GB", de: "de-DE", fr: "fr-FR", pl: "pl-PL" };
+export const locale = () => locales[lang()];
+export const monthName = d => { const s = parseDate(d).toLocaleDateString(locale(), { month: "long", year: "numeric" }); return s.charAt(0).toUpperCase() + s.slice(1); };
+export const monthShort = d => parseDate(d).toLocaleDateString(locale(), { month: "short" }).replace(".", "");
+
+// ---------------------------------------------------------------- numbers
+
+const nf = new Intl.NumberFormat("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: "always" });
+const round2 = v => Math.round((v + Number.EPSILON) * 100) / 100;
+export const pln = v => nf.format(round2(v || 0)).replace(/ /g, " ") + " zł";
+export const rate = v => (v || 0).toFixed(2).replace(".", ",") + "%";
+export function amount(v, cur) {
+  const n = nf.format(round2(v || 0)).replace(/ /g, " ");
+  return cur === "USD" ? "$" + n : cur === "EUR" ? "€" + n : cur === "PLN" ? n + " zł" : n + " " + cur;
+}
+/** "1 234,50", "1234.5" → 1234.5. Empty → null. */
+export function num(text) {
+  if (text === null || text === undefined) return null;
+  let v = String(text).replace(/[\s zł%]/g, "");
+  if (!v) return null;
+  const c = v.lastIndexOf(","), d = v.lastIndexOf(".");
+  if (c >= 0 && d >= 0) v = c > d ? v.replace(/\./g, "").replace(",", ".") : v.replace(/,/g, "");
+  else if (c >= 0) v = v.replace(",", ".");
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+export const plain = v => (v === 0 || v) ? String(Math.round(v * 100) / 100).replace(".", ",") : "";
+
+// ---------------------------------------------------------------- license (same keys as the Windows app)
+
+const PUBLIC_KEY = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE13kV127//P+BWPUsOX3hN2RZLj+EKAP2ANQYpknXmmsCAH2Bfb6osIz6+ro1qe7t+fZCXUuZrL1bRKu5CIvhEA==";
+const ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+const EPOCH = Date.UTC(2020, 0, 1);
+
+function fromBase32(text) {
+  const out = []; let buffer = 0, bits = 0;
+  for (const raw of text) {
+    const c = raw === "I" || raw === "L" ? "1" : raw === "O" ? "0" : raw;
+    const v = ALPHABET.indexOf(c);
+    if (v < 0) return null;
+    buffer = ((buffer << 5) | v) & 0xffffff; bits += 5;
+    if (bits >= 8) { out.push((buffer >> (bits - 8)) & 0xff); bits -= 8; }
+  }
+  return new Uint8Array(out);
+}
+const dayToDate = days => { const d = new Date(EPOCH + days * 86400000); return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()); };
+
+function readPayload(p) {
+  if (p.length < 7 || (p[0] !== 1 && p[0] !== 2)) return null;
+  const u16 = i => p[i] | (p[i + 1] << 8);
+  const issued = dayToDate(u16(1)), expDays = u16(3), pro = (p[5] & 1) === 1, len = p[6];
+  const dec = new TextDecoder();
+  const expires = expDays === 0 ? null : dayToDate(expDays);
+  if (p[0] === 1) {
+    if (p.length !== 7 + len) return null;
+    return { name: dec.decode(p.slice(7, 7 + len)), pro, issued, expires, email: "" };
+  }
+  if (p.length < 8 + len) return null;
+  const elen = p[7 + len];
+  if (p.length !== 8 + len + elen) return null;
+  return { name: dec.decode(p.slice(7, 7 + len)), pro, issued, expires, email: dec.decode(p.slice(8 + len, 8 + len + elen)) };
+}
+
+let publicKey = null;
+export async function verifyKey(key) {
+  try {
+    if (!key || !key.trim()) return null;
+    const clean = key.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (!clean.startsWith("MC1")) return null;
+    const bytes = fromBase32(clean.slice(3));
+    if (!bytes || bytes.length <= 64 + 7) return null;
+    const payload = bytes.slice(0, bytes.length - 64), sig = bytes.slice(bytes.length - 64);
+    if (!publicKey) {
+      const raw = Uint8Array.from(atob(PUBLIC_KEY), c => c.charCodeAt(0));
+      publicKey = await crypto.subtle.importKey("spki", raw, { name: "ECDSA", namedCurve: "P-256" }, false, ["verify"]);
+    }
+    const ok = await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, publicKey, sig, payload);
+    return ok ? readPayload(payload) : null;
+  } catch { return null; }
+}
+
+export const license = {
+  current: null,
+  get expired() { return !!(this.current && this.current.expires && today() > this.current.expires); },
+  get isPro() { return !!(this.current && this.current.pro && !this.expired); },
+  async load() { this.current = await verifyKey(store.get("mc-license") || ""); },
+  async activate(key) {
+    const info = await verifyKey(key);
+    if (!info) return T("This license key is not valid. Please check that you copied all of it.");
+    if (info.expires && today() > info.expires) return T("This license key ended on {0}.", fmtDate(info.expires));
+    store.set("mc-license", key.trim()); this.current = info; return null;
+  },
+  remove() { store.remove("mc-license"); this.current = null; },
+  get status() {
+    const l = this.current;
+    if (!l) return T("Free version");
+    if (this.expired) return T("Pro license of {0} ended on {1}", l.name, fmtDate(l.expires));
+    return l.expires ? T("Pro – licensed to {0}, valid until {1}", l.name, fmtDate(l.expires)) : T("Pro – licensed to {0}", l.name);
+  },
+};
+export const FREE_EXPORTS = 3;
+export const freeExportsLeft = () => Math.max(0, FREE_EXPORTS - (State.data.Settings.FreeExportsUsed || 0));
+
+// ---------------------------------------------------------------- modules
+
+export const MODULES = [
+  { code: "goals", name: "Savings goals", description: "Goals like a car or a holiday: progress and how much to save per month." },
+  { code: "loans", name: "Loans & debts", description: "Credits and loans: what is left to pay, monthly payments and when you are debt-free." },
+  { code: "budget", name: "Budget plan", description: "A monthly limit per expense category, with a warning when you go over." },
+];
+export const moduleOn = code => license.isPro && State.data.Settings.Modules.includes(code);
+export function setModule(code, on) {
+  const list = State.data.Settings.Modules.filter(m => m !== code);
+  if (on) list.push(code);
+  State.data.Settings.Modules = list; save();
+}
+
+// ---------------------------------------------------------------- categories
+
+export const OTHER = "Other";
+const BUILT_IN = [
+  ["Housing / rent", true, "🏠"], ["Electricity, gas, water, heating", true, "💡"], ["Internet & phone", true, "📱"],
+  ["Food & groceries", true, "🛒"], ["Transport / fuel", true, "⛽"], ["Car insurance & service", true, "🚗"],
+  ["Health & medicine", true, "💊"], ["Insurance", true, "🛡️"], ["Loan payments", true, "🏦"],
+  ["Restaurants & takeaway", false, "🍽️"], ["Subscriptions", false, "📺"], ["Hobbies & leisure", false, "🎮"],
+  ["Shopping", false, "🛍️"], ["Travel", false, "✈️"],
+].map(([Name, Essential, Icon]) => ({ Name, Essential, Icon, Custom: false }));
+const OTHER_CAT = { Name: OTHER, Essential: false, Icon: "📦", Custom: false };
+export const ICON_CHOICES = ["🏠", "💡", "📱", "🛒", "⛽", "🚗", "💊", "🛡️", "🏦", "🍽️", "📺", "🎮", "🛍️", "✈️", "📦",
+  "👶", "🐶", "🐱", "🎓", "📚", "💇", "👗", "👟", "🎁", "🎉", "🏋️", "⚽", "🎵", "🎬", "🍺",
+  "☕", "🚌", "🚲", "🅿️", "🔧", "🧾", "💼", "💻", "🖨️", "🌱", "🧹", "🏥", "🦷", "👓", "💰", "🚬"];
+
+export const categories = () => [...BUILT_IN, ...State.data.Categories.map(c => ({ ...c, Custom: true })), OTHER_CAT];
+export function findCategory(name) {
+  if (name === OTHER) return OTHER_CAT;
+  return BUILT_IN.find(c => c.Name === name) || (State.data.Categories.find(c => c.Name === name) ? { ...State.data.Categories.find(c => c.Name === name), Custom: true } : null);
+}
+export const categoryIcon = name => license.isPro ? (findCategory(name)?.Icon || "") : "";
+export const categoryLabel = name => { const i = categoryIcon(name); return i ? `${i}  ${T(name)}` : T(name); };
+export function addCategory(name, essential, icon) {
+  name = (name || "").trim();
+  if (!name) return T("Please enter a name.");
+  if (name.length > 40) return T("Please use a shorter name (up to 40 letters).");
+  const lower = s => s.toLowerCase();
+  if (categories().some(c => lower(c.Name) === lower(name) || lower(T(c.Name)) === lower(name))) return T("This category already exists.");
+  const stem = s => s.trim().toLowerCase().replace(/s+$/, "");
+  const similar = categories().find(c => stem(c.Name) === stem(name) || stem(T(c.Name)) === stem(name));
+  if (similar) return T("A very similar category already exists: {0}", T(similar.Name));
+  State.data.Categories.push({ Name: name, Essential: !!essential, Icon: icon || "" }); save();
+  return null;
+}
+export function removeCategory(name) {
+  const d = State.data;
+  d.Categories = d.Categories.filter(c => c.Name !== name);
+  d.Expenses.forEach(e => { if (e.Category === name) e.Category = OTHER; });
+  d.Budgets = d.Budgets.filter(b => b.Category !== name);
+  save();
+}
+
+// ---------------------------------------------------------------- money maths (Calc.cs)
+
+export const BELKA = 0.19;
+export const LOAN_CATEGORY = "Loan payments";
+export const ONE_TIME = "One-time";
+export const FREQUENCIES = [["Monthly", 1], ["Every 2 weeks", 26 / 12], ["Weekly", 52 / 12], ["Quarterly", 1 / 3],
+  ["Twice a year", 1 / 6], ["Yearly", 1 / 12], [ONE_TIME, 0]];
+export const RECEIVED = { income: "income", salary: "salary", none: "none" };
+
+export const Calc = {
+  emergency(s) {
+    const monthly = (s.MonthlyEssentials || 0) + (s.YearlyCosts || 0) / 12;
+    const buffer = 1 + (s.BufferPercent || 0) / 100;
+    return { monthly, three: monthly * 3 * buffer, six: monthly * 6 * buffer, target: monthly * (s.EmergencyMonths || 0) * buffer };
+  },
+  groupMonths(expenses) {
+    const map = new Map();
+    for (const e of expenses) {
+      const d = parseDate(e.Date), key = d.getFullYear() * 12 + d.getMonth();
+      if (!map.has(key)) map.set(key, { key, start: monthStart(d), items: [] });
+      map.get(key).items.push(e);
+    }
+    return [...map.values()].sort((a, b) => b.key - a.key);
+  },
+  averages(expenses, maxMonths = 3) {
+    const months = this.groupMonths(expenses).slice(0, maxMonths);
+    if (!months.length) return { essential: 0, nonEssential: 0, monthsUsed: 0, label: "" };
+    let ess = 0, other = 0;
+    for (const m of months) for (const e of m.items) (e.Essential ? (ess += e.Amount) : (other += e.Amount));
+    const label = [...months].reverse().map(m => `${pad(m.start.getMonth() + 1)}.${m.start.getFullYear()}`).join(", ");
+    return { essential: ess / months.length, nonEssential: other / months.length, monthsUsed: months.length, label };
+  },
+  receivedIn(d, month) {
+    const start = monthStart(month), end = addMonths(start, 1);
+    return d.Received.filter(r => r.Kind === RECEIVED.income && parseDate(r.Date) >= start && parseDate(r.Date) < end).reduce((s, r) => s + r.Amount, 0);
+  },
+  totalIncome(d) { return this.income(d).monthlyTotal; },
+  loanPayments(d, month) {
+    if (!moduleOn("loans")) return 0;
+    const start = monthStart(month || today());
+    return d.Loans.filter(l => l.Remaining > 0 && parseDate(l.EndDate) >= start).reduce((s, l) => s + l.MonthlyPayment, 0);
+  },
+  loansCounted(d) { return this.loanPayments(d) > 0; },
+  countedExpenses(d) { return this.loansCounted(d) ? d.Expenses.filter(e => e.Category !== LOAN_CATEGORY) : d.Expenses; },
+  spending(d) {
+    const avg = this.averages(this.countedExpenses(d));
+    const loans = this.loanPayments(d);
+    if (loans <= 0) return avg;
+    return { ...avg, essential: avg.essential + loans, monthsUsed: Math.max(1, avg.monthsUsed) };
+  },
+  savings(o) {
+    if (!(o.Amount > 0) || !(o.PeriodDays > 0)) return { promo: 0, after: 0, gross: 0, tax: 0, net: 0, effective: 0 };
+    const promoDays = Math.min(Math.max(o.PromoDays || 0, 0), o.PeriodDays);
+    const afterDays = o.PeriodDays - promoDays;
+    const inPromo = o.PromoLimit > 0 ? Math.min(o.Amount, o.PromoLimit) : o.Amount;
+    const over = o.Amount - inPromo;
+    const promo = inPromo * (o.PromoRate || 0) / 100 * promoDays / 365 + over * (o.StandardRate || 0) / 100 * promoDays / 365;
+    const after = o.Amount * (o.StandardRate || 0) / 100 * afterDays / 365;
+    const gross = promo + after;
+    const tax = o.ApplyTax ? round2(gross * BELKA) : 0;
+    const net = gross - tax;
+    return { promo, after, gross, tax, net, effective: net / o.Amount * 365 / o.PeriodDays * 100 };
+  },
+  toPln(value, currency, s) { return currency === "USD" ? value * (s.UsdToPln || 0) : currency === "EUR" ? value * (s.EurToPln || 0) : value; },
+  rateMissing(currency, s) { return (currency === "USD" && !(s.UsdToPln > 0)) || (currency === "EUR" && !(s.EurToPln > 0)); },
+  stepN(start, freq, n) {
+    switch (freq) {
+      case "Weekly": return addDays(start, 7 * n);
+      case "Every 2 weeks": return addDays(start, 14 * n);
+      case "Quarterly": return addMonths(start, 3 * n);
+      case "Twice a year": return addMonths(start, 6 * n);
+      case "Yearly": return addMonths(start, 12 * n);
+      default: return addMonths(start, n);
+    }
+  },
+  nextPayment(i, from) {
+    const start = parseDate(i.Date);
+    if (i.Frequency === ONE_TIME) return start >= from ? start : null;
+    let n = 0;
+    if (start >= from) { while (this.stepN(start, i.Frequency, n - 1) >= from) n--; }
+    else { while (this.stepN(start, i.Frequency, n) < from) n++; }
+    return this.stepN(start, i.Frequency, n);
+  },
+  upcoming(d, from, to) {
+    const list = [];
+    for (const i of d.Incomes.filter(x => x.Active)) {
+      const amt = this.toPln(i.Amount, i.Currency, d.Settings);
+      let next = this.nextPayment(i, from), guard = 0;
+      while (next && next <= to && guard++ < 500) {
+        list.push({ source: i, date: next, amount: amt });
+        if (i.Frequency === ONE_TIME) break;
+        next = this.nextPayment(i, addDays(next, 1));
+      }
+    }
+    return list.sort((a, b) => a.date - b.date);
+  },
+  perMonth(freq) { const f = FREQUENCIES.find(x => x[0] === freq); return f ? f[1] : 1; },
+  monthlyPln(i, s) { return this.toPln(i.Amount, i.Currency, s) * this.perMonth(i.Frequency); },
+  income(d) {
+    let total = 0, oneTime = 0, count = 0, missing = false;
+    const year = today().getFullYear();
+    for (const i of d.Incomes.filter(x => x.Active)) {
+      if (this.rateMissing(i.Currency, d.Settings)) missing = true;
+      if (i.Frequency === ONE_TIME) { if (parseDate(i.Date).getFullYear() === year) oneTime += this.toPln(i.Amount, i.Currency, d.Settings); }
+      else { total += this.monthlyPln(i, d.Settings); count++; }
+    }
+    return { monthlyTotal: total, activeSources: count, oneTimeThisYear: oneTime, missing };
+  },
+  portfolio(d) {
+    let total = 0, safe = 0, risky = 0, yearly = 0, missing = false;
+    for (const h of d.Holdings) {
+      if (this.rateMissing(h.Currency, d.Settings)) missing = true;
+      const v = this.toPln(h.Amount, h.Currency, d.Settings);
+      total += v; if (h.Safe) safe += v; else risky += v;
+      yearly += v * (h.RatePercent || 0) / 100;
+    }
+    return { total, safe, risky, yearly, missing };
+  },
+  spentThisMonth(category) {
+    const start = monthStart(today()), end = addMonths(start, 1);
+    return State.data.Expenses.filter(e => e.Category === category && parseDate(e.Date) >= start && parseDate(e.Date) < end).reduce((s, e) => s + e.Amount, 0);
+  },
+};
+
+// ---------------------------------------------------------------- chart numbers (ChartData.cs)
+
+export const COLORS = { income: "#2a78d6", expenses: "#eb6834", leftOver: "#1baf7a", other: "#a3a3a0",
+  series: ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300"] };
+
+export const ChartData = {
+  inOut(d) {
+    const income = Calc.totalIncome(d), avg = Calc.spending(d), spending = avg.essential + avg.nonEssential, left = income - spending;
+    return [
+      { label: T("Income"), value: income, color: COLORS.income, text: pln(income) },
+      { label: T("Expenses"), value: spending, color: COLORS.expenses, text: pln(spending) },
+      { label: T("Left over"), value: Math.max(0, left), color: COLORS.leftOver, text: pln(left) },
+    ];
+  },
+  hasInOut(d) { return Calc.totalIncome(d) > 0 || Calc.spending(d).monthsUsed > 0; },
+  trend(d) {
+    const thisMonth = monthStart(today());
+    let first = addMonths(thisMonth, -5);
+    if (d.Expenses.length) {
+      const fm = monthStart(new Date(Math.min(...d.Expenses.map(e => parseDate(e.Date).getTime()))));
+      if (fm > first) first = fm > thisMonth ? thisMonth : fm;
+    }
+    const count = (thisMonth.getFullYear() - first.getFullYear()) * 12 + thisMonth.getMonth() - first.getMonth() + 1;
+    const out = [];
+    for (let n = 0; n < count; n++) {
+      const start = addMonths(first, n), end = addDays(addMonths(start, 1), -1);
+      const income = Calc.upcoming(d, start, end).reduce((s, p) => s + p.amount, 0)
+        + d.Received.filter(r => r.Kind === RECEIVED.income && parseDate(r.Date) >= start && parseDate(r.Date) <= end).reduce((s, r) => s + r.Amount, 0);
+      const expenses = Calc.countedExpenses(d).filter(e => parseDate(e.Date) >= start && parseDate(e.Date) <= end).reduce((s, e) => s + e.Amount, 0)
+        + Calc.loanPayments(d, start);
+      out.push({ month: monthShort(start), start, income, expenses });
+    }
+    return out;
+  },
+  categories(d) {
+    const by = Advisor.spendingByCategory(d);
+    const total = by.reduce((s, c) => s + c.perMonth, 0);
+    const slices = by.slice(0, 6).map((c, n) => ({ label: T(c.category), key: c.category, value: c.perMonth, color: COLORS.series[n], text: pln(c.perMonth), icon: categoryIcon(c.category) }));
+    if (by.length > 6) {
+      const rest = by.slice(6).reduce((s, c) => s + c.perMonth, 0);
+      slices.push({ label: T("Everything else"), value: rest, color: COLORS.other, text: pln(rest) });
+    }
+    return { slices, total, all: by };
+  },
+  money(p) {
+    return [
+      { label: T("Safe money"), value: p.safe, color: COLORS.income, text: pln(p.safe) },
+      { label: T("Risky money"), value: p.risky, color: COLORS.expenses, text: pln(p.risky) },
+    ];
+  },
+  share(value, total) { return total > 0 ? `${Math.round(value / total * 100)}%` : ""; },
+};
+
+// ---------------------------------------------------------------- advice (Advisor.cs)
+
+export const Advisor = {
+  analyse(d) {
+    const list = [];
+    const income = Calc.totalIncome(d), avg = Calc.spending(d);
+    const spending = avg.essential + avg.nonEssential, left = income - spending;
+    const p = Calc.portfolio(d), target = Calc.emergency(d.Settings).target, missing = target - p.safe;
+    const best = this.bestOffer(d);
+    const add = (kind, title, text, benefit, route, action) => list.push({ kind, title, text, benefit, route, action });
+
+    if (income <= 0 || avg.monthsUsed === 0)
+      add("tip", T("Enter your income and expenses first"), T("The more you enter in the Income and Expenses tabs, the better MoneyCompass can suggest how to save. One month of expenses is enough to start."), 0, "income");
+    if (income > 0 && avg.monthsUsed > 0 && left < 0)
+      add("warning", T("You spend more than you earn"), T("On average you are {0} short every month. Look at the not-essential costs first, before saving or investing.", pln(-left)), -left * 12, "expenses");
+    if (target <= 0)
+      add("safety", T("Set your emergency fund target"), T("Before investing, keep 3–6 months of essential costs in a safe bank account. Enter your costs in the Emergency fund tab."), 0, "emergency");
+    else if (missing > 0) {
+      const text = left > 0
+        ? T("You still need {0} in safe money. Putting {1} aside every month, you reach your target in about {2} month(s). Keep it in a savings account in złoty, not in crypto.", pln(missing), pln(Math.min(left, missing)), Math.ceil(missing / Math.max(1, left)))
+        : T("You still need {0} in safe money. Keep it in a savings account in złoty, not in crypto.", pln(missing));
+      add("safety", T("Build your emergency fund first"), text, 0, "emergency");
+    }
+    if (p.total > 0 && p.risky / p.total > 0.5 && missing > 0)
+      add("safety", T("Most of your money is in risky places"), T("{0}% of your money is on crypto platforms or investments, but your emergency fund isn't full. Consider moving {1} to a guaranteed bank account.", Math.round(p.risky / p.total * 100), pln(Math.min(missing, p.risky))), 0, "portfolio");
+    if (best) {
+      for (const h of d.Holdings.filter(h => h.Safe)) {
+        const v = Calc.toPln(h.Amount, h.Currency, d.Settings);
+        const movable = best.limit > 0 ? Math.min(v, best.limit) : v;
+        const gain = movable * (best.rate - (h.RatePercent || 0)) / 100 * (1 - BELKA);
+        if (v >= 1000 && gain >= 50)
+          add("money", T("Move \"{0}\" to a better offer", h.Name), T("It earns {0}. Your best saved offer \"{1}\" pays on average {2} per year (promo and the rate after it together). Check that you meet the offer's conditions (new money, card payments...).", fmtPct(h.RatePercent), best.name, fmtPct(best.rate)), gain, "savings");
+      }
+    } else {
+      const low = d.Holdings.filter(h => h.Safe && (h.RatePercent || 0) < 2 && Calc.toPln(h.Amount, h.Currency, d.Settings) >= 1000);
+      if (low.length)
+        add("money", T("Your savings earn almost nothing"), T("{0} sits in accounts paying under 2%. Banks often offer 5–6% for new money. Enter a few offers in the Compare offers tab and MoneyCompass shows you exactly how much you'd gain.", pln(low.reduce((s, h) => s + Calc.toPln(h.Amount, h.Currency, d.Settings), 0))), 0, "savings", T("Compare offers"));
+    }
+    if (avg.monthsUsed > 0 && avg.nonEssential > 0) {
+      const top = this.topNonEssential(d);
+      for (let i = 0; i < top.length; i++) {
+        const c = top[i];
+        if (i > 0 && c.perMonth < top[0].perMonth * 0.6) break;
+        const cut = c.perMonth * 0.2;
+        add("money", T("Spend a little less on \"{0}\"", T(c.category)), i === 0
+          ? T("It's your biggest not-essential cost: about {0} per month. Spending 20% less there saves {1} per month.", pln(c.perMonth), pln(cut))
+          : T("Another big not-essential cost: about {0} per month. Spending 20% less there saves {1} per month.", pln(c.perMonth), pln(cut)), cut * 12, "expenses");
+      }
+    }
+    if (income > 0 && avg.monthsUsed > 0 && left >= 0) {
+      const r = left / income * 100;
+      if (r < 20) {
+        const needed = income * 0.2 - left;
+        add("tip", T("Aim to save 20% of your income"), T("You save {0}% now. To reach 20% you need {1} more per month. A standing order on payday makes it automatic.", Math.round(r), pln(needed)), needed * 12, "expenses");
+      }
+    }
+    if (left > 0 && missing <= 0 && target > 0) {
+      const r = best ? best.rate : 0;
+      const gain = r > 0 ? left * 12 * r / 100 / 2 * (1 - BELKA) : 0;
+      add("money", T("Put your monthly surplus to work"), T("Your emergency fund is complete and {0} is left every month. Long-term money can go to tax-friendly options like IKE/IKZE or Polish treasury bonds (see the options below).", pln(left)), gain, "portfolio");
+    }
+    const order = k => k === "warning" ? 0 : k === "safety" ? 1 : 2;
+    return list.sort((a, b) => order(a.kind) - order(b.kind) || b.benefit - a.benefit);
+  },
+  bestOffer(d) {
+    const best = d.Offers.map(o => ({ o, r: Calc.savings(o) })).filter(x => x.r.effective > 0).sort((a, b) => b.r.effective - a.r.effective)[0];
+    if (!best) return null;
+    const gross = best.o.ApplyTax ? best.r.effective / (1 - BELKA) : best.r.effective;
+    return { name: best.o.Name, rate: Math.round(gross * 100) / 100, limit: best.o.PromoLimit || 0 };
+  },
+  perCategory(d, filter) {
+    const months = Calc.groupMonths(Calc.countedExpenses(d)).slice(0, 3);
+    if (!months.length) return [];
+    const map = new Map();
+    for (const m of months) for (const e of m.items) if (!filter || filter(e)) map.set(e.Category, (map.get(e.Category) || 0) + e.Amount);
+    return [...map.entries()].map(([category, sum]) => ({ category, perMonth: sum / months.length }));
+  },
+  topNonEssential(d) { return this.perCategory(d, e => !e.Essential).sort((a, b) => b.perMonth - a.perMonth).slice(0, 3); },
+  spendingByCategory(d) {
+    const list = this.perCategory(d);
+    const loans = Calc.loanPayments(d);
+    if (loans > 0) list.push({ category: LOAN_CATEGORY, perMonth: loans });
+    return list.sort((a, b) => b.perMonth - a.perMonth);
+  },
+};
+const fmtPct = v => (Math.round((v || 0) * 100) / 100).toString().replace(".", ",") + "%";
+
+// ---------------------------------------------------------------- reset (Delete data)
+
+export function reset(parts) {
+  const d = State.data;
+  if (parts.incomes) d.Incomes = [];
+  if (parts.expenses) { d.Expenses = []; d.Received = []; d.Transfers = []; }
+  if (parts.holdings) d.Holdings = [];
+  if (parts.offers) d.Offers = [];
+  if (parts.emergency) Object.assign(d.Settings, { MonthlyEssentials: 0, YearlyCosts: 0, EmergencyMonths: 3, BufferPercent: 10 });
+  if (parts.rates) Object.assign(d.Settings, { UsdToPln: 0, EurToPln: 0 });
+  if (parts.modules) { d.Goals = []; d.Loans = []; d.Budgets = []; }
+  if (parts.categories) {
+    const own = new Set(d.Categories.map(c => c.Name));
+    d.Expenses.forEach(e => { if (own.has(e.Category)) e.Category = OTHER; });
+    d.Budgets = d.Budgets.filter(b => !own.has(b.Category));
+    d.Categories = [];
+  }
+  save();
+}
+
+export function summary(d) {
+  return T("{0} income sources, {1} expenses, {2} savings entries, {3} saved offers", d.Incomes.length, d.Expenses.length, d.Holdings.length, d.Offers.length);
+}
