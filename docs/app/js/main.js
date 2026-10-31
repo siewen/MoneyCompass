@@ -5,7 +5,7 @@ import { App, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
 import { Overview, Income, Expenses, Emergency, Portfolio } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
-import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile } from "./dialogs.js";
+import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile } from "./dialogs.js";
 
 const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", savings: "#7E22CE" };
 const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget };
@@ -41,13 +41,14 @@ function buildShell() {
         <button class="act green" data-act="export" title="${esc(T("Export"))}">⬇<span>${esc(T("Export"))}</span></button>
         ${installed() ? "" : `<button class="act teal" data-act="install" title="${esc(T("Install app"))}">📲<span>${esc(T("Install app"))}</span></button>`}
         <button class="profile-btn" data-act="profile" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}</button>
+        ${installed() ? `<button class="act exit" data-act="exit" title="${esc(T("Close"))}">⏻</button>` : ""}
       </div>
     </header>
     ${license.isPro ? "" : `<div class="free-bar">${esc(T("Free web version."))} <a href="${DOWNLOAD_URL}" target="_blank" rel="noopener">${esc(T("Download the Windows app"))}</a> · <a href="#" data-act="profile">${esc(T("Enter license key"))}</a></div>`}
     <main id="page"></main>
     <button class="help-fab" data-act="help-menu" title="${esc(T("Help & About"))}">?</button>`;
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => App.go(b.dataset.tab));
-  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, "help-menu": helpMenu, install };
+  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, "help-menu": helpMenu, install, exit: closeApp };
   document.querySelectorAll("[data-act]").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
   render();
 }
@@ -57,10 +58,11 @@ function helpMenu() {
     <button class="btn second" data-m="help">? ${esc(T("Help"))}</button>
     <button class="btn second" data-m="options">⚙ ${esc(T("Options"))}</button>
     <button class="btn second" data-m="about">ℹ ${esc(T("About"))}</button>
-    ${installed() ? "" : `<button class="btn second" data-m="install">📲 ${esc(T("Install app"))}</button>`}</div>`, { width: 320 });
+    ${installed() ? "" : `<button class="btn second" data-m="install">📲 ${esc(T("Install app"))}</button>`}
+    <button class="btn second" data-m="exit">⏻ ${esc(T("Close"))}</button></div>`, { width: 320 });
   p.el.querySelectorAll("[data-m]").forEach(b => b.onclick = () => {
     p.close();
-    if (b.dataset.m === "help") openHelp(); else if (b.dataset.m === "options") openOptions(); else if (b.dataset.m === "install") install(); else about();
+    if (b.dataset.m === "help") openHelp(); else if (b.dataset.m === "options") openOptions(); else if (b.dataset.m === "install") install(); else if (b.dataset.m === "exit") closeApp(); else about();
   });
 }
 // ---------- Install as an app (iPhone, iPad, Mac, Android, Windows) ----------
@@ -114,6 +116,36 @@ function welcome() {
     if (b.dataset.w === "load") await loadProfileFile();
     else if (b.dataset.w === "fresh") openDelete();
   });
+}
+
+// ---------- Closing: the same "Save your profile before closing?" box as the Windows app ----------
+async function closeApp() {
+  const s = State.data.Settings;
+  const choice = s.CloseChoice || "";
+  if (choice === "with") { saveProfileFile(); return finishClose(); }
+  if (choice === "without" || choice === "none") return finishClose();
+  const p = popup(`<div class="box-head"><span class="box-icon">💾</span><h2>${esc(T("Save your profile before closing?"))}</h2></div>
+    <p class="hint">${esc(T("Your entries are always kept in this browser. The profile is an extra copy, for example as a backup."))}</p>
+    <div class="box-buttons">
+      <button class="btn go" data-c="with">💾 ${esc(T("Save profile and close"))}</button>
+      <button class="btn second" data-c="without">${esc(T("Close without saving"))}</button>
+      <button class="btn second" data-c="cancel">${esc(T("Cancel"))}</button></div>
+    <label class="check"><input type="checkbox" name="remember"><span>${esc(T("Remember my choice"))}</span></label>
+    <p class="hint">${esc(T("You can change this later in Options → Backup & restore."))}</p>`, { width: 440, cls: "box" });
+  p.el.querySelectorAll("[data-c]").forEach(b => b.onclick = () => {
+    const c = b.dataset.c;
+    p.close();
+    if (c === "cancel") return;
+    if (p.el.querySelector('[name="remember"]').checked) { s.CloseChoice = c; save(); }
+    if (c === "with") saveProfileFile();
+    setTimeout(finishClose, c === "with" ? 900 : 200);
+  });
+}
+function finishClose() {
+  save();
+  window.close();
+  // A normal browser tab can't be closed by the page itself
+  setTimeout(() => { if (!window.closed) toast(T("Everything is saved. You can close this tab now.")); }, 300);
 }
 
 function about() {

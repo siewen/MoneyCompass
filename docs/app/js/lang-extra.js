@@ -39,7 +39,11 @@ export const EXTRA = {
 "On iPhone and iPad the installed app has its own storage: if you already entered data in Safari, save your profile there first and load it in the app.": "Auf iPhone und iPad hat die installierte App einen eigenen Speicher: Wenn Sie schon Daten in Safari eingegeben haben, speichern Sie dort zuerst Ihr Profil und laden Sie es in der App.",
 "Open the browser menu (⋮ or …).": "Öffnen Sie das Browsermenü (⋮ oder …).",
 "Open this page in Safari.": "Öffnen Sie diese Seite in Safari.",
-"Tap the Share button (the square with the arrow).": "Tippen Sie auf „Teilen“ (das Quadrat mit dem Pfeil)."
+"Tap the Share button (the square with the arrow).": "Tippen Sie auf „Teilen“ (das Quadrat mit dem Pfeil).",
+"Ask every time": "Jedes Mal fragen",
+"Everything is saved. You can close this tab now.": "Alles ist gespeichert. Sie können diesen Tab jetzt schließen.",
+"Save profile and close": "Profil speichern und schließen",
+"Your entries are always kept in this browser. The profile is an extra copy, for example as a backup.": "Ihre Einträge bleiben immer in diesem Browser. Das Profil ist eine zusätzliche Kopie, zum Beispiel als Sicherung."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -80,7 +84,11 @@ export const EXTRA = {
 "On iPhone and iPad the installed app has its own storage: if you already entered data in Safari, save your profile there first and load it in the app.": "Sur iPhone et iPad, l'application installée a son propre stockage : si vous avez déjà saisi des données dans Safari, enregistrez d'abord votre profil puis chargez-le dans l'application.",
 "Open the browser menu (⋮ or …).": "Ouvrez le menu du navigateur (⋮ ou …).",
 "Open this page in Safari.": "Ouvrez cette page dans Safari.",
-"Tap the Share button (the square with the arrow).": "Touchez le bouton Partager (le carré avec la flèche)."
+"Tap the Share button (the square with the arrow).": "Touchez le bouton Partager (le carré avec la flèche).",
+"Ask every time": "Demander à chaque fois",
+"Everything is saved. You can close this tab now.": "Tout est enregistré. Vous pouvez fermer cet onglet.",
+"Save profile and close": "Enregistrer le profil et fermer",
+"Your entries are always kept in this browser. The profile is an extra copy, for example as a backup.": "Vos saisies restent toujours dans ce navigateur. Le profil est une copie supplémentaire, par exemple comme sauvegarde."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -121,6 +129,10 @@ export const EXTRA = {
 "On iPhone and iPad the installed app has its own storage: if you already entered data in Safari, save your profile there first and load it in the app.": "Na iPhonie i iPadzie zainstalowana aplikacja ma własną pamięć: jeśli masz już dane w Safari, najpierw zapisz tam profil, a potem wczytaj go w aplikacji.",
 "Open the browser menu (⋮ or …).": "Otwórz menu przeglądarki (⋮ lub …).",
 "Open this page in Safari.": "Otwórz tę stronę w Safari.",
-"Tap the Share button (the square with the arrow).": "Stuknij przycisk Udostępnij (kwadrat ze strzałką)."
+"Tap the Share button (the square with the arrow).": "Stuknij przycisk Udostępnij (kwadrat ze strzałką).",
+"Ask every time": "Pytaj za każdym razem",
+"Everything is saved. You can close this tab now.": "Wszystko zapisane. Możesz teraz zamknąć tę kartę.",
+"Save profile and close": "Zapisz profil i zamknij",
+"Your entries are always kept in this browser. The profile is an extra copy, for example as a backup.": "Twoje wpisy zawsze zostają w tej przeglądarce. Profil to dodatkowa kopia, na przykład jako kopia zapasowa."
 }
 };
