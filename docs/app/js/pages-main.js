@@ -2,7 +2,7 @@
 import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
-  addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross,
+  addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, repeatingExpenses, setRepeat, seriesKey,
 } from "./core.js";
 import { hbars, donut, legend, monthBars, progress } from "./charts.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast } from "./ui.js";
@@ -278,6 +278,7 @@ export const Expenses = {
         <div class="cat-row">${field(T("Category"), select("category", categories().map(c => [c.Name, categoryLabel(c.Name)]), cat0.Name))}
           ${button(T("Categories…"), "categories", "second small")}</div>
         ${field(T("Description (optional)"), textInput("description", "", T("e.g. {0}", "Biedronka")))}
+        <div class="two">${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), ""))}<div class="hint">${esc(T("Repeating expenses appear automatically in the Payment calendar, also in the next months."))}</div></div>
         ${check("essential", T("Essential (must pay even in a crisis)"), cat0.Essential)}
         <div class="buttons">${button(T("Add expense"), "add-expense", "main")}${button("⬆ " + esc(T("Import from your bank (CSV)…")), "import", "second")}</div></form>`)}
       ${card(heading(T("Monthly average")) + (avg.monthsUsed ? row(T("Essential"), pln(avg.essential)) + row(T("Not essential"), pln(avg.nonEssential)) + row(T("Total per month"), pln(avg.essential + avg.nonEssential)) +
@@ -301,7 +302,7 @@ export const Expenses = {
     el.querySelector('[data-action="add-expense"]').onclick = () => {
       const v = values(form), amt = num(v.amount);
       if (!(amt > 0)) { toast(T("Please enter an amount bigger than 0."), "bad"); return; }
-      d.Expenses.push({ Id: uuid(), Date: isoDate(v.date ? parseDate(v.date) : today()), Description: v.description.trim(), Category: v.category, Amount: amt, Essential: v.essential });
+      d.Expenses.push({ Id: uuid(), Date: isoDate(v.date ? parseDate(v.date) : today()), Description: v.description.trim(), Category: v.category, Amount: amt, Essential: v.essential, Repeat: v.repeat || "" });
       save(); toast(T("Added: {0}, {1}.", T(v.category), pln(amt))); App.refresh();
     };
     el.querySelector('[data-action="categories"]').onclick = () => manageCategories();
@@ -312,17 +313,37 @@ export const Expenses = {
     bindExpenseRows(el);
   },
 };
+const REPEAT_OPTIONS = () => [["", T("Does not repeat")], ...FREQUENCIES.filter(f => f[0] !== ONE_TIME).map(f => [f[0], "🔁 " + T(f[0])])];
 function expenseRow(e) {
   const icon = categoryIcon(e.Category);
+  const rep = repeatOn(e);
   return `<div class="item expense" data-id="${e.Id}">
     <div class="toggle" data-toggle="${e.Id}" title="${esc(T("Click to switch between essential and not essential"))}"><b>${esc(e.Description || T(e.Category))}</b>
       <span class="hint">${fmtDate(e.Date)} · ${esc((icon ? icon + " " : "") + T(e.Category))} · <span class="${e.Essential ? "ess" : "noness"}">${esc(e.Essential ? T("Essential") : T("Not essential"))}</span></span></div>
     <b>${pln(e.Amount)}</b>
+    <button class="icon-btn repeat${rep ? " on" : ""}" data-repeat="${e.Id}" title="${esc(rep ? T("Repeats {0} – click to stop", T(rep).toLowerCase()) : T("Click to repeat every month"))}">🔁</button>
     <button class="icon-btn" data-edit="${e.Id}" title="${esc(T("Change"))}">✎</button>
     <button class="icon-btn danger" data-del="${e.Id}" title="${esc(T("Delete"))}">🗑</button></div>`;
 }
+/** The repeat of this expense's series ("Monthly"…), or "" when it does not repeat. */
+function repeatOn(e) {
+  const k = seriesKey(e);
+  const r = State.data.Expenses.find(x => x.Repeat && seriesKey(x) === k);
+  return r ? r.Repeat : "";
+}
 function bindExpenseRows(root, after = () => App.refresh()) {
   const d = D();
+  root.querySelectorAll("[data-repeat]").forEach(x => x.onclick = () => {
+    const e = d.Expenses.find(y => y.Id === x.dataset.repeat);
+    if (repeatOn(e)) { setRepeat(d, e, ""); toast(T("{0} no longer repeats.", e.Description || T(e.Category))); }
+    else {
+      // The newest payment of this expense carries the repeat
+      const k = seriesKey(e);
+      const newest = d.Expenses.filter(y => seriesKey(y) === k).reduce((a, b) => parseDate(a.Date) > parseDate(b.Date) ? a : b);
+      setRepeat(d, newest, "Monthly"); toast(T("{0} repeats every month – see the Payment calendar.", e.Description || T(e.Category)));
+    }
+    save(); after();
+  });
   root.querySelectorAll("[data-toggle]").forEach(x => x.onclick = () => {
     const e = d.Expenses.find(y => y.Id === x.dataset.toggle); e.Essential = !e.Essential; save(); after();
   });
@@ -339,12 +360,15 @@ function editExpense(e, after) {
     <div class="two">${field(T("Date"), dateInput("date", inputDate(parseDate(e.Date))))}${field(T("Amount (zł)"), numInput("amount", plain(e.Amount)))}</div>
     ${field(T("Category"), select("category", categories().map(c => [c.Name, categoryLabel(c.Name)]), e.Category))}
     ${field(T("Description"), textInput("description", e.Description))}
+    ${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), repeatOn(e)))}
     ${check("essential", T("Essential (must pay even in a crisis)"), e.Essential)}</form>
     <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button><button class="btn main" data-save>${esc(T("Save"))}</button></div>`, { width: 520 });
   p.el.querySelector("[data-save]").onclick = () => {
     const v = values(p.el), amt = num(v.amount);
     if (!(amt > 0)) { toast(T("Please enter an amount bigger than 0."), "bad"); return; }
+    const before = repeatOn(e);
     Object.assign(e, { Date: isoDate(parseDate(v.date)), Amount: amt, Category: v.category, Description: v.description.trim(), Essential: v.essential });
+    if (v.repeat !== before) { setRepeat(D(), e, ""); if (v.repeat) setRepeat(D(), e, v.repeat); }
     save(); p.close(); after();
   };
 }

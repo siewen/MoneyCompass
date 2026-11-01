@@ -148,7 +148,7 @@ export function lang() {
     let pick = "";
     try { pick = store.get("mc-lang") || ""; } catch { /* none */ }
     if (!LANGS.some(l => l[0] === pick)) pick = (navigator.language || "en").slice(0, 2).toLowerCase();
-    s.Language = LANGS.some(l => l[0] === pick) ? pick : "en";
+    s.Language = LANGS.some(l => l[0] === pick) ? pick : "pl";   // made for Poland: Polish unless the browser speaks English, German or French
     save();
   }
   return s.Language;
@@ -629,4 +629,24 @@ export function netFromGross(gross) {
   const yearTax = yearly <= 120000 ? yearly * 0.12 - 3600 : 120000 * 0.12 - 3600 + (yearly - 120000) * 0.32;
   const tax = Math.max(0, Math.round(yearTax / 12));
   return Math.round((gross - social - health - tax) * 100) / 100;
+}
+
+// ---------------------------------------------------------------- repeating expenses (🔁)
+
+/** The key that groups the payments of one repeating expense: its description (or its category). */
+export const seriesKey = e => ((e.Description || e.Category || "").toLowerCase().replace(/[0-9.,/#*-]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 40)) + "|" + e.Category;
+
+/** Expenses marked "repeats": the most recent payment of each one, which the calendar continues into the future. */
+export function repeatingExpenses(d) {
+  const latest = new Map();
+  for (const e of d.Expenses) {
+    if (!e.Repeat) continue;
+    const k = seriesKey(e), cur = latest.get(k);
+    if (!cur || parseDate(e.Date) > parseDate(cur.Date)) latest.set(k, e);
+  }
+  return [...latest.values()];
+}
+export function setRepeat(d, e, freq) {
+  if (freq) e.Repeat = freq;
+  else { const k = seriesKey(e); d.Expenses.forEach(x => { if (seriesKey(x) === k) x.Repeat = ""; }); }
 }

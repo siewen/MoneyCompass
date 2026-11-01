@@ -474,7 +474,7 @@ let latestVersion = "";
 function pickLanguage() {
   try { const saved = localStorage.getItem("mc-lang"); if (saved && T[saved]) return saved; } catch (e) {}
   const nav = (navigator.language || "pl").slice(0, 2).toLowerCase();
-  return T[nav] ? nav : "en";
+  return T[nav] ? nav : "pl";
 }
 
 function apply(lang) {

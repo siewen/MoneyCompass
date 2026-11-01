@@ -123,7 +123,16 @@ export const EXTRA = {
 "Use the switch to stop counting a payment without deleting it.": "Mit dem Schalter zählt eine Zahlung nicht mehr mit, ohne sie zu löschen.",
 "ended {0}": "beendet am {0}",
 "last {0}": "letzte {0}",
-"For payments that stop, e.g. a loan or a contract: after the last payment it no longer counts. Or switch a payment off in the list below.": "Für Zahlungen, die enden, z. B. ein Kredit oder Vertrag: nach der letzten Zahlung zählt sie nicht mehr. Oder schalten Sie eine Zahlung in der Liste unten aus."
+"For payments that stop, e.g. a loan or a contract: after the last payment it no longer counts. Or switch a payment off in the list below.": "Für Zahlungen, die enden, z. B. ein Kredit oder Vertrag: nach der letzten Zahlung zählt sie nicht mehr. Oder schalten Sie eine Zahlung in der Liste unten aus.",
+"Repeats {0} – click to stop": "Wiederholt sich {0} – zum Beenden klicken",
+"From your expenses": "Aus Ihren Ausgaben",
+"Repeating expenses appear automatically in the Payment calendar, also in the next months.": "Wiederkehrende Ausgaben erscheinen automatisch im Zahlungskalender, auch in den nächsten Monaten.",
+"Click to repeat every month": "Klicken, um jeden Monat zu wiederholen",
+"Does not repeat": "Wiederholt sich nicht",
+"Tip: mark an expense with 🔁 in the Expenses tab, and it appears here every month.": "Tipp: Markieren Sie eine Ausgabe im Tab Ausgaben mit 🔁, dann erscheint sie hier jeden Monat.",
+"{0} no longer repeats.": "{0} wiederholt sich nicht mehr.",
+"{0} repeats every month – see the Payment calendar.": "{0} wiederholt sich jeden Monat – siehe Zahlungskalender.",
+"Repeats": "Wiederholung"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -248,7 +257,16 @@ export const EXTRA = {
 "Use the switch to stop counting a payment without deleting it.": "Utilisez l'interrupteur pour ne plus compter un paiement sans le supprimer.",
 "ended {0}": "terminé le {0}",
 "last {0}": "dernier {0}",
-"For payments that stop, e.g. a loan or a contract: after the last payment it no longer counts. Or switch a payment off in the list below.": "Pour les paiements qui s'arrêtent, par ex. un crédit ou un contrat : après le dernier paiement, il n'est plus compté. Ou désactivez un paiement dans la liste ci-dessous."
+"For payments that stop, e.g. a loan or a contract: after the last payment it no longer counts. Or switch a payment off in the list below.": "Pour les paiements qui s'arrêtent, par ex. un crédit ou un contrat : après le dernier paiement, il n'est plus compté. Ou désactivez un paiement dans la liste ci-dessous.",
+"Repeats {0} – click to stop": "Se répète {0} – cliquez pour arrêter",
+"From your expenses": "De vos dépenses",
+"Repeating expenses appear automatically in the Payment calendar, also in the next months.": "Les dépenses récurrentes apparaissent automatiquement dans le calendrier des paiements, aussi pour les mois suivants.",
+"Click to repeat every month": "Cliquez pour répéter chaque mois",
+"Does not repeat": "Ne se répète pas",
+"Tip: mark an expense with 🔁 in the Expenses tab, and it appears here every month.": "Astuce : marquez une dépense avec 🔁 dans l'onglet Dépenses, elle apparaîtra ici chaque mois.",
+"{0} no longer repeats.": "{0} ne se répète plus.",
+"{0} repeats every month – see the Payment calendar.": "{0} se répète chaque mois – voir le calendrier des paiements.",
+"Repeats": "Répétition"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -373,6 +391,15 @@ export const EXTRA = {
 "Use the switch to stop counting a payment without deleting it.": "Przełącznikiem wyłączysz liczenie płatności bez jej usuwania.",
 "ended {0}": "zakończone {0}",
 "last {0}": "ostatnia {0}",
-"For payments that stop, e.g. a loan or a contract: after the last payment it no longer counts. Or switch a payment off in the list below.": "Dla płatności, które się kończą, np. kredytu lub umowy: po ostatniej płatności przestaje się liczyć. Albo wyłącz płatność na liście poniżej."
+"For payments that stop, e.g. a loan or a contract: after the last payment it no longer counts. Or switch a payment off in the list below.": "Dla płatności, które się kończą, np. kredytu lub umowy: po ostatniej płatności przestaje się liczyć. Albo wyłącz płatność na liście poniżej.",
+"Repeats {0} – click to stop": "Powtarza się {0} – kliknij, aby zatrzymać",
+"From your expenses": "Z Twoich wydatków",
+"Repeating expenses appear automatically in the Payment calendar, also in the next months.": "Powtarzające się wydatki pojawiają się automatycznie w kalendarzu płatności, także w kolejnych miesiącach.",
+"Click to repeat every month": "Kliknij, aby powtarzać co miesiąc",
+"Does not repeat": "Nie powtarza się",
+"Tip: mark an expense with 🔁 in the Expenses tab, and it appears here every month.": "Wskazówka: oznacz wydatek symbolem 🔁 w karcie Wydatki, a pojawi się tu co miesiąc.",
+"{0} no longer repeats.": "{0} już się nie powtarza.",
+"{0} repeats every month – see the Payment calendar.": "{0} powtarza się co miesiąc – zobacz kalendarz płatności.",
+"Repeats": "Powtarzanie"
 }
 };

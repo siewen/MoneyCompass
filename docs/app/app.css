@@ -320,3 +320,7 @@ body.is-dragging, body.is-dragging * { cursor: grabbing !important; user-select:
 .gross-box { background: var(--soft); border: 1px dashed var(--border); border-radius: 10px; padding: 4px 12px 2px; margin: 8px 0; }
 input.flash { outline: 3px solid #15803D; transition: outline .3s; }
 @media (max-height: 520px) { .guide-step .ring { width: 56px; height: 56px; } .guide-step b { font-size: 18px; } .guide-step small { display: none; } .guide-step.low { margin-top: 0; } }
+
+.icon-btn.repeat { opacity: .35; filter: grayscale(1); }
+.icon-btn.repeat.on { opacity: 1; filter: none; background: color-mix(in srgb, #0369A1 15%, transparent); }
+.sub-h { font-size: 14px; color: var(--muted); margin: 4px 0; }

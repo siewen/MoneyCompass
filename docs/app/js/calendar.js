@@ -2,7 +2,7 @@
 // loan payments – in a month calendar and as a preview for 1, 3, 6 or 12 months.
 import {
   T, State, save, Calc, pln, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addDays, addMonths, monthStart, monthName,
-  uuid, categories, categoryLabel, moduleOn, FREQUENCIES, ONE_TIME, locale, monthsCount,
+  uuid, categories, categoryLabel, moduleOn, FREQUENCIES, ONE_TIME, locale, monthsCount, repeatingExpenses, setRepeat,
 } from "./core.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, button, values, confirmBox, toast } from "./ui.js";
 import { App } from "./app.js";
@@ -27,6 +27,15 @@ export function events(d, from, to) {
       next = Calc.nextPayment(r, addDays(next, 1));
     }
   }
+  // Expenses marked 🔁 in the Expenses tab: continued after their latest payment
+  for (const e of repeatingExpenses(d)) {
+    const lastPaid = parseDate(e.Date);
+    let next = Calc.nextPayment({ Date: e.Date, Frequency: e.Repeat }, from), guard = 0;
+    while (next && next <= to && guard++ < 400) {
+      if (next > lastPaid) list.push({ date: next, name: e.Description || T(e.Category), amount: e.Amount, type: "out", note: T(e.Category) + " · 🔁", expense: e.Id });
+      next = Calc.nextPayment({ Date: e.Date, Frequency: e.Repeat }, addDays(next, 1));
+    }
+  }
   if (moduleOn("loans"))
     for (const l of d.Loans.filter(l => l.Remaining > 0 && l.MonthlyPayment > 0)) {
       const end = parseDate(l.EndDate);
@@ -42,7 +51,7 @@ export function events(d, from, to) {
 /** Expenses that look like they come back every month (same name, similar amount, in 2 or more months). */
 function suggestions(d) {
   const key = s => (s || "").toLowerCase().replace(/[0-9.,/#*-]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 40);
-  const known = new Set((d.Recurring || []).map(r => key(r.Name)));
+  const known = new Set([...(d.Recurring || []).map(r => key(r.Name)), ...repeatingExpenses(d).map(e => key(e.Description))]);
   const since = addMonths(monthStart(today()), -4);
   const groups = new Map();
   for (const e of d.Expenses.filter(e => parseDate(e.Date) >= since && e.Description)) {
@@ -110,6 +119,7 @@ export const Calendar = {
     const r = editId ? d.Recurring.find(x => x.Id === editId) : null;
     const f = r || { Name: "", Kind: "expense", Category: "Housing / rent", Amount: "", Frequency: "Monthly", Date: isoDate(today()), Active: true };
     const sugg = suggestions(d);
+    const reps = repeatingExpenses(d);
     const evRow = e => `<div class="item"><span class="cal-dot ${e.type}"></span><div><b>${esc(e.name)}</b><span class="hint">${fmtDate(e.date)} · ${esc(e.note)}</span></div>
       <b class="${e.type === "in" ? "good" : e.type === "save" ? "primary" : "bad"}">${e.type === "in" ? "+" : "−"}${pln(e.amount)}</b></div>`;
 
@@ -132,11 +142,14 @@ export const Calendar = {
         ${field(T("Last payment (optional)"), `<input type="date" name="end" value="${f.EndDate ? inputDate(parseDate(f.EndDate)) : ""}">`)}</div>
         ${hint(T("For payments that stop, e.g. a loan or a contract: after the last payment it no longer counts. Or switch a payment off in the list below."))}
         <div class="buttons">${button(r ? T("Save changes") : T("Add"), "save-rec", "main")}${r ? button(T("Cancel"), "cancel-rec") : ""}</div></form>`)}
-      ${card(heading(T("Regular payments")) + (d.Recurring.length ? `<div class="list">${d.Recurring.map(x => `
+      ${card(heading(T("Regular payments")) + (reps.length ? `<h3 class="sub-h">🔁 ${esc(T("From your expenses"))}</h3><div class="list">${reps.map(e => `
+        <div class="item"><span class="cal-dot out"></span><div><b>${esc(e.Description || T(e.Category))}</b>
+        <span class="hint">${esc(T(e.Repeat))} · ${esc(T(e.Category))} · ${esc(T("next {0}", fmtDate(Calc.nextPayment({ Date: e.Date, Frequency: e.Repeat }, new Date(Math.max(today().getTime(), addDays(parseDate(e.Date), 1).getTime()))) || e.Date)))}</span></div>
+        <b>${pln(e.Amount)}</b><label class="switch" title="${esc(T("Repeats"))}"><input type="checkbox" data-rep-exp="${e.Id}" checked><span></span></label></div>`).join("")}</div><hr>` : hint(T("Tip: mark an expense with 🔁 in the Expenses tab, and it appears here every month."))) + (d.Recurring.length ? `<div class="list">${d.Recurring.map(x => `
         <div class="item clickable${x.Active === false || ended(x) ? " off" : ""}" data-edit-rec="${x.Id}"><span class="cal-dot ${x.Kind === "saving" ? "save" : "out"}"></span><div><b>${esc(x.Name)}</b>
         <span class="hint">${esc(T(x.Frequency))} · ${esc(x.Kind === "saving" ? T("Transfer to savings") : T(x.Category))} · ${esc(x.Active === false ? T("switched off") : ended(x) ? T("ended {0}", fmtDate(x.EndDate)) : T("next {0}", fmtDate(Calc.nextPayment(x, today()) || x.Date)) + (x.EndDate ? " · " + T("last {0}", fmtDate(x.EndDate)) : ""))}</span></div>
         <b>${pln(x.Amount)}</b><label class="switch" title="${esc(T("Active (count it in the totals)"))}"><input type="checkbox" data-active-rec="${x.Id}"${x.Active !== false ? " checked" : ""}><span></span></label>
-        <button class="icon-btn danger" data-del-rec="${x.Id}">🗑</button></div>`).join("")}</div>` + hint(T("Use the switch to stop counting a payment without deleting it.")) : hint(T("No regular payments yet. Add your rent, bills and subscriptions above."))) +
+        <button class="icon-btn danger" data-del-rec="${x.Id}">🗑</button></div>`).join("")}</div>` + hint(T("Use the switch to stop counting a payment without deleting it.")) : (reps.length ? "" : hint(T("No regular payments yet. Add your rent, bills and subscriptions above.")))) +
         (sugg.length ? `<hr><h3>💡 ${esc(T("Found in your expenses"))}</h3>${hint(T("These come back every month. Add them with one click."))}<div class="list">${sugg.map((x, i) => `
           <div class="item"><div><b>${esc(x.name)}</b><span class="hint">${esc(categoryLabel(x.category))} · ${esc(T("in {0} months", x.months))}</span></div><b>${pln(x.amount)}</b>
           <button class="btn second small" data-sugg="${i}">＋ ${esc(T("Add"))}</button></div>`).join("")}</div>` : ""))}
@@ -162,6 +175,9 @@ export const Calendar = {
       editId = null; save(); toast(T("Saved.")); App.refresh();
     };
     const c = el.querySelector('[data-action="cancel-rec"]'); if (c) c.onclick = () => { editId = null; App.refresh(); };
+    el.querySelectorAll("[data-rep-exp]").forEach(c => c.onchange = () => {
+      const e = d.Expenses.find(y => y.Id === c.dataset.repExp); setRepeat(d, e, ""); save(); toast(T("{0} no longer repeats.", e.Description || T(e.Category))); App.refresh();
+    });
     el.querySelectorAll("[data-active-rec]").forEach(c => c.onchange = () => {
       const x = d.Recurring.find(y => y.Id === c.dataset.activeRec); x.Active = c.checked; save(); App.refresh();
     });
@@ -172,7 +188,8 @@ export const Calendar = {
     });
     el.querySelectorAll("[data-sugg]").forEach(b => b.onclick = () => {
       const x = sugg[+b.dataset.sugg];
-      d.Recurring.push({ Id: uuid(), Name: x.name, Kind: "expense", Category: x.category, Amount: x.amount, Frequency: "Monthly", Date: x.date, Active: true });
+      const newest = d.Expenses.filter(e => e.Description === x.name).reduce((a, b) => parseDate(a.Date) > parseDate(b.Date) ? a : b);
+      setRepeat(d, newest, "Monthly");
       save(); toast(T("Added: {0}.", x.name)); App.refresh();
     });
   },

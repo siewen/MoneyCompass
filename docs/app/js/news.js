@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 20, date: "2026-11-01", items: {
+    en: ["🔁 Expenses can repeat: choose \"Repeats\" when adding an expense, or click 🔁 next to it – it then appears every month in the Payment calendar."],
+    pl: ["🔁 Wydatki mogą się powtarzać: wybierz „Powtarzanie” przy dodawaniu wydatku albo kliknij 🔁 obok niego – pojawi się co miesiąc w kalendarzu płatności."],
+    de: ["🔁 Ausgaben können sich wiederholen: beim Hinzufügen „Wiederholung“ wählen oder daneben auf 🔁 klicken – sie erscheinen dann jeden Monat im Zahlungskalender."],
+    fr: ["🔁 Les dépenses peuvent se répéter : choisissez « Répétition » en ajoutant une dépense, ou cliquez sur 🔁 à côté – elle apparaît alors chaque mois dans le calendrier des paiements."] } },
   { build: 19, date: "2026-11-01", items: {
     en: ["📅 New module \"Payment calendar\" (Pro): salary, bills, subscriptions and savings transfers in a calendar, with a preview of the next 1, 3, 6 or 12 months. Switch it on in Options → Modules.", "💡 It finds payments that come back every month in your expenses – add them with one click.", "⠿ Wide cards like \"Comparison\" can be moved too.", "💰 Income: enter your gross salary and MoneyCompass estimates the net (Poland, employment contract) – you can always correct it.", "⏸ Switch income and regular payments on or off, and give regular payments a last payment date.", "🔄 Compare offers shows when the bank offers were last updated."],
     pl: ["📅 Nowy moduł „Kalendarz płatności” (Pro): pensja, rachunki, subskrypcje i przelewy na oszczędności w kalendarzu, z podglądem na 1, 3, 6 lub 12 miesięcy. Włącz go w Opcje → Moduły.", "💡 Znajduje w wydatkach płatności powtarzające się co miesiąc – dodasz je jednym kliknięciem.", "⠿ Szerokie karty, jak „Porównanie”, też można przesuwać.", "💰 Dochody: wpisz wynagrodzenie brutto, a MoneyCompass oszacuje netto (Polska, umowa o pracę) – zawsze możesz je poprawić.", "⏸ Włączaj i wyłączaj dochody oraz stałe płatności, a stałym płatnościom ustaw datę ostatniej płatności.", "🔄 Porównaj oferty pokazuje, kiedy ostatnio zaktualizowano oferty banków."],
