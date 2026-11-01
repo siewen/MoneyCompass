@@ -206,8 +206,8 @@ function welcome() {
 async function closeApp() {
   const s = State.data.Settings;
   const choice = s.CloseChoice || "";
-  if (choice === "with") { saveProfileFile(); return finishClose(); }
-  if (choice === "without" || choice === "none") return finishClose();
+  if (choice === "with") { saveProfileFile(); return setTimeout(() => finishClose(true), 900); }
+  if (choice === "without" || choice === "none") return finishClose(false);
   const p = popup(`<div class="box-head"><span class="box-icon">💾</span><h2>${esc(T("Save your profile before closing?"))}</h2></div>
     <p class="hint">${esc(T("Your entries are always kept in this browser. The profile is an extra copy, for example as a backup."))}</p>
     <div class="box-buttons">
@@ -222,14 +222,21 @@ async function closeApp() {
     if (c === "cancel") return;
     if (p.el.querySelector('[name="remember"]').checked) { s.CloseChoice = c; save(); }
     if (c === "with") saveProfileFile();
-    setTimeout(finishClose, c === "with" ? 900 : 200);
+    setTimeout(() => finishClose(c === "with"), c === "with" ? 900 : 200);
   });
 }
-function finishClose() {
+function finishClose(fileSaved) {
   save();
-  window.close();
-  // A normal browser tab can't be closed by the page itself
-  setTimeout(() => { if (!window.closed) toast(T("Everything is saved. You can close this tab now.")); }, 300);
+  try { window.close(); } catch { /* not allowed */ }
+  try { window.open("", "_self")?.close(); } catch { /* not allowed */ }
+  // The browser may not allow a page to close its own window or tab: then say so honestly
+  setTimeout(() => {
+    if (window.closed) return;
+    popup(`<div class="box-head"><span class="box-icon">⏻</span><h2>${esc(T("Close the window"))}</h2></div>
+      <p>${esc(fileSaved ? T("Your profile file was saved.") : T("No profile file was saved."))}</p>
+      <p class="hint">${esc(T("Your entries always stay in this browser, as before. This browser doesn't let MoneyCompass close the window by itself – close it with the X at the top right."))}</p>
+      <div class="box-buttons"><button class="btn main" data-close>${esc(T("OK"))}</button></div>`, { width: 440, cls: "box" });
+  }, 400);
 }
 
 function about() {

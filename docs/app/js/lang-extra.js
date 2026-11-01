@@ -69,7 +69,11 @@ export const EXTRA = {
 "Show what's new after an update": "Neuigkeiten nach einem Update anzeigen",
 "Fill in from My savings": "Aus Meine Ersparnisse ausfüllen",
 "Choose…": "Auswählen …",
-"Compare what your savings earn now with other offers.": "Vergleichen Sie, was Ihre Ersparnisse jetzt bringen, mit anderen Angeboten."
+"Compare what your savings earn now with other offers.": "Vergleichen Sie, was Ihre Ersparnisse jetzt bringen, mit anderen Angeboten.",
+"Close the window": "Fenster schließen",
+"Your profile file was saved.": "Ihre Profildatei wurde gespeichert.",
+"No profile file was saved.": "Es wurde keine Profildatei gespeichert.",
+"Your entries always stay in this browser, as before. This browser doesn't let MoneyCompass close the window by itself – close it with the X at the top right.": "Ihre Einträge bleiben wie immer in diesem Browser. Dieser Browser erlaubt MoneyCompass nicht, das Fenster selbst zu schließen – schließen Sie es mit dem X oben rechts."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -140,7 +144,11 @@ export const EXTRA = {
 "Show what's new after an update": "Afficher les nouveautés après une mise à jour",
 "Fill in from My savings": "Remplir depuis Mon épargne",
 "Choose…": "Choisir…",
-"Compare what your savings earn now with other offers.": "Comparez ce que rapporte votre épargne aujourd'hui avec d'autres offres."
+"Compare what your savings earn now with other offers.": "Comparez ce que rapporte votre épargne aujourd'hui avec d'autres offres.",
+"Close the window": "Fermer la fenêtre",
+"Your profile file was saved.": "Votre fichier de profil a été enregistré.",
+"No profile file was saved.": "Aucun fichier de profil n'a été enregistré.",
+"Your entries always stay in this browser, as before. This browser doesn't let MoneyCompass close the window by itself – close it with the X at the top right.": "Vos saisies restent comme toujours dans ce navigateur. Ce navigateur ne permet pas à MoneyCompass de fermer la fenêtre lui-même – fermez-la avec le X en haut à droite."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -211,6 +219,10 @@ export const EXTRA = {
 "Show what's new after an update": "Pokazuj nowości po aktualizacji",
 "Fill in from My savings": "Uzupełnij z Moich oszczędności",
 "Choose…": "Wybierz…",
-"Compare what your savings earn now with other offers.": "Porównaj, ile Twoje oszczędności zarabiają teraz, z innymi ofertami."
+"Compare what your savings earn now with other offers.": "Porównaj, ile Twoje oszczędności zarabiają teraz, z innymi ofertami.",
+"Close the window": "Zamknij okno",
+"Your profile file was saved.": "Plik profilu został zapisany.",
+"No profile file was saved.": "Nie zapisano pliku profilu.",
+"Your entries always stay in this browser, as before. This browser doesn't let MoneyCompass close the window by itself – close it with the X at the top right.": "Twoje wpisy jak zawsze zostają w tej przeglądarce. Ta przeglądarka nie pozwala MoneyCompass samodzielnie zamknąć okna – zamknij je krzyżykiem X w prawym górnym rogu."
 }
 };
