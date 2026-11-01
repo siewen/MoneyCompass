@@ -147,7 +147,7 @@ function fitTabs() {
   if (window.innerWidth >= 720) nav.scrollLeft = 0;
   // The beta design shows all tabs in a side menu on wide screens
   if (beta() && window.innerWidth >= 900) return;
-  if (window.innerWidth < 720 || nav.scrollWidth <= nav.clientWidth + 1) return;
+  if (window.innerWidth < (beta() ? 900 : 720) || nav.scrollWidth <= nav.clientWidth + 1) return;
   const more = document.createElement("button");
   more.className = "tab tab-more";
   more.textContent = T("More") + " ▾";   // the label first: measured with its real width
@@ -416,7 +416,7 @@ Object.assign(App, {
     // Phones: the tabs scroll sideways, so bring the chosen one into view. Wider screens: "More ▾" holds the rest,
     // so the tab row must start at the left (otherwise "Overview" ends up half hidden under the logo)
     const nav = document.getElementById("tabs");
-    if (window.innerWidth < 720) { if (tab) tab.scrollIntoView({ inline: "center", block: "nearest" }); }
+    if (window.innerWidth < (beta() ? 900 : 720)) { if (tab) tab.scrollIntoView({ inline: "center", block: "nearest" }); }
     else if (nav) nav.scrollLeft = 0;
     try { history.replaceState(null, "", "#" + route); } catch { /* file */ }
   },
