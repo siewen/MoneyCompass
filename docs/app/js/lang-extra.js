@@ -373,7 +373,15 @@ export const EXTRA = {
 "High risk": "Hohes Risiko",
 "New category…": "Neue Kategorie…",
 "New category": "Neue Kategorie",
-"Name of the category": "Name der Kategorie"
+"Name of the category": "Name der Kategorie",
+"Search: shop, amount…": "Suchen: Geschäft, Betrag…",
+"All categories": "Alle Kategorien",
+"Essential and not": "Notwendig und nicht",
+"Repeating only": "Nur wiederkehrende",
+"Clear filter": "Filter löschen",
+"{0} expenses found · together {1}": "{0} Ausgaben gefunden · zusammen {1}",
+"No expenses match this filter.": "Keine Ausgaben passen zu diesem Filter.",
+"Expenses found: {0} · together {1}": "Gefundene Ausgaben: {0} · zusammen {1}"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -748,7 +756,15 @@ export const EXTRA = {
 "High risk": "Risque élevé",
 "New category…": "Nouvelle catégorie…",
 "New category": "Nouvelle catégorie",
-"Name of the category": "Nom de la catégorie"
+"Name of the category": "Nom de la catégorie",
+"Search: shop, amount…": "Rechercher : magasin, montant…",
+"All categories": "Toutes les catégories",
+"Essential and not": "Essentiel ou non",
+"Repeating only": "Récurrentes uniquement",
+"Clear filter": "Effacer le filtre",
+"{0} expenses found · together {1}": "{0} dépenses trouvées · total {1}",
+"No expenses match this filter.": "Aucune dépense ne correspond à ce filtre.",
+"Expenses found: {0} · together {1}": "Dépenses trouvées : {0} · total {1}"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1123,6 +1139,14 @@ export const EXTRA = {
 "High risk": "Wysokie ryzyko",
 "New category…": "Nowa kategoria…",
 "New category": "Nowa kategoria",
-"Name of the category": "Nazwa kategorii"
+"Name of the category": "Nazwa kategorii",
+"Search: shop, amount…": "Szukaj: sklep, kwota…",
+"All categories": "Wszystkie kategorie",
+"Essential and not": "Niezbędne i inne",
+"Repeating only": "Tylko powtarzające się",
+"Clear filter": "Wyczyść filtr",
+"{0} expenses found · together {1}": "Znaleziono wydatków: {0} · razem {1}",
+"No expenses match this filter.": "Żaden wydatek nie pasuje do filtra.",
+"Expenses found: {0} · together {1}": "Znalezione wydatki: {0} · razem {1}"
 }
 };
