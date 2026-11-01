@@ -68,16 +68,18 @@ function fitTabs() {
   nav.querySelector(".tab-more")?.remove();
   const tabsEls = [...nav.querySelectorAll("[data-tab]")];
   tabsEls.forEach(t => t.hidden = false);
+  if (window.innerWidth >= 720) nav.scrollLeft = 0;
   if (window.innerWidth < 720 || nav.scrollWidth <= nav.clientWidth + 1) return;
   const more = document.createElement("button");
   more.className = "tab tab-more";
+  more.textContent = T("More") + " ▾";   // the label first: measured with its real width
   nav.appendChild(more);
   const hidden = [];
   for (let i = tabsEls.length - 1; i >= 0 && nav.scrollWidth > nav.clientWidth + 1; i--) {
     if (tabsEls[i].classList.contains("active")) continue;
     tabsEls[i].hidden = true; hidden.unshift(tabsEls[i]);
   }
-  more.textContent = T("More") + " ▾";
+  nav.scrollLeft = 0;
   more.onclick = () => {
     const r = more.getBoundingClientRect();
     const shield = document.createElement("div"); shield.className = "help-shield";
@@ -91,6 +93,8 @@ function fitTabs() {
   };
 }
 window.addEventListener("resize", () => { clearTimeout(fitTabs._t); fitTabs._t = setTimeout(fitTabs, 150); });
+// The web font makes the tab names a little wider once it has loaded: measure again then
+try { document.fonts?.ready.then(() => fitTabs()); } catch { /* old browser */ }
 
 // ---------- The ? button can be dragged anywhere, like in the app ----------
 function helpPos() { try { return JSON.parse(store.get("mc-help-pos")) || null; } catch { return null; } }
@@ -302,7 +306,11 @@ Object.assign(App, {
     if (!tabs().some(t => t.route === route)) route = "overview";
     current = route; render(); fitTabs(); window.scrollTo(0, 0);
     const tab = document.querySelector(`[data-tab="${route}"]`);
-    if (tab) tab.scrollIntoView({ inline: "center", block: "nearest" });
+    // Phones: the tabs scroll sideways, so bring the chosen one into view. Wider screens: "More ▾" holds the rest,
+    // so the tab row must start at the left (otherwise "Overview" ends up half hidden under the logo)
+    const nav = document.getElementById("tabs");
+    if (window.innerWidth < 720) { if (tab) tab.scrollIntoView({ inline: "center", block: "nearest" }); }
+    else if (nav) nav.scrollLeft = 0;
     try { history.replaceState(null, "", "#" + route); } catch { /* file */ }
   },
   refresh: render,

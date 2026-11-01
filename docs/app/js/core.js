@@ -412,11 +412,44 @@ export const Calc = {
   },
   loansCounted(d) { return this.loanPayments(d) > 0; },
   countedExpenses(d) { return this.loansCounted(d) ? d.Expenses.filter(e => e.Category !== LOAN_CATEGORY) : d.Expenses; },
+  /** Regular payments added in the Payment calendar that fall in this month and are NOT already among your
+   *  expenses (same amount within 5%, within 5 days) – e.g. paid from a bank you don't import. */
+  recurringIn(d, start, end) {
+    if (!moduleOn("calendar")) return [];
+    const out = [];
+    for (const r of (d.Recurring || []).filter(r => r.Active !== false && r.Kind !== "saving" && r.Amount > 0)) {
+      const last = r.EndDate ? parseDate(r.EndDate) : null;
+      let next = this.nextPayment(r, start), guard = 0;
+      while (next && next <= end && (!last || next <= last) && guard++ < 62) {
+        const n = next;
+        const known = d.Expenses.some(e => Math.abs(parseDate(e.Date) - n) <= 5 * 86400000 && Math.abs(e.Amount - r.Amount) <= r.Amount * 0.05);
+        if (!known) out.push({ category: r.Category || OTHER, amount: r.Amount, essential: !!findCategory(r.Category)?.Essential });
+        if (r.Frequency === ONE_TIME) break;
+        next = this.nextPayment(r, addDays(next, 1));
+      }
+    }
+    return out;
+  },
+  /** The same months as the expense averages (or this month when there are no expenses yet). */
+  basisMonths(d) {
+    const months = this.groupMonths(this.countedExpenses(d)).slice(0, 3).map(m => m.start);
+    return months.length ? months : [monthStart(today())];
+  },
+  recurringPerMonth(d) {
+    const months = this.basisMonths(d), list = [];
+    for (const m of months) list.push(...this.recurringIn(d, m, addDays(addMonths(m, 1), -1)));
+    const per = { essential: 0, other: 0, byCategory: new Map() };
+    for (const x of list) {
+      per[x.essential ? "essential" : "other"] += x.amount / months.length;
+      per.byCategory.set(x.category, (per.byCategory.get(x.category) || 0) + x.amount / months.length);
+    }
+    return per;
+  },
   spending(d) {
     const avg = this.averages(this.countedExpenses(d));
-    const loans = this.loanPayments(d);
-    if (loans <= 0) return avg;
-    return { ...avg, essential: avg.essential + loans, monthsUsed: Math.max(1, avg.monthsUsed) };
+    const loans = this.loanPayments(d), rec = this.recurringPerMonth(d);
+    if (loans <= 0 && rec.essential + rec.other <= 0) return avg;
+    return { ...avg, essential: avg.essential + loans + rec.essential, nonEssential: avg.nonEssential + rec.other, monthsUsed: Math.max(1, avg.monthsUsed) };
   },
   savings(o) {
     if (!(o.Amount > 0) || !(o.PeriodDays > 0)) return { promo: 0, after: 0, gross: 0, tax: 0, net: 0, effective: 0 };
@@ -498,7 +531,8 @@ export const Calc = {
   },
   spentThisMonth(category) {
     const start = monthStart(today()), end = addMonths(start, 1);
-    return State.data.Expenses.filter(e => e.Category === category && parseDate(e.Date) >= start && parseDate(e.Date) < end).reduce((s, e) => s + e.Amount, 0);
+    return State.data.Expenses.filter(e => e.Category === category && parseDate(e.Date) >= start && parseDate(e.Date) < end).reduce((s, e) => s + e.Amount, 0)
+      + Calc.recurringIn(State.data, start, today()).filter(x => x.category === category).reduce((s, x) => s + x.amount, 0);
   },
 };
 
@@ -533,7 +567,7 @@ export const ChartData = {
         ? Calc.upcoming(d, start, end).reduce((s, p) => s + p.amount, 0) + Calc.receivedIn(d, start)
         : Calc.monthIncome(d, start, end).total;
       const expenses = Calc.countedExpenses(d).filter(e => parseDate(e.Date) >= start && parseDate(e.Date) <= end).reduce((s, e) => s + e.Amount, 0)
-        + Calc.loanPayments(d, start);
+        + Calc.loanPayments(d, start) + Calc.recurringIn(d, start, end).reduce((s, x) => s + x.amount, 0);
       out.push({ month: monthShort(start), start, income, expenses, current: start.getTime() === thisMonth.getTime() });
     }
     return out;
@@ -639,6 +673,11 @@ export const Advisor = {
     const list = this.perCategory(d);
     const loans = Calc.loanPayments(d);
     if (loans > 0) list.push({ category: LOAN_CATEGORY, perMonth: loans });
+    // Regular payments from the Payment calendar that are not in your expenses
+    for (const [category, perMonth] of Calc.recurringPerMonth(d).byCategory) {
+      const x = list.find(c => c.category === category);
+      if (x) x.perMonth += perMonth; else list.push({ category, perMonth });
+    }
     return list.sort((a, b) => b.perMonth - a.perMonth);
   },
 };
