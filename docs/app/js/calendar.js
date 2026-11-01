@@ -96,12 +96,14 @@ function pastEvents(d, from, to) {
   const list = [], inRange = x => { const t = parseDate(x.Date); return t >= from && t <= to && t < today(); };
   // By default only what comes back: repeating expenses, salary and repeating income, transfers to savings.
   // "All transactions" shows every single payment too.
-  const repKeys = new Set(d.Expenses.filter(e => e.Repeat).map(seriesKey)), recKeys = new Set(d.Received.filter(r => r.Repeat).map(seriesKey));
+  const repOf = new Map(d.Expenses.filter(e => e.Repeat).map(e => [seriesKey(e), e.Repeat])), recOf = new Map(d.Received.filter(r => r.Repeat).map(r => [seriesKey(r), r.Repeat]));
+  const repKeys = new Set(repOf.keys()), recKeys = new Set(recOf.keys());
+  const tag = (map, x) => map.has(seriesKey(x)) ? " · 🔁 " + freqLabel(map.get(seriesKey(x))) : "";
   const regularExp = e => allPast || repKeys.has(seriesKey(e)), regularRec = r => allPast || r.Kind === "salary" || recKeys.has(seriesKey(r));
   for (const e of d.Expenses.filter(e => inRange(e) && regularExp(e)))
-    list.push({ date: parseDate(e.Date), name: e.Description || T(e.Category), amount: e.Amount, type: "out", note: T(e.Category), past: true, info: ["expense", e] });
+    list.push({ date: parseDate(e.Date), name: e.Description || T(e.Category), amount: e.Amount, type: "out", note: T(e.Category) + tag(repOf, e), past: true, info: ["expense", e] });
   for (const r of d.Received.filter(r => r.Kind !== "none" && inRange(r) && regularRec(r)))
-    list.push({ date: parseDate(r.Date), name: r.Description || T("Money received"), amount: r.Amount, type: "in", note: T(r.Kind === "salary" ? "Salary" : "Extra income"), past: true, info: ["received", r] });
+    list.push({ date: parseDate(r.Date), name: r.Description || T("Money received"), amount: r.Amount, type: "in", note: T(r.Kind === "salary" ? "Salary" : "Extra income") + tag(recOf, r), past: true, info: ["received", r] });
   for (const t of d.Transfers.filter(t => t.Saved && inRange(t))) {
     const h = d.Holdings.find(x => x.Id === t.HoldingId);
     list.push({ date: parseDate(t.Date), name: h ? h.Name : (t.Description || T("Transfer to savings")), amount: t.Amount, type: "save", note: T("Transfer to savings") + (t.Info?.Account ? " · " + T("from {0}", t.Info.Account) : ""), past: true, info: ["transfer", t] });
