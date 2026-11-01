@@ -6,6 +6,7 @@ import {
   markFileBase } from "./core.js";
 import { esc, card, heading, hint, row, field, textInput, select, check, button, values, popup, confirmBox, alertBox, promptBox, toast, pickFile, download, stamp } from "./ui.js";
 import { App, requirePro, windowsOrPro, DOWNLOAD_URL } from "./app.js";
+import { hasPin, lock, pinDialog } from "./lock.js";
 import { Rates } from "./rates.js";
 import { openBankImport } from "./pages-pro.js";
 
@@ -33,6 +34,9 @@ export function openProfile() {
         : (l ? `<p class="bad">${esc(license.status)}</p>` : "") +
           hint(T("Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules and unlimited exports (the free version has {0}).", 0)) +
           field(T("License key"), `<textarea name="key" rows="3" placeholder="MC1-…" data-nofocus></textarea>`) + button(esc(T("Activate")), "activate", "main")}
+      <hr><h3>🔒 ${esc(T("PIN"))}</h3>
+      ${hint(hasPin() ? T("This profile is protected with a PIN.") : T("No PIN: anyone using this device can open this profile."))}
+      <div class="buttons">${button(esc(hasPin() ? T("Change or remove PIN…") : T("Set a PIN…")), "pin", "second small")}</div>
       <hr><h3>${esc(T("Profiles"))}</h3>
       <div class="list">${list.map(x => `<div class="item${x.current ? " current" : " clickable"}" data-switch="${x.id}"><div><b>${esc(x.name)}</b>${x.current ? `<span class="hint">${esc(T("in use"))}</span>` : ""}</div>
         ${x.current ? "" : `<button class="icon-btn danger" data-del-profile="${x.id}">🗑</button>`}</div>`).join("")}</div>
@@ -52,6 +56,7 @@ export function openProfile() {
       if (url) { setPicture(url); draw(); App.rebuild(); }
     });
     on('[data-a="nopic"]', () => { setPicture(null); draw(); App.rebuild(); });
+    on('[data-action="pin"]', () => pinDialog(draw));
     on('[data-action="activate"]', async () => {
       const err = await license.activate(p.el.querySelector("textarea").value);
       if (err) { toast(err, "bad"); return; }
@@ -66,6 +71,7 @@ export function openProfile() {
     p.el.querySelectorAll("[data-switch]").forEach(x => x.onclick = ev => {
       if (ev.target.closest("[data-del-profile]") || x.classList.contains("current")) return;
       switchTo(x.dataset.switch); p.close(); App.rebuild();
+      if (hasPin()) lock();
     });
     p.el.querySelectorAll("[data-del-profile]").forEach(b => b.onclick = async () => {
       const x = profiles().find(y => y.id === b.dataset.delProfile);
@@ -127,6 +133,9 @@ export function openOptions() {
       MODULES.map(m => `<label class="check"><input type="checkbox" name="mod-${m.code}"${s.Modules.includes(m.code) ? " checked" : ""}${license.isPro ? "" : " disabled"}><span><b>${esc(T(m.name))}</b><br><span class="hint">${esc(T(m.description))}</span></span></label>`).join(""))}
     ${card(heading(T("Current rates")) + check("online", T("Download current rates from the internet"), s.OnlineRates) +
       hint(T("Exchange rates and the reference rate from NBP (Narodowy Bank Polski), treasury bond rates from the Ministry of Finance. Only public numbers are downloaded – your own data never leaves this device.")))}
+    ${card(heading("🔒 " + T("Automatic lock")) + hint(T("After this time without using MoneyCompass the screen locks, so nobody else sees your finances. With a PIN (set it in your profile, top right) the PIN is needed to open it again.")) +
+      select("autolock", [[0, T("Off")], ...[1, 5, 10, 15, 30, 60].map(m => [m, T("After {0} minutes", m)])], +s.AutoLockMinutes || 0) +
+      hint(hasPin() ? T("This profile has a PIN.") : T("This profile has no PIN yet.")))}
     ${card(heading(T("Backup & restore")) + hint(T("Everything you enter is saved automatically, only in this browser on this device. Nothing is sent to the internet.")) +
       hint(T("Your profile is one file with all your entries (income, expenses, emergency fund, saved offers, savings, exchange rates) and your language. Use it as a backup or to move MoneyCompass to another computer.")) +
       hint(T("The file works in the Windows app too.")) +
@@ -146,6 +155,7 @@ export function openOptions() {
   el.querySelector('select[name="closechoice"]').onchange = e => { s.CloseChoice = e.target.value; save(); };
   el.querySelector('input[name="shownews"]').onchange = e => { s.NewsHidden = !e.target.checked; save(); };
   el.querySelector('input[name="showguide"]').onchange = e => { s.GuideHidden = !e.target.checked; save(); };
+  el.querySelector('select[name="autolock"]').onchange = e => { s.AutoLockMinutes = +e.target.value; save(); };
   el.querySelector('input[name="askstart"]').onchange = e => { s.AskOnStart = e.target.checked; save(); };
   el.querySelector('[data-action="save-file"]').onclick = saveProfileFile;
   el.querySelector('[data-action="reset-layout"]').onclick = () => {

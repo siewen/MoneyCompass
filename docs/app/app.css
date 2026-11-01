@@ -599,3 +599,20 @@ svg.donut text { pointer-events: none; }
 .sort-other .item b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sort-other select { width: 220px; flex: none; }
 .list.scroll.sort-other { max-height: 60vh; overflow: auto; }
+
+/* ---------- Lock screen (PIN / automatic lock) ---------- */
+body.is-locked #app { filter: blur(18px); pointer-events: none; user-select: none; }
+body.is-locked #page { visibility: hidden; }
+.lock-screen { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, var(--page) 82%, transparent); backdrop-filter: blur(6px); }
+.lock-box { width: min(360px, 100%); background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px 24px; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,.35); display: flex; flex-direction: column; gap: 12px; align-items: stretch; }
+.lock-logo { width: 56px; height: 56px; margin: 0 auto; }
+.lock-box h2 { margin: 0; }
+.lock-box .pin-input { text-align: center; font-size: 26px; letter-spacing: .5em; padding: 12px; }
+.lock-error { margin: 0; font-size: 14px; }
+.lock-switch { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+.lock-switch select { flex: 1; }
+.lock-forgot { font-size: 13px; }
+.lock-box.shake { animation: shake .35s; }
+@keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+body.is-locked .popup-back { visibility: hidden; }
+body.is-locked .lock-screen ~ .popup-back { visibility: visible; z-index: 1100; }

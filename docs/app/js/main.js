@@ -1,6 +1,7 @@
 // MoneyCompass web: the window, the tabs and starting up.
 import { store, T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed, summary, fmtDate, changedSinceFile } from "./core.js";
 import { esc, popup, toast } from "./ui.js";
+import { startLock, lock, hasPin } from "./lock.js";
 import { App, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
 import { WEB_VERSION, WEB_BUILD, WEB_DATE } from "./version.js";
@@ -439,7 +440,9 @@ async function start() {
     if (hasNews(isNew)) openNews(false, () => { if (shouldShowGuide()) openGuide(); });
     else if (shouldShowGuide()) openGuide(); else promoReminder();
   });
-  termsGate(afterTerms);
+  startLock(buildShell);
+  // With a PIN the lock screen comes first
+  if (hasPin()) lock(() => termsGate(afterTerms)); else termsGate(afterTerms);
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
   Rates.listeners.push(() => { if (!document.querySelector(".popup-back, .dragging")) render(); });
   Rates.refresh();
