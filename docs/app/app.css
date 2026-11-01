@@ -427,3 +427,6 @@ details.cal-month > summary:hover .m-name b { text-decoration: underline; }
 .loan-preview { font-weight: 600; margin: 4px 0; }
 .past-chips { margin: 0 0 6px; }
 .m-name .hint { display: inline; margin: 0; }
+.alert.good-alert { background: rgba(21,128,61,.10); border-color: rgba(21,128,61,.45); }
+.alert.good-alert p { margin: 2px 0; font-weight: 600; color: var(--good); }
+.extra-result { margin: 8px 0; }

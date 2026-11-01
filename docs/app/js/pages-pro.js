@@ -4,6 +4,7 @@ import {
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA,
 } from "./core.js";
 import { progress, hbars } from "./charts.js";
+import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, alertBox, toast, pickFile } from "./ui.js";
 import { App, requirePro } from "./app.js";
 import { Rates, BOND_CODES, BONDS_WEBSITE, SAVINGS_RANKING, DEPOSITS_RANKING } from "./rates.js";
@@ -180,6 +181,7 @@ function optimizeHtml() {
       advice.map((a, i) => `<div class="advice ${kind[a.kind][1]}"${a.route ? ` data-route="${a.route}"` : ""}><b>${kind[a.kind][0]} ${i + 1}. ${esc(a.title)}</b><p>${esc(a.text)}</p>
         ${a.benefit > 0 ? `<b class="${kind[a.kind][1]}">${esc(a.kind === "warning" ? T("Shortfall: about {0} per year", pln(a.benefit)) : T("Worth about {0} per year", pln(a.benefit)))}</b>` : ""}
         ${a.route ? `<span class="go-link">${esc(T("Go to {0} →", T(TAB_NAMES[a.route] || "Overview")))}</span>` : ""}</div>`).join(""))}
+    ${moduleOn("loans") ? debtAdvice(d) : ""}
     ${card(heading(T("Best savings accounts now"), "🏦") + hint(offersStatus) + offerRows(Rates.savings, "s") + `<a class="btn second" href="${SAVINGS_RANKING}" target="_blank" rel="noopener">${esc(T("Open the full ranking"))}</a>`)}
     ${card(heading(T("Best 12-month deposits now"), "🔒") + hint(offersStatus) + offerRows(Rates.deposits, "d") + `<a class="btn second" href="${DEPOSITS_RANKING}" target="_blank" rel="noopener">${esc(T("Open the full ranking"))}</a>`)}
     ${card(heading(T("Ways to save money in Poland")) + hint(T("From the safest and most flexible to long-term. Rates change often – always check the current conditions.")) + `<p>📈 ${esc(status)}</p>` + button("⟳ " + esc(T("Refresh rates")), "refresh-rates"))}
@@ -282,10 +284,19 @@ export const Loans = {
       ${card(heading(T("Your debts")) + loanProgress(running.map(x => ({ ...x, Remaining: now(x) }))) + row(T("Still to pay back"), pln(running.reduce((s, x) => s + now(x), 0))) + row(T("Payments per month"), pln(payments)) +
         row(T("Share of your income"), income > 0 ? Math.round(share * 100) + "%" : "–") + row(T("Debt-free"), debtFree) +
         level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Expenses tab.")))}
+      ${running.length ? card(`<form id="extra">${heading(T("Pay extra (overpayment)"), "💰")}
+        ${hint(T("Paid more than the monthly payment, or want to see what it would bring? Enter it here – MoneyCompass updates the loan."))}
+        ${field(T("Loan"), select("loan", running.map(x => [x.Id, x.Name]), running[0].Id))}
+        <div class="two">${field(T("Extra amount once (zł)"), numInput("amount", "", T("e.g. {0}", "5000")))}${field(T("Date"), dateInput("date", inputDate(today())))}</div>
+        ${field(T("What should change?"), select("mode", [["shorter", T("Shorter loan – same monthly payment")], ["lower", T("Lower monthly payment – same end date")]], "shorter"))}
+        ${field(T("What if I pay more every month? (zł, only a calculation)"), numInput("monthly", "", T("e.g. {0}", "200")))}
+        <div class="extra-result" id="extra-result"></div>
+        <div class="buttons">${button("✔ " + esc(T("Save the extra repayment")), "save-extra", "main")}</div></form>`) : ""}
       ${card(heading(T("Loans")) + hint(T("Tap a loan to edit it, for example to update what is left.")) + (d.Loans.length ? `<div class="list">${d.Loans.map(x => `
         <div class="item clickable loan-item" data-edit-loan="${x.Id}"><div class="loan-main"><b>${esc(x.Name)}</b>
           <span class="hint">${esc(loanLine(x, plans.get(x.Id) || loanPlan(x)))}</span>
           ${x.Original > 0 ? `<div class="loan-progress">${progress(1 - now(x) / x.Original, "#1BAF7A")}<span class="hint">${esc(T("Paid back {0} of {1} ({2}%)", pln(x.Original - now(x)), pln(x.Original), Math.round((1 - now(x) / x.Original) * 100)))}</span></div>` : ""}
+          ${(x.Extra || []).length ? `<span class="hint good">💰 ${esc(T("Extra repayments: {0}", x.Extra.map(e => `${pln(e.Amount)} (${fmtDate(e.Date)})`).join(", ")))}</span>` : ""}
           ${loanWarning(x)}</div>
         <div class="right"><b>${pln((plans.get(x.Id) || loanPlan(x)).remainingNow)}</b>${(plans.get(x.Id) || loanPlan(x)).done ? `<span class="hint">${esc(T("estimated today"))}</span>` : ""}</div><button class="icon-btn danger" data-del-loan="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No loans – great! Add one above if you have any."))), "wide")}
       ${binCard(["loan"])}
@@ -304,6 +315,30 @@ export const Loans = {
       if (plan.never) toast(T("Saved – but the monthly payment doesn't cover the interest, see the warning."), "bad");
       else toast(T("Saved. Debt-free in {0} ({1} payments).", monthName(plan.end), plan.needed));
     };
+    // Extra repayment: what it changes, live; saved only with the button
+    const xf = el.querySelector("#extra");
+    if (xf) {
+      const show = () => {
+        const v = values(xf), loan = d.Loans.find(y => y.Id === v.loan), amt = num(v.amount) || 0, monthly = num(v.monthly) || 0, out = el.querySelector("#extra-result");
+        if (!loan || (!(amt > 0) && !(monthly > 0))) { out.innerHTML = hint(T("Enter an amount to see what it changes.")); return; }
+        const e = extraEffect(loan, amt, v.mode, monthly);
+        const lines = [];
+        if (v.mode === "lower" && amt > 0) lines.push(T("New monthly payment: about {0} instead of {1}.", pln(e.newPayment), pln(loan.MonthlyPayment)));
+        if (e.after.months !== Infinity && e.after.months !== e.before.months) lines.push(T("Debt-free in {0} instead of {1}.", monthName(addMonths(e.next, e.after.months - 1)), e.before.months === Infinity ? T("never") : monthName(addMonths(e.next, e.before.months - 1))));
+        if (e.saved > 0 && e.saved !== Infinity) lines.push(T("You save about {0} in interest.", pln(e.saved)));
+        if (monthly > 0) lines.push(T("Includes {0} extra every month – that part is only a calculation.", pln(monthly)));
+        out.innerHTML = `<div class="alert good-alert">${lines.map(l => `<p>✔ ${esc(l)}</p>`).join("")}</div>`;
+      };
+      xf.querySelectorAll("input, select").forEach(i => i.addEventListener("input", show)); show();
+      el.querySelector('[data-action="save-extra"]').onclick = async () => {
+        const v = values(xf), loan = d.Loans.find(y => y.Id === v.loan), amt = num(v.amount) || 0;
+        if (!loan || !(amt > 0)) { toast(T("Enter the extra amount you paid."), "bad"); return; }
+        if (amt > loanPlan(loan).remainingNow) { toast(T("That is more than what is left to pay back."), "bad"); return; }
+        if (!(await confirmBox(T("Save the extra repayment?"), T("{0} paid extra into {1} on {2}. What is left goes down by this amount{3}.", pln(amt), loan.Name, fmtDate(parseDate(v.date)), v.mode === "lower" ? ", " + T("and the monthly payment is lowered") : ""), T("Save"), T("Cancel")))) return;
+        applyExtra(loan, amt, v.mode, parseDate(v.date));
+        toast(T("Saved. Debt-free in {0}.", monthName(loanPlan(loan).end || today()))); App.refresh();
+      };
+    }
     // Live preview while typing: payments left and the debt-free date
     const preview = () => {
       const v = values(fm), x = { Remaining: num(v.remaining) || 0, MonthlyPayment: num(v.payment) || 0, RatePercent: num(v.rate) || 0, NextPayment: v.next };
