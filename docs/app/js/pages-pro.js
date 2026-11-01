@@ -43,7 +43,10 @@ export const Savings = {
     const diff = v => mine ? `<span class="${v - mine.net >= 0 ? "good" : "bad"}">${v - mine.net >= 0 ? "+" : "−"}${pln(Math.abs(v - mine.net))}</span>` : "";
     const chartItems = [...(mine ? [{ label: (f.Name || T("Your offer")).slice(0, 22), value: mine.net, color: "#7E22CE", text: pln(mine.net) }] : []),
       ...bankRows.slice(0, 5).map((x, i) => ({ label: x.o.Bank.slice(0, 22), value: x.r.net, color: ["#2a78d6", "#1baf7a", "#eda100", "#e87ba4", "#008300"][i], text: pln(x.r.net) }))];
+    const checked = String(Rates.checked);
+    const checkedText = checked.length > 10 ? fmtDate(checked.slice(0, 10)) + " " + new Date(checked).toTimeString().slice(0, 5) : fmtDate(checked);
     const bankCard = card(heading(T("Today's bank offers compared"), "🏦") +
+      `<div class="sync-line"><span>🔄 ${esc(T("Bank offers last updated: {0}", checkedText))}${Rates.updating ? " · " + esc(T("Updating rates…")) : ""}</span>${button("⟳ " + esc(T("Refresh rates")), "refresh-offers", "second small")}</div>` +
       hint(T("The best savings accounts and 12-month deposits right now, calculated for {0} over {1} days{2}.", pln(A), period, f.ApplyTax !== false ? ", " + T("after the 19% Belka tax") : "")) +
       `<div class="two">${field(T("Amount to compare (zł)"), numInput("bank-amount", plain(A)))}${field(T("Rate after the promotion, for all offers (% per year)"), numInput("bank-after", plain(after), "0"))}</div>` +
       hint(T("Most banks pay much less after a promotion ends, and the rankings don't say how much. 0% shows only what the promotion itself brings.")) +
@@ -73,7 +76,7 @@ export const Savings = {
         hint(T("Simple interest without compounding. Banks pay monthly, so the real result can be slightly higher.")) + button(T("Save to comparison"), "save-offer", "main"))}
       ${card(heading(T("Comparison")) + hint(T("Best offer on top. Tap an offer to load it into the form.")) + (ranked.length ? `<div class="list">${ranked.map((x, i) => `
         <div class="item clickable${i === 0 ? " best" : ""}" data-load="${x.o.Id}"><div><b>${i === 0 ? "🏆 " : ""}${esc(x.o.Name)}</b><span class="hint">${esc(T("{0} · {1} for {2} days{3}, then {4} · over {5} days", pln(x.o.Amount), rate(x.o.PromoRate), x.o.PromoDays, x.o.PromoLimit > 0 ? " (" + T("up to {0}", pln(x.o.PromoLimit)) + ")" : "", rate(x.o.StandardRate), x.o.PeriodDays))}</span></div>
-        <div class="right"><b class="good">${pln(x.r.net)}</b><span class="hint">${rate(x.r.effective)}</span></div><button class="icon-btn danger" data-del-offer="${x.o.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No saved offers yet."))), "wide")}
+        <div class="right"><b class="good">${pln(x.r.net)}</b><span class="hint">${rate(x.r.effective)}</span></div><button class="icon-btn danger" data-del-offer="${x.o.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No saved offers yet."))))}
       ${bankCard}
     </div>`;
     const fm = el.querySelector("#offer");
@@ -98,6 +101,7 @@ export const Savings = {
       const o = d.Offers.find(y => y.Id === x.dataset.load);
       form = { ...o }; toast(T("Loaded \"{0}\". Change it and save again to add a new version.", o.Name)); App.refresh(); window.scrollTo({ top: 0, behavior: "smooth" });
     });
+    el.querySelector('[data-action="refresh-offers"]').onclick = async () => { await Rates.refresh(true); App.refresh(); toast(T("Bank offers last updated: {0}", fmtDate(String(Rates.checked).slice(0, 10)))); };
     el.querySelector('[name="bank-amount"]').onchange = e => { const v = num(e.target.value); form = { ...(form || f), Amount: v > 0 ? v : "" }; App.refresh(); };
     el.querySelector('[name="bank-after"]').onchange = e => { bankAfter = Math.max(0, num(e.target.value) || 0); App.refresh(); };
     el.querySelectorAll("[data-bank]").forEach(b => b.onclick = () => {

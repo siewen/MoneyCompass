@@ -8,10 +8,11 @@ import { openGuide, shouldShowGuide } from "./guide.js";
 import { hasNews, openNews } from "./news.js";
 import { Overview, Income, Expenses, Emergency, Portfolio } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
+import { Calendar } from "./calendar.js";
 import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile } from "./dialogs.js";
 
-const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", savings: "#7E22CE" };
-const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget };
+const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", savings: "#7E22CE" };
+const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget, calendar: Calendar };
 let current = "overview";
 
 function tabs() {
@@ -133,8 +134,13 @@ function helpMenu() {
   document.body.append(shield, menu);
   const r = document.querySelector(".help-fab").getBoundingClientRect();
   const h = menu.offsetHeight, w = menu.offsetWidth;
-  const top = r.top - h - 10 > 64 ? r.top - h - 10 : r.bottom + 10;
-  const left = Math.min(Math.max(8, r.right - w), window.innerWidth - w - 8);
+  // Above the button, else below it, else next to it (small or landscape screens)
+  let top = r.top - h - 10, left = Math.min(Math.max(8, r.right - w), window.innerWidth - w - 8);
+  if (top < 8) top = r.bottom + 10;
+  if (top + h > window.innerHeight - 8) {
+    top = Math.max(8, window.innerHeight - h - 8);
+    left = r.left - w - 10 >= 8 ? r.left - w - 10 : Math.min(r.right + 10, window.innerWidth - w - 8);
+  }
   Object.assign(menu.style, { left: left + "px", top: top + "px", right: "auto", bottom: "auto" });
   requestAnimationFrame(() => menu.classList.add("open"));
   shield.onclick = closeHelpMenu;

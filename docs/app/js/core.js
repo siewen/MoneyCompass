@@ -53,13 +53,13 @@ export function newSettings() {
 }
 export function newData() {
   return { Incomes: [], Expenses: [], Holdings: [], Offers: [], Loans: [], Goals: [], Received: [],
-           Transfers: [], Categories: [], Budgets: [], Settings: newSettings() };
+           Transfers: [], Categories: [], Budgets: [], Recurring: [], Settings: newSettings() };
 }
 /** Fills in anything missing (older files, files from the Windows app). */
 export function normalise(d) {
   const base = newData();
   const out = Object.assign(base, d || {});
-  for (const k of ["Incomes", "Expenses", "Holdings", "Offers", "Loans", "Goals", "Received", "Transfers", "Categories", "Budgets"])
+  for (const k of ["Incomes", "Expenses", "Holdings", "Offers", "Loans", "Goals", "Received", "Transfers", "Categories", "Budgets", "Recurring"])
     if (!Array.isArray(out[k])) out[k] = [];
   out.Settings = Object.assign(newSettings(), out.Settings || {});
   if (!Array.isArray(out.Settings.Modules)) out.Settings.Modules = [];
@@ -276,6 +276,7 @@ export const MODULES = [
   { code: "goals", name: "Savings goals", description: "Goals like a car or a holiday: progress and how much to save per month." },
   { code: "loans", name: "Loans & debts", description: "Credits and loans: what is left to pay, monthly payments and when you are debt-free." },
   { code: "budget", name: "Budget plan", description: "A monthly limit per expense category, with a warning when you go over." },
+  { code: "calendar", name: "Payment calendar", description: "Everything that comes back every month – salary, bills, subscriptions, savings – in a calendar, with a preview of the next 1 to 12 months." },
 ];
 export const moduleOn = code => license.isPro && State.data.Settings.Modules.includes(code);
 export function setModule(code, on) {
@@ -600,7 +601,7 @@ export function reset(parts) {
   if (parts.offers) d.Offers = [];
   if (parts.emergency) Object.assign(d.Settings, { MonthlyEssentials: 0, YearlyCosts: 0, EmergencyMonths: 3, BufferPercent: 10 });
   if (parts.rates) Object.assign(d.Settings, { UsdToPln: 0, EurToPln: 0 });
-  if (parts.modules) { d.Goals = []; d.Loans = []; d.Budgets = []; }
+  if (parts.modules) { d.Goals = []; d.Loans = []; d.Budgets = []; d.Recurring = []; }
   if (parts.categories) {
     const own = new Set(d.Categories.map(c => c.Name));
     d.Expenses.forEach(e => { if (own.has(e.Category)) e.Category = OTHER; });
@@ -612,4 +613,20 @@ export function reset(parts) {
 
 export function summary(d) {
   return T("{0} income sources, {1} expenses, {2} savings entries, {3} saved offers", d.Incomes.length, d.Expenses.length, d.Holdings.length, d.Offers.length);
+}
+
+// ---------------------------------------------------------------- gross → net salary (Poland, employment contract)
+
+/** Estimate of the monthly net pay from the gross pay for an employment contract (umowa o pracę) in Poland, 2026 rules:
+ *  social insurance 13.71%, health insurance 9%, income tax 12% (32% above 120 000 zł a year), tax-free amount
+ *  30 000 zł a year (300 zł less tax per month), costs of earning 250 zł per month. Without PPK and the under-26 relief. */
+export function netFromGross(gross) {
+  if (!(gross > 0)) return 0;
+  const social = Math.round(gross * 0.1371 * 100) / 100;
+  const health = Math.round((gross - social) * 0.09 * 100) / 100;
+  const base = Math.max(0, Math.round(gross - social - 250));
+  const yearly = base * 12;
+  const yearTax = yearly <= 120000 ? yearly * 0.12 - 3600 : 120000 * 0.12 - 3600 + (yearly - 120000) * 0.32;
+  const tax = Math.max(0, Math.round(yearTax / 12));
+  return Math.round((gross - social - health - tax) * 100) / 100;
 }

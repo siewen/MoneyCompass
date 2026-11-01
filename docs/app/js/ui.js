@@ -116,7 +116,9 @@ export const stamp = () => { const d = new Date(), p = n => String(n).padStart(2
 
 /** Puts the cards of every .grid in 1, 2 or 3 columns: card 1 left, card 2 middle, card 3 right, then the next row.
  *  On the tabs (grid with data-key) the cards can be moved with their handle ⠿, like in the app. */
-const isFull = el => el.matches(".tiles, .btn, .tip, .wide");
+// Fixed: tiles and big buttons stay where they are. Wide cards span the whole width but can be moved too.
+const isFull = el => el.matches(".tiles, .btn, .tip");
+const spans = el => el.matches(".tiles, .btn, .tip, .wide");
 function layoutGrid(grid) {
   if (!grid._items) {
     grid._items = [...grid.children];
@@ -138,7 +140,7 @@ function layoutGrid(grid) {
   const parts = [];
   let group = null;
   for (const item of grid._items) {
-    if (isFull(item)) { parts.push(item); group = null; continue; }
+    if (spans(item)) { parts.push(item); group = null; continue; }
     if (!group) {
       group = document.createElement("div"); group.className = "cols";
       group.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;

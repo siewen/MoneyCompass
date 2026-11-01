@@ -2,7 +2,7 @@
 import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
-  addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY,
+  addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross,
 } from "./core.js";
 import { hbars, donut, legend, monthBars, progress } from "./charts.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast } from "./ui.js";
@@ -151,6 +151,11 @@ export const Income = {
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("Salary, side job"))))}
         <div class="two">${field(T("Type"), select("type", INCOME_TYPES.map(t => [t, T(t)]), f.Type))}
         ${field(T("Currency"), select("currency", CURRENCIES, f.Currency))}</div>
+        <div class="gross-box"${f.Type === "Salary" && f.Currency === "PLN" ? "" : " hidden"}>
+          <div class="cat-row">${field(T("Gross salary per month (brutto, optional)"), numInput("gross", plain(f.Gross), T("e.g. {0}", "10000")))}
+          ${button("→ " + esc(T("Calculate net")), "calc-net", "second small")}</div>
+          <p class="hint">${esc(T("Estimate for an employment contract (umowa o pracę) in Poland: social and health insurance and income tax. Bonuses, a sport card (Multisport), PPK, the under-26 relief, overtime or another kind of contract change your net pay – compare with your payslip and correct the net amount below if needed."))}</p>
+        </div>
         ${field(T("Amount you receive each time (net, after tax)"), numInput("amount", plain(f.Amount), T("e.g. 8500 (what you actually receive, after tax)")))}
         <div class="two">${field(T("How often"), select("frequency", FREQUENCIES.map(x => [x[0], T(x[0])]), f.Frequency))}
         ${field(f.Frequency === ONE_TIME ? T("Date the money arrives") : T("Payday - date of any payment (last or next one); the app repeats it"), dateInput("date", inputDate(parseDate(f.Date))))}</div>
@@ -164,7 +169,8 @@ export const Income = {
           const next = Calc.nextPayment(i, today());
           const info = i.Frequency === ONE_TIME ? `${T("one-time")} · ${T("on {0}", fmtDate(i.Date))}` : `${T(i.Frequency)} · ${next ? T("next {0}", fmtDate(next)) : ""}`;
           return `<div class="item clickable${i.Active ? "" : " off"}" data-edit-income="${i.Id}"><div><b>${esc(i.Name)}</b><span class="hint">${esc(T(i.Type))} · ${esc(info)}${i.Active ? "" : " · " + esc(T("not active"))}</span></div>
-            <div class="right"><b>${amount(i.Amount, i.Currency)}</b>${i.Frequency !== ONE_TIME ? `<span class="hint">${esc(T("{0} / month", pln(Calc.monthlyPln(i, s))))}</span>` : ""}</div>
+            <div class="right"><b>${amount(i.Amount, i.Currency)}</b>${i.Frequency !== ONE_TIME ? `<span class="hint">${esc(T("{0} / month", pln(Calc.monthlyPln(i, s))))}</span>` : ""}${i.Gross > 0 ? `<span class="hint">${esc(T("gross {0}", pln(i.Gross)))}</span>` : ""}</div>
+            <label class="switch" title="${esc(T("Active (count it in the totals)"))}"><input type="checkbox" data-active-income="${i.Id}"${i.Active ? " checked" : ""}><span></span></label>
             <button class="icon-btn danger" data-del-income="${i.Id}" title="${esc(T("Delete"))}">🗑</button></div>`;
         }).join("")}</div>` : hint(T("No income added yet."))))}
       ${card(heading(T("Received (bank import)")) + hint(T("Money that came into your account, from your bank imports. Choose for each payment how it counts: Extra income – only in that month. Salary – your regular pay, counted every month through Your income sources. Not income – ignored.")) +
@@ -180,12 +186,25 @@ export const Income = {
       const lbl = form.date.closest(".field").querySelector("span");
       lbl.textContent = form.frequency.value === ONE_TIME ? T("Date the money arrives") : T("Payday - date of any payment (last or next one); the app repeats it");
     };
+    const grossBox = el.querySelector(".gross-box");
+    const toggleGross = () => { grossBox.hidden = !(form.type.value === "Salary" && form.currency.value === "PLN"); };
+    form.type.addEventListener("change", toggleGross); form.currency.addEventListener("change", toggleGross);
+    el.querySelector('[data-action="calc-net"]').onclick = () => {
+      const g = num(form.gross.value);
+      if (!(g > 0)) { toast(T("Please enter an amount bigger than 0."), "bad"); return; }
+      form.amount.value = plain(netFromGross(g));
+      form.amount.classList.add("flash"); setTimeout(() => form.amount.classList.remove("flash"), 900);
+      toast(T("Net about {0} – you can still change it.", pln(netFromGross(g))));
+    };
     form.onsubmit = ev => { ev.preventDefault(); saveIncome(form); };
     el.querySelector('[data-action="save-income"]').onclick = () => saveIncome(form);
     const cancel = el.querySelector('[data-action="cancel-income"]');
     if (cancel) cancel.onclick = () => { editIncome = null; App.refresh(); };
+    el.querySelectorAll("[data-active-income]").forEach(c => c.onchange = () => {
+      const i = d.Incomes.find(y => y.Id === c.dataset.activeIncome); i.Active = c.checked; save(); App.refresh();
+    });
     el.querySelectorAll("[data-edit-income]").forEach(x => x.onclick = ev => {
-      if (ev.target.closest("[data-del-income]")) return;
+      if (ev.target.closest("[data-del-income], .switch")) return;
       editIncome = x.dataset.editIncome; App.refresh(); window.scrollTo({ top: 0, behavior: "smooth" });
     });
     el.querySelectorAll("[data-del-income]").forEach(b => b.onclick = async () => {
@@ -214,10 +233,10 @@ function saveIncome(form) {
   const date = v.date ? isoDate(parseDate(v.date)) : isoDate(today());
   const name = v.name.trim() || T(v.type);
   if (editIncome) {
-    Object.assign(d.Incomes.find(x => x.Id === editIncome), { Name: name, Type: v.type, Amount: amt, Currency: v.currency, Frequency: v.frequency, Date: date, Active: v.active });
+    Object.assign(d.Incomes.find(x => x.Id === editIncome), { Name: name, Type: v.type, Amount: amt, Currency: v.currency, Frequency: v.frequency, Date: date, Active: v.active, Gross: num(v.gross) || 0 });
     toast(T("Updated: {0}.", name)); editIncome = null;
   } else {
-    d.Incomes.push({ Id: uuid(), Name: name, Type: v.type, Amount: amt, Currency: v.currency, Frequency: v.frequency, Date: date, Active: v.active });
+    d.Incomes.push({ Id: uuid(), Name: name, Type: v.type, Amount: amt, Currency: v.currency, Frequency: v.frequency, Date: date, Active: v.active, Gross: num(v.gross) || 0 });
     toast(T("Added: {0}.", name));
   }
   save(); App.refresh();
