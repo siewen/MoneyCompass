@@ -481,10 +481,15 @@ export const Portfolio = {
         <div class="two">${field(T("Where"), select("place", PLACES.map(x => [x, T(x)]), f.Place))}${field(T("Currency"), select("currency", CURRENCIES, f.Currency))}</div>
         <div class="two">${field(T("Amount"), numInput("amount", plain(f.Amount), T("e.g. {0}", "10000")))}${field(T("Interest rate (% per year, 0 if none)"), numInput("rate", plain(f.RatePercent), "0"))}</div>
         ${check("safe", T("Safe money (guaranteed, e.g. bank)"), f.Safe)}
+        <details class="deposit"${f.Deposit > 0 ? " open" : ""}><summary>🔁 ${esc(T("Regular deposit (standing order) – optional"))}</summary>
+          <div class="two">${field(T("Amount (zł)"), numInput("deposit", plain(f.Deposit), T("e.g. {0}", "500")))}${field(T("How often"), select("depfreq", FREQUENCIES.filter(x => x[0] !== ONE_TIME).map(x => [x[0], T(x[0])]), f.DepositFrequency || "Monthly"))}</div>
+          ${field(T("Date of a payment (last or next one)"), dateInput("depdate", inputDate(parseDate(f.DepositDate || isoDate(today())))))}
+          ${hint(T("Shown as \"To savings\" in the Payment calendar. The amount above is not changed by itself – update it when you check your account."))}
+        </details>
         <div class="buttons">${button(h ? T("Save changes") : T("Add"), "save-holding", "main")}${h ? button(T("Cancel editing"), "cancel-holding") : ""}</div></form>`)}
       ${card(heading(T("Your savings")) + hint(T("Tap an item to edit it, for example to update the amount.")) + (d.Holdings.length ? `<div class="list">${d.Holdings.map(x => `
         <div class="item clickable" data-edit-holding="${x.Id}"><div><b>${esc(x.Name)}</b><span class="hint">${esc(T(x.Place))} · ${esc(x.Safe ? T("Safe") : T("Risky"))} · ${rate(x.RatePercent || 0)}</span></div>
-        <div class="right"><b>${amount(x.Amount, x.Currency)}</b>${x.RatePercent ? `<span class="hint">${esc(T("{0} / year", pln(Calc.toPln(x.Amount, x.Currency, s) * x.RatePercent / 100)))}</span>` : ""}</div>
+        <div class="right"><b>${amount(x.Amount, x.Currency)}</b>${x.RatePercent ? `<span class="hint">${esc(T("{0} / year", pln(Calc.toPln(x.Amount, x.Currency, s) * x.RatePercent / 100)))}</span>` : ""}${x.Deposit > 0 ? `<span class="hint primary">🔁 +${esc(pln(x.Deposit))} · ${esc(T(x.DepositFrequency || "Monthly"))}</span>` : ""}</div>
         <button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("Nothing added yet."))))}
       ${card(`<form id="fx">${heading(T("Exchange rates"))}${hint(T("Used to convert dollars and euros to złoty."))}
         ${check("auto", T("Update automatically with the official NBP rates"), s.AutoExchangeRates)}
@@ -494,7 +499,9 @@ export const Portfolio = {
     const saveIt = () => {
       const v = values(form), amt = num(v.amount);
       if (!(amt > 0)) { toast(T("Please enter an amount bigger than 0."), "bad"); return; }
-      const item = { Name: v.name.trim() || T(v.place), Place: v.place, Amount: amt, Currency: v.currency, RatePercent: num(v.rate) || 0, Safe: v.safe };
+      const dep = num(v.deposit) || 0;
+      const item = { Name: v.name.trim() || T(v.place), Place: v.place, Amount: amt, Currency: v.currency, RatePercent: num(v.rate) || 0, Safe: v.safe,
+        Deposit: dep, DepositFrequency: dep > 0 ? v.depfreq : "", DepositDate: dep > 0 ? isoDate(parseDate(v.depdate)) : null };
       if (h) { Object.assign(h, item); toast(T("Updated: {0}.", item.Name)); editHolding = null; }
       else { d.Holdings.push({ Id: uuid(), ...item }); toast(T("Added: {0}.", item.Name)); }
       save(); App.refresh();

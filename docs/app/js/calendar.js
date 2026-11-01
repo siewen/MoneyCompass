@@ -27,6 +27,15 @@ export function events(d, from, to) {
       next = Calc.nextPayment(r, addDays(next, 1));
     }
   }
+  // My savings with a regular deposit (standing order)
+  for (const h of d.Holdings.filter(h => h.Deposit > 0 && h.DepositDate)) {
+    const rule = { Date: h.DepositDate, Frequency: h.DepositFrequency || "Monthly" };
+    let next = Calc.nextPayment(rule, from), guard = 0;
+    while (next && next <= to && guard++ < 400) {
+      list.push({ date: next, name: h.Name, amount: h.Deposit, type: "save", note: T("My savings") + " · 🔁" });
+      next = Calc.nextPayment(rule, addDays(next, 1));
+    }
+  }
   // Expenses marked 🔁 in the Expenses tab: continued after their latest payment
   for (const e of repeatingExpenses(d)) {
     const lastPaid = parseDate(e.Date);
@@ -120,6 +129,7 @@ export const Calendar = {
     const f = r || { Name: "", Kind: "expense", Category: "Housing / rent", Amount: "", Frequency: "Monthly", Date: isoDate(today()), Active: true };
     const sugg = suggestions(d);
     const reps = repeatingExpenses(d);
+    const deps = d.Holdings.filter(h => h.Deposit > 0 && h.DepositDate);
     const evRow = e => `<div class="item"><span class="cal-dot ${e.type}"></span><div><b>${esc(e.name)}</b><span class="hint">${fmtDate(e.date)} · ${esc(e.note)}</span></div>
       <b class="${e.type === "in" ? "good" : e.type === "save" ? "primary" : "bad"}">${e.type === "in" ? "+" : "−"}${pln(e.amount)}</b></div>`;
 
@@ -142,14 +152,17 @@ export const Calendar = {
         ${field(T("Last payment (optional)"), `<input type="date" name="end" value="${f.EndDate ? inputDate(parseDate(f.EndDate)) : ""}">`)}</div>
         ${hint(T("For payments that stop, e.g. a loan or a contract: after the last payment it no longer counts. Or switch a payment off in the list below."))}
         <div class="buttons">${button(r ? T("Save changes") : T("Add"), "save-rec", "main")}${r ? button(T("Cancel"), "cancel-rec") : ""}</div></form>`)}
-      ${card(heading(T("Regular payments")) + (reps.length ? `<h3 class="sub-h">🔁 ${esc(T("From your expenses"))}</h3><div class="list">${reps.map(e => `
+      ${card(heading(T("Regular payments")) + (deps.length ? `<h3 class="sub-h">🔁 ${esc(T("From My savings"))}</h3><div class="list">${deps.map(h => `
+        <div class="item clickable" data-go="portfolio"><span class="cal-dot save"></span><div><b>${esc(h.Name)}</b>
+        <span class="hint">${esc(T(h.DepositFrequency || "Monthly"))} · ${esc(T("Transfer to savings"))} · ${esc(T("next {0}", fmtDate(Calc.nextPayment({ Date: h.DepositDate, Frequency: h.DepositFrequency || "Monthly" }, today()) || h.DepositDate)))}</span></div>
+        <b class="primary">${pln(h.Deposit)}</b></div>`).join("")}</div><hr>` : "") + (reps.length ? `<h3 class="sub-h">🔁 ${esc(T("From your expenses"))}</h3><div class="list">${reps.map(e => `
         <div class="item"><span class="cal-dot out"></span><div><b>${esc(e.Description || T(e.Category))}</b>
         <span class="hint">${esc(T(e.Repeat))} · ${esc(T(e.Category))} · ${esc(T("next {0}", fmtDate(Calc.nextPayment({ Date: e.Date, Frequency: e.Repeat }, new Date(Math.max(today().getTime(), addDays(parseDate(e.Date), 1).getTime()))) || e.Date)))}</span></div>
         <b>${pln(e.Amount)}</b><label class="switch" title="${esc(T("Repeats"))}"><input type="checkbox" data-rep-exp="${e.Id}" checked><span></span></label></div>`).join("")}</div><hr>` : hint(T("Tip: mark an expense with 🔁 in the Expenses tab, and it appears here every month."))) + (d.Recurring.length ? `<div class="list">${d.Recurring.map(x => `
         <div class="item clickable${x.Active === false || ended(x) ? " off" : ""}" data-edit-rec="${x.Id}"><span class="cal-dot ${x.Kind === "saving" ? "save" : "out"}"></span><div><b>${esc(x.Name)}</b>
         <span class="hint">${esc(T(x.Frequency))} · ${esc(x.Kind === "saving" ? T("Transfer to savings") : T(x.Category))} · ${esc(x.Active === false ? T("switched off") : ended(x) ? T("ended {0}", fmtDate(x.EndDate)) : T("next {0}", fmtDate(Calc.nextPayment(x, today()) || x.Date)) + (x.EndDate ? " · " + T("last {0}", fmtDate(x.EndDate)) : ""))}</span></div>
         <b>${pln(x.Amount)}</b><label class="switch" title="${esc(T("Active (count it in the totals)"))}"><input type="checkbox" data-active-rec="${x.Id}"${x.Active !== false ? " checked" : ""}><span></span></label>
-        <button class="icon-btn danger" data-del-rec="${x.Id}">🗑</button></div>`).join("")}</div>` + hint(T("Use the switch to stop counting a payment without deleting it.")) : (reps.length ? "" : hint(T("No regular payments yet. Add your rent, bills and subscriptions above.")))) +
+        <button class="icon-btn danger" data-del-rec="${x.Id}">🗑</button></div>`).join("")}</div>` + hint(T("Use the switch to stop counting a payment without deleting it.")) : (reps.length || deps.length ? "" : hint(T("No regular payments yet. Add your rent, bills and subscriptions above.")))) +
         (sugg.length ? `<hr><h3>💡 ${esc(T("Found in your expenses"))}</h3>${hint(T("These come back every month. Add them with one click."))}<div class="list">${sugg.map((x, i) => `
           <div class="item"><div><b>${esc(x.name)}</b><span class="hint">${esc(categoryLabel(x.category))} · ${esc(T("in {0} months", x.months))}</span></div><b>${pln(x.amount)}</b>
           <button class="btn second small" data-sugg="${i}">＋ ${esc(T("Add"))}</button></div>`).join("")}</div>` : ""))}

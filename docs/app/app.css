@@ -324,3 +324,6 @@ input.flash { outline: 3px solid #15803D; transition: outline .3s; }
 .icon-btn.repeat { opacity: .35; filter: grayscale(1); }
 .icon-btn.repeat.on { opacity: 1; filter: none; background: color-mix(in srgb, #0369A1 15%, transparent); }
 .sub-h { font-size: 14px; color: var(--muted); margin: 4px 0; }
+
+details.deposit { border: 1px dashed var(--border); border-radius: 10px; padding: 6px 12px; margin: 8px 0; background: var(--soft); }
+details.deposit summary { cursor: pointer; font-weight: 700; font-size: 14px; color: var(--primary); }

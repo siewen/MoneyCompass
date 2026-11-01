@@ -132,7 +132,10 @@ export const EXTRA = {
 "Tip: mark an expense with 🔁 in the Expenses tab, and it appears here every month.": "Tipp: Markieren Sie eine Ausgabe im Tab Ausgaben mit 🔁, dann erscheint sie hier jeden Monat.",
 "{0} no longer repeats.": "{0} wiederholt sich nicht mehr.",
 "{0} repeats every month – see the Payment calendar.": "{0} wiederholt sich jeden Monat – siehe Zahlungskalender.",
-"Repeats": "Wiederholung"
+"Repeats": "Wiederholung",
+"Regular deposit (standing order) – optional": "Regelmäßige Einzahlung (Dauerauftrag) – optional",
+"Shown as \"To savings\" in the Payment calendar. The amount above is not changed by itself – update it when you check your account.": "Erscheint als „Zum Sparen“ im Zahlungskalender. Der Betrag oben ändert sich nicht von selbst – aktualisieren Sie ihn, wenn Sie Ihr Konto prüfen.",
+"From My savings": "Aus Meine Ersparnisse"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -266,7 +269,10 @@ export const EXTRA = {
 "Tip: mark an expense with 🔁 in the Expenses tab, and it appears here every month.": "Astuce : marquez une dépense avec 🔁 dans l'onglet Dépenses, elle apparaîtra ici chaque mois.",
 "{0} no longer repeats.": "{0} ne se répète plus.",
 "{0} repeats every month – see the Payment calendar.": "{0} se répète chaque mois – voir le calendrier des paiements.",
-"Repeats": "Répétition"
+"Repeats": "Répétition",
+"Regular deposit (standing order) – optional": "Versement régulier (virement permanent) – facultatif",
+"Shown as \"To savings\" in the Payment calendar. The amount above is not changed by itself – update it when you check your account.": "Affiché comme « Vers l'épargne » dans le calendrier des paiements. Le montant ci-dessus ne change pas tout seul – mettez-le à jour quand vous consultez votre compte.",
+"From My savings": "De Mon épargne"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -400,6 +406,9 @@ export const EXTRA = {
 "Tip: mark an expense with 🔁 in the Expenses tab, and it appears here every month.": "Wskazówka: oznacz wydatek symbolem 🔁 w karcie Wydatki, a pojawi się tu co miesiąc.",
 "{0} no longer repeats.": "{0} już się nie powtarza.",
 "{0} repeats every month – see the Payment calendar.": "{0} powtarza się co miesiąc – zobacz kalendarz płatności.",
-"Repeats": "Powtarzanie"
+"Repeats": "Powtarzanie",
+"Regular deposit (standing order) – optional": "Regularna wpłata (zlecenie stałe) – opcjonalnie",
+"Shown as \"To savings\" in the Payment calendar. The amount above is not changed by itself – update it when you check your account.": "Widoczne jako „Na oszczędności” w kalendarzu płatności. Kwota powyżej nie zmienia się sama – zaktualizuj ją, gdy sprawdzisz konto.",
+"From My savings": "Z Moich oszczędności"
 }
 };
