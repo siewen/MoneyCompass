@@ -1,7 +1,7 @@
 // Loans & debts: extra repayments (nadpłata) and advice for "Optimize my finances".
 import { T, State, save, Calc, pln, rate, fmtDate, isoDate, parseDate, today, addMonths, monthName, loanPlan, planLoan, loanNextPayment, license } from "./core.js";
 import { esc, card, heading, hint } from "./ui.js";
-import { Rates, LOAN_MARKET, maxLegalRate } from "./rates.js";
+import { Rates, LOAN_MARKET, LOAN_RANKINGS, maxLegalRate } from "./rates.js";
 
 const TAX = 0.81;
 
@@ -113,19 +113,12 @@ export function debtAdvice(d) {
       continue;
     }
     if (!m || !m.rate) continue;
-    const marketLink = LOAN_MARKET.links[kind] ? ` <a href="${esc(LOAN_MARKET.links[kind])}" target="_blank" rel="noopener">${esc(T("See today's offers"))} ↗</a>` : "";
-    const margin = kind === "mortgage" ? 0.8 : 1.5;
-    if (r > m.rate + margin && !x.p.never) {
-      const now = simulate(x.p.remainingNow, +x.l.MonthlyPayment || 0, r), cheaper = simulate(x.p.remainingNow, +x.l.MonthlyPayment || 0, m.rate);
-      const saved = now.interest === Infinity ? 0 : now.interest - cheaper.interest;
-      tips.push(`<div class="advice warn" data-route="loans"><b>🔁 ${esc(T("{0}: your rate is above today's market", x.l.Name))}</b><p>${esc(T("You pay {0}; new {1} offers are about {2} ({3}). Refinancing at that rate could save about {4} in interest – minus its costs (commission, possible early repayment fee{5}). Ask your bank for a better rate first, then compare other banks.",
-        rate(r), T(kind === "mortgage" ? "mortgage" : kind === "car" ? "car loan" : "cash loan"), rate(m.rate), T(m.note), pln(Math.max(0, saved)), kind === "mortgage" ? ", " + T("valuation and notary costs") : ""))}${marketLink}</p></div>`);
-    } else if (r <= m.rate + margin) {
-      tips.push(`<div class="advice primary" data-route="loans"><b>✔ ${esc(T("{0}: your rate is close to today's market", x.l.Name))}</b><p>${esc(T("You pay {0}; new {1} offers are about {2}. Refinancing is probably not worth its costs right now.", rate(r), T(kind === "mortgage" ? "mortgage" : kind === "car" ? "car loan" : "cash loan"), rate(m.rate)))}</p></div>`);
-    }
+    tips.push(compareLoan(x, kind));
   }
-  if (loans.some(x => !x.l.Kind || x.l.Kind === "other"))
-    tips.push(`<div class="advice primary" data-route="loans"><b>💡 ${esc(T("Compare your loans with the market"))}</b><p>${esc(T("Choose the type of each loan (mortgage, cash loan, car loan, credit card) in Loans & debts – MoneyCompass then compares your rate with today's offers."))}</p></div>`);
+  const untyped = loans.filter(x => !x.l.Kind || x.l.Kind === "other");
+  if (untyped.length)
+    tips.push(`<div class="advice primary"><b>💡 ${esc(T("Compare your loans with the market"))}</b><p>${esc(T("Choose the type of each loan – MoneyCompass then compares your rate with today's best offers."))}</p>
+      ${untyped.map(x => `<label class="kind-pick"><span>${esc(x.l.Name)}</span><select data-loan-kind="${esc(x.l.Id)}">${LOAN_TYPES.map(([k, n]) => `<option value="${k}"${(x.l.Kind || "other") === k ? " selected" : ""}>${esc(T(n))}</option>`).join("")}</select></label>`).join("")}</div>`);
   // 6. How to overpay in Poland
   add("primary", "💡 " + esc(T("When you overpay")), T("Choose a shorter loan (skrócenie okresu) if you can still pay the same amount – it saves the most interest. A lower monthly payment (zmniejszenie raty) gives you more room each month. Banks may charge a fee: for consumer loans at most 1% (0.5% with less than a year left), for variable-rate mortgages only in the first 3 years – check your contract."));
 
@@ -133,4 +126,41 @@ export function debtAdvice(d) {
   tips.push(`<p class="hint">${esc(T("Typical market rates checked {0}. Your bank's offer depends on your income, credit history and the amount – always check the full terms.", fmtDate(LOAN_MARKET.checked)))}</p>`);
   return card(heading(T("Your loans & debts"), "💳") +
     `<p>${esc(T("Remaining principal amount to be repaid: {0} · interest still to be repaid: about {1}", pln(loans.reduce((s, x) => s + x.p.remainingNow, 0)), pln(total)))}</p>` + tips.join(""));
+}
+
+const LOAN_TYPES = [["mortgage", "Mortgage"], ["cash", "Cash loan"], ["car", "Car loan"], ["card", "Credit card / overdraft"], ["other", "Other loan or debt"]];
+/** Switching costs we subtract: valuation, notary and court fees for a mortgage; the early repayment fee (at most 1%) for other loans. */
+export const switchCost = (kind, amount) => kind === "mortgage" ? 1500 : Math.round(amount * 0.01);
+
+/** Your loan against today's best offers: the same remaining amount and end date at each offer's rate.
+ *  Calculated again every time Optimize opens – with your current loan and the newest offers. */
+export function compareLoan(x, kind) {
+  const l = x.l, r = +l.RatePercent || 0, rem = x.p.remainingNow, n = x.p.left;
+  const what = T(kind === "mortgage" ? "mortgage" : kind === "car" ? "car loan" : "cash loan");
+  const link = LOAN_RANKINGS[kind === "car" ? "cash" : kind];
+  if (x.p.never || !(n > 0) || rem <= 0) return "";
+  const costs = switchCost(kind, rem);
+  const rows = Rates.loanOffers(kind).slice(0, 4).map(o => {
+    // Compared with your own rate over the same months, so rounding in your payment does not count as a saving
+    const or = o.Rate || o.Rrso, pay = paymentFor(rem, n, or), diff = paymentFor(rem, n, r) - pay, total = diff * n, net = total - costs;
+    return { o, or, pay, diff, total, net };
+  });
+  if (!rows.length) return "";
+  const best = rows.reduce((a, b) => b.net > a.net ? b : a);
+  const worth = best.net > Math.max(1000, costs);
+  const head = worth
+    ? "🔁 " + esc(T("{0}: better offers exist", l.Name))
+    : "✔ " + esc(T("{0}: your rate is close to today's market", l.Name));
+  const intro = worth
+    ? T("You pay {0}. With {1} at {2} you could pay about {3} less per month – about {4} less in total, or {5} after switching costs.", rate(r), best.o.Bank, rate(best.or), pln(best.diff), pln(best.total), pln(best.net))
+    : T("You pay {0}; the best new {1} offers are from {2}. After switching costs, refinancing is probably not worth it right now.", rate(r), what, rate(rows[0].or));
+  const list = rows.map(({ o, or, pay, diff, net }) => `<div class="loan-offer">
+      <div><b>${esc(o.Bank)}</b><span class="hint">${esc(o.Name)}${o.Fixed === true ? " · " + esc(T("fixed rate")) : o.Fixed === false ? " · " + esc(T("variable rate")) : ""}</span></div>
+      <div class="lo-rate"><b class="${or < r ? "good" : ""}">${rate(or)}</b><span class="hint">${esc(o.Rate ? T("RRSO {0}", rate(o.Rrso)) : "RRSO")}</span></div>
+      <div class="lo-pay"><span>${esc(T("{0} / month", pln(pay)))}</span><span class="${diff > 0 ? "good" : "bad"} small">${diff > 0 ? "−" : "+"}${esc(pln(Math.abs(diff)))}</span></div>
+      <div class="lo-net ${net > 0 ? "good" : "hint"} small">${esc(net > 0 ? T("saves about {0}", pln(net)) : T("not worth it"))}</div></div>`).join("");
+  return `<div class="advice ${worth ? "good" : "primary"} loan-compare"><b>${head}</b><p>${esc(intro)}</p>${list}
+    <p class="hint">${esc(T("Same remaining amount ({0}) and same end ({1} more payments). Switching costs of about {2} are subtracted ({3}). Offers checked {4}; your bank's offer depends on your income and credit history.",
+      pln(rem), n, pln(costs), T(kind === "mortgage" ? "valuation, notary and court fees" : "early repayment fee, at most 1%"), fmtDate(String(Rates.loansChecked).slice(0, 10))))}
+    ${link ? ` <a href="${esc(link)}" target="_blank" rel="noopener">${esc(T("Open the full ranking"))} ↗</a>` : ""}</p></div>`;
 }

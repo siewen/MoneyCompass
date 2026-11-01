@@ -532,7 +532,20 @@ export const EXTRA = {
 "Fill in from Savings": "Aus Ersparnisse ausfüllen",
 "Add your goals in the Savings tab to see them here.": "Tragen Sie Ihre Ziele im Tab Ersparnisse ein, um sie hier zu sehen.",
 "Goals like a car or a holiday: progress and how much to save per month – shown in the Savings tab.": "Ziele wie ein Auto oder ein Urlaub: Fortschritt und wie viel Sie pro Monat sparen – im Tab Ersparnisse.",
-"Savings goals, Loans & debts and Budget plan (Pro): switch them on in Options → Modules. Savings goals appear in the Savings tab; the others add their own tab.": "Sparziele, Kredite & Schulden und Budgetplan (Pro): in Optionen → Module einschalten. Sparziele erscheinen im Tab Ersparnisse; die anderen bekommen einen eigenen Tab."
+"Savings goals, Loans & debts and Budget plan (Pro): switch them on in Options → Modules. Savings goals appear in the Savings tab; the others add their own tab.": "Sparziele, Kredite & Schulden und Budgetplan (Pro): in Optionen → Module einschalten. Sparziele erscheinen im Tab Ersparnisse; die anderen bekommen einen eigenen Tab.",
+"Choose the type of each loan – MoneyCompass then compares your rate with today's best offers.": "Wählen Sie die Art jedes Kredits – MoneyCompass vergleicht dann Ihren Zinssatz mit den besten aktuellen Angeboten.",
+"{0}: better offers exist": "{0}: es gibt bessere Angebote",
+"You pay {0}. With {1} at {2} you could pay about {3} less per month – about {4} less in total, or {5} after switching costs.": "Sie zahlen {0}. Bei {1} mit {2} wäre die Rate etwa {3} niedriger pro Monat – insgesamt etwa {4} weniger, nach Wechselkosten {5}.",
+"You pay {0}; the best new {1} offers are from {2}. After switching costs, refinancing is probably not worth it right now.": "Sie zahlen {0}; die besten neuen Angebote ({1}) beginnen bei {2}. Nach Wechselkosten lohnt sich eine Umschuldung derzeit wohl nicht.",
+"fixed rate": "fester Zins",
+"variable rate": "variabler Zins",
+"RRSO {0}": "RRSO {0}",
+"{0} / month": "{0} / Monat",
+"saves about {0}": "spart etwa {0}",
+"not worth it": "lohnt sich nicht",
+"Same remaining amount ({0}) and same end ({1} more payments). Switching costs of about {2} are subtracted ({3}). Offers checked {4}; your bank's offer depends on your income and credit history.": "Gleicher Restbetrag ({0}) und gleiches Ende ({1} weitere Raten). Wechselkosten von etwa {2} sind abgezogen ({3}). Angebote geprüft am {4}; das Angebot Ihrer Bank hängt von Einkommen und Bonität ab.",
+"valuation, notary and court fees": "Bewertung, Notar- und Gerichtskosten",
+"early repayment fee, at most 1%": "Vorfälligkeitsgebühr, höchstens 1 %"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1066,7 +1079,20 @@ export const EXTRA = {
 "Fill in from Savings": "Remplir depuis Épargne",
 "Add your goals in the Savings tab to see them here.": "Ajoutez vos objectifs dans l'onglet Épargne pour les voir ici.",
 "Goals like a car or a holiday: progress and how much to save per month – shown in the Savings tab.": "Objectifs comme une voiture ou des vacances : progression et combien épargner par mois – dans l'onglet Épargne.",
-"Savings goals, Loans & debts and Budget plan (Pro): switch them on in Options → Modules. Savings goals appear in the Savings tab; the others add their own tab.": "Objectifs d'épargne, Prêts & dettes et Plan budgétaire (Pro) : activez-les dans Options → Modules. Les objectifs apparaissent dans l'onglet Épargne ; les autres ajoutent leur propre onglet."
+"Savings goals, Loans & debts and Budget plan (Pro): switch them on in Options → Modules. Savings goals appear in the Savings tab; the others add their own tab.": "Objectifs d'épargne, Prêts & dettes et Plan budgétaire (Pro) : activez-les dans Options → Modules. Les objectifs apparaissent dans l'onglet Épargne ; les autres ajoutent leur propre onglet.",
+"Choose the type of each loan – MoneyCompass then compares your rate with today's best offers.": "Choisissez le type de chaque prêt – MoneyCompass compare alors votre taux avec les meilleures offres du jour.",
+"{0}: better offers exist": "{0} : il existe de meilleures offres",
+"You pay {0}. With {1} at {2} you could pay about {3} less per month – about {4} less in total, or {5} after switching costs.": "Vous payez {0}. Chez {1} à {2}, la mensualité serait d'environ {3} de moins – environ {4} de moins au total, soit {5} après les frais de changement.",
+"You pay {0}; the best new {1} offers are from {2}. After switching costs, refinancing is probably not worth it right now.": "Vous payez {0} ; les meilleures nouvelles offres ({1}) commencent à {2}. Après les frais de changement, un rachat ne vaut probablement pas la peine pour l'instant.",
+"fixed rate": "taux fixe",
+"variable rate": "taux variable",
+"RRSO {0}": "RRSO {0}",
+"{0} / month": "{0} / mois",
+"saves about {0}": "économise environ {0}",
+"not worth it": "pas intéressant",
+"Same remaining amount ({0}) and same end ({1} more payments). Switching costs of about {2} are subtracted ({3}). Offers checked {4}; your bank's offer depends on your income and credit history.": "Même montant restant ({0}) et même fin ({1} mensualités). Les frais de changement d'environ {2} sont déduits ({3}). Offres vérifiées le {4} ; l'offre de votre banque dépend de vos revenus et de votre historique de crédit.",
+"valuation, notary and court fees": "expertise, notaire et frais de justice",
+"early repayment fee, at most 1%": "frais de remboursement anticipé, 1 % maximum"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1600,6 +1626,19 @@ export const EXTRA = {
 "Fill in from Savings": "Uzupełnij z Oszczędności",
 "Add your goals in the Savings tab to see them here.": "Dodaj cele w zakładce Oszczędności, aby je tu zobaczyć.",
 "Goals like a car or a holiday: progress and how much to save per month – shown in the Savings tab.": "Cele, np. samochód lub wakacje: postęp i ile odkładać co miesiąc – w zakładce Oszczędności.",
-"Savings goals, Loans & debts and Budget plan (Pro): switch them on in Options → Modules. Savings goals appear in the Savings tab; the others add their own tab.": "Cele oszczędnościowe, Kredyty i długi oraz Plan budżetu (Pro): włącz je w Opcje → Moduły. Cele oszczędnościowe pojawiają się w zakładce Oszczędności; pozostałe dodają własną zakładkę."
+"Savings goals, Loans & debts and Budget plan (Pro): switch them on in Options → Modules. Savings goals appear in the Savings tab; the others add their own tab.": "Cele oszczędnościowe, Kredyty i długi oraz Plan budżetu (Pro): włącz je w Opcje → Moduły. Cele oszczędnościowe pojawiają się w zakładce Oszczędności; pozostałe dodają własną zakładkę.",
+"Choose the type of each loan – MoneyCompass then compares your rate with today's best offers.": "Wybierz rodzaj każdego kredytu – MoneyCompass porówna wtedy Twoje oprocentowanie z najlepszymi dzisiejszymi ofertami.",
+"{0}: better offers exist": "{0}: są lepsze oferty",
+"You pay {0}. With {1} at {2} you could pay about {3} less per month – about {4} less in total, or {5} after switching costs.": "Płacisz {0}. W {1} przy {2} rata byłaby niższa o około {3} miesięcznie – łącznie około {4} mniej, czyli {5} po odjęciu kosztów zmiany.",
+"You pay {0}; the best new {1} offers are from {2}. After switching costs, refinancing is probably not worth it right now.": "Płacisz {0}; najlepsze nowe oferty ({1}) zaczynają się od {2}. Po odjęciu kosztów zmiany refinansowanie raczej się teraz nie opłaca.",
+"fixed rate": "stałe oprocentowanie",
+"variable rate": "zmienne oprocentowanie",
+"RRSO {0}": "RRSO {0}",
+"{0} / month": "{0} / mies.",
+"saves about {0}": "oszczędza około {0}",
+"not worth it": "nie opłaca się",
+"Same remaining amount ({0}) and same end ({1} more payments). Switching costs of about {2} are subtracted ({3}). Offers checked {4}; your bank's offer depends on your income and credit history.": "Ta sama pozostała kwota ({0}) i ten sam koniec ({1} rat). Odjęto koszty zmiany około {2} ({3}). Oferty sprawdzone {4}; oferta banku zależy od Twoich dochodów i historii kredytowej.",
+"valuation, notary and court fees": "wycena, notariusz i opłaty sądowe",
+"early repayment fee, at most 1%": "prowizja za wcześniejszą spłatę, maks. 1%"
 }
 };

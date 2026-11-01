@@ -471,3 +471,11 @@ svg.donut text { pointer-events: none; }
 .amount-range { display: inline-flex; align-items: center; gap: 4px; } .amount-range input { width: 110px; }
 .terms-list { margin: 6px 0 10px; padding-left: 20px; } .terms-list li { margin: 4px 0; }
 .goals-section { margin-top: 26px; } .section-title { font-size: 20px; margin: 0 0 12px; padding-left: 4px; }
+.loan-compare .loan-offer { display: grid; grid-template-columns: auto 1fr auto; gap: 2px 14px; align-items: end; padding: 9px 0; border-top: 1px dashed var(--line, #334); }
+.loan-compare .loan-offer > div:first-child { grid-column: 1 / -1; display: flex; flex-direction: column; min-width: 0; margin-bottom: 4px; }
+.loan-compare .lo-rate, .loan-compare .lo-pay { display: flex; flex-direction: column; white-space: nowrap; }
+.loan-compare .lo-rate b { font-size: 1.15em; }
+.loan-compare .lo-pay span:first-child { color: var(--text, inherit); }
+.loan-compare .lo-net { text-align: right; white-space: nowrap; }
+.kind-pick { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
+.kind-pick select { max-width: 60%; }

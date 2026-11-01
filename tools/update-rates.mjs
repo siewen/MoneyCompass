@@ -72,6 +72,30 @@ function parseOffers(html, defaultDays) {
   return offers.filter(o => { const k = o.Bank + "|" + o.Name; if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => b.Rate - a.Rate).slice(0, 6);
 }
 
+// Loan offers from the totalmoney.pl rankings (text based, so small layout changes don't break it).
+const LOAN_BANKS = ["PKO Bank Polski", "Bank Pekao", "Pekao", "mBank", "ING Bank Śląski", "Santander Bank Polska", "Santander", "Bank Millennium", "Millennium", "VeloBank", "Alior Bank",
+  "Credit Agricole", "BNP Paribas", "Erste Bank Polska", "UniCredit", "Raiffeisen Digital Bank", "Citi Handlowy", "Nest Bank", "Bank BPS", "Inbank", "Toyota Bank", "Smartney"];
+export function parseLoans(html, min, max) {
+  const text = decode(html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " | ")).replace(/\s+/g, " ");
+  const names = LOAN_BANKS.map(b => b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+  const found = [];
+  const hits = [...text.matchAll(new RegExp("(" + names + ")", "g"))];
+  for (let i = 0; i < hits.length; i++) {
+    const m = hits[i], start = m.index + m[0].length, end = Math.min(hits[i + 1]?.index ?? text.length, start + 700);
+    const win = text.slice(start, end);
+    const rrso = /RRSO[^\d]{0,40}(\d{1,2}[,.]\d{1,2})\s?%/i.exec(win);
+    if (!rrso) continue;
+    const nominal = /oprocentowanie(?! ?m)(?: nominalne)?(?:(?!RRSO)[^\d]){0,40}(\d{1,2}[,.]\d{1,2})\s?%/i.exec(win);
+    const o = { Bank: m[1].replace(/^Pekao$/, "Bank Pekao").replace(/^Millennium$/, "Bank Millennium"), Name: "", Rrso: num(rrso[1]) };
+    if (nominal) o.Rate = num(nominal[1]);
+    if (/stał/i.test(win)) o.Fixed = true; else if (/zmienn/i.test(win)) o.Fixed = false;
+    if (!(o.Rrso >= min && o.Rrso <= max) || (o.Rate && !(o.Rate >= min - 1 && o.Rate <= o.Rrso))) continue;
+    if (found.some(f => f.Bank === o.Bank && f.Fixed === o.Fixed)) continue;
+    found.push(o);
+  }
+  return found.sort((a, b) => a.Rrso - b.Rrso).slice(0, 6);
+}
+
 const tasks = {
   usd: get("https://api.nbp.pl/api/exchangerates/rates/a/usd/?format=json"),
   eur: get("https://api.nbp.pl/api/exchangerates/rates/a/eur/?format=json"),
@@ -79,6 +103,8 @@ const tasks = {
   bonds: get("https://www.obligacjeskarbowe.pl/"),
   savings: get("https://rankomat.pl/finanse/rankingi/ranking-kont-oszczednosciowych/"),
   deposits: get("https://rankomat.pl/finanse/rankingi/ranking-lokat-na-12-miesiecy/"),
+  mortgages: get("https://www.totalmoney.pl/kredyty_hipoteczne"),
+  cashLoans: get("https://www.totalmoney.pl/kredyty_gotowkowe"),
 };
 const r = {};
 for (const [k, p] of Object.entries(tasks)) { try { r[k] = await p; } catch (e) { console.log("failed:", k, e.message); } }
@@ -93,6 +119,14 @@ try {
   const s = parseOffers(r.savings || "", 90), d = parseOffers(r.deposits || "", 365);
   if (s.length >= 3 && d.length >= 3) { data.SavingsOffers = s; data.DepositOffers = d; data.OffersChecked = now; }
 } catch { /* keep */ }
+try {
+  const mo = parseLoans(r.mortgages || "", 3.5, 10), ca = parseLoans(r.cashLoans || "", 5, 20);
+  const L = { ...(data.LoanOffers || {}) };
+  if (mo.length >= 3) L.mortgage = mo.map(o => ({ ...o, Name: o.Name || (o.Fixed ? "Kredyt hipoteczny – stałe" : o.Fixed === false ? "Kredyt hipoteczny – zmienne" : "Kredyt hipoteczny") }));
+  if (ca.length >= 3) L.cash = ca.map(o => ({ ...o, Name: o.Name || "Kredyt gotówkowy" }));
+  if (mo.length >= 3 || ca.length >= 3) { L.Checked = now; data.LoanOffers = L; }
+  console.log("loans: mortgage", mo.length, "cash", ca.length);
+} catch (e) { console.log("loans failed:", e.message); }
 data.Updated = now;
 writeFileSync(OUT, JSON.stringify(data, null, 1) + "\n");
 console.log("bonds", data.Bonds?.length, "savings", data.SavingsOffers?.length, "deposits", data.DepositOffers?.length, "usd", data.Usd, "ref", data.ReferenceRate);

@@ -132,6 +132,9 @@ export async function openOptimize() {
   const draw = () => { p.el.innerHTML = optimizeHtml(); bind(); };
   const bind = () => {
     p.el.querySelectorAll("[data-route]").forEach(c => c.onclick = () => { p.close(); App.go(c.dataset.route); });
+    // Choose the type of a loan right here – the comparison appears at once
+    p.el.querySelectorAll("[data-loan-kind]").forEach(s => { s.onclick = e => e.stopPropagation(); s.onchange = () => {
+      const l = D().Loans.find(x => x.Id === s.dataset.loanKind); if (l) { l.Kind = s.value; save(); draw(); } }; });
     p.el.querySelector('[data-action="refresh-rates"]').onclick = () => Rates.refresh(true);
     p.el.querySelectorAll("[data-compare]").forEach(b => b.onclick = async () => {
       const [list, i] = b.dataset.compare.split(":");

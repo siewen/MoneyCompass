@@ -32,6 +32,26 @@ export const LOAN_MARKET = {
   card: { rate: null, note: "most cards charge the legal maximum: 2 × (NBP reference rate + 3.5%)" },
   links: { mortgage: "https://www.bankier.pl/kredyty-hipoteczne/porownaj-oferty", cash: "https://www.totalmoney.pl/ranking-kredytow-gotowkowych", car: "https://www.totalmoney.pl/ranking-kredytow-gotowkowych" },
 };
+/** Best loan offers from the totalmoney.pl rankings. rates.json (updated every day on GitHub) replaces these when it has newer ones.
+ *  Rate = nominal interest (when known), Rrso = full yearly cost. Mortgage RRSO for 405 000 zł over 25 years; cash loans without commission. */
+export const LOAN_RANKINGS = { mortgage: "https://www.totalmoney.pl/kredyty_hipoteczne", cash: "https://www.totalmoney.pl/kredyty_gotowkowe" };
+export const BUILT_IN_LOANS = {
+  Checked: "2026-11-01",
+  mortgage: [
+    { Bank: "Bank Millennium", Name: "Kredyt hipoteczny z oprocentowaniem zmiennym", Rrso: 5.79, Fixed: false },
+    { Bank: "VeloBank", Name: "VeloDom dla Profesjonalistów", Rrso: 5.88, Fixed: false },
+    { Bank: "Bank Millennium", Name: "Kredyt hipoteczny ze stałym oprocentowaniem", Rrso: 5.98, Fixed: true },
+    { Bank: "mBank", Name: "Stała Pewność, edycja 3", Rrso: 6.13, Fixed: true },
+    { Bank: "PKO Bank Polski", Name: "Kredyt hipoteczny Własny Kąt", Rrso: 6.14, Fixed: true },
+  ],
+  cash: [
+    { Bank: "VeloBank", Name: "Kredyt gotówkowy", Rate: 7.6, Rrso: 7.87 },
+    { Bank: "UniCredit", Name: "Kredyt gotówkowy", Rate: 7.79, Rrso: 8.07 },
+    { Bank: "Bank Pekao", Name: "Kredyt gotówkowy", Rate: 7.8, Rrso: 8.08 },
+    { Bank: "Raiffeisen Digital Bank", Name: "Kredyt gotówkowy", Rate: 8.05, Rrso: 8.35 },
+    { Bank: "ING Bank Śląski", Name: "Kredyt gotówkowy", Rate: 8.09, Rrso: 8.4 },
+  ],
+};
 /** The legal maximum interest in Poland: 2 × (reference rate + 3.5 percentage points). */
 export const maxLegalRate = () => 2 * ((Rates.data.ReferenceRate || 3.75) + 3.5);
 
@@ -49,6 +69,13 @@ export const Rates = {
   get savings() { return this.data.SavingsOffers?.length ? this.data.SavingsOffers : BUILT_IN.SavingsOffers; },
   get deposits() { return this.data.DepositOffers?.length ? this.data.DepositOffers : BUILT_IN.DepositOffers; },
   get checked() { return this.data.DepositOffers?.length && this.data.OffersChecked ? this.data.OffersChecked : BUILT_IN_DATE; },
+  /** Best current loan offers for a type of loan (car loans compare with cash loans), cheapest first. */
+  loanOffers(kind) {
+    const k = kind === "car" ? "cash" : kind, live = this.data.LoanOffers?.[k];
+    const list = live?.length >= 3 ? live : BUILT_IN_LOANS[k] || [];
+    return [...list].sort((a, b) => (a.Rate || a.Rrso) - (b.Rate || b.Rrso));
+  },
+  get loansChecked() { const k = this.data.LoanOffers; return k?.Checked && (k.mortgage?.length >= 3 || k.cash?.length >= 3) ? k.Checked : BUILT_IN_LOANS.Checked; },
   bond(code) { return this.data.Bonds?.find(b => b.Code === code)?.Rate; },
   bestOffer() { return [...this.savings, ...this.deposits].sort((a, b) => b.Rate - a.Rate)[0] || null; },
   link(o) { return o.Url || "https://www.google.com/search?q=" + encodeURIComponent(`${o.Bank} ${o.Name}`.trim()); },
