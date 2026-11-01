@@ -271,7 +271,7 @@ export const Loans = {
     el.innerHTML = `<div class="grid">
       ${card(`<form id="loan">${heading(l ? T("Edit loan") : T("Add a loan"))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("Car loan, credit card, mortgage"))))}
-        <div class="two">${field(T("Borrowed at the start (zł)"), numInput("original", plain(f.Original), T("optional")))}${field(T("Still to pay back (zł)"), numInput("remaining", plain(l ? loanPlan(l).remainingNow : f.Remaining)))}</div>
+        <div class="two">${field(T("Loan amount at the start (zł)"), numInput("original", plain(f.Original), T("optional")))}${field(T("Principal still owed (zł)"), numInput("remaining", plain(l ? loanPlan(l).remainingNow : f.Remaining)))}</div>
         ${hint(T("With the amount at the start, MoneyCompass shows how much you have already paid back."))}
         <div class="two">${field(T("Monthly payment (zł)"), numInput("payment", plain(f.MonthlyPayment)))}${field(T("Interest rate (% per year, 0 if none)"), numInput("rate", plain(f.RatePercent), "0"))}</div>
         <div class="two">${field(T("Next payment on (then every month)"), dateInput("next", inputDate(l ? (loanPlan(l).next || loanNextPayment(l)) : parseDate(f.NextPayment))))}
@@ -284,19 +284,19 @@ export const Loans = {
       ${card(heading(T("Your debts")) + loanProgress(running.map(x => ({ ...x, Remaining: now(x) }))) + row(T("Still to pay back"), pln(running.reduce((s, x) => s + now(x), 0))) + row(T("Payments per month"), pln(payments)) +
         row(T("Share of your income"), income > 0 ? Math.round(share * 100) + "%" : "–") + row(T("Debt-free"), debtFree) +
         level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Expenses tab.")))}
-      ${running.length ? card(`<form id="extra">${heading(T("Pay extra (overpayment)"), "💰")}
-        ${hint(T("Paid more than the monthly payment, or want to see what it would bring? Enter it here – MoneyCompass updates the loan."))}
+      ${running.length ? card(`<form id="extra">${heading(T("Partial early repayment (overpayment)"), "💰")}
+        ${hint(T("An overpayment goes straight to the principal (the capital you still owe), so you pay less interest. Banks call it a partial early repayment. Enter it here – or just try an amount to see what it would bring."))}
         ${field(T("Loan"), select("loan", running.map(x => [x.Id, x.Name]), running[0].Id))}
-        <div class="two">${field(T("Extra amount once (zł)"), numInput("amount", "", T("e.g. {0}", "5000")))}${field(T("Date"), dateInput("date", inputDate(today())))}</div>
-        ${field(T("What should change?"), select("mode", [["shorter", T("Shorter loan – same monthly payment")], ["lower", T("Lower monthly payment – same end date")]], "shorter"))}
-        ${field(T("What if I pay more every month? (zł, only a calculation)"), numInput("monthly", "", T("e.g. {0}", "200")))}
+        <div class="two">${field(T("Amount paid towards the principal (zł)"), numInput("amount", "", T("e.g. {0}", "5000")))}${field(T("Date"), dateInput("date", inputDate(today())))}</div>
+        ${field(T("After the overpayment"), select("mode", [["shorter", T("Shorten the loan term – same monthly payment")], ["lower", T("Reduce the monthly payment – same term")]], "shorter"))}
+        ${field(T("Regular extra principal every month? (zł, calculation only)"), numInput("monthly", "", T("e.g. {0}", "200")))}
         <div class="extra-result" id="extra-result"></div>
-        <div class="buttons">${button("✔ " + esc(T("Save the extra repayment")), "save-extra", "main")}</div></form>`) : ""}
+        <div class="buttons">${button("✔ " + esc(T("Save the overpayment")), "save-extra", "main")}</div></form>`) : ""}
       ${card(heading(T("Loans")) + hint(T("Tap a loan to edit it, for example to update what is left.")) + (d.Loans.length ? `<div class="list">${d.Loans.map(x => `
         <div class="item clickable loan-item" data-edit-loan="${x.Id}"><div class="loan-main"><b>${esc(x.Name)}</b>
           <span class="hint">${esc(loanLine(x, plans.get(x.Id) || loanPlan(x)))}</span>
           ${x.Original > 0 ? `<div class="loan-progress">${progress(1 - now(x) / x.Original, "#1BAF7A")}<span class="hint">${esc(T("Paid back {0} of {1} ({2}%)", pln(x.Original - now(x)), pln(x.Original), Math.round((1 - now(x) / x.Original) * 100)))}</span></div>` : ""}
-          ${(x.Extra || []).length ? `<span class="hint good">💰 ${esc(T("Extra repayments: {0}", x.Extra.map(e => `${pln(e.Amount)} (${fmtDate(e.Date)})`).join(", ")))}</span>` : ""}
+          ${(x.Extra || []).length ? `<span class="hint good">💰 ${esc(T("Overpayments: {0}", x.Extra.map(e => `${pln(e.Amount)} (${fmtDate(e.Date)})`).join(", ")))}</span>` : ""}
           ${loanWarning(x)}</div>
         <div class="right"><b>${pln((plans.get(x.Id) || loanPlan(x)).remainingNow)}</b>${(plans.get(x.Id) || loanPlan(x)).done ? `<span class="hint">${esc(T("estimated today"))}</span>` : ""}</div><button class="icon-btn danger" data-del-loan="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No loans – great! Add one above if you have any."))), "wide")}
       ${binCard(["loan"])}
@@ -332,9 +332,9 @@ export const Loans = {
       xf.querySelectorAll("input, select").forEach(i => i.addEventListener("input", show)); show();
       el.querySelector('[data-action="save-extra"]').onclick = async () => {
         const v = values(xf), loan = d.Loans.find(y => y.Id === v.loan), amt = num(v.amount) || 0;
-        if (!loan || !(amt > 0)) { toast(T("Enter the extra amount you paid."), "bad"); return; }
-        if (amt > loanPlan(loan).remainingNow) { toast(T("That is more than what is left to pay back."), "bad"); return; }
-        if (!(await confirmBox(T("Save the extra repayment?"), T("{0} paid extra into {1} on {2}. What is left goes down by this amount{3}.", pln(amt), loan.Name, fmtDate(parseDate(v.date)), v.mode === "lower" ? ", " + T("and the monthly payment is lowered") : ""), T("Save"), T("Cancel")))) return;
+        if (!loan || !(amt > 0)) { toast(T("Enter the amount you paid towards the principal."), "bad"); return; }
+        if (amt > loanPlan(loan).remainingNow) { toast(T("That is more than the principal still owed."), "bad"); return; }
+        if (!(await confirmBox(T("Save the overpayment?"), T("{0} paid towards the principal of {1} on {2}. The principal still owed goes down by this amount{3}.", pln(amt), loan.Name, fmtDate(parseDate(v.date)), v.mode === "lower" ? ", " + T("and the monthly payment is lowered") : ""), T("Save"), T("Cancel")))) return;
         applyExtra(loan, amt, v.mode, parseDate(v.date));
         toast(T("Saved. Debt-free in {0}.", monthName(loanPlan(loan).end || today()))); App.refresh();
       };
