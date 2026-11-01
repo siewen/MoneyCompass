@@ -651,4 +651,6 @@ body.is-locked .lock-screen ~ .popup-back { visibility: visible; z-index: 1100; 
   :root[data-design] .help-fab { bottom: calc(86px + env(safe-area-inset-bottom)); }
   :root[data-design] .guide-bar { bottom: calc(86px + env(safe-area-inset-bottom)); }
   :root[data-design] .brand span { display: none; }
+  :root[data-design] .actions { margin-left: auto; }
+  :root[data-design] .tabs { justify-content: safe center; }
 }
