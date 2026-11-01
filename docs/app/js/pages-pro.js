@@ -148,6 +148,7 @@ export async function openOptimize() {
 }
 const exampleAmount = () => { const s = Calc.portfolio(D()).safe; return s > 0 ? Math.round(s) : 10000; };
 
+const RISK_LABEL = { low: "Low risk", mid: "Medium risk", high: "High risk" };
 function optimizeHtml() {
   const d = D(), advice = Advisor.analyse(d);
   const gain = advice.filter(a => a.kind === "money" || a.kind === "tip").reduce((s, a) => s + a.benefit, 0);
@@ -170,7 +171,7 @@ function optimizeHtml() {
   const offersStatus = T("Top rates from the {0} rankings, checked {1}. Conditions apply – always check the bank's own terms.", "rankomat.pl", fmtDate(String(Rates.checked).slice(0, 10)));
   const kind = { warning: ["⚠️", "bad"], safety: ["🛡️", "primary"], money: ["💳", "good"], tip: ["💡", "warn"] };
   const option = (icon, title, text, now, risk, access, best) => card(`<h3><span class="h-icon">${icon}</span>${esc(title)}</h3><p>${esc(text)}</p>
-    <div class="facts"><span>${esc(T("Now"))}</span><div><b>${now}</b></div><span>${esc(T("Risk"))}</span><div>${esc(risk)}</div>
+    <div class="facts"><span>${esc(T("Now"))}</span><div><b>${now}</b></div><span>${esc(T("Risk"))}</span><div><span class="risk ${risk[0]}">${esc(T(RISK_LABEL[risk[0]]))}</span> ${esc(risk[1].includes(" – ") ? risk[1].slice(risk[1].indexOf(" – ") + 3) : risk[1])}</div>
     <span>${esc(T("Access to money"))}</span><div>${esc(access)}</div><span>${esc(T("Best for"))}</span><div>${esc(best)}</div></div>`);
   const bonds = BOND_CODES.filter(c => Rates.bond(c) !== undefined).map(c => `<div class="bond"><b>${c}</b><span>${esc(T(BOND_NAMES[c]))}</span><b class="good">${rate(Rates.bond(c))}</b></div>`).join("") || "–";
 
@@ -187,18 +188,18 @@ function optimizeHtml() {
     ${card(heading(T("Ways to save money in Poland")) + hint(T("From the safest and most flexible to long-term. Rates change often – always check the current conditions.")) + `<p>📈 ${esc(status)}</p>` + button("⟳ " + esc(T("Refresh rates")), "refresh-rates"))}
     ${option("🏦", T("Savings account (konto oszczędnościowe)"), T("Pay in and take out any time. Banks pay the best rates as 3–6 month promotions for new money, then much less."),
       esc(ref ? T("NBP reference rate: {0}. The best promotions for new money are usually about 2–3 points higher for a few months; standard rates are often lower.", ref) : "–"),
-      T("Very low – guaranteed by the BFG up to €100,000 per bank"), T("Same day"), T("Emergency fund, short-term savings"))}
+      ["low", T("Very low – guaranteed by the BFG up to €100,000 per bank")], T("Same day"), T("Emergency fund, short-term savings"))}
     ${option("🔒", T("Fixed deposit (lokata)"), T("A fixed rate for a fixed time, e.g. 3, 6 or 12 months. If you take the money out early you usually lose the interest."),
-      esc(ref ? T("Good 12-month deposits usually pay about the NBP reference rate ({0}).", ref) : "–"), T("Very low – guaranteed by the BFG"), T("At the end of the term"), T("Money you won't need for a while"))}
+      esc(ref ? T("Good 12-month deposits usually pay about the NBP reference rate ({0}).", ref) : "–"), ["low", T("Very low – guaranteed by the BFG")], T("At the end of the term"), T("Money you won't need for a while"))}
     ${option("🏛️", T("Polish treasury bonds (obligacje skarbowe)"), T("Lent to the State Treasury. Longer bonds (e.g. 4-year COI, 10-year EDO) follow inflation, so your money keeps its value. Bought online in PKO BP or Pekao."),
       `<div class="bonds">${bonds}</div><span class="hint">${esc(T("Interest in the first period for the bonds on sale now. Inflation-linked bonds then pay inflation plus a margin."))}</span><br><a class="btn second small" href="${BONDS_WEBSITE}" target="_blank" rel="noopener">${esc(T("Open the official bond website"))}</a>`,
-      T("Very low – backed by the State"), T("Early redemption possible for a small fee"), T("Protecting savings against inflation"))}
+      ["low", T("Very low – backed by the State")], T("Early redemption possible for a small fee"), T("Protecting savings against inflation"))}
     ${option("👤", T("IKE / IKZE (retirement accounts)"), T("Special accounts with tax benefits: IKE – no 19% Belka tax when you withdraw after 60. IKZE – payments lower your income tax every year. Can hold deposits, bonds or funds."),
-      esc(T("Yearly limits in {0}: IKE {1}, IKZE {2} (self-employed: {3}).", LIMITS_YEAR, pln(IKE), pln(IKZE), pln(IKZE_SELF))), T("Depends on what you put inside"), T("Long-term (until retirement)"), T("Saving for retirement with less tax"))}
+      esc(T("Yearly limits in {0}: IKE {1}, IKZE {2} (self-employed: {3}).", LIMITS_YEAR, pln(IKE), pln(IKZE), pln(IKZE_SELF))), ["mid", T("Depends on what you put inside")], T("Long-term (until retirement)"), T("Saving for retirement with less tax"))}
     ${option("💼", T("PPK (employee capital plan)"), T("Workplace plan: you pay a small part of your salary, your employer and the State add extra money on top. Leaving it means losing that free money."),
-      esc(T("You pay 2% of your salary (0.5–4% possible), your employer at least 1.5%, and the State adds 250 zł once and 240 zł every year.")), T("Medium – invested in funds"), T("Long-term"), T("Almost everyone who is employed"))}
+      esc(T("You pay 2% of your salary (0.5–4% possible), your employer at least 1.5%, and the State adds 250 zł once and 240 zł every year.")), ["mid", T("Medium – invested in funds")], T("Long-term"), T("Almost everyone who is employed"))}
     ${option("📊", T("Crypto savings"), T("Higher rates on stablecoins and crypto, often without time limits. But no state guarantee: if the platform fails, your money can be lost."),
-      esc(T("Rates differ a lot between platforms and coins and change often – there is no guarantee.")), T("High – no BFG guarantee, prices can fall"), T("Usually same day"), T("Only money you can afford to lose"))}
+      esc(T("Rates differ a lot between platforms and coins and change often – there is no guarantee.")), ["high", T("High – no BFG guarantee, prices can fall")], T("Usually same day"), T("Only money you can afford to lose"))}
     ${card(heading(T("Please note")) + hint(T("These suggestions are calculated from what you entered and are estimates. They are not financial, investment or tax advice.")))}
   </div><div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
 }

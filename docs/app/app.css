@@ -435,3 +435,5 @@ details.cal-month > summary:hover .m-name b { text-decoration: underline; }
 .data-menu { min-width: 260px; }
 .data-menu hr { margin: 4px 6px; }
 .data-menu .mi { display: inline-block; width: 26px; }
+.risk { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; color: #fff; margin-right: 4px; white-space: nowrap; }
+.risk.low { background: #15803D; } .risk.mid { background: #D97706; } .risk.high { background: #DC2626; }

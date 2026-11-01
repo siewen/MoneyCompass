@@ -367,7 +367,10 @@ export const EXTRA = {
 "Loan amount at the start (zł)": "Kreditbetrag zu Beginn (zł)",
 "Data": "Daten",
 "Data: import, export, backup": "Daten: Import, Export, Sicherung",
-"Save profile (backup)": "Profil speichern (Sicherung)"
+"Save profile (backup)": "Profil speichern (Sicherung)",
+"Low risk": "Geringes Risiko",
+"Medium risk": "Mittleres Risiko",
+"High risk": "Hohes Risiko"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -736,7 +739,10 @@ export const EXTRA = {
 "Loan amount at the start (zł)": "Montant initial du prêt (zł)",
 "Data": "Données",
 "Data: import, export, backup": "Données : import, export, sauvegarde",
-"Save profile (backup)": "Enregistrer le profil (sauvegarde)"
+"Save profile (backup)": "Enregistrer le profil (sauvegarde)",
+"Low risk": "Risque faible",
+"Medium risk": "Risque moyen",
+"High risk": "Risque élevé"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1105,6 +1111,9 @@ export const EXTRA = {
 "Loan amount at the start (zł)": "Kwota kredytu na początku (zł)",
 "Data": "Dane",
 "Data: import, export, backup": "Dane: import, eksport, kopia zapasowa",
-"Save profile (backup)": "Zapisz profil (kopia zapasowa)"
+"Save profile (backup)": "Zapisz profil (kopia zapasowa)",
+"Low risk": "Niskie ryzyko",
+"Medium risk": "Średnie ryzyko",
+"High risk": "Wysokie ryzyko"
 }
 };
