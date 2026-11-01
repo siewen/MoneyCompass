@@ -603,13 +603,17 @@ const hasInfo = (kind, x) => kind === "holding"
 export function infoBtn(kind, x) {
   return hasInfo(kind, x) ? `<button class="icon-btn c-info" data-info="${kind}:${x.Id}" title="${esc(T("Details from your bank"))}">ⓘ</button>` : "";
 }
-function infoRows(info) {
-  const labels = [["Bank", "Bank"], ["Type", "Type"], ["Account", "Your account"], ["Name", "From / to"], ["OtherAccount", "Their account"], ["Title", "Title"], ["Category", "Bank category"]];
+function infoRows(info, incoming = false) {
   // Card payments, BLIK and cash: the bank file has no account of the shop – say so instead of leaving it out
   const card = /kart|card|blik|bankomat|atm|wypłata|withdrawal/i.test((info.Type || "") + " " + (info.Title || ""));
   const missing = T(card ? "– not in the bank file (card payment: banks don't give the shop's account)" : "– not in the bank file");
-  return labels.filter(([k]) => info[k] || (k === "OtherAccount" && info.Bank)).map(([k, l]) =>
-    row(T(l), info[k] ? `<span class="info-val">${esc(info[k])}</span>` : `<span class="hint">${esc(missing)}</span>`)).join("");
+  const acc = v => v ? `<span class="info-acc">${esc(v)}</span>` : `<span class="hint">${esc(missing)}</span>`;
+  const mine = `<b>${esc(T("Your account"))}${info.Bank ? " · " + esc(info.Bank) : ""}</b>${info.Account ? `<span class="info-acc">${esc(info.Account)}</span>` : ""}`;
+  const theirs = `<b>${esc(info.Name || info.Title || "–")}</b>${acc(info.OtherAccount)}`;
+  const flow = `<div class="info-flow"><div><small>${esc(T("From"))}</small>${incoming ? theirs : mine}</div><span class="info-arrow">→</span>
+    <div><small>${esc(T("To"))}</small>${incoming ? mine : theirs}</div></div>`;
+  return flow + [["Type", "Type"], ["Title", "Title"], ["Category", "Bank category"]].filter(([k]) => info[k])
+    .map(([k, l]) => row(T(l), `<span class="info-val">${esc(info[k])}</span>`)).join("");
 }
 export function showInfo(kind, id) {
   const d = State.data, x = (d[INFO_LISTS[kind]] || []).find(y => y.Id === id);
@@ -622,7 +626,7 @@ export function showInfo(kind, id) {
     if (tr.length) body += `<h3>⬆ ${esc(T("Transfers from your bank imports"))}</h3><div class="list">${tr.slice(0, 50).map(t => `<div class="item"><div><b>${esc(t.Description || "–")}</b>
       <span class="hint">${fmtDate(t.Date)}${t.Info?.Account ? " · " + esc(T("from {0}", t.Info.Account)) : ""}${t.Info?.OtherAccount ? " → " + esc(t.Info.OtherAccount) : ""}</span></div><b class="primary">${pln(t.Amount)}</b></div>`).join("")}</div>`;
   } else {
-    body = row(T("Date"), fmtDate(x.Date)) + row(T("Amount"), pln(x.Amount)) + infoRows(x.Info || {});
+    body = row(T("Date"), fmtDate(x.Date)) + row(T("Amount"), pln(x.Amount)) + infoRows(x.Info || {}, kind === "received");
   }
   const p = popup(`<div class="box-head"><span class="box-icon">ⓘ</span><h2>${esc(x.Description || x.Name || "–")}</h2></div>${body}
     ${hint(T("From your bank file. It stays only in this browser."))}
