@@ -360,7 +360,7 @@ export const Expenses = {
     const filterBar = d.Expenses.length ? `<div class="filter-bar">
       <input type="search" name="f-text" value="${esc(flt.text)}" placeholder="🔍 ${esc(T("Search: shop, amount…"))}">
       <select name="f-cat"><option value="">${esc(T("All categories"))}</option>${usedCats.map(c => `<option value="${esc(c)}"${c === flt.cat ? " selected" : ""}>${esc(categoryLabel(c))}</option>`).join("")}</select>
-      <select name="f-ess"><option value="">${esc(T("Essential and not"))}</option><option value="yes"${flt.ess === "yes" ? " selected" : ""}>${esc(T("Essential"))}</option><option value="no"${flt.ess === "no" ? " selected" : ""}>${esc(T("Not essential"))}</option></select>
+      <select name="f-ess"><option value="">${esc(T("All"))}</option><option value="yes"${flt.ess === "yes" ? " selected" : ""}>${esc(T("Essential"))}</option><option value="no"${flt.ess === "no" ? " selected" : ""}>${esc(T("Not essential"))}</option></select>
       <label class="check"><input type="checkbox" name="f-rep"${flt.rep ? " checked" : ""}><span>🔁 ${esc(T("Repeating only"))}</span></label>
       ${filtering ? `<button class="btn second small" data-action="f-clear">✕ ${esc(T("Clear filter"))}</button>` : ""}</div>` +
       (filtering ? `<p class="filter-result">${esc(T("Expenses found: {0} · together {1}", shown.length, pln(shown.reduce((s, e) => s + e.Amount, 0))))}</p>` : "") : "";
