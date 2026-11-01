@@ -539,7 +539,7 @@ svg.donut text { pointer-events: none; }
 :root[data-design] .top { background: color-mix(in srgb, var(--side) 92%, transparent); border-bottom-color: var(--border); }
 :root[data-design] .tab { color: var(--muted); filter: none; opacity: 1; }
 :root[data-design] .tab.active { color: var(--ink); border-bottom-color: var(--hi); }
-@media (min-width: 900px) {
+@media (min-width: 700px) {
   :root[data-design] body { padding-left: 250px; }
   :root[data-design] .top { position: fixed; inset: 0 auto 0 0; width: 250px; flex-direction: column; align-items: stretch; gap: 14px; padding: 26px 18px 18px; background: var(--side); border: 0; border-right: 1px solid var(--border); backdrop-filter: none; overflow-y: auto; }
   :root[data-design="emerald"] .top { background: #161C1B; }
@@ -570,26 +570,26 @@ svg.donut text { pointer-events: none; }
 
 /* Beta side menu: folded to icons ("auto", opens when pointed at) or kept open ("pinned"), with the small arrow */
 .side-toggle { display: none; }
-@media (min-width: 900px) {
+@media (min-width: 700px) {
   :root[data-design] .top { transition: width .2s ease, box-shadow .2s; overflow-x: hidden; }
   :root[data-design] .side-toggle { display: grid; place-items: center; position: fixed; top: 34px; left: 236px; z-index: 25; width: 26px; height: 26px; border-radius: 50%;
     border: 1px solid var(--border); background: var(--card); color: var(--ink); font: 700 16px/1 system-ui, sans-serif; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.3); transition: left .2s; padding: 0 0 2px; }
   :root[data-design] .side-toggle:hover { background: var(--hi); color: #0D2B21; }
   :root[data-design][data-side="auto"] body { padding-left: 78px; }
   :root[data-design][data-side="auto"] .side-toggle { left: 64px; }
-  :root[data-design][data-side="auto"] .top:not(:hover) { width: 78px; padding-left: 12px; padding-right: 12px; }
-  :root[data-design][data-side="auto"] .top:hover { box-shadow: 18px 0 40px rgba(0,0,0,.45); z-index: 30; }
-  :root[data-design][data-side="auto"] .top:hover .side-toggle { left: 236px; }
-  :root[data-design][data-side="auto"] .top:not(:hover) .brand span,
-  :root[data-design][data-side="auto"] .top:not(:hover) .tab .tl,
-  :root[data-design][data-side="auto"] .top:not(:hover) .sw-l,
-  :root[data-design][data-side="auto"] .top:not(:hover) .act span,
-  :root[data-design][data-side="auto"] .top:not(:hover) .lang-btn,
-  :root[data-design][data-side="auto"] .top:not(:hover) .data-btn { display: none; }
-  :root[data-design][data-side="auto"] .top:not(:hover) .brand { padding: 0 0 18px; justify-content: center; }
-  :root[data-design][data-side="auto"] .top:not(:hover) .tab { justify-content: center; padding: 10px 0; }
-  :root[data-design][data-side="auto"] .top:not(:hover) .actions { justify-content: center; }
-  :root[data-design][data-side="auto"] .top:not(:hover) .design-switch { justify-content: center; padding: 8px 0; }
+  :root[data-design][data-side="auto"] .top:not(.open) { width: 78px; padding-left: 12px; padding-right: 12px; }
+  :root[data-design][data-side="auto"] .top.open { box-shadow: 18px 0 40px rgba(0,0,0,.45); z-index: 30; }
+  :root[data-design][data-side="auto"] .top.open .side-toggle { left: 236px; }
+  :root[data-design][data-side="auto"] .top:not(.open) .brand span,
+  :root[data-design][data-side="auto"] .top:not(.open) .tab .tl,
+  :root[data-design][data-side="auto"] .top:not(.open) .sw-l,
+  :root[data-design][data-side="auto"] .top:not(.open) .act span,
+  :root[data-design][data-side="auto"] .top:not(.open) .lang-btn,
+  :root[data-design][data-side="auto"] .top:not(.open) .data-btn { display: none; }
+  :root[data-design][data-side="auto"] .top:not(.open) .brand { padding: 0 0 18px; justify-content: center; }
+  :root[data-design][data-side="auto"] .top:not(.open) .tab { justify-content: center; padding: 10px 0; }
+  :root[data-design][data-side="auto"] .top:not(.open) .actions { justify-content: center; }
+  :root[data-design][data-side="auto"] .top:not(.open) .design-switch { justify-content: center; padding: 8px 0; }
   :root[data-design] .tab .tl { white-space: nowrap; }
 }
 .swatch.classic-dark { background: linear-gradient(135deg, #0F172A 50%, #14B8A6 50%); }
@@ -632,7 +632,7 @@ body.is-locked .lock-screen ~ .popup-back { visibility: visible; z-index: 1100; 
 .wave-key.off { opacity: .45; } .wave-key.off i { background: var(--muted); }
 
 /* Emerald / Navy on phones and small windows: page title on top, tabs as an app-like bottom bar with icons */
-@media (max-width: 899px) {
+@media (max-width: 699px) {
   :root[data-design] body { padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
   :root[data-design] .top { flex-wrap: nowrap; padding: 8px 12px; backdrop-filter: none; background: var(--side); }   /* no backdrop-filter here: it would trap the fixed bottom bar inside the header */
   :root[data-design] .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; order: 0; flex-basis: auto; gap: 2px;

@@ -111,6 +111,13 @@ function buildShell() {
   setupHelpButton();
   render();
   fitTabs();
+  // Folded side menu: opens while the mouse is on it. On touch screens (phones, the open Z Fold) it opens with the arrow instead,
+  // because a tap would leave it open over the page.
+  const top = document.querySelector(".top");
+  if (top && matchMedia("(hover: hover)").matches) {
+    top.addEventListener("mouseenter", () => top.classList.add("open"));
+    top.addEventListener("mouseleave", () => top.classList.remove("open"));
+  }
 }
 
 // ---------- One "Data ▾" menu instead of four buttons: import, export, backup, install, delete ----------
@@ -146,8 +153,8 @@ function fitTabs() {
   tabsEls.forEach(t => t.hidden = false);
   if (window.innerWidth >= 720) nav.scrollLeft = 0;
   // The beta design shows all tabs in a side menu on wide screens
-  if (beta() && window.innerWidth >= 900) return;
-  if (window.innerWidth < (beta() ? 900 : 720) || nav.scrollWidth <= nav.clientWidth + 1) return;
+  if (beta() && window.innerWidth >= 700) return;
+  if (window.innerWidth < (beta() ? 700 : 720) || nav.scrollWidth <= nav.clientWidth + 1) return;
   const more = document.createElement("button");
   more.className = "tab tab-more";
   more.textContent = T("More") + " ▾";   // the label first: measured with its real width
@@ -416,7 +423,7 @@ Object.assign(App, {
     // Phones: the tabs scroll sideways, so bring the chosen one into view. Wider screens: "More ▾" holds the rest,
     // so the tab row must start at the left (otherwise "Overview" ends up half hidden under the logo)
     const nav = document.getElementById("tabs");
-    if (window.innerWidth < (beta() ? 900 : 720)) { if (tab) tab.scrollIntoView({ inline: "center", block: "nearest" }); }
+    if (window.innerWidth < (beta() ? 700 : 720)) { if (tab) tab.scrollIntoView({ inline: "center", block: "nearest" }); }
     else if (nav) nav.scrollLeft = 0;
     try { history.replaceState(null, "", "#" + route); } catch { /* file */ }
   },
