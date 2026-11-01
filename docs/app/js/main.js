@@ -24,11 +24,46 @@ function tabs() {
   return list;
 }
 
+// Line icons for the tabs (shown in the beta design's side menu)
+const I = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const TAB_ICON = {
+  overview: I('<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'),
+  income: I('<path d="M12 4v12M6 10l6 6 6-6"/><path d="M4 20h16"/>'),
+  expenses: I('<path d="M12 20V8M6 14l6-6 6 6"/><path d="M4 4h16"/>'),
+  emergency: I('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>'),
+  portfolio: I('<path d="M4 8h13a3 3 0 0 1 3 3v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 8l11-4 2 4"/><circle cx="16" cy="14" r="1.3"/>'),
+  loans: I('<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h4"/>'),
+  budget: I('<path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/>'),
+  calendar: I('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
+  savings: I('<path d="M4 7h16M4 12h16M4 17h10"/><path d="M18 15l2 2-2 2"/>'),
+};
+/** Beta design: "navy" or "emerald" (saved in this browser), or "" for the normal design. */
+const BETA_KEY = "mc-beta";
+const beta = () => { try { return localStorage.getItem(BETA_KEY) || ""; } catch { return ""; } };
+function setBeta(v) { try { v ? localStorage.setItem(BETA_KEY, v) : localStorage.removeItem(BETA_KEY); } catch { /* private window */ } buildShell(); }
+function betaMenu() {
+  const btn = document.querySelector('[data-act="beta"]'), r = btn.getBoundingClientRect(), now = beta();
+  const shield = document.createElement("div"); shield.className = "help-shield";
+  const menu = document.createElement("div"); menu.className = "tab-menu data-menu beta-menu";
+  const opt = (v, sw, label, sub) => `<button data-b="${v}"${now === v ? ' class="on"' : ""}><span class="swatch ${sw}"></span><span><b>${esc(label)}</b><small>${esc(sub)}</small></span>${now === v ? "<i>✓</i>" : ""}</button>`;
+  menu.innerHTML = `<div class="menu-title">${esc(T("Design"))}</div>` + opt("", "classic", T("Classic"), T("The design you know")) + "<hr>" +
+    opt("navy", "navy", T("Beta – Navy"), T("Side menu, dark blue with mint and magenta")) + opt("emerald", "emerald", T("Beta – Emerald"), T("Side menu, dark green with lavender"));
+  document.body.append(shield, menu);
+  const w = menu.offsetWidth, h = menu.offsetHeight;
+  menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + "px";
+  menu.style.top = Math.max(8, Math.min(r.bottom + 6, window.innerHeight - h - 8)) + "px";
+  const close = () => { shield.remove(); menu.remove(); };
+  shield.onclick = close;
+  menu.querySelectorAll("[data-b]").forEach(b => b.onclick = () => { close(); setBeta(b.dataset.b); });
+}
+
 function applyTheme() {
   let design = State.data.Settings.Design || "light";
   if (!license.isPro) design = "light";
   if (design === "system") design = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   document.documentElement.dataset.theme = design;
+  const b = beta();
+  if (b) document.documentElement.dataset.design = b; else delete document.documentElement.dataset.design;
 }
 
 function buildShell() {
@@ -40,8 +75,9 @@ function buildShell() {
   document.getElementById("app").innerHTML = `
     <header class="top">
       <a class="brand" href="../index.html" title="MoneyCompass"><img src="../logo.svg" alt=""><span>MoneyCompass</span></a>
-      <nav class="tabs" id="tabs">${list.map(t => `<button class="tab" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}">${esc(T(t.title))}</button>`).join("")}</nav>
+      <nav class="tabs" id="tabs">${list.map(t => `<button class="tab" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}"><span class="ti">${TAB_ICON[t.route] || ""}</span><span class="tl">${esc(T(t.title))}</span></button>`).join("")}</nav>
       <div class="actions">
+        <button class="design-switch${beta() ? " on" : ""}" data-act="beta" title="${esc(T("Try the new beta design"))}"><span class="sw"></span><span class="sw-l">${esc(T("Beta design"))}</span></button>
         <button class="act data-btn" data-act="data" title="${esc(T("Data: import, export, backup"))}">🗂<span>${esc(T("Data"))}</span> ▾</button>
         <button class="act lang-btn" data-act="lang" title="${esc(T("Language"))}">🌐<b>${esc(lang().toUpperCase())}</b></button>
         <button class="profile-btn" data-act="profile" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}</button>
@@ -49,10 +85,11 @@ function buildShell() {
       </div>
     </header>
     ${license.isPro ? "" : `<div class="free-bar">${esc(T("Free web version."))} <a href="${DOWNLOAD_URL}" target="_blank" rel="noopener">${esc(T("Download the Windows app"))}</a> · <a href="#" data-act="profile">${esc(T("Enter license key"))}</a></div>`}
+    <div class="page-head"><h1 id="page-title"></h1></div>
     <main id="page"></main>
     <button class="help-fab" data-act="help-menu" title="${esc(T("Help & About"))}">?</button>`;
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => App.go(b.dataset.tab));
-  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu };
+  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, beta: betaMenu };
   document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
   setupHelpButton();
   render();
@@ -74,7 +111,8 @@ function dataMenu() {
   menu.innerHTML = items.map(([k, i, l]) => k === "-" ? "<hr>" : `<button data-d="${k}"${k === "delete" ? ' class="danger-item"' : ""}><span class="mi">${i}</span>${esc(l)}</button>`).join("");
   document.body.append(shield, menu);
   const w = menu.offsetWidth;
-  menu.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + "px"; menu.style.top = (r.bottom + 6) + "px";
+  menu.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + "px";
+  menu.style.top = Math.max(8, Math.min(r.bottom + 6, window.innerHeight - menu.offsetHeight - 8)) + "px";   // the beta side menu has the button low on the screen
   const close = () => { shield.remove(); menu.remove(); };
   shield.onclick = close;
   document.addEventListener("keydown", function esc1(e) { if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc1); } });
@@ -90,6 +128,8 @@ function fitTabs() {
   const tabsEls = [...nav.querySelectorAll("[data-tab]")];
   tabsEls.forEach(t => t.hidden = false);
   if (window.innerWidth >= 720) nav.scrollLeft = 0;
+  // The beta design shows all tabs in a side menu on wide screens
+  if (beta() && window.innerWidth >= 900) return;
   if (window.innerWidth < 720 || nav.scrollWidth <= nav.clientWidth + 1) return;
   const more = document.createElement("button");
   more.className = "tab tab-more";
@@ -327,6 +367,7 @@ function render() {
   document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b.dataset.tab === page.route));
   document.documentElement.style.setProperty("--accent", ACCENT[page.route]);
   document.documentElement.dataset.page = page.route;
+  const pt = document.getElementById("page-title"); if (pt) pt.textContent = T(page.title);
   const el = document.getElementById("page");
   const y = window.scrollY;
   page.render(el);

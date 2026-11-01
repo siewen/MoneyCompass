@@ -545,7 +545,16 @@ export const EXTRA = {
 "not worth it": "lohnt sich nicht",
 "Same remaining amount ({0}) and same end ({1} more payments). Switching costs of about {2} are subtracted ({3}). Offers checked {4}; your bank's offer depends on your income and credit history.": "Gleicher Restbetrag ({0}) und gleiches Ende ({1} weitere Raten). Wechselkosten von etwa {2} sind abgezogen ({3}). Angebote geprüft am {4}; das Angebot Ihrer Bank hängt von Einkommen und Bonität ab.",
 "valuation, notary and court fees": "Bewertung, Notar- und Gerichtskosten",
-"early repayment fee, at most 1%": "Vorfälligkeitsgebühr, höchstens 1 %"
+"early repayment fee, at most 1%": "Vorfälligkeitsgebühr, höchstens 1 %",
+"Design": "Design",
+"Classic": "Klassisch",
+"The design you know": "Das bekannte Design",
+"Beta – Navy": "Beta – Marine",
+"Side menu, dark blue with mint and magenta": "Seitenmenü, Dunkelblau mit Mint und Magenta",
+"Beta – Emerald": "Beta – Smaragd",
+"Side menu, dark green with lavender": "Seitenmenü, Dunkelgrün mit Lavendel",
+"Try the new beta design": "Das neue Beta-Design ausprobieren",
+"Beta design": "Beta-Design"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1092,7 +1101,16 @@ export const EXTRA = {
 "not worth it": "pas intéressant",
 "Same remaining amount ({0}) and same end ({1} more payments). Switching costs of about {2} are subtracted ({3}). Offers checked {4}; your bank's offer depends on your income and credit history.": "Même montant restant ({0}) et même fin ({1} mensualités). Les frais de changement d'environ {2} sont déduits ({3}). Offres vérifiées le {4} ; l'offre de votre banque dépend de vos revenus et de votre historique de crédit.",
 "valuation, notary and court fees": "expertise, notaire et frais de justice",
-"early repayment fee, at most 1%": "frais de remboursement anticipé, 1 % maximum"
+"early repayment fee, at most 1%": "frais de remboursement anticipé, 1 % maximum",
+"Design": "Apparence",
+"Classic": "Classique",
+"The design you know": "L'apparence habituelle",
+"Beta – Navy": "Bêta – marine",
+"Side menu, dark blue with mint and magenta": "Menu latéral, bleu foncé avec menthe et magenta",
+"Beta – Emerald": "Bêta – émeraude",
+"Side menu, dark green with lavender": "Menu latéral, vert foncé avec lavande",
+"Try the new beta design": "Essayer la nouvelle apparence bêta",
+"Beta design": "Apparence bêta"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1639,6 +1657,15 @@ export const EXTRA = {
 "not worth it": "nie opłaca się",
 "Same remaining amount ({0}) and same end ({1} more payments). Switching costs of about {2} are subtracted ({3}). Offers checked {4}; your bank's offer depends on your income and credit history.": "Ta sama pozostała kwota ({0}) i ten sam koniec ({1} rat). Odjęto koszty zmiany około {2} ({3}). Oferty sprawdzone {4}; oferta banku zależy od Twoich dochodów i historii kredytowej.",
 "valuation, notary and court fees": "wycena, notariusz i opłaty sądowe",
-"early repayment fee, at most 1%": "prowizja za wcześniejszą spłatę, maks. 1%"
+"early repayment fee, at most 1%": "prowizja za wcześniejszą spłatę, maks. 1%",
+"Design": "Wygląd",
+"Classic": "Klasyczny",
+"The design you know": "Wygląd, który znasz",
+"Beta – Navy": "Beta – granatowy",
+"Side menu, dark blue with mint and magenta": "Menu boczne, granat z miętą i magentą",
+"Beta – Emerald": "Beta – szmaragdowy",
+"Side menu, dark green with lavender": "Menu boczne, ciemna zieleń z lawendą",
+"Try the new beta design": "Wypróbuj nowy wygląd (beta)",
+"Beta design": "Wygląd beta"
 }
 };
