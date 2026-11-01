@@ -76,7 +76,19 @@ export const EXTRA = {
 "Your entries always stay in this browser, as before. This browser doesn't let MoneyCompass close the window by itself – close it with the X at the top right.": "Ihre Einträge bleiben wie immer in diesem Browser. Dieser Browser erlaubt MoneyCompass nicht, das Fenster selbst zu schließen – schließen Sie es mit dem X oben rechts.",
 "Your profile file is in your Downloads folder.": "Ihre Profildatei liegt in Ihrem Download-Ordner.",
 "Close MoneyCompass": "MoneyCompass schließen",
-"Stay": "Hierbleiben"
+"Stay": "Hierbleiben",
+"{0} days": "{0} Tage",
+"Your offer": "Ihr Angebot",
+"{0} would bring about {1} more than your offer.": "{0} würde etwa {1} mehr bringen als Ihr Angebot.",
+"no limit": "ohne Limit",
+"after the 19% Belka tax": "nach 19 % Belka-Steuer",
+"Today's bank offers compared": "Bankangebote von heute im Vergleich",
+"Amount to compare (zł)": "Betrag zum Vergleichen (zł)",
+"Your offer pays more than today's best bank offer.": "Ihr Angebot bringt mehr als das beste Bankangebot von heute.",
+"Rate after the promotion, for all offers (% per year)": "Zins nach der Aktion, für alle Angebote (% pro Jahr)",
+"Most banks pay much less after a promotion ends, and the rankings don't say how much. 0% shows only what the promotion itself brings.": "Die meisten Banken zahlen nach einer Aktion deutlich weniger, und die Rankings nennen den Zins nicht. 0 % zeigt nur, was die Aktion selbst bringt.",
+"The best savings accounts and 12-month deposits right now, calculated for {0} over {1} days{2}.": "Die besten Sparkonten und 12-Monats-Festgelder von heute, berechnet für {0} über {1} Tage{2}.",
+"12-month deposit": "12-Monats-Festgeld"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -154,7 +166,19 @@ export const EXTRA = {
 "Your entries always stay in this browser, as before. This browser doesn't let MoneyCompass close the window by itself – close it with the X at the top right.": "Vos saisies restent comme toujours dans ce navigateur. Ce navigateur ne permet pas à MoneyCompass de fermer la fenêtre lui-même – fermez-la avec le X en haut à droite.",
 "Your profile file is in your Downloads folder.": "Votre fichier de profil se trouve dans votre dossier Téléchargements.",
 "Close MoneyCompass": "Fermer MoneyCompass",
-"Stay": "Rester"
+"Stay": "Rester",
+"{0} days": "{0} jours",
+"Your offer": "Votre offre",
+"{0} would bring about {1} more than your offer.": "{0} rapporterait environ {1} de plus que votre offre.",
+"no limit": "sans limite",
+"after the 19% Belka tax": "après l'impôt Belka de 19 %",
+"Today's bank offers compared": "Offres bancaires du jour comparées",
+"Amount to compare (zł)": "Montant à comparer (zł)",
+"Your offer pays more than today's best bank offer.": "Votre offre rapporte plus que la meilleure offre bancaire du jour.",
+"Rate after the promotion, for all offers (% per year)": "Taux après la promotion, pour toutes les offres (% par an)",
+"Most banks pay much less after a promotion ends, and the rankings don't say how much. 0% shows only what the promotion itself brings.": "La plupart des banques paient bien moins après une promotion, et les classements ne disent pas combien. 0 % montre seulement ce que rapporte la promotion.",
+"The best savings accounts and 12-month deposits right now, calculated for {0} over {1} days{2}.": "Les meilleurs comptes d'épargne et dépôts à 12 mois du moment, calculés pour {0} sur {1} jours{2}.",
+"12-month deposit": "Dépôt à 12 mois"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -232,6 +256,18 @@ export const EXTRA = {
 "Your entries always stay in this browser, as before. This browser doesn't let MoneyCompass close the window by itself – close it with the X at the top right.": "Twoje wpisy jak zawsze zostają w tej przeglądarce. Ta przeglądarka nie pozwala MoneyCompass samodzielnie zamknąć okna – zamknij je krzyżykiem X w prawym górnym rogu.",
 "Your profile file is in your Downloads folder.": "Plik profilu jest w folderze Pobrane.",
 "Close MoneyCompass": "Zamknij MoneyCompass",
-"Stay": "Zostań"
+"Stay": "Zostań",
+"{0} days": "{0} dni",
+"Your offer": "Twoja oferta",
+"{0} would bring about {1} more than your offer.": "{0} przyniósłby około {1} więcej niż Twoja oferta.",
+"no limit": "bez limitu",
+"after the 19% Belka tax": "po 19% podatku Belki",
+"Today's bank offers compared": "Dzisiejsze oferty banków w porównaniu",
+"Amount to compare (zł)": "Kwota do porównania (zł)",
+"Your offer pays more than today's best bank offer.": "Twoja oferta daje więcej niż dzisiejsza najlepsza oferta banku.",
+"Rate after the promotion, for all offers (% per year)": "Oprocentowanie po promocji, dla wszystkich ofert (% rocznie)",
+"Most banks pay much less after a promotion ends, and the rankings don't say how much. 0% shows only what the promotion itself brings.": "Większość banków po promocji płaci dużo mniej, a rankingi nie podają ile. 0% pokazuje tylko to, co daje sama promocja.",
+"The best savings accounts and 12-month deposits right now, calculated for {0} over {1} days{2}.": "Najlepsze konta oszczędnościowe i lokaty 12-miesięczne teraz, przeliczone dla {0} na {1} dni{2}.",
+"12-month deposit": "Lokata 12-miesięczna"
 }
 };

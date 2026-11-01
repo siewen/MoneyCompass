@@ -282,3 +282,7 @@ body.is-dragging, body.is-dragging * { cursor: grabbing !important; user-select:
 .news-head { display: flex; justify-content: space-between; align-items: baseline; }
 .news ul { margin: 6px 0 0; padding-left: 4px; list-style: none; }
 .news li { margin: 6px 0; }
+
+.bank-list .item { flex-wrap: wrap; }
+.bank-list .row-actions { display: flex; gap: 6px; flex: none; }
+@media (max-width: 640px) { .bank-list .row-actions { width: 100%; justify-content: flex-end; } }

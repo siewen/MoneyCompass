@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 18, date: "2026-11-01", items: {
+    en: ["🏦 Compare offers: today's best savings accounts and deposits are calculated for your amount – with the difference to your own offer and one click to add them."],
+    pl: ["🏦 Porównaj oferty: dzisiejsze najlepsze konta oszczędnościowe i lokaty przeliczone dla Twojej kwoty – z różnicą względem Twojej oferty i dodawaniem jednym kliknięciem."],
+    de: ["🏦 Angebote vergleichen: die besten Sparkonten und Festgelder von heute, berechnet für Ihren Betrag – mit dem Unterschied zu Ihrem Angebot und Hinzufügen per Klick."],
+    fr: ["🏦 Comparer les offres : les meilleurs comptes d'épargne et dépôts du jour calculés pour votre montant – avec l'écart par rapport à votre offre et ajout en un clic."] } },
   { build: 14, date: "2026-11-01", items: {
     en: ["🏦 Compare offers: fill in an offer from My savings with one click, to see what your money earns now compared with other banks."],
     pl: ["🏦 Porównaj oferty: uzupełnij ofertę z Moich oszczędności jednym kliknięciem i zobacz, ile Twoje pieniądze zarabiają teraz w porównaniu z innymi bankami."],
