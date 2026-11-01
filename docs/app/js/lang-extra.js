@@ -171,7 +171,21 @@ export const EXTRA = {
 "Today": "Heute",
 "Before today: what really happened (your entries and bank imports). From today: what is planned.": "Vor heute: was wirklich passiert ist (Ihre Einträge und Bankimporte). Ab heute: was geplant ist.",
 "ⓘ {0} entries you imported before get the details from your bank (accounts, title).": "ⓘ {0} früher importierte Einträge erhalten die Details Ihrer Bank (Konten, Verwendungszweck).",
-"Add the bank details": "Bankdetails hinzufügen"
+"Add the bank details": "Bankdetails hinzufügen",
+"Daily": "Täglich",
+"Every {0} days": "Alle {0} Tage",
+"Every {0} weeks": "Alle {0} Wochen",
+"Every {0} months": "Alle {0} Monate",
+"How often does it repeat?": "Wie oft wiederholt es sich?",
+"Your own": "Eigene Angabe",
+"Every": "Alle",
+"days": "Tage",
+"weeks": "Wochen",
+"months": "Monate",
+"Repeats: {0} – click to change": "Wiederholt sich: {0} – klicken zum Ändern",
+"Click to choose how often it repeats": "Klicken, um zu wählen, wie oft es sich wiederholt",
+"{0} repeats: {1} – see the Payment calendar.": "{0} wiederholt sich: {1} – siehe Zahlungskalender.",
+"Money coming in": "Geld, das hereinkommt"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -344,7 +358,21 @@ export const EXTRA = {
 "Today": "Aujourd'hui",
 "Before today: what really happened (your entries and bank imports). From today: what is planned.": "Avant aujourd'hui : ce qui s'est vraiment passé (vos saisies et imports bancaires). À partir d'aujourd'hui : ce qui est prévu.",
 "ⓘ {0} entries you imported before get the details from your bank (accounts, title).": "ⓘ {0} opérations importées auparavant reçoivent les détails de votre banque (comptes, libellé).",
-"Add the bank details": "Ajouter les détails bancaires"
+"Add the bank details": "Ajouter les détails bancaires",
+"Daily": "Quotidien",
+"Every {0} days": "Tous les {0} jours",
+"Every {0} weeks": "Toutes les {0} semaines",
+"Every {0} months": "Tous les {0} mois",
+"How often does it repeat?": "À quelle fréquence ?",
+"Your own": "Personnalisé",
+"Every": "Tous les",
+"days": "jours",
+"weeks": "semaines",
+"months": "mois",
+"Repeats: {0} – click to change": "Se répète : {0} – cliquer pour modifier",
+"Click to choose how often it repeats": "Cliquer pour choisir la fréquence",
+"{0} repeats: {1} – see the Payment calendar.": "{0} se répète : {1} – voir le calendrier des paiements.",
+"Money coming in": "Argent qui arrive"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -517,6 +545,20 @@ export const EXTRA = {
 "Today": "Dziś",
 "Before today: what really happened (your entries and bank imports). From today: what is planned.": "Przed dziś: co naprawdę się wydarzyło (Twoje wpisy i importy z banku). Od dziś: co jest zaplanowane.",
 "ⓘ {0} entries you imported before get the details from your bank (accounts, title).": "ⓘ {0} wcześniej zaimportowanych wpisów otrzyma szczegóły z banku (konta, tytuł).",
-"Add the bank details": "Dodaj szczegóły z banku"
+"Add the bank details": "Dodaj szczegóły z banku",
+"Daily": "Codziennie",
+"Every {0} days": "Co {0} dni",
+"Every {0} weeks": "Co {0} tygodnie",
+"Every {0} months": "Co {0} miesięcy",
+"How often does it repeat?": "Jak często się powtarza?",
+"Your own": "Własne",
+"Every": "Co",
+"days": "dni",
+"weeks": "tygodni",
+"months": "miesięcy",
+"Repeats: {0} – click to change": "Powtarza się: {0} – kliknij, aby zmienić",
+"Click to choose how often it repeats": "Kliknij, aby wybrać, jak często się powtarza",
+"{0} repeats: {1} – see the Payment calendar.": "{0} powtarza się: {1} – zobacz kalendarz płatności.",
+"Money coming in": "Wpływy"
 }
 };

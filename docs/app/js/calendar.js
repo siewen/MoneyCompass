@@ -2,7 +2,7 @@
 // loan payments – in a month calendar and as a preview for 1, 3, 6 or 12 months.
 import {
   T, State, save, Calc, pln, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addDays, addMonths, monthStart, monthName,
-  uuid, categories, categoryLabel, moduleOn, FREQUENCIES, ONE_TIME, locale, monthsCount, repeatingExpenses, setRepeat,
+  uuid, categories, categoryLabel, moduleOn, FREQUENCIES, ONE_TIME, locale, monthsCount, repeatingExpenses, setRepeat, freqLabel, repeatingReceived, setReceivedRepeat,
 } from "./core.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, button, values, confirmBox, toast } from "./ui.js";
 import { App } from "./app.js";
@@ -45,6 +45,15 @@ export function events(d, from, to) {
     while (next && next <= to && guard++ < 400) {
       if (next > lastPaid) list.push({ date: next, name: e.Description || T(e.Category), amount: e.Amount, type: "out", note: T(e.Category) + " · 🔁", expense: e.Id });
       next = Calc.nextPayment({ Date: e.Date, Frequency: e.Repeat }, addDays(next, 1));
+    }
+  }
+  // Money received (not salary) marked 🔁 in the Income tab
+  for (const r of repeatingReceived(d)) {
+    const lastPaid = parseDate(r.Date), rule = { Date: r.Date, Frequency: r.Repeat };
+    let next = Calc.nextPayment(rule, from), guard = 0;
+    while (next && next <= to && guard++ < 400) {
+      if (next > lastPaid) list.push({ date: next, name: r.Description || T("Money received"), amount: r.Amount, type: "in", note: T("Extra income") + " · 🔁", received: r.Id });
+      next = Calc.nextPayment(rule, addDays(next, 1));
     }
   }
   if (moduleOn("loans"))
@@ -156,7 +165,7 @@ export const Calendar = {
     const r = editId ? d.Recurring.find(x => x.Id === editId) : null;
     const f = r || { Name: "", Kind: "expense", Category: "Housing / rent", Amount: "", Frequency: "Monthly", Date: isoDate(today()), Active: true };
     const sugg = suggestions(d);
-    const reps = repeatingExpenses(d);
+    const reps = repeatingExpenses(d), recs = repeatingReceived(d);
     const deps = d.Holdings.filter(h => h.Deposit > 0 && h.DepositDate);
     const evRow = e => `<div class="item"><span class="cal-dot ${e.type}"></span><div><b>${esc(e.name)}</b><span class="hint">${fmtDate(e.date)} · ${esc(e.note)}${e.past ? "" : " · " + esc(T("planned"))}</span></div>
       <b class="${e.type === "in" ? "good" : e.type === "save" ? "primary" : "bad"}">${e.type === "in" ? "+" : "−"}${pln(e.amount)}</b>${e.info ? infoBtn(...e.info) : ""}</div>`;
@@ -183,13 +192,16 @@ export const Calendar = {
         <div class="buttons">${button(r ? T("Save changes") : T("Add"), "save-rec", "main")}${r ? button(T("Cancel"), "cancel-rec") : ""}</div></form>`)}
       ${card(heading(T("Regular payments")) + (deps.length ? `<h3 class="sub-h">🔁 ${esc(T("From My savings"))}</h3><div class="list">${deps.map(h => `
         <div class="item clickable" data-go="portfolio"><span class="cal-dot save"></span><div><b>${esc(h.Name)}</b>
-        <span class="hint">${esc(T(h.DepositFrequency || "Monthly"))} · ${esc(T("Transfer to savings"))}${h.DepositFrom ? " · " + esc(T("from {0}", h.DepositFrom)) : ""} · ${esc(T("next {0}", fmtDate(Calc.nextPayment({ Date: h.DepositDate, Frequency: h.DepositFrequency || "Monthly" }, today()) || h.DepositDate)))}</span></div>
-        <b class="primary">${pln(h.Deposit)}</b></div>`).join("")}</div><hr>` : "") + (reps.length ? `<h3 class="sub-h">🔁 ${esc(T("From your expenses"))}</h3><div class="list">${reps.map(e => `
+        <span class="hint">${esc(freqLabel(h.DepositFrequency || "Monthly"))} · ${esc(T("Transfer to savings"))}${h.DepositFrom ? " · " + esc(T("from {0}", h.DepositFrom)) : ""} · ${esc(T("next {0}", fmtDate(Calc.nextPayment({ Date: h.DepositDate, Frequency: h.DepositFrequency || "Monthly" }, today()) || h.DepositDate)))}</span></div>
+        <b class="primary">${pln(h.Deposit)}</b></div>`).join("")}</div><hr>` : "") + (recs.length ? `<h3 class="sub-h">🔁 ${esc(T("Money coming in"))}</h3><div class="list">${recs.map(r => `
+        <div class="item"><span class="cal-dot in"></span><div><b>${esc(r.Description || "–")}</b>
+        <span class="hint">${esc(freqLabel(r.Repeat))} · ${esc(T("Extra income"))} · ${esc(T("next {0}", fmtDate(Calc.nextPayment({ Date: r.Date, Frequency: r.Repeat }, new Date(Math.max(today().getTime(), addDays(parseDate(r.Date), 1).getTime()))) || r.Date)))}</span></div>
+        <b class="good">+${pln(r.Amount)}</b><label class="switch" title="${esc(T("Repeats"))}"><input type="checkbox" data-rep-rec="${r.Id}" checked><span></span></label></div>`).join("")}</div><hr>` : "") + (reps.length ? `<h3 class="sub-h">🔁 ${esc(T("From your expenses"))}</h3><div class="list">${reps.map(e => `
         <div class="item"><span class="cal-dot out"></span><div><b>${esc(e.Description || T(e.Category))}</b>
-        <span class="hint">${esc(T(e.Repeat))} · ${esc(T(e.Category))} · ${esc(T("next {0}", fmtDate(Calc.nextPayment({ Date: e.Date, Frequency: e.Repeat }, new Date(Math.max(today().getTime(), addDays(parseDate(e.Date), 1).getTime()))) || e.Date)))}</span></div>
+        <span class="hint">${esc(freqLabel(e.Repeat))} · ${esc(T(e.Category))} · ${esc(T("next {0}", fmtDate(Calc.nextPayment({ Date: e.Date, Frequency: e.Repeat }, new Date(Math.max(today().getTime(), addDays(parseDate(e.Date), 1).getTime()))) || e.Date)))}</span></div>
         <b>${pln(e.Amount)}</b><label class="switch" title="${esc(T("Repeats"))}"><input type="checkbox" data-rep-exp="${e.Id}" checked><span></span></label></div>`).join("")}</div><hr>` : hint(T("Tip: mark an expense with 🔁 in the Expenses tab, and it appears here every month."))) + (d.Recurring.length ? `<div class="list">${d.Recurring.map(x => `
         <div class="item clickable${x.Active === false || ended(x) ? " off" : ""}" data-edit-rec="${x.Id}"><span class="cal-dot ${x.Kind === "saving" ? "save" : "out"}"></span><div><b>${esc(x.Name)}</b>
-        <span class="hint">${esc(T(x.Frequency))} · ${esc(x.Kind === "saving" ? T("Transfer to savings") : T(x.Category))} · ${esc(x.Active === false ? T("switched off") : ended(x) ? T("ended {0}", fmtDate(x.EndDate)) : T("next {0}", fmtDate(Calc.nextPayment(x, today()) || x.Date)) + (x.EndDate ? " · " + T("last {0}", fmtDate(x.EndDate)) : ""))}</span></div>
+        <span class="hint">${esc(freqLabel(x.Frequency))} · ${esc(x.Kind === "saving" ? T("Transfer to savings") : T(x.Category))} · ${esc(x.Active === false ? T("switched off") : ended(x) ? T("ended {0}", fmtDate(x.EndDate)) : T("next {0}", fmtDate(Calc.nextPayment(x, today()) || x.Date)) + (x.EndDate ? " · " + T("last {0}", fmtDate(x.EndDate)) : ""))}</span></div>
         <b>${pln(x.Amount)}</b><label class="switch" title="${esc(T("Active (count it in the totals)"))}"><input type="checkbox" data-active-rec="${x.Id}"${x.Active !== false ? " checked" : ""}><span></span></label>
         <button class="icon-btn danger" data-del-rec="${x.Id}">🗑</button></div>`).join("")}</div>` + hint(T("Use the switch to stop counting a payment without deleting it.")) : (reps.length || deps.length ? "" : hint(T("No regular payments yet. Add your rent, bills and subscriptions above.")))) +
         (sugg.length ? `<hr><h3>💡 ${esc(T("Found in your expenses"))}</h3>${hint(T("These come back every month. Add them with one click."))}<div class="list">${sugg.map((x, i) => `
@@ -220,6 +232,9 @@ export const Calendar = {
     const c = el.querySelector('[data-action="cancel-rec"]'); if (c) c.onclick = () => { editId = null; App.refresh(); };
     el.querySelectorAll("[data-rep-exp]").forEach(c => c.onchange = () => {
       const e = d.Expenses.find(y => y.Id === c.dataset.repExp); setRepeat(d, e, ""); save(); toast(T("{0} no longer repeats.", e.Description || T(e.Category))); App.refresh();
+    });
+    el.querySelectorAll("[data-rep-rec]").forEach(c => c.onchange = () => {
+      const r = d.Received.find(y => y.Id === c.dataset.repRec); setReceivedRepeat(d, r, ""); save(); toast(T("{0} no longer repeats.", r.Description || "–")); App.refresh();
     });
     el.querySelectorAll("[data-active-rec]").forEach(c => c.onchange = () => {
       const x = d.Recurring.find(y => y.Id === c.dataset.activeRec); x.Active = c.checked; save(); App.refresh();

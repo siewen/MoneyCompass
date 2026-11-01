@@ -340,8 +340,18 @@ export function removeCategory(name) {
 export const BELKA = 0.19;
 export const LOAN_CATEGORY = "Loan payments";
 export const ONE_TIME = "One-time";
-export const FREQUENCIES = [["Monthly", 1], ["Every 2 weeks", 26 / 12], ["Weekly", 52 / 12], ["Quarterly", 1 / 3],
+export const FREQUENCIES = [["Monthly", 1], ["Every 2 weeks", 26 / 12], ["Weekly", 52 / 12], ["Daily", 365.25 / 12], ["Quarterly", 1 / 3],
   ["Twice a year", 1 / 6], ["Yearly", 1 / 12], [ONE_TIME, 0]];
+// Your own repeat: "Every:3:d" = every 3 days, "Every:2:w" = every 2 weeks, "Every:5:m" = every 5 months
+const CUSTOM = /^Every:(\d{1,3}):([dwm])$/;
+export const customFrequency = (n, unit) => `Every:${Math.max(1, Math.min(999, Math.round(n) || 1))}:${unit}`;
+export const parseCustom = f => { const m = CUSTOM.exec(f || ""); return m ? { n: +m[1], unit: m[2] } : null; };
+/** How a repeat is shown: "Monthly", "Every 3 days"… */
+export function freqLabel(f) {
+  const c = parseCustom(f);
+  if (!c) return T(f || "Monthly");
+  return T(c.unit === "d" ? (c.n === 1 ? "Daily" : "Every {0} days") : c.unit === "w" ? (c.n === 1 ? "Weekly" : "Every {0} weeks") : (c.n === 1 ? "Monthly" : "Every {0} months"), c.n);
+}
 export const RECEIVED = { income: "income", salary: "salary", none: "none" };
 
 export const Calc = {
@@ -402,12 +412,17 @@ export const Calc = {
   rateMissing(currency, s) { return (currency === "USD" && !(s.UsdToPln > 0)) || (currency === "EUR" && !(s.EurToPln > 0)); },
   stepN(start, freq, n) {
     switch (freq) {
+      case "Daily": return addDays(start, n);
       case "Weekly": return addDays(start, 7 * n);
       case "Every 2 weeks": return addDays(start, 14 * n);
       case "Quarterly": return addMonths(start, 3 * n);
       case "Twice a year": return addMonths(start, 6 * n);
       case "Yearly": return addMonths(start, 12 * n);
-      default: return addMonths(start, n);
+      default: {
+        const c = parseCustom(freq);
+        if (c) return c.unit === "d" ? addDays(start, c.n * n) : c.unit === "w" ? addDays(start, 7 * c.n * n) : addMonths(start, c.n * n);
+        return addMonths(start, n);
+      }
     }
   },
   nextPayment(i, from) {
@@ -431,7 +446,12 @@ export const Calc = {
     }
     return list.sort((a, b) => a.date - b.date);
   },
-  perMonth(freq) { const f = FREQUENCIES.find(x => x[0] === freq); return f ? f[1] : 1; },
+  perMonth(freq) {
+    const f = FREQUENCIES.find(x => x[0] === freq);
+    if (f) return f[1];
+    const c = parseCustom(freq);
+    return c ? (c.unit === "d" ? 365.25 / 12 : c.unit === "w" ? 52 / 12 : 1) / c.n : 1;
+  },
   monthlyPln(i, s) { return this.toPln(i.Amount, i.Currency, s) * this.perMonth(i.Frequency); },
   income(d) {
     let total = 0, oneTime = 0, count = 0, missing = false;
@@ -654,6 +674,23 @@ export function repeatingExpenses(d) {
   }
   return [...latest.values()];
 }
+/** Money received (not salary) marked 🔁: the newest payment of each series. */
+export function repeatingReceived(d) {
+  const latest = new Map();
+  for (const r of d.Received) {
+    if (!r.Repeat || r.Kind === RECEIVED.none || r.Kind === RECEIVED.salary) continue;
+    const k = seriesKey(r), cur = latest.get(k);
+    if (!cur || parseDate(r.Date) > parseDate(cur.Date)) latest.set(k, r);
+  }
+  return [...latest.values()];
+}
+/** Repeat a received payment: the newest one of its series carries the repeat ("" = stop). */
+export function setReceivedRepeat(d, r, freq) {
+  const k = seriesKey(r), series = d.Received.filter(x => seriesKey(x) === k);
+  series.forEach(x => { x.Repeat = ""; });
+  if (freq) series.reduce((a, b) => parseDate(a.Date) > parseDate(b.Date) ? a : b).Repeat = freq;
+}
+export const receivedRepeatOn = (d, r) => { const k = seriesKey(r); return d.Received.find(x => x.Repeat && seriesKey(x) === k)?.Repeat || ""; };
 export function setRepeat(d, e, freq) {
   if (freq) e.Repeat = freq;
   else { const k = seriesKey(e); d.Expenses.forEach(x => { if (seriesKey(x) === k) x.Repeat = ""; }); }

@@ -2,7 +2,7 @@
 import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
-  addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, repeatingExpenses, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
+  addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
 } from "./core.js";
 import { hbars, donut, legend, monthBars, progress } from "./charts.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON } from "./ui.js";
@@ -178,7 +178,7 @@ export const Income = {
       ${card(heading(T("Your income sources")) + hint(T("Tap a source to edit it. Switch off 'Active' for income that has stopped but you want to keep in the list.")) +
         (d.Incomes.length ? `<div class="list">${d.Incomes.map(i => {
           const next = Calc.nextPayment(i, today());
-          const info = i.Frequency === ONE_TIME ? `${T("one-time")} · ${T("on {0}", fmtDate(i.Date))}` : `${T(i.Frequency)} · ${next ? T("next {0}", fmtDate(next)) : ""}`;
+          const info = i.Frequency === ONE_TIME ? `${T("one-time")} · ${T("on {0}", fmtDate(i.Date))}` : `${freqLabel(i.Frequency)} · ${next ? T("next {0}", fmtDate(next)) : ""}`;
           return `<div class="item clickable${i.Active ? "" : " off"}" data-edit-income="${i.Id}"><div><b>${esc(i.Name)}</b><span class="hint">${esc(T(i.Type))} · ${esc(info)}${i.Active ? "" : " · " + esc(T("not active"))}</span></div>
             <div class="right"><b>${amount(i.Amount, i.Currency)}</b>${i.Frequency !== ONE_TIME ? `<span class="hint">${esc(T("{0} / month", pln(Calc.monthlyPln(i, s))))}</span>` : ""}${i.Gross > 0 ? `<span class="hint">${esc(T("gross {0}", pln(i.Gross)))}</span>` : ""}</div>
             <label class="switch" title="${esc(T("Active (count it in the totals)"))}"><input type="checkbox" data-active-income="${i.Id}"${i.Active ? " checked" : ""}><span></span></label>
@@ -186,7 +186,7 @@ export const Income = {
         }).join("")}</div>` : hint(T("No income added yet."))))}
       ${card(heading(T("Received (bank import)")) + hint(T("Money that came into your account, from your bank imports. Choose for each payment how it counts: Extra income – only in that month. Salary – your regular pay, counted every month through Your income sources. Not income – ignored.")) +
         (d.Received.length ? `<div class="list">${[...d.Received].sort((a, b) => parseDate(b.Date) - parseDate(a.Date)).slice(0, 150).map(r => `
-          <div class="item"><div><b>${esc(r.Description || "–")}</b><span class="hint">${fmtDate(r.Date)} · +${pln(r.Amount)}</span></div>
+          <div class="item"><div><b>${esc(r.Description || "–")}</b><span class="hint">${fmtDate(r.Date)} · +${pln(r.Amount)}${r.Kind === RECEIVED.income ? (rr => ` · <button class="rep-tag${rr ? " on" : ""}" data-repeat-rec="${r.Id}" title="${esc(T("How often does it repeat?"))}">🔁 ${esc(rr ? freqLabel(rr) : T("Does not repeat"))}</button>`)(receivedRepeatOn(d, r)) : ""}</span></div>
           ${select("kind-" + r.Id, KINDS.map(k => [k[0], T(k[1])]), r.Kind)}${infoBtn("received", r)}
           <button class="icon-btn danger" data-del-received="${r.Id}" title="${esc(T("Delete"))}">🗑</button></div>`).join("")}</div>`
           : hint(T("Nothing imported yet."))))}
@@ -230,6 +230,14 @@ export const Income = {
       r.Kind = sel.value; save();
       if (r.Kind === RECEIVED.salary) await offerSalary(r);
       App.refresh();
+    });
+    el.querySelectorAll("[data-repeat-rec]").forEach(b => b.onclick = () => {
+      const r = d.Received.find(x => x.Id === b.dataset.repeatRec);
+      pickRepeat(receivedRepeatOn(d, r), freq => {
+        setReceivedRepeat(d, r, freq); save();
+        toast(freq ? T("{0} repeats: {1} – see the Payment calendar.", r.Description || "–", freqLabel(freq)) : T("{0} no longer repeats.", r.Description || "–"));
+        App.refresh();
+      });
     });
     el.querySelectorAll("[data-del-received]").forEach(b => b.onclick = async () => {
       if (await confirmBox(T("Delete?"), T("Remove this received payment from MoneyCompass?"), T("Delete"), T("Cancel"), true)) {
@@ -326,17 +334,40 @@ export const Expenses = {
     bindExpenseRows(el);
   },
 };
-const REPEAT_OPTIONS = () => [["", T("Does not repeat")], ...FREQUENCIES.filter(f => f[0] !== ONE_TIME).map(f => [f[0], "🔁 " + T(f[0])])];
+const REPEAT_OPTIONS = (cur = "") => [["", T("Does not repeat")], ...FREQUENCIES.filter(f => f[0] !== ONE_TIME).map(f => [f[0], "🔁 " + T(f[0])]),
+  ...(parseCustom(cur) ? [[cur, "🔁 " + freqLabel(cur)]] : [])];
 function expenseRow(e) {
   const icon = categoryIcon(e.Category);
   const rep = repeatOn(e);
   return `<div class="item expense" data-id="${e.Id}">
     <div class="toggle" data-toggle="${e.Id}" title="${esc(T("Click to switch between essential and not essential"))}"><b>${esc(e.Description || T(e.Category))}</b>
-      <span class="hint">${fmtDate(e.Date)} · ${esc((icon ? icon + " " : "") + T(e.Category))} · <span class="${e.Essential ? "ess" : "noness"}">${esc(e.Essential ? T("Essential") : T("Not essential"))}</span>${rep ? ` · <span class="rep-tag">🔁 ${esc(T(rep))}</span>` : ""}</span></div>
+      <span class="hint">${fmtDate(e.Date)} · ${esc((icon ? icon + " " : "") + T(e.Category))} · <span class="${e.Essential ? "ess" : "noness"}">${esc(e.Essential ? T("Essential") : T("Not essential"))}</span> · <button class="rep-tag${rep ? " on" : ""}" data-repeat="${e.Id}" title="${esc(T("How often does it repeat?"))}">🔁 ${esc(rep ? freqLabel(rep) : T("Does not repeat"))}</button></span></div>
     <b>${pln(e.Amount)}</b>${infoBtn("expense", e)}
-    <button class="icon-btn c-repeat${rep ? " on" : ""}" data-repeat="${e.Id}" title="${esc(rep ? T("Repeats {0} – click to stop", T(rep).toLowerCase()) : T("Click to repeat every month"))}">${ICON.repeat}</button>
+    <button class="icon-btn c-repeat${rep ? " on" : ""}" data-repeat="${e.Id}" title="${esc(rep ? T("Repeats: {0} – click to change", freqLabel(rep)) : T("Click to choose how often it repeats"))}">${ICON.repeat}</button>
     <button class="icon-btn c-edit${e.Edited ? " on" : ""}" data-edit="${e.Id}" title="${esc(e.Edited ? T("Changed by you – click to change again") : T("Change"))}">${ICON.edit}</button>
     <button class="icon-btn c-del" data-del="${e.Id}" title="${esc(T("Delete"))}">${ICON.trash}</button></div>`;
+}
+/** Choose how often an expense repeats: the usual ones, or your own (every N days / weeks / months). */
+export function pickRepeat(current, done) {
+  const c = parseCustom(current) || { n: 3, unit: "d" };
+  const opts = [["", T("Does not repeat")], ...FREQUENCIES.filter(f => f[0] !== ONE_TIME).map(f => [f[0], T(f[0])])];
+  const p = popup(`<div class="box-head"><span class="box-icon rep">🔁</span><h2>${esc(T("How often does it repeat?"))}</h2></div>
+    <div class="rep-choices">${opts.map(([v, l]) => `<button class="chip${v === (current || "") ? " on" : ""}" data-f="${esc(v)}">${esc(l)}</button>`).join("")}</div>
+    <h3>${esc(T("Your own"))}</h3>
+    <div class="rep-own${parseCustom(current) ? " on" : ""}"><span>${esc(T("Every"))}</span><input type="number" name="n" min="1" max="999" value="${c.n}">
+      ${select("unit", [["d", T("days")], ["w", T("weeks")], ["m", T("months")]], c.unit)}
+      <button class="btn main small" data-own>${esc(T("OK"))}</button></div>
+    ${hint(T("Repeating expenses appear automatically in the Payment calendar, also in the next months."))}
+    <div class="box-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button></div>`, { width: 460, cls: "box" });
+  p.el.querySelectorAll("[data-f]").forEach(b => b.onclick = () => { p.close(); done(b.dataset.f); });
+  p.el.querySelector("[data-own]").onclick = () => {
+    const n = +p.el.querySelector('[name="n"]').value, unit = p.el.querySelector('[name="unit"]').value;
+    if (!(n >= 1)) return;
+    p.close();
+    // "Every 1 week" is simply Weekly, and so on
+    const plain = n === 1 ? { d: "Daily", w: "Weekly", m: "Monthly" }[unit] : n === 2 && unit === "w" ? "Every 2 weeks" : n === 3 && unit === "m" ? "Quarterly" : n === 6 && unit === "m" ? "Twice a year" : n === 12 && unit === "m" ? "Yearly" : "";
+    done(plain || customFrequency(n, unit));
+  };
 }
 /** The repeat of this expense's series ("Monthly"…), or "" when it does not repeat. */
 function repeatOn(e) {
@@ -346,16 +377,20 @@ function repeatOn(e) {
 }
 function bindExpenseRows(root, after = () => App.refresh()) {
   const d = D();
-  root.querySelectorAll("[data-repeat]").forEach(x => x.onclick = () => {
+  root.querySelectorAll("[data-repeat]").forEach(x => x.onclick = ev => {
+    ev.stopPropagation();
     const e = d.Expenses.find(y => y.Id === x.dataset.repeat);
-    if (repeatOn(e)) { setRepeat(d, e, ""); toast(T("{0} no longer repeats.", e.Description || T(e.Category))); }
-    else {
-      // The newest payment of this expense carries the repeat
-      const k = seriesKey(e);
-      const newest = d.Expenses.filter(y => seriesKey(y) === k).reduce((a, b) => parseDate(a.Date) > parseDate(b.Date) ? a : b);
-      setRepeat(d, newest, "Monthly"); toast(T("{0} repeats every month – see the Payment calendar.", e.Description || T(e.Category)));
-    }
-    save(); after();
+    pickRepeat(repeatOn(e), freq => {
+      const name = e.Description || T(e.Category);
+      setRepeat(d, e, "");
+      if (freq) {
+        // The newest payment of this expense carries the repeat
+        const k = seriesKey(e);
+        const newest = d.Expenses.filter(y => seriesKey(y) === k).reduce((a, b) => parseDate(a.Date) > parseDate(b.Date) ? a : b);
+        setRepeat(d, newest, freq); toast(T("{0} repeats: {1} – see the Payment calendar.", name, freqLabel(freq)));
+      } else toast(T("{0} no longer repeats.", name));
+      save(); after();
+    });
   });
   root.querySelectorAll("[data-toggle]").forEach(x => x.onclick = () => {
     const e = d.Expenses.find(y => y.Id === x.dataset.toggle); e.Essential = !e.Essential; save(); after();
@@ -373,7 +408,7 @@ function editExpense(e, after) {
     <div class="two">${field(T("Date"), dateInput("date", inputDate(parseDate(e.Date))))}${field(T("Amount (zł)"), numInput("amount", plain(e.Amount)))}</div>
     ${field(T("Category"), select("category", categories().map(c => [c.Name, categoryLabel(c.Name)]), e.Category))}
     ${field(T("Description"), textInput("description", e.Description))}
-    ${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), repeatOn(e)))}
+    ${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(repeatOn(e)), repeatOn(e)))}
     ${check("essential", T("Essential (must pay even in a crisis)"), e.Essential)}</form>
     <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button><button class="btn main" data-save>${esc(T("Save"))}</button></div>`, { width: 520 });
   p.el.querySelector("[data-save]").onclick = () => {
@@ -506,7 +541,7 @@ export const Portfolio = {
         <div class="buttons">${button(h ? T("Save changes") : T("Add"), "save-holding", "main")}${h ? button(T("Cancel editing"), "cancel-holding") : ""}</div></form>`)}
       ${card(heading(T("Your savings")) + hint(T("Tap an item to edit it, for example to update the amount.")) + (d.Holdings.length ? `<div class="list">${d.Holdings.map(x => `
         <div class="item clickable" data-edit-holding="${x.Id}"><div><b>${esc(x.Name)}</b><span class="hint">${esc(T(x.Place))} · ${esc(x.Safe ? T("Safe") : T("Risky"))} · ${rate(x.RatePercent || 0)}</span></div>
-        <div class="right"><b>${amount(x.Amount, x.Currency)}</b>${x.RatePercent ? `<span class="hint">${esc(T("{0} / year", pln(Calc.toPln(x.Amount, x.Currency, s) * x.RatePercent / 100)))}</span>` : ""}${x.Deposit > 0 ? `<span class="hint primary">🔁 +${esc(pln(x.Deposit))} · ${esc(T(x.DepositFrequency || "Monthly"))}${x.DepositFrom ? " · " + esc(T("from {0}", x.DepositFrom)) : ""}</span>` : ""}</div>
+        <div class="right"><b>${amount(x.Amount, x.Currency)}</b>${x.RatePercent ? `<span class="hint">${esc(T("{0} / year", pln(Calc.toPln(x.Amount, x.Currency, s) * x.RatePercent / 100)))}</span>` : ""}${x.Deposit > 0 ? `<span class="hint primary">🔁 +${esc(pln(x.Deposit))} · ${esc(freqLabel(x.DepositFrequency || "Monthly"))}${x.DepositFrom ? " · " + esc(T("from {0}", x.DepositFrom)) : ""}</span>` : ""}</div>
         ${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("Nothing added yet."))))}
       ${card(`<form id="fx">${heading(T("Exchange rates"))}${hint(T("Used to convert dollars and euros to złoty."))}
         ${check("auto", T("Update automatically with the official NBP rates"), s.AutoExchangeRates)}
@@ -574,7 +609,7 @@ export function showInfo(kind, id) {
   if (!x) return;
   let body = "";
   if (kind === "holding") {
-    if (x.Deposit > 0) body += `<h3>🔁 ${esc(T("Regular deposit"))}</h3>` + row(T("Amount"), pln(x.Deposit)) + row(T("How often"), T(x.DepositFrequency || "Monthly")) +
+    if (x.Deposit > 0) body += `<h3>🔁 ${esc(T("Regular deposit"))}</h3>` + row(T("Amount"), pln(x.Deposit)) + row(T("How often"), esc(freqLabel(x.DepositFrequency || "Monthly"))) +
       (x.DepositFrom ? row(T("From which account"), esc(x.DepositFrom)) : "") + (x.DepositInfo ? infoRows(x.DepositInfo) : "");
     const tr = d.Transfers.filter(t => t.HoldingId === x.Id).sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
     if (tr.length) body += `<h3>⬆ ${esc(T("Transfers from your bank imports"))}</h3><div class="list">${tr.slice(0, 50).map(t => `<div class="item"><div><b>${esc(t.Description || "–")}</b>
