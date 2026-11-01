@@ -54,17 +54,28 @@ function buildShell() {
 }
 
 function helpMenu() {
-  const p = popup(`<div class="buttons col">
-    <button class="btn second" data-m="help">? ${esc(T("Help"))}</button>
-    <button class="btn second" data-m="options">⚙ ${esc(T("Options"))}</button>
-    <button class="btn second" data-m="about">ℹ ${esc(T("About"))}</button>
-    ${installed() ? "" : `<button class="btn second" data-m="install">📲 ${esc(T("Install app"))}</button>`}
-    <button class="btn second" data-m="exit">⏻ ${esc(T("Close"))}</button></div>`, { width: 320 });
-  p.el.querySelectorAll("[data-m]").forEach(b => b.onclick = () => {
-    p.close();
-    if (b.dataset.m === "help") openHelp(); else if (b.dataset.m === "options") openOptions(); else if (b.dataset.m === "install") install(); else if (b.dataset.m === "exit") closeApp(); else about();
+  // Small buttons above the round ? button, like the app (not a window in the middle)
+  if (document.querySelector(".help-menu")) return closeHelpMenu();
+  const shield = document.createElement("div"); shield.className = "help-shield";
+  const menu = document.createElement("div"); menu.className = "help-menu";
+  const items = [["about", "ℹ  " + T("About")], ["help", "?  " + T("Help")], ["options", "⚙  " + T("Options")]];
+  if (!installed()) items.push(["install", "📲  " + T("Install app")]);
+  items.push(["exit", "⏻  " + T("Close")]);
+  menu.innerHTML = items.map(([k, t]) => `<button data-m="${k}">${esc(t)}</button>`).join("");
+  document.body.append(shield, menu);
+  requestAnimationFrame(() => menu.classList.add("open"));
+  shield.onclick = closeHelpMenu;
+  menu.querySelectorAll("[data-m]").forEach(b => b.onclick = () => {
+    closeHelpMenu();
+    const m = b.dataset.m;
+    if (m === "help") openHelp(); else if (m === "options") openOptions(); else if (m === "install") install(); else if (m === "exit") closeApp(); else about();
   });
 }
+function closeHelpMenu() {
+  document.querySelectorAll(".help-menu, .help-shield").forEach(x => x.remove());
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeHelpMenu(); });
+
 // ---------- Install as an app (iPhone, iPad, Mac, Android, Windows) ----------
 let installPrompt = null;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installPrompt = e; });

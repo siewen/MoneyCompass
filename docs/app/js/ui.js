@@ -111,3 +111,32 @@ export function download(name, content, type) {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 export const stamp = () => { const d = new Date(), p = n => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`; };
+
+// ---------------------------------------------------------------- card layout like the app (CardBoard)
+
+/** Puts the cards of every .grid in 1, 2 or 3 columns: card 1 left, card 2 middle, card 3 right, then the next row. */
+function layoutGrid(grid) {
+  if (!grid._items) grid._items = [...grid.children];
+  const width = grid.clientWidth || grid.parentElement?.clientWidth || window.innerWidth;
+  const n = width >= 1100 ? 3 : width >= 720 ? 2 : 1;
+  if (grid._cols === n) return;
+  grid._cols = n;
+  const full = el => el.matches(".tiles, .btn, .tip, .wide");
+  const parts = [];
+  let group = null;
+  for (const item of grid._items) {
+    if (full(item)) { parts.push(item); group = null; continue; }
+    if (!group) {
+      group = document.createElement("div"); group.className = "cols";
+      group.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
+      for (let i = 0; i < n; i++) { const c = document.createElement("div"); c.className = "col"; group.appendChild(c); }
+      group._count = 0; parts.push(group);
+    }
+    group.children[group._count++ % n].appendChild(item);
+  }
+  grid.replaceChildren(...parts);
+}
+const resize = new ResizeObserver(entries => entries.forEach(e => layoutGrid(e.target)));
+new MutationObserver(() => {
+  document.querySelectorAll(".grid:not([data-laid])").forEach(g => { g.dataset.laid = "1"; layoutGrid(g); resize.observe(g); });
+}).observe(document.documentElement, { childList: true, subtree: true });

@@ -125,7 +125,7 @@ function optimizeHtml() {
       (advice.length ? "" : `<h3 class="good">✔ ${esc(T("Well done!"))}</h3><p>${esc(T("Your emergency fund is complete, you save at least 20% and your money is in good places. Check your offers again when promotions end."))}</p>`) +
       advice.map((a, i) => `<div class="advice ${kind[a.kind][1]}"${a.route ? ` data-route="${a.route}"` : ""}><b>${kind[a.kind][0]} ${i + 1}. ${esc(a.title)}</b><p>${esc(a.text)}</p>
         ${a.benefit > 0 ? `<b class="${kind[a.kind][1]}">${esc(a.kind === "warning" ? T("Shortfall: about {0} per year", pln(a.benefit)) : T("Worth about {0} per year", pln(a.benefit)))}</b>` : ""}
-        ${a.route ? `<span class="go-link">${esc(T("Go to {0} →", T(TAB_NAMES[a.route] || "Overview")))}</span>` : ""}</div>`).join(""), "wide")}
+        ${a.route ? `<span class="go-link">${esc(T("Go to {0} →", T(TAB_NAMES[a.route] || "Overview")))}</span>` : ""}</div>`).join(""))}
     ${card(heading(T("Best savings accounts now"), "🏦") + hint(offersStatus) + offerRows(Rates.savings, "s") + `<a class="btn second" href="${SAVINGS_RANKING}" target="_blank" rel="noopener">${esc(T("Open the full ranking"))}</a>`)}
     ${card(heading(T("Best 12-month deposits now"), "🔒") + hint(offersStatus) + offerRows(Rates.deposits, "d") + `<a class="btn second" href="${DEPOSITS_RANKING}" target="_blank" rel="noopener">${esc(T("Open the full ranking"))}</a>`)}
     ${card(heading(T("Ways to save money in Poland")) + hint(T("From the safest and most flexible to long-term. Rates change often – always check the current conditions.")) + `<p>📈 ${esc(status)}</p>` + button("⟳ " + esc(T("Refresh rates")), "refresh-rates"))}
@@ -143,7 +143,7 @@ function optimizeHtml() {
       esc(T("You pay 2% of your salary (0.5–4% possible), your employer at least 1.5%, and the State adds 250 zł once and 240 zł every year.")), T("Medium – invested in funds"), T("Long-term"), T("Almost everyone who is employed"))}
     ${option("📊", T("Crypto savings"), T("Higher rates on stablecoins and crypto, often without time limits. But no state guarantee: if the platform fails, your money can be lost."),
       esc(T("Rates differ a lot between platforms and coins and change often – there is no guarantee.")), T("High – no BFG guarantee, prices can fall"), T("Usually same day"), T("Only money you can afford to lose"))}
-    ${card(heading(T("Please note")) + hint(T("These suggestions are calculated from what you entered and are estimates. They are not financial, investment or tax advice.")), "wide")}
+    ${card(heading(T("Please note")) + hint(T("These suggestions are calculated from what you entered and are estimates. They are not financial, investment or tax advice.")))}
   </div><div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
 }
 
