@@ -298,12 +298,13 @@ export function setModule(code, on) {
 // ---------------------------------------------------------------- categories
 
 export const OTHER = "Other";
+export const BANK_FEES = "Bank fees";
 const BUILT_IN = [
   ["Housing / rent", true, "🏠"], ["Electricity, gas, water, heating", true, "💡"], ["Internet & phone", true, "📱"],
   ["Food & groceries", true, "🛒"], ["Transport / fuel", true, "⛽"], ["Car insurance & service", true, "🚗"],
   ["Health & medicine", true, "💊"], ["Insurance", true, "🛡️"], ["Loan payments", true, "🏦"],
   ["Restaurants & takeaway", false, "🍽️"], ["Subscriptions", false, "📺"], ["Hobbies & leisure", false, "🎮"],
-  ["Shopping", false, "🛍️"], ["Travel", false, "✈️"],
+  ["Shopping", false, "🛍️"], ["Travel", false, "✈️"], [BANK_FEES, false, "🧾"],
 ].map(([Name, Essential, Icon]) => ({ Name, Essential, Icon, Custom: false }));
 const OTHER_CAT = { Name: OTHER, Essential: false, Icon: "📦", Custom: false };
 export const ICON_CHOICES = ["🏠", "💡", "📱", "🛒", "⛽", "🚗", "💊", "🛡️", "🏦", "🍽️", "📺", "🎮", "🛍️", "✈️", "📦",
@@ -640,6 +641,10 @@ export const Advisor = {
           : T("Another big not-essential cost: about {0} per month. Spending 20% less there saves {1} per month.", pln(c.perMonth), pln(cut)), cut * 12, "expenses");
       }
     }
+    // Bank fees: many Polish banks have accounts and cards without fees
+    const fees = Advisor.perCategory(d, e => e.Category === BANK_FEES)[0]?.perMonth || 0;
+    if (fees >= 5)
+      add("money", T("You pay {0} a month in bank fees", pln(fees)), T("Account, card, ATM or transfer fees add up to {0} a year. Many Polish banks have a free account and card if you meet simple conditions (e.g. a monthly salary payment or a few card payments) – check your bank's conditions or switch.", pln(fees * 12)), fees * 12, "expenses");
     if (income > 0 && avg.monthsUsed > 0 && left >= 0) {
       const r = left / income * 100;
       if (r < 20) {

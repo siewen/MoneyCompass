@@ -275,6 +275,8 @@ export const isOwnTransfer = r => r.ownAccount || /przelew własny|przelew wlasn
 export const isSavingsTransfer = r => /own transfer|internal transfer|przelew własny|przelew wlasny|oszczędn|oszczedn|lokat[aęy]|saving|deposit/i.test(r.allText + " " + r.bankCategory);
 
 const RULES = [
+  // Bank fees first: "opłata za kartę", "prowizja"… (before "kredyt" or "przelew" catch them)
+  ["Bank fees", /opłat[ay] za (prowadzenie|kart|użytkowanie karty|uzytkowanie karty|wypłat|wyplat|przelew|sms|powiadom|rachun|konto|wydanie|pakiet|obsług|obslug|zestawien|wyciąg|wyciag|bankomat)|oplat[ay] za (prowadzenie|kart|wypłat|wyplat|przelew|sms|rachun|konto|pakiet|bankomat)|prowizj|opłata miesięczna|oplata miesieczna|opłata za ekspres|odsetki (od debetu|karne|od zadłużenia|od zadluzenia|od salda ujemnego)|bank fee|account fee|card fee|atm fee|service charge|monthly fee|commission/i],
   ["Food & groceries", /biedronk|\blidl|żabk|zabka|kaufland|carrefour|auchan|\bnetto\b|\bdino\b|stokrotk|lewiatan|\baldi\b|intermarch|polomarket|\bspar\b|delikates|piekarni|frisco|\bmarket\b|żywność|zywnosc|spożywcz/i],
   ["Restaurants & takeaway", /mcdonald|\bkfc\b|burger king|pizz|pyszne|glovo|uber ?eats|\bwolt\b|restaura|bistro|kebab|starbucks|costa coffee|kawiarni|\bcafe\b|subway|jedzenie poza domem|bar mleczny|sushi/i],
   ["Transport / fuel", /orlen|\bbp\b|\bshell\b|circle ?k|\bmoya\b|lotos|\bamic\b|\buber\b|\bbolt\b|free ?now|\bpkp\b|intercity|koleje|jakdojade|\bmpk\b|\bztm\b|skycash|parking|paliwo|transport|autostrad/i],

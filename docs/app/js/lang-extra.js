@@ -387,7 +387,10 @@ export const EXTRA = {
 "Salary {0} + extra income {1} per month, from the same months as your expenses. Click for the Income tab.": "Gehalt {0} + Zusatzeinkommen {1} pro Monat, aus denselben Monaten wie Ihre Ausgaben. Klicken für den Tab Einkommen.",
 "From your income sources. Click for the Income tab.": "Aus Ihren Einkommensquellen. Klicken für den Tab Einkommen.",
 "Essential {0} + not essential {1} per month (average of {2}), including loan instalments and regular payments. Click for the Expenses tab.": "Notwendig {0} + nicht notwendig {1} pro Monat (Durchschnitt: {2}), mit Kreditraten und regelmäßigen Zahlungen. Klicken für den Tab Ausgaben.",
-"Essential {0} + not essential {1} per month, including loan instalments and regular payments. Click for the Expenses tab.": "Notwendig {0} + nicht notwendig {1} pro Monat, mit Kreditraten und regelmäßigen Zahlungen. Klicken für den Tab Ausgaben."
+"Essential {0} + not essential {1} per month, including loan instalments and regular payments. Click for the Expenses tab.": "Notwendig {0} + nicht notwendig {1} pro Monat, mit Kreditraten und regelmäßigen Zahlungen. Klicken für den Tab Ausgaben.",
+"Bank fees": "Bankgebühren",
+"You pay {0} a month in bank fees": "Sie zahlen {0} pro Monat an Bankgebühren",
+"Account, card, ATM or transfer fees add up to {0} a year. Many Polish banks have a free account and card if you meet simple conditions (e.g. a monthly salary payment or a few card payments) – check your bank's conditions or switch.": "Konto-, Karten-, Geldautomaten- oder Überweisungsgebühren summieren sich auf {0} pro Jahr. Viele polnische Banken bieten ein kostenloses Konto und eine Karte, wenn Sie einfache Bedingungen erfüllen (z. B. monatlicher Gehaltseingang oder einige Kartenzahlungen) – prüfen Sie die Bedingungen Ihrer Bank oder wechseln Sie."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -776,7 +779,10 @@ export const EXTRA = {
 "Salary {0} + extra income {1} per month, from the same months as your expenses. Click for the Income tab.": "Salaire {0} + revenus supplémentaires {1} par mois, sur les mêmes mois que vos dépenses. Cliquez pour l'onglet Revenus.",
 "From your income sources. Click for the Income tab.": "D'après vos sources de revenus. Cliquez pour l'onglet Revenus.",
 "Essential {0} + not essential {1} per month (average of {2}), including loan instalments and regular payments. Click for the Expenses tab.": "Essentiel {0} + non essentiel {1} par mois (moyenne : {2}), mensualités de prêt et paiements réguliers compris. Cliquez pour l'onglet Dépenses.",
-"Essential {0} + not essential {1} per month, including loan instalments and regular payments. Click for the Expenses tab.": "Essentiel {0} + non essentiel {1} par mois, mensualités de prêt et paiements réguliers compris. Cliquez pour l'onglet Dépenses."
+"Essential {0} + not essential {1} per month, including loan instalments and regular payments. Click for the Expenses tab.": "Essentiel {0} + non essentiel {1} par mois, mensualités de prêt et paiements réguliers compris. Cliquez pour l'onglet Dépenses.",
+"Bank fees": "Frais bancaires",
+"You pay {0} a month in bank fees": "Vous payez {0} par mois de frais bancaires",
+"Account, card, ATM or transfer fees add up to {0} a year. Many Polish banks have a free account and card if you meet simple conditions (e.g. a monthly salary payment or a few card payments) – check your bank's conditions or switch.": "Les frais de compte, de carte, de retrait ou de virement atteignent {0} par an. Beaucoup de banques polonaises proposent un compte et une carte gratuits sous conditions simples (par ex. salaire versé chaque mois ou quelques paiements par carte) – vérifiez les conditions de votre banque ou changez."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1165,6 +1171,9 @@ export const EXTRA = {
 "Salary {0} + extra income {1} per month, from the same months as your expenses. Click for the Income tab.": "Wynagrodzenie {0} + dodatkowy dochód {1} miesięcznie, z tych samych miesięcy co wydatki. Kliknij, aby przejść do Dochodów.",
 "From your income sources. Click for the Income tab.": "Z Twoich źródeł dochodu. Kliknij, aby przejść do Dochodów.",
 "Essential {0} + not essential {1} per month (average of {2}), including loan instalments and regular payments. Click for the Expenses tab.": "Niezbędne {0} + inne {1} miesięcznie (średnia: {2}), z ratami kredytów i płatnościami cyklicznymi. Kliknij, aby przejść do Wydatków.",
-"Essential {0} + not essential {1} per month, including loan instalments and regular payments. Click for the Expenses tab.": "Niezbędne {0} + inne {1} miesięcznie, z ratami kredytów i płatnościami cyklicznymi. Kliknij, aby przejść do Wydatków."
+"Essential {0} + not essential {1} per month, including loan instalments and regular payments. Click for the Expenses tab.": "Niezbędne {0} + inne {1} miesięcznie, z ratami kredytów i płatnościami cyklicznymi. Kliknij, aby przejść do Wydatków.",
+"Bank fees": "Opłaty bankowe",
+"You pay {0} a month in bank fees": "Płacisz {0} miesięcznie opłat bankowych",
+"Account, card, ATM or transfer fees add up to {0} a year. Many Polish banks have a free account and card if you meet simple conditions (e.g. a monthly salary payment or a few card payments) – check your bank's conditions or switch.": "Opłaty za konto, kartę, bankomat czy przelewy to {0} rocznie. Wiele polskich banków ma darmowe konto i kartę po spełnieniu prostych warunków (np. wpływ wynagrodzenia co miesiąc lub kilka płatności kartą) – sprawdź warunki swojego banku albo zmień bank."
 }
 };
