@@ -3,6 +3,7 @@ import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, addMonths, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
   addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
+  matchKey, learnCategory, similarExpenses, setCategory,
 } from "./core.js";
 import { hbars, donut, legend, monthBars, progress } from "./charts.js";
 import { NEW_CAT } from "./ui.js";
@@ -111,7 +112,10 @@ export const Overview = {
         <b class="out" data-tip="${esc(T("Essential {0} + not essential {1}", pln(avg.essential), pln(avg.nonEssential)))}">${pln(outflow)} <small>${100 - pIn}%</small></b>
       </div>` : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"income"));
     const cur = months.find(m => m.current);
-    parts.push(card(heading(T("Financial analysis: inflows and outflows by month")) + hint(T("Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered or imported.")) +
+    const fd = ChartData.firstDate(d);
+    parts.push(card(heading(T("Financial analysis: inflows and outflows by month")) +
+      (fd ? `<p class="period-line">📅 ${esc(T("From {0} to {1} · {2} months", fmtDate(fd), fmtDate(today()), months.length))}</p>` : "") +
+      hint(T("Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered or imported.")) +
       (showTrend ? monthBars(months, axis, pln, [T("Inflows"), T("Outflows")]) + legend([
         { color: "#2E9E5B", label: T("Inflows"), text: pln(months.reduce((s, m) => s + m.income, 0) / Math.max(1, months.length)) + " " + T("avg.") },
         { color: "#C81E26", label: T("Outflows"), text: pln(months.reduce((s, m) => s + m.expenses, 0) / Math.max(1, months.length)) + " " + T("avg.") },
@@ -389,7 +393,9 @@ export const Expenses = {
     const older = months.slice(3).reduce((s, m) => s + m.items.length, 0);
     const loans = Calc.loanPayments(d);
 
+    const otherCount = d.Expenses.filter(x => x.Category === OTHER).length;
     el.innerHTML = `<div class="grid">
+      ${otherCount >= 2 ? `<button class="tip" data-action="sort-other">🏷 ${esc(T("{0} outflows are in \"Other\" – sort them by shop in one go →", otherCount))}</button>` : ""}
       ${card(`<form id="expense-form">${heading(T("Add an expense"))}
         <div class="two">${field(T("Date"), dateInput("date", inputDate(today())))}${field(T("Amount (zł)"), numInput("amount", "", T("e.g. {0}", "120,50")))}</div>
         <div class="cat-row">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], cat0.Name))}
@@ -424,6 +430,7 @@ export const Expenses = {
       save(); toast(T("Added: {0}, {1}.", T(v.category), pln(amt))); App.refresh();
     };
     el.querySelector('[data-action="categories"]').onclick = () => manageCategories();
+    el.querySelector('[data-action="sort-other"]')?.addEventListener("click", () => sortOther(() => App.refresh()));
     el.querySelector('[data-action="import"]').onclick = () => App.openBankImport();
     const olderBtn = el.querySelector('[data-action="older"]');
     if (olderBtn) olderBtn.onclick = () => { showAllMonths = true; App.refresh(); };
@@ -530,8 +537,50 @@ function editExpense(e, after) {
     Object.assign(e, { Date: isoDate(parseDate(v.date)), Amount: amt, Category: v.category, Description: v.description.trim(), Essential: v.essential });
     if (changed) e.Edited = true;
     if (v.repeat !== before) { setRepeat(D(), e, ""); if (v.repeat) setRepeat(D(), e, v.repeat); }
+    const oldCat = p.oldCat;
     save(); p.close(); after();
+    if (v.category !== oldCat) offerSameCategory(e, after);
   };
+  p.oldCat = e.Category;
+}
+/** You changed the category of one expense: the same shop or payee can get it everywhere, and in future imports. */
+async function offerSameCategory(e, after) {
+  const d = D(), others = similarExpenses(d, e).filter(x => x.Category !== e.Category);
+  learnCategory(d, e.Description, e.Category); save();
+  if (!others.length) return;
+  const ok = await confirmBox(T("Change the same ones too?"),
+    T("{0} more outflows look like \"{1}\". Put all of them in \"{2}\" too?\nNew bank imports from there will get this category automatically.", others.length, e.Description, categoryLabel(e.Category)),
+    T("Yes, change all {0}", others.length), T("Only this one"), false, "🏷");
+  if (!ok) return;
+  setCategory(others, e.Category); save(); after();
+  toast(T("{0} outflows moved to {1}.", others.length + 1, categoryLabel(e.Category)), "good");
+}
+/** All outflows in "Other", grouped by shop or payee: give each group a category in one go. */
+function sortOther(after) {
+  const d = D();
+  const draw = () => {
+    const groups = new Map();
+    for (const x of d.Expenses.filter(x => x.Category === OTHER)) {
+      const k = matchKey(x.Description) || "—"; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(x);
+    }
+    const list = [...groups.entries()].sort((a, b) => b[1].length - a[1].length || b[1].reduce((s, x) => s + x.Amount, 0) - a[1].reduce((s, x) => s + x.Amount, 0));
+    return `<h2 class="popup-title">🏷 ${esc(T("Sort the \"Other\" outflows"))}</h2>
+      ${hint(T("The same shops and payees are grouped. Choose a category for a group – all its outflows move there, and new bank imports from there get it automatically."))}
+      ${list.length ? `<div class="list scroll sort-other">${list.slice(0, 80).map(([k, xs]) => `<div class="item"><div><b>${esc(xs[0].Description || T("No description"))}</b>
+        <span class="hint">${esc(T("{0} × · together {1}", xs.length, pln(xs.reduce((s, x) => s + x.Amount, 0))))}</span></div>
+        <select data-group="${esc(k)}">${[...categories().map(c => [c.Name, categoryLabel(c.Name)])].map(([v, l]) => `<option value="${esc(v)}"${v === OTHER ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></div>`).join("")}</div>`
+        : `<p class="good">✔ ${esc(T("Nothing left in \"Other\"."))}</p>`}
+      <div class="popup-buttons"><button class="btn main" data-close>${esc(T("Done"))}</button></div>`;
+  };
+  const p = popup(draw(), { width: 680, onClose: () => after() });
+  const bind = () => p.el.querySelectorAll("[data-group]").forEach(sel => sel.onchange = () => {
+    const k = sel.dataset.group, xs = d.Expenses.filter(x => x.Category === OTHER && (matchKey(x.Description) || "—") === k);
+    if (!xs.length || sel.value === OTHER) return;
+    setCategory(xs, sel.value); learnCategory(d, xs[0].Description, sel.value); save();
+    toast(T("{0} outflows moved to {1}.", xs.length, categoryLabel(sel.value)), "good");
+    p.el.innerHTML = draw(); bind();
+  });
+  bind();
 }
 function showCategory(name) {
   const d = D();

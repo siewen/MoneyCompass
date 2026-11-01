@@ -580,11 +580,10 @@ export const ChartData = {
   hasInOut(d) { return Calc.totalIncome(d) > 0 || Calc.spending(d).monthsUsed > 0; },
   trend(d) {
     const thisMonth = monthStart(today());
-    let first = addMonths(thisMonth, -5);
-    if (d.Expenses.length) {
-      const fm = monthStart(new Date(Math.min(...d.Expenses.map(e => parseDate(e.Date).getTime()))));
-      if (fm > first) first = fm > thisMonth ? thisMonth : fm;
-    }
+    // All months from your oldest entry (typed in or imported) up to today; without entries the last 6 months
+    const first0 = this.firstDate(d);
+    let first = first0 ? monthStart(first0) : addMonths(thisMonth, -5);
+    if (first > thisMonth) first = thisMonth;
     const count = (thisMonth.getFullYear() - first.getFullYear()) * 12 + thisMonth.getMonth() - first.getMonth() + 1;
     const out = [];
     for (let n = 0; n < count; n++) {
@@ -597,7 +596,14 @@ export const ChartData = {
         + Calc.loanPayments(d, start) + Calc.recurringIn(d, start, end).reduce((s, x) => s + x.amount, 0);
       out.push({ month: monthShort(start), start, income, expenses, current: start.getTime() === thisMonth.getTime() });
     }
+    // Over more than one year the labels get the year too: "Sep 25", "Jan 26"
+    if (out.length && out[0].start.getFullYear() !== thisMonth.getFullYear()) out.forEach(m => { m.month += " " + String(m.start.getFullYear()).slice(2); });
     return out;
+  },
+  /** The date of your oldest expense or money received, or null. */
+  firstDate(d) {
+    const t = [...d.Expenses, ...d.Received, ...(d.Transfers || [])].map(x => parseDate(x.Date)?.getTime()).filter(Number.isFinite);
+    return t.length ? new Date(Math.min(...t)) : null;
   },
   categories(d) {
     const by = Advisor.spendingByCategory(d);
@@ -880,4 +886,29 @@ export function planLoan(l) {
   l.EndDate = p.end ? isoDate(p.end) : isoDate(addMonths(parseDate(l.NextPayment), 1200));
   l.Planned = true;
   return p;
+}
+
+// ---------- Learned categories: change one expense, and the same shop gets that category everywhere ----------
+/** The shop or payee of a description, without card numbers, dates and amounts: "ŻABKA Z1234 SZCZECIN 12.10" → "żabka z szczecin". */
+export const matchKey = text => String(text || "").toLowerCase().replace(/[0-9.,/#*:;_()+\-]+/g, " ").replace(/\b[a-z]\b/g, " ").replace(/\s+/g, " ").trim().slice(0, 40);
+/** The category you chose earlier for this shop or payee (used for new imports), or null. */
+export function ruleFor(d, text) {
+  const k = matchKey(text);
+  return k ? (d.Settings.CategoryRules || []).find(r => r.Match === k)?.Category || null : null;
+}
+export function learnCategory(d, text, category) {
+  const k = matchKey(text); if (!k) return;
+  const rules = d.Settings.CategoryRules || (d.Settings.CategoryRules = []);
+  const r = rules.find(x => x.Match === k);
+  if (r) r.Category = category; else rules.push({ Match: k, Category: category });
+}
+/** Other expenses from the same shop or payee. */
+export function similarExpenses(d, e) {
+  const k = matchKey(e.Description);
+  return k ? d.Expenses.filter(x => x !== e && matchKey(x.Description) === k) : [];
+}
+/** Give a group of expenses a category (and its "essential" default). */
+export function setCategory(list, category) {
+  const ess = !!findCategory(category)?.Essential;
+  for (const x of list) { x.Category = category; x.Essential = ess; x.Edited = true; }
 }

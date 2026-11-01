@@ -593,3 +593,9 @@ svg.donut text { pointer-events: none; }
   :root[data-design] .tab .tl { white-space: nowrap; }
 }
 .swatch.classic-dark { background: linear-gradient(135deg, #0F172A 50%, #14B8A6 50%); }
+.period-line { margin: -4px 0 4px; font-weight: 600; color: var(--ink); font-size: 14px; }
+.sort-other .item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px dashed var(--border); }
+.sort-other .item > div { min-width: 0; display: flex; flex-direction: column; }
+.sort-other .item b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sort-other select { width: 220px; flex: none; }
+.list.scroll.sort-other { max-height: 60vh; overflow: auto; }

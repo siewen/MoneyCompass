@@ -11,7 +11,7 @@ import { App, requirePro } from "./app.js";
 import { Rates, BOND_CODES, BONDS_WEBSITE, SAVINGS_RANKING, DEPOSITS_RANKING } from "./rates.js";
 import { budgetBars, offerSalary, binCard, bindBin } from "./pages-main.js";
 import * as Csv from "./csv.js";
-import { toBin, loanPlan, planLoan, loanNextPayment, lang } from "./core.js";
+import { toBin, loanPlan, planLoan, loanNextPayment, lang, ruleFor } from "./core.js";
 
 const D = () => State.data;
 const locked = (title, text) => `<div class="grid">${card(`<div class="locked">🔒<h3>${esc(title)}</h3><p>${esc(text)}</p>${button(esc(T("Enter license key")), "unlock", "main")}</div>`)}</div>`;
@@ -445,7 +445,7 @@ export async function openBankImport() {
       if (v === null) { foreign++; continue; }
       const old = d.Expenses.find(e => sameDay(e.Date, r.date) && Math.abs(e.Amount - v) < 0.005 && e.Description === r.description);
       if (old) { dup++; remember(old, r); continue; }
-      items.push({ row: r, pln: v, category: Csv.category(r) });
+      items.push({ row: r, pln: v, category: ruleFor(d, r.description) || Csv.category(r) });
     }
     const transfers = outgoing.filter(Csv.isOwnTransfer).filter(r => r.currency === "PLN")
       .filter(r => { const old = d.Transfers.find(t => sameDay(t.Date, r.date) && Math.abs(t.Amount + r.amount) < 0.005 && t.Description === r.description); remember(old, r); return !old; })

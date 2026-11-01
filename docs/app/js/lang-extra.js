@@ -562,7 +562,19 @@ export const EXTRA = {
 "Same layout, dark background": "Gleiches Layout, dunkler Hintergrund",
 "Design: classic light or dark, or the new beta designs": "Design: klassisch hell oder dunkel oder die neuen Beta-Designs",
 "from your income sources": "aus Ihren Einkommensquellen",
-"Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules and unlimited exports (the free version has {0}).": "Pro schaltet frei: Finanzen optimieren mit aktuellen Zinsen, Angebote vergleichen, Kontoauszug importieren, eigene Kategorien mit Symbolen, die Module und unbegrenzte Exporte (die kostenlose Version hat {0})."
+"Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules and unlimited exports (the free version has {0}).": "Pro schaltet frei: Finanzen optimieren mit aktuellen Zinsen, Angebote vergleichen, Kontoauszug importieren, eigene Kategorien mit Symbolen, die Module und unbegrenzte Exporte (die kostenlose Version hat {0}).",
+"Change the same ones too?": "Die gleichen auch ändern?",
+"{0} more outflows look like \"{1}\". Put all of them in \"{2}\" too?\nNew bank imports from there will get this category automatically.": "{0} weitere Ausgaben sehen aus wie „{1}“. Alle auch nach „{2}“ verschieben?\nNeue Bankimporte von dort bekommen diese Kategorie automatisch.",
+"Yes, change all {0}": "Ja, alle {0} ändern",
+"Only this one": "Nur diese",
+"{0} outflows moved to {1}.": "{0} Ausgaben nach {1} verschoben.",
+"Sort the \"Other\" outflows": "„Sonstiges“-Ausgaben sortieren",
+"The same shops and payees are grouped. Choose a category for a group – all its outflows move there, and new bank imports from there get it automatically.": "Gleiche Geschäfte und Empfänger sind gruppiert. Wählen Sie eine Kategorie für eine Gruppe – alle Ausgaben wandern dorthin, und neue Bankimporte bekommen sie automatisch.",
+"No description": "Ohne Beschreibung",
+"{0} × · together {1}": "{0} × · zusammen {1}",
+"Nothing left in \"Other\".": "Nichts mehr in „Sonstiges“.",
+"{0} outflows are in \"Other\" – sort them by shop in one go →": "{0} Ausgaben sind in „Sonstiges“ – nach Geschäft in einem Schritt sortieren →",
+"From {0} to {1} · {2} months": "Vom {0} bis {1} · {2} Monate"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1126,7 +1138,19 @@ export const EXTRA = {
 "Same layout, dark background": "Même disposition, fond sombre",
 "Design: classic light or dark, or the new beta designs": "Apparence : classique claire ou sombre, ou les nouvelles apparences bêta",
 "from your income sources": "de vos sources de revenus",
-"Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules and unlimited exports (the free version has {0}).": "Pro débloque : Optimiser mes finances avec les taux actuels, Comparer les offres, Importer un relevé bancaire, des catégories personnalisées avec icônes, les Modules et des exports illimités (la version gratuite en a {0})."
+"Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules and unlimited exports (the free version has {0}).": "Pro débloque : Optimiser mes finances avec les taux actuels, Comparer les offres, Importer un relevé bancaire, des catégories personnalisées avec icônes, les Modules et des exports illimités (la version gratuite en a {0}).",
+"Change the same ones too?": "Modifier aussi les mêmes ?",
+"{0} more outflows look like \"{1}\". Put all of them in \"{2}\" too?\nNew bank imports from there will get this category automatically.": "{0} autres sorties ressemblent à « {1} ». Les mettre toutes aussi dans « {2} » ?\nLes nouveaux imports bancaires de ce bénéficiaire recevront cette catégorie automatiquement.",
+"Yes, change all {0}": "Oui, modifier les {0}",
+"Only this one": "Seulement celle-ci",
+"{0} outflows moved to {1}.": "{0} sorties déplacées vers {1}.",
+"Sort the \"Other\" outflows": "Trier les sorties « Autre »",
+"The same shops and payees are grouped. Choose a category for a group – all its outflows move there, and new bank imports from there get it automatically.": "Les mêmes magasins et bénéficiaires sont regroupés. Choisissez une catégorie pour un groupe – toutes ses sorties y vont, et les nouveaux imports bancaires la reçoivent automatiquement.",
+"No description": "Sans description",
+"{0} × · together {1}": "{0} × · total {1}",
+"Nothing left in \"Other\".": "Plus rien dans « Autre ».",
+"{0} outflows are in \"Other\" – sort them by shop in one go →": "{0} sorties sont dans « Autre » – triez-les par magasin en une fois →",
+"From {0} to {1} · {2} months": "Du {0} au {1} · {2} mois"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1690,6 +1714,18 @@ export const EXTRA = {
 "Same layout, dark background": "Ten sam układ, ciemne tło",
 "Design: classic light or dark, or the new beta designs": "Wygląd: klasyczny jasny lub ciemny albo nowe wyglądy beta",
 "from your income sources": "z Twoich źródeł dochodu",
-"Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules and unlimited exports (the free version has {0}).": "Pro odblokowuje: Optymalizuj finanse z aktualnymi stawkami, Porównaj oferty, Import wyciągu bankowego, własne kategorie z ikonami, Moduły i nieograniczony eksport (wersja darmowa ma {0})."
+"Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules and unlimited exports (the free version has {0}).": "Pro odblokowuje: Optymalizuj finanse z aktualnymi stawkami, Porównaj oferty, Import wyciągu bankowego, własne kategorie z ikonami, Moduły i nieograniczony eksport (wersja darmowa ma {0}).",
+"Change the same ones too?": "Zmienić też takie same?",
+"{0} more outflows look like \"{1}\". Put all of them in \"{2}\" too?\nNew bank imports from there will get this category automatically.": "{0} innych wydatków wygląda jak „{1}”. Przenieść je wszystkie też do „{2}”?\nNowe importy z banku od tego odbiorcy dostaną tę kategorię automatycznie.",
+"Yes, change all {0}": "Tak, zmień wszystkie {0}",
+"Only this one": "Tylko ten",
+"{0} outflows moved to {1}.": "Przeniesiono {0} wydatków do: {1}.",
+"Sort the \"Other\" outflows": "Uporządkuj wydatki „Inne”",
+"The same shops and payees are grouped. Choose a category for a group – all its outflows move there, and new bank imports from there get it automatically.": "Te same sklepy i odbiorcy są zgrupowane. Wybierz kategorię dla grupy – wszystkie jej wydatki tam trafią, a nowe importy z banku dostaną ją automatycznie.",
+"No description": "Bez opisu",
+"{0} × · together {1}": "{0} × · razem {1}",
+"Nothing left in \"Other\".": "Nic nie zostało w „Inne”.",
+"{0} outflows are in \"Other\" – sort them by shop in one go →": "{0} wydatków jest w „Inne” – uporządkuj je według sklepu za jednym razem →",
+"From {0} to {1} · {2} months": "Od {0} do {1} · miesięcy: {2}"
 }
 };
