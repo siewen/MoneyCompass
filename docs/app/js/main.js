@@ -40,6 +40,14 @@ const TAB_ICON = {
 /** Beta design: "navy" or "emerald" (saved in this browser), or "" for the normal design. */
 const BETA_KEY = "mc-beta";
 const beta = () => { try { return localStorage.getItem(BETA_KEY) || ""; } catch { return ""; } };
+/** Beta side menu: "auto" folds to icons and opens when the mouse is on it, "pinned" stays open. */
+const side = () => { try { return localStorage.getItem("mc-side") || "auto"; } catch { return "auto"; } };
+function toggleSide() {
+  const v = side() === "pinned" ? "auto" : "pinned";
+  try { localStorage.setItem("mc-side", v); } catch { /* private window */ }
+  document.documentElement.dataset.side = v;
+  const b = document.querySelector(".side-toggle"); if (b) { b.textContent = v === "pinned" ? "‹" : "›"; b.title = T(v === "pinned" ? "Fold the menu (it opens when you point at it)" : "Keep the menu open"); }
+}
 function setBeta(v) { try { v ? localStorage.setItem(BETA_KEY, v) : localStorage.removeItem(BETA_KEY); } catch { /* private window */ } buildShell(); }
 function betaMenu() {
   const btn = document.querySelector('[data-act="beta"]'), r = btn.getBoundingClientRect(), now = beta();
@@ -64,6 +72,7 @@ function applyTheme() {
   document.documentElement.dataset.theme = design;
   const b = beta();
   if (b) document.documentElement.dataset.design = b; else delete document.documentElement.dataset.design;
+  document.documentElement.dataset.side = side();
 }
 
 function buildShell() {
@@ -74,6 +83,7 @@ function buildShell() {
   if (!list.some(t => t.route === current)) current = "overview";
   document.getElementById("app").innerHTML = `
     <header class="top">
+      <button class="side-toggle" data-act="side" title="${esc(T(side() === "pinned" ? "Fold the menu (it opens when you point at it)" : "Keep the menu open"))}">${side() === "pinned" ? "‹" : "›"}</button>
       <a class="brand" href="../index.html" title="MoneyCompass"><img src="../logo.svg" alt=""><span>MoneyCompass</span></a>
       <nav class="tabs" id="tabs">${list.map(t => `<button class="tab" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}"><span class="ti">${TAB_ICON[t.route] || ""}</span><span class="tl">${esc(T(t.title))}</span></button>`).join("")}</nav>
       <div class="actions">
@@ -89,7 +99,7 @@ function buildShell() {
     <main id="page"></main>
     <button class="help-fab" data-act="help-menu" title="${esc(T("Help & About"))}">?</button>`;
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => App.go(b.dataset.tab));
-  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, beta: betaMenu };
+  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, beta: betaMenu, side: toggleSide };
   document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
   setupHelpButton();
   render();

@@ -542,7 +542,7 @@ svg.donut text { pointer-events: none; }
 @media (min-width: 900px) {
   :root[data-design] body { padding-left: 250px; }
   :root[data-design] .top { position: fixed; inset: 0 auto 0 0; width: 250px; flex-direction: column; align-items: stretch; gap: 14px; padding: 26px 18px 18px; background: var(--side); border: 0; border-right: 1px solid var(--border); backdrop-filter: none; overflow-y: auto; }
-  :root[data-design="emerald"] .top { background: rgba(20,26,25,.85); }
+  :root[data-design="emerald"] .top { background: #161C1B; }
   :root[data-design] .brand { padding: 0 8px 18px; font-size: 18px; }
   :root[data-design] .brand img { width: 34px; height: 34px; }
   :root[data-design] .tabs { flex-direction: column; overflow: visible; flex: 1; gap: 4px; }
@@ -567,3 +567,29 @@ svg.donut text { pointer-events: none; }
 :root[data-design] .flow-bar .in span { background: var(--hi); color: #06231A; } :root[data-design] .flow-bar .out span { background: var(--hi2); }
 :root[data-design] [style*="#2E9E5B"] { background: var(--hi) !important; } :root[data-design] [style*="#C81E26"] { background: var(--hi2) !important; }
 :root[data-design] .flow-values { border-color: var(--border) !important; }
+
+/* Beta side menu: folded to icons ("auto", opens when pointed at) or kept open ("pinned"), with the small arrow */
+.side-toggle { display: none; }
+@media (min-width: 900px) {
+  :root[data-design] .top { transition: width .2s ease, box-shadow .2s; overflow-x: hidden; }
+  :root[data-design] .side-toggle { display: grid; place-items: center; position: fixed; top: 34px; left: 236px; z-index: 25; width: 26px; height: 26px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--card); color: var(--ink); font: 700 16px/1 system-ui, sans-serif; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.3); transition: left .2s; padding: 0 0 2px; }
+  :root[data-design] .side-toggle:hover { background: var(--hi); color: #0D2B21; }
+  :root[data-design][data-side="auto"] body { padding-left: 78px; }
+  :root[data-design][data-side="auto"] .side-toggle { left: 64px; }
+  :root[data-design][data-side="auto"] .top:not(:hover) { width: 78px; padding-left: 12px; padding-right: 12px; }
+  :root[data-design][data-side="auto"] .top:hover { box-shadow: 18px 0 40px rgba(0,0,0,.45); z-index: 30; }
+  :root[data-design][data-side="auto"] .top:hover .side-toggle { left: 236px; }
+  :root[data-design][data-side="auto"] .top:not(:hover) .brand span,
+  :root[data-design][data-side="auto"] .top:not(:hover) .tab .tl,
+  :root[data-design][data-side="auto"] .top:not(:hover) .sw-l,
+  :root[data-design][data-side="auto"] .top:not(:hover) .act span,
+  :root[data-design][data-side="auto"] .top:not(:hover) .lang-btn,
+  :root[data-design][data-side="auto"] .top:not(:hover) .data-btn,
+  :root[data-design][data-side="auto"] .top:not(:hover) .exit { display: none; }
+  :root[data-design][data-side="auto"] .top:not(:hover) .brand { padding: 0 0 18px; justify-content: center; }
+  :root[data-design][data-side="auto"] .top:not(:hover) .tab { justify-content: center; padding: 10px 0; }
+  :root[data-design][data-side="auto"] .top:not(:hover) .actions { justify-content: center; }
+  :root[data-design][data-side="auto"] .top:not(:hover) .design-switch { justify-content: center; padding: 8px 0; }
+  :root[data-design] .tab .tl { white-space: nowrap; }
+}

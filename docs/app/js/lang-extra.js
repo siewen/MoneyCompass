@@ -554,7 +554,9 @@ export const EXTRA = {
 "Beta – Emerald": "Beta – Smaragd",
 "Side menu, dark green with lavender": "Seitenmenü, Dunkelgrün mit Lavendel",
 "Try the new beta design": "Das neue Beta-Design ausprobieren",
-"Beta design": "Beta-Design"
+"Beta design": "Beta-Design",
+"Fold the menu (it opens when you point at it)": "Menü einklappen (öffnet sich, wenn Sie darauf zeigen)",
+"Keep the menu open": "Menü offen lassen"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1110,7 +1112,9 @@ export const EXTRA = {
 "Beta – Emerald": "Bêta – émeraude",
 "Side menu, dark green with lavender": "Menu latéral, vert foncé avec lavande",
 "Try the new beta design": "Essayer la nouvelle apparence bêta",
-"Beta design": "Apparence bêta"
+"Beta design": "Apparence bêta",
+"Fold the menu (it opens when you point at it)": "Replier le menu (il s'ouvre au survol)",
+"Keep the menu open": "Garder le menu ouvert"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1666,6 +1670,8 @@ export const EXTRA = {
 "Beta – Emerald": "Beta – szmaragdowy",
 "Side menu, dark green with lavender": "Menu boczne, ciemna zieleń z lawendą",
 "Try the new beta design": "Wypróbuj nowy wygląd (beta)",
-"Beta design": "Wygląd beta"
+"Beta design": "Wygląd beta",
+"Fold the menu (it opens when you point at it)": "Zwiń menu (otworzy się po najechaniu myszką)",
+"Keep the menu open": "Zostaw menu otwarte"
 }
 };
