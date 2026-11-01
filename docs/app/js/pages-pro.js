@@ -7,8 +7,9 @@ import { progress, hbars } from "./charts.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, alertBox, toast, pickFile } from "./ui.js";
 import { App, requirePro } from "./app.js";
 import { Rates, BOND_CODES, BONDS_WEBSITE, SAVINGS_RANKING, DEPOSITS_RANKING } from "./rates.js";
-import { budgetBars, offerSalary } from "./pages-main.js";
+import { budgetBars, offerSalary, binCard, bindBin } from "./pages-main.js";
 import * as Csv from "./csv.js";
+import { toBin } from "./core.js";
 
 const D = () => State.data;
 const locked = (title, text) => `<div class="grid">${card(`<div class="locked">🔒<h3>${esc(title)}</h3><p>${esc(text)}</p>${button(esc(T("Enter license key")), "unlock", "main")}</div>`)}</div>`;
@@ -78,6 +79,7 @@ export const Savings = {
         <div class="item clickable${i === 0 ? " best" : ""}" data-load="${x.o.Id}"><div><b>${i === 0 ? "🏆 " : ""}${esc(x.o.Name)}</b><span class="hint">${esc(T("{0} · {1} for {2} days{3}, then {4} · over {5} days", pln(x.o.Amount), rate(x.o.PromoRate), x.o.PromoDays, x.o.PromoLimit > 0 ? " (" + T("up to {0}", pln(x.o.PromoLimit)) + ")" : "", rate(x.o.StandardRate), x.o.PeriodDays))}</span></div>
         <div class="right"><b class="good">${pln(x.r.net)}</b><span class="hint">${rate(x.r.effective)}</span></div><button class="icon-btn danger" data-del-offer="${x.o.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No saved offers yet."))))}
       ${bankCard}
+      ${binCard(["offer"])}
     </div>`;
     const fm = el.querySelector("#offer");
     const pick = fm.querySelector('[name="from-holding"]');
@@ -111,7 +113,7 @@ export const Savings = {
     });
     el.querySelectorAll("[data-del-offer]").forEach(b => b.onclick = async () => {
       const o = d.Offers.find(y => y.Id === b.dataset.delOffer);
-      if (await confirmBox(T("Delete?"), o.Name, T("Delete"), T("Cancel"), true)) { d.Offers = d.Offers.filter(y => y !== o); save(); App.refresh(); }
+      if (await confirmBox(T("Delete?"), o.Name, T("Delete"), T("Cancel"), true)) { toBin("offer", o); d.Offers = d.Offers.filter(y => y !== o); save(); App.refresh(); }
     });
   },
 };
@@ -227,6 +229,7 @@ export const Goals = {
           ${progress(fr, done ? COLORS.leftOver : "var(--goals)")}<span class="hint">${esc(T("{0} of {1} ({2}%) · by {3}", pln(Math.min(x.Saved, x.Target)), pln(x.Target), Math.round(Math.min(100, fr * 100)), fmtDate(x.TargetDate)))}</span>
           <span class="${done ? "good" : ""}">${esc(done ? T("Goal reached – well done!") : T("Save about {0} per month to reach it in time.", pln(perMonth(x))))}</span></div>`;
       }).join("") : hint(T("No goals yet. Add your first one above."))), "wide")}
+      ${binCard(["goal"])}
     </div>`;
     const fm = el.querySelector("#goal");
     el.querySelector('[data-action="save-goal"]').onclick = () => {
@@ -240,7 +243,7 @@ export const Goals = {
     el.querySelectorAll("[data-edit-goal]").forEach(x => x.onclick = ev => { if (ev.target.closest("[data-del-goal]")) return; editGoal = x.dataset.editGoal; App.refresh(); window.scrollTo({ top: 0, behavior: "smooth" }); });
     el.querySelectorAll("[data-del-goal]").forEach(b => b.onclick = async () => {
       const x = d.Goals.find(y => y.Id === b.dataset.delGoal);
-      if (await confirmBox(T("Delete goal?"), x.Name, T("Delete"), T("Cancel"), true)) { d.Goals = d.Goals.filter(y => y !== x); save(); App.refresh(); }
+      if (await confirmBox(T("Delete goal?"), x.Name, T("Delete"), T("Cancel"), true)) { toBin("goal", x); d.Goals = d.Goals.filter(y => y !== x); save(); App.refresh(); }
     });
   },
 };
@@ -272,6 +275,7 @@ export const Loans = {
       ${card(heading(T("Loans")) + hint(T("Tap a loan to edit it, for example to update what is left.")) + (d.Loans.length ? `<div class="list">${d.Loans.map(x => `
         <div class="item clickable" data-edit-loan="${x.Id}"><div><b>${esc(x.Name)}</b><span class="hint">${esc(T("{0} per month · {1} per year · last payment {2} ({3} months left)", pln(x.MonthlyPayment), rate(x.RatePercent || 0), fmtDate(x.EndDate), monthsLeft(x)))}</span></div>
         <b>${pln(x.Remaining)}</b><button class="icon-btn danger" data-del-loan="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No loans – great! Add one above if you have any."))), "wide")}
+      ${binCard(["loan"])}
     </div>`;
     const fm = el.querySelector("#loan");
     el.querySelector('[data-action="save-loan"]').onclick = () => {
@@ -285,7 +289,7 @@ export const Loans = {
     el.querySelectorAll("[data-edit-loan]").forEach(x => x.onclick = ev => { if (ev.target.closest("[data-del-loan]")) return; editLoan = x.dataset.editLoan; App.refresh(); window.scrollTo({ top: 0, behavior: "smooth" }); });
     el.querySelectorAll("[data-del-loan]").forEach(b => b.onclick = async () => {
       const x = d.Loans.find(y => y.Id === b.dataset.delLoan);
-      if (await confirmBox(T("Delete loan?"), x.Name, T("Delete"), T("Cancel"), true)) { d.Loans = d.Loans.filter(y => y !== x); save(); App.refresh(); }
+      if (await confirmBox(T("Delete loan?"), x.Name, T("Delete"), T("Cancel"), true)) { toBin("loan", x); d.Loans = d.Loans.filter(y => y !== x); save(); App.refresh(); }
     });
   },
 };
@@ -307,11 +311,12 @@ export const Budget = {
         ${button(T("Save limit"), "save-limit", "main")}</form>`)}
       ${card(heading(T("Limits this month")) + hint(T("From your entries in the Expenses tab. Green: on track, amber: almost used, red: over the limit.")) +
         (limits.length ? budgetBars() : hint(T("No limits yet. Set your first one above."))), "wide")}
+      ${binCard(["budget"])}
     </div>`;
     el.querySelectorAll("[data-budget]").forEach(b => {
       const del = document.createElement("button"); del.className = "icon-btn danger"; del.textContent = "🗑";
       del.onclick = async () => {
-        if (await confirmBox(T("Delete limit?"), T(b.dataset.budget), T("Delete"), T("Cancel"), true)) { d.Budgets = d.Budgets.filter(x => x.Category !== b.dataset.budget); save(); App.refresh(); }
+        if (await confirmBox(T("Delete limit?"), T(b.dataset.budget), T("Delete"), T("Cancel"), true)) { toBin("budget", d.Budgets.find(x => x.Category === b.dataset.budget)); d.Budgets = d.Budgets.filter(x => x.Category !== b.dataset.budget); save(); App.refresh(); }
       };
       b.querySelector("b").after(del);
     });

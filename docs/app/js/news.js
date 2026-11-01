@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 24, date: "2026-11-01", items: {
+    en: ["🗑 Deleted items: at the bottom of each tab you see what you deleted – put it back with ↩ Restore."],
+    pl: ["🗑 Usunięte pozycje: na dole każdej karty widzisz, co usunięto – przywróć to przyciskiem ↩ Przywróć."],
+    de: ["🗑 Gelöschte Einträge: unten auf jedem Tab sehen Sie, was Sie gelöscht haben – mit ↩ Wiederherstellen zurückholen."],
+    fr: ["🗑 Éléments supprimés : en bas de chaque onglet, voyez ce que vous avez supprimé – remettez-le avec ↩ Restaurer."] } },
   { build: 23, date: "2026-11-01", items: {
     en: ["🎨 Expenses: coloured buttons – blue 🔁 repeat (bright when on), amber ✎ edit (with a light background when you changed the expense), red 🗑 delete."],
     pl: ["🎨 Wydatki: kolorowe przyciski – niebieskie 🔁 powtarzanie (jasne, gdy włączone), bursztynowa ✎ edycja (z jasnym tłem, gdy wydatek został zmieniony), czerwone 🗑 usuwanie."],

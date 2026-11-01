@@ -6,6 +6,8 @@ import {
 } from "./core.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, button, values, confirmBox, toast } from "./ui.js";
 import { App } from "./app.js";
+import { binCard } from "./pages-main.js";
+import { toBin } from "./core.js";
 
 const D = () => State.data;
 const KINDS = [["expense", "Payment"], ["saving", "Transfer to savings"]];
@@ -171,6 +173,7 @@ export const Calendar = {
         ${range <= 3 ? `<div class="list">${m.ev.map(evRow).join("") || hint(T("No payments expected in this period."))}</div>` : ""}</div>`).join("") +
         (range > 3 ? hint(T("Choose 1 or 3 months to see every payment.")) : "") +
         row(T("Together after {0}", monthsLabel(range)), pln(running), "big" + (running < 0 ? " bad" : " good")), "wide")}
+      ${binCard(["recurring"])}
     </div>`;
 
     el.querySelectorAll("[data-range]").forEach(b => b.onclick = () => { range = +b.dataset.range; App.refresh(); });
@@ -197,7 +200,7 @@ export const Calendar = {
     el.querySelectorAll("[data-edit-rec]").forEach(x => x.onclick = ev => { if (ev.target.closest("[data-del-rec], .switch")) return; editId = x.dataset.editRec; App.refresh(); });
     el.querySelectorAll("[data-del-rec]").forEach(b => b.onclick = async () => {
       const x = d.Recurring.find(y => y.Id === b.dataset.delRec);
-      if (await confirmBox(T("Delete?"), x.Name, T("Delete"), T("Cancel"), true)) { d.Recurring = d.Recurring.filter(y => y !== x); save(); App.refresh(); }
+      if (await confirmBox(T("Delete?"), x.Name, T("Delete"), T("Cancel"), true)) { toBin("recurring", x); d.Recurring = d.Recurring.filter(y => y !== x); save(); App.refresh(); }
     });
     el.querySelectorAll("[data-sugg]").forEach(b => b.onclick = () => {
       const x = sugg[+b.dataset.sugg];

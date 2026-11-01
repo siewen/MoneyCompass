@@ -6,7 +6,7 @@ import { Rates } from "./rates.js";
 import { WEB_VERSION, WEB_BUILD, WEB_DATE } from "./version.js";
 import { openGuide, shouldShowGuide } from "./guide.js";
 import { hasNews, openNews } from "./news.js";
-import { Overview, Income, Expenses, Emergency, Portfolio } from "./pages-main.js";
+import { Overview, Income, Expenses, Emergency, Portfolio, bindBin } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
 import { Calendar } from "./calendar.js";
 import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile } from "./dialogs.js";
@@ -278,6 +278,7 @@ function render() {
   const el = document.getElementById("page");
   const y = window.scrollY;
   page.render(el);
+  bindBin(el);
   const grid = el.querySelector(".grid");
   if (grid) grid.dataset.key = "web:" + page.route;
   el.querySelectorAll("[data-go]").forEach(x => x.addEventListener("click", ev => {

@@ -343,3 +343,13 @@ details.deposit summary { cursor: pointer; font-weight: 700; font-size: 14px; co
 :root[data-theme="dark"] .icon-btn.c-del { color: #F87171; }
 :root[data-theme="dark"] .icon-btn.c-edit { color: #FBBF24; }
 :root[data-theme="dark"] .icon-btn.c-repeat { color: #60A5FA; }
+
+/* Deleted items */
+.bin-card { border-top-color: var(--border) !important; opacity: .95; }
+details.bin summary { cursor: pointer; list-style: none; }
+details.bin summary::-webkit-details-marker { display: none; }
+details.bin summary h3 { margin: 0; color: var(--muted); }
+details.bin summary h3::after { content: "▾"; margin-left: auto; font-size: 14px; }
+details.bin[open] summary h3::after { content: "▴"; }
+.bin .count { background: var(--soft); border: 1px solid var(--border); border-radius: 999px; padding: 0 8px; font-size: 13px; }
+details.bin summary h3 { padding-right: 40px; }

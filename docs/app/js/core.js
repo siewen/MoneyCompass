@@ -53,13 +53,13 @@ export function newSettings() {
 }
 export function newData() {
   return { Incomes: [], Expenses: [], Holdings: [], Offers: [], Loans: [], Goals: [], Received: [],
-           Transfers: [], Categories: [], Budgets: [], Recurring: [], Settings: newSettings() };
+           Transfers: [], Categories: [], Budgets: [], Recurring: [], Deleted: [], Settings: newSettings() };
 }
 /** Fills in anything missing (older files, files from the Windows app). */
 export function normalise(d) {
   const base = newData();
   const out = Object.assign(base, d || {});
-  for (const k of ["Incomes", "Expenses", "Holdings", "Offers", "Loans", "Goals", "Received", "Transfers", "Categories", "Budgets", "Recurring"])
+  for (const k of ["Incomes", "Expenses", "Holdings", "Offers", "Loans", "Goals", "Received", "Transfers", "Categories", "Budgets", "Recurring", "Deleted"])
     if (!Array.isArray(out[k])) out[k] = [];
   out.Settings = Object.assign(newSettings(), out.Settings || {});
   if (!Array.isArray(out.Settings.Modules)) out.Settings.Modules = [];
@@ -649,4 +649,28 @@ export function repeatingExpenses(d) {
 export function setRepeat(d, e, freq) {
   if (freq) e.Repeat = freq;
   else { const k = seriesKey(e); d.Expenses.forEach(x => { if (seriesKey(x) === k) x.Repeat = ""; }); }
+}
+
+// ---------------------------------------------------------------- deleted items (can be put back)
+
+const BIN = { expense: "Expenses", income: "Incomes", received: "Received", holding: "Holdings", offer: "Offers", goal: "Goals", loan: "Loans", budget: "Budgets", recurring: "Recurring" };
+export function toBin(kind, item) {
+  const d = State.data;
+  d.Deleted = [{ Id: uuid(), Kind: kind, DeletedAt: new Date().toISOString(), Item: item }, ...(d.Deleted || [])].slice(0, 300);
+}
+export function restoreFromBin(id) {
+  const d = State.data, entry = (d.Deleted || []).find(x => x.Id === id);
+  if (!entry) return null;
+  const list = d[BIN[entry.Kind]] || (d[BIN[entry.Kind]] = []);
+  if (entry.Kind === "budget") { const i = list.findIndex(b => b.Category === entry.Item.Category); if (i >= 0) list.splice(i, 1); }
+  list.push(entry.Item);
+  d.Deleted = d.Deleted.filter(x => x !== entry);
+  save();
+  return entry;
+}
+export function binLabel(entry) {
+  const x = entry.Item;
+  const name = x.Name || x.Description || (x.Category ? T(x.Category) : "") || "–";
+  const value = x.Amount ?? x.Remaining ?? x.Target ?? x.MonthlyLimit;
+  return { name, value };
 }

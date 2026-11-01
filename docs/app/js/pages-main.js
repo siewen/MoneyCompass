@@ -2,7 +2,7 @@
 import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
-  addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, repeatingExpenses, setRepeat, seriesKey,
+  addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, repeatingExpenses, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
 } from "./core.js";
 import { hbars, donut, legend, monthBars, progress } from "./charts.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON } from "./ui.js";
@@ -190,6 +190,7 @@ export const Income = {
           ${select("kind-" + r.Id, KINDS.map(k => [k[0], T(k[1])]), r.Kind)}
           <button class="icon-btn danger" data-del-received="${r.Id}" title="${esc(T("Delete"))}">🗑</button></div>`).join("")}</div>`
           : hint(T("Nothing imported yet."))))}
+      ${binCard(["income", "received"])}
     </div>`;
 
     const form = el.querySelector("#income-form");
@@ -221,7 +222,7 @@ export const Income = {
     el.querySelectorAll("[data-del-income]").forEach(b => b.onclick = async () => {
       const i = d.Incomes.find(x => x.Id === b.dataset.delIncome);
       if (await confirmBox(T("Delete?"), i.Name, T("Delete"), T("Cancel"), true)) {
-        d.Incomes = d.Incomes.filter(x => x !== i); if (editIncome === i.Id) editIncome = null; save(); App.refresh();
+        toBin("income", i); d.Incomes = d.Incomes.filter(x => x !== i); if (editIncome === i.Id) editIncome = null; save(); App.refresh();
       }
     });
     el.querySelectorAll('select[name^="kind-"]').forEach(sel => sel.onchange = async () => {
@@ -232,7 +233,7 @@ export const Income = {
     });
     el.querySelectorAll("[data-del-received]").forEach(b => b.onclick = async () => {
       if (await confirmBox(T("Delete?"), T("Remove this received payment from MoneyCompass?"), T("Delete"), T("Cancel"), true)) {
-        d.Received = d.Received.filter(x => x.Id !== b.dataset.delReceived); save(); App.refresh();
+        toBin("received", d.Received.find(x => x.Id === b.dataset.delReceived)); d.Received = d.Received.filter(x => x.Id !== b.dataset.delReceived); save(); App.refresh();
       }
     });
   },
@@ -306,6 +307,7 @@ export const Expenses = {
           return `<div class="month-head">${esc(T("{0}  ·  total {1}  ·  essential {2}", monthName(m.start), pln(total), pln(ess)))}</div><div class="list">${m.items.map(expenseRow).join("")}</div>`;
         }).join("") + (!showAllMonths && older ? button(T("Show older expenses ({0})", older), "older", "second") : "")
           : hint(T("No expenses yet."))), "wide")}
+      ${binCard(["expense"])}
     </div>`;
 
     const form = el.querySelector("#expense-form");
@@ -362,7 +364,7 @@ function bindExpenseRows(root, after = () => App.refresh()) {
   root.querySelectorAll("[data-del]").forEach(x => x.onclick = async () => {
     const e = d.Expenses.find(y => y.Id === x.dataset.del);
     if (await confirmBox(T("Delete?"), `${e.Description || T(e.Category)} · ${pln(e.Amount)}`, T("Delete"), T("Cancel"), true)) {
-      d.Expenses = d.Expenses.filter(y => y !== e); save(); after();
+      toBin("expense", e); d.Expenses = d.Expenses.filter(y => y !== e); save(); after();
     }
   });
 }
@@ -507,6 +509,7 @@ export const Portfolio = {
       ${card(`<form id="fx">${heading(T("Exchange rates"))}${hint(T("Used to convert dollars and euros to złoty."))}
         ${check("auto", T("Update automatically with the official NBP rates"), s.AutoExchangeRates)}
         <div class="two">${field("1 USD = … zł", numInput("usd", plain(s.UsdToPln)))}${field("1 EUR = … zł", numInput("eur", plain(s.EurToPln)))}</div>${hint(rateInfo)}</form>`)}
+      ${binCard(["holding"])}
     </div>`;
     const form = el.querySelector("#hold");
     const saveIt = () => {
@@ -525,7 +528,7 @@ export const Portfolio = {
     el.querySelectorAll("[data-edit-holding]").forEach(x => x.onclick = ev => { if (ev.target.closest("[data-del-holding]")) return; editHolding = x.dataset.editHolding; App.refresh(); window.scrollTo({ top: 0, behavior: "smooth" }); });
     el.querySelectorAll("[data-del-holding]").forEach(b => b.onclick = async () => {
       const x = d.Holdings.find(y => y.Id === b.dataset.delHolding);
-      if (await confirmBox(T("Delete?"), x.Name, T("Delete"), T("Cancel"), true)) { d.Holdings = d.Holdings.filter(y => y !== x); save(); App.refresh(); }
+      if (await confirmBox(T("Delete?"), x.Name, T("Delete"), T("Cancel"), true)) { toBin("holding", x); d.Holdings = d.Holdings.filter(y => y !== x); save(); App.refresh(); }
     });
     const fx = el.querySelector("#fx");
     fx.querySelectorAll("input").forEach(i => i.addEventListener("change", () => {
@@ -537,3 +540,30 @@ export const Portfolio = {
     }));
   },
 };
+
+// ---------------------------------------------------------------- "Deleted items" card at the bottom of a tab
+
+const BIN_NAMES = { expense: "Expenses", income: "Income", received: "Received (bank import)", holding: "My savings", offer: "Compare offers", goal: "Savings goals", loan: "Loans & debts", budget: "Budget plan", recurring: "Regular payments" };
+export function binCard(kinds) {
+  const items = (State.data.Deleted || []).filter(x => kinds.includes(x.Kind));
+  if (!items.length) return "";
+  return card(`<details class="bin"><summary><h3>🗑 ${esc(T("Deleted items"))} <span class="count">${items.length}</span></h3></summary>
+    ${hint(T("What you deleted on this tab. Put an item back with ↩, or empty the list to delete for good."))}
+    <div class="list">${items.slice(0, 100).map(x => { const l = binLabel(x); const when = new Date(x.DeletedAt);
+      return `<div class="item"><div><b>${esc(l.name)}</b><span class="hint">${esc(T(BIN_NAMES[x.Kind]))} · ${esc(T("deleted {0}", fmtDate(when) + " " + when.toTimeString().slice(0, 5)))}</span></div>
+      ${l.value !== undefined ? `<b>${pln(l.value)}</b>` : ""}<button class="btn second small" data-restore="${x.Id}">↩ ${esc(T("Restore"))}</button></div>`; }).join("")}</div>
+    <div class="buttons">${button("🗑 " + esc(T("Empty the list")), "empty-bin", "second small", `data-kinds="${kinds.join(",")}"`)}</div></details>`, "wide bin-card");
+}
+export function bindBin(el) {
+  el.querySelectorAll("[data-restore]").forEach(b => b.onclick = () => {
+    const entry = restoreFromBin(b.dataset.restore);
+    if (entry) { toast(T("Restored: {0}.", binLabel(entry).name)); App.refresh(); }
+  });
+  const empty = el.querySelector('[data-action="empty-bin"]');
+  if (empty) empty.onclick = async () => {
+    const kinds = empty.dataset.kinds.split(",");
+    if (await confirmBox(T("Empty the list?"), T("These items are then deleted for good."), T("Delete"), T("Cancel"), true)) {
+      State.data.Deleted = State.data.Deleted.filter(x => !kinds.includes(x.Kind)); save(); App.refresh();
+    }
+  };
+}

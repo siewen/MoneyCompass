@@ -140,7 +140,15 @@ export const EXTRA = {
 "{0} is not finished: income as planned from your income sources, expenses entered so far.": "{0} ist noch nicht vorbei: Einnahmen wie geplant aus Ihren Einkommensquellen, Ausgaben bisher eingetragen.",
 "Your expenses from {0} to {1} (1 month).": "Ihre Ausgaben vom {0} bis {1} (1 Monat).",
 "Average per month of your expenses from {0} to {1} ({2} months).": "Durchschnitt pro Monat Ihrer Ausgaben vom {0} bis {1} ({2} Monate).",
-"Changed by you – click to change again": "Von Ihnen geändert – zum erneuten Ändern klicken"
+"Changed by you – click to change again": "Von Ihnen geändert – zum erneuten Ändern klicken",
+"Deleted items": "Gelöschte Einträge",
+"What you deleted on this tab. Put an item back with ↩, or empty the list to delete for good.": "Was Sie auf diesem Tab gelöscht haben. Mit ↩ zurückholen oder die Liste leeren, um endgültig zu löschen.",
+"deleted {0}": "gelöscht {0}",
+"Restore": "Wiederherstellen",
+"Empty the list": "Liste leeren",
+"Restored: {0}.": "Wiederhergestellt: {0}.",
+"Empty the list?": "Liste leeren?",
+"These items are then deleted for good.": "Diese Einträge werden dann endgültig gelöscht."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -282,7 +290,15 @@ export const EXTRA = {
 "{0} is not finished: income as planned from your income sources, expenses entered so far.": "{0} n'est pas terminé : revenus prévus d'après vos sources de revenus, dépenses saisies jusqu'ici.",
 "Your expenses from {0} to {1} (1 month).": "Vos dépenses du {0} au {1} (1 mois).",
 "Average per month of your expenses from {0} to {1} ({2} months).": "Moyenne par mois de vos dépenses du {0} au {1} ({2} mois).",
-"Changed by you – click to change again": "Modifiée par vous – cliquez pour modifier à nouveau"
+"Changed by you – click to change again": "Modifiée par vous – cliquez pour modifier à nouveau",
+"Deleted items": "Éléments supprimés",
+"What you deleted on this tab. Put an item back with ↩, or empty the list to delete for good.": "Ce que vous avez supprimé dans cet onglet. Remettez un élément avec ↩, ou videz la liste pour supprimer définitivement.",
+"deleted {0}": "supprimé le {0}",
+"Restore": "Restaurer",
+"Empty the list": "Vider la liste",
+"Restored: {0}.": "Restauré : {0}.",
+"Empty the list?": "Vider la liste ?",
+"These items are then deleted for good.": "Ces éléments seront alors supprimés définitivement."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -424,6 +440,14 @@ export const EXTRA = {
 "{0} is not finished: income as planned from your income sources, expenses entered so far.": "{0} jeszcze trwa: dochody zaplanowane ze źródeł dochodu, wydatki wpisane do tej pory.",
 "Your expenses from {0} to {1} (1 month).": "Twoje wydatki od {0} do {1} (1 miesiąc).",
 "Average per month of your expenses from {0} to {1} ({2} months).": "Średnio miesięcznie z Twoich wydatków od {0} do {1} ({2} mies.).",
-"Changed by you – click to change again": "Zmienione przez Ciebie – kliknij, aby zmienić ponownie"
+"Changed by you – click to change again": "Zmienione przez Ciebie – kliknij, aby zmienić ponownie",
+"Deleted items": "Usunięte pozycje",
+"What you deleted on this tab. Put an item back with ↩, or empty the list to delete for good.": "To, co usunięto w tej karcie. Przywróć pozycję przyciskiem ↩ albo opróżnij listę, aby usunąć na zawsze.",
+"deleted {0}": "usunięto {0}",
+"Restore": "Przywróć",
+"Empty the list": "Opróżnij listę",
+"Restored: {0}.": "Przywrócono: {0}.",
+"Empty the list?": "Opróżnić listę?",
+"These items are then deleted for good.": "Te pozycje zostaną wtedy usunięte na zawsze."
 }
 };
