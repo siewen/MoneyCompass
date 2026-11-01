@@ -636,7 +636,14 @@ export const EXTRA = {
 "avg. {0}": "Ø {0}",
 "Emerald": "Smaragd",
 "Navy": "Marine",
-"Standard design: side menu, dark green with lavender": "Standard-Design: Seitenmenü, Dunkelgrün mit Lavendel"
+"Standard design: side menu, dark green with lavender": "Standard-Design: Seitenmenü, Dunkelgrün mit Lavendel",
+"Savings: add your bank accounts, cash and other savings with their interest rate.": "Ersparnisse: Tragen Sie Konten, Bargeld und andere Ersparnisse mit Zinssatz ein.",
+"Your money at a glance: inflows, outflows, balance and savings rate, with diagrams. The green \"Optimize my finances\" button shows your best next steps and the main ways to save.": "Ihr Geld auf einen Blick: Eingänge, Ausgänge, Saldo und Sparquote, mit Diagrammen. Die grüne Schaltfläche „Finanzen optimieren“ zeigt Ihre besten nächsten Schritte und die wichtigsten Sparmöglichkeiten.",
+"Overview: see everything together, then press \"Optimize my finances\" for your personal plan.": "Überblick: Sehen Sie alles zusammen und drücken Sie dann „Finanzen optimieren“ für Ihren persönlichen Plan.",
+"Crypto": "Krypto",
+"{0} payments came from your own accounts in other banks – not counted as income.": "{0} Zahlungen kamen von Ihren eigenen Konten bei anderen Banken – nicht als Einkommen gezählt.",
+"{0} earlier payments came from your own account in another bank – no longer counted as income.": "{0} frühere Zahlungen kamen von Ihrem Konto bei einer anderen Bank – zählen nicht mehr als Einkommen.",
+"{0} earlier payments were moves between your own accounts in different banks – no longer counted as income or expenses.": "{0} frühere Zahlungen waren Überträge zwischen Ihren eigenen Konten bei verschiedenen Banken – zählen nicht mehr als Einkommen oder Ausgabe."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1274,7 +1281,14 @@ export const EXTRA = {
 "avg. {0}": "moy. {0}",
 "Emerald": "Émeraude",
 "Navy": "Marine",
-"Standard design: side menu, dark green with lavender": "Apparence standard : menu latéral, vert foncé avec lavande"
+"Standard design: side menu, dark green with lavender": "Apparence standard : menu latéral, vert foncé avec lavande",
+"Savings: add your bank accounts, cash and other savings with their interest rate.": "Épargne : ajoutez vos comptes, espèces et autres économies avec leur taux.",
+"Your money at a glance: inflows, outflows, balance and savings rate, with diagrams. The green \"Optimize my finances\" button shows your best next steps and the main ways to save.": "Votre argent en un coup d'œil : entrées, sorties, solde et taux d'épargne, avec des graphiques. Le bouton vert « Optimiser mes finances » montre vos meilleures prochaines étapes et les principales façons d'épargner.",
+"Overview: see everything together, then press \"Optimize my finances\" for your personal plan.": "Vue d’ensemble : voyez tout ensemble, puis appuyez sur « Optimiser mes finances » pour votre plan personnel.",
+"Crypto": "Crypto",
+"{0} payments came from your own accounts in other banks – not counted as income.": "{0} paiements venaient de vos propres comptes dans d'autres banques – non comptés comme revenu.",
+"{0} earlier payments came from your own account in another bank – no longer counted as income.": "{0} paiements antérieurs venaient de votre compte dans une autre banque – ils ne comptent plus comme revenu.",
+"{0} earlier payments were moves between your own accounts in different banks – no longer counted as income or expenses.": "{0} paiements antérieurs étaient des virements entre vos propres comptes dans différentes banques – ils ne comptent plus comme revenus ou dépenses."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1912,6 +1926,13 @@ export const EXTRA = {
 "avg. {0}": "śr. {0}",
 "Emerald": "Szmaragdowy",
 "Navy": "Granatowy",
-"Standard design: side menu, dark green with lavender": "Standardowy wygląd: menu boczne, ciemna zieleń z lawendą"
+"Standard design: side menu, dark green with lavender": "Standardowy wygląd: menu boczne, ciemna zieleń z lawendą",
+"Savings: add your bank accounts, cash and other savings with their interest rate.": "Oszczędności: dodaj konta, gotówkę i inne oszczędności z oprocentowaniem.",
+"Your money at a glance: inflows, outflows, balance and savings rate, with diagrams. The green \"Optimize my finances\" button shows your best next steps and the main ways to save.": "Twoje pieniądze w skrócie: wpływy, wydatki, bilans i stopa oszczędności, z wykresami. Zielony przycisk „Optymalizuj finanse” pokazuje najlepsze kolejne kroki i główne sposoby oszczędzania.",
+"Overview: see everything together, then press \"Optimize my finances\" for your personal plan.": "Przegląd: zobacz wszystko razem, a potem naciśnij „Optymalizuj finanse”, aby zobaczyć osobisty plan.",
+"Crypto": "Krypto",
+"{0} payments came from your own accounts in other banks – not counted as income.": "{0} wpłat przyszło z Twoich własnych kont w innych bankach – nie liczą się jako dochód.",
+"{0} earlier payments came from your own account in another bank – no longer counted as income.": "{0} wcześniejszych wpłat pochodziło z Twojego konta w innym banku – nie liczą się już jako dochód.",
+"{0} earlier payments were moves between your own accounts in different banks – no longer counted as income or expenses.": "{0} wcześniejszych płatności to przelewy między Twoimi kontami w różnych bankach – nie liczą się już jako dochód ani wydatek."
 }
 };

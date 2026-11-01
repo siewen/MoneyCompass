@@ -437,29 +437,38 @@ export async function openBankImport() {
     const rows = all.filter(r => (!from || r.date >= from) && (!to || r.date <= to));
     state = { allDates: all.map(r => r.date) };
     const outgoing = rows.filter(r => r.amount < 0), incoming = rows.filter(r => r.amount > 0);
-    const items = [], known = []; let dup = 0, foreign = 0;
+    const items = [], known = []; let dup = 0, foreign = 0, ownIn = 0;
+    // Your own accounts – from this file and from every bank you imported before. Money moved between them
+    // (e.g. Pekao → Millennium) is neither an expense nor income, also when the bank calls it a normal transfer.
+    const digits = a => String(a || "").replace(/\D/g, "").slice(-26);
+    const mine = new Set([...d.Expenses, ...d.Received, ...d.Transfers].map(x => digits(x.Info?.Account)).filter(x => x.length >= 10));
+    all.forEach(r => { const a = digits(r.info?.Account); if (a.length >= 10) mine.add(a); });
+    const ownMove = r => Csv.isOwnTransfer(r) || mine.has(digits(r.info?.OtherAccount));
     // Already imported earlier: only the bank details (ⓘ) are added, if they are missing
     const remember = (x, r) => { if (x && r.info && Object.keys(r.info).length > Object.keys(x.Info || {}).length) known.push([x, r.info]); };
-    for (const r of outgoing.filter(r => !Csv.isOwnTransfer(r))) {
+    for (const r of outgoing.filter(r => !ownMove(r))) {
       const v = toPln(-r.amount, r.currency);
       if (v === null) { foreign++; continue; }
       const old = d.Expenses.find(e => sameDay(e.Date, r.date) && Math.abs(e.Amount - v) < 0.005 && e.Description === r.description);
       if (old) { dup++; remember(old, r); continue; }
       items.push({ row: r, pln: v, category: ruleFor(d, r.description) || Csv.category(r) });
     }
-    const transfers = outgoing.filter(Csv.isOwnTransfer).filter(r => r.currency === "PLN")
+    const transfers = outgoing.filter(ownMove).filter(r => r.currency === "PLN")
       .filter(r => { const old = d.Transfers.find(t => sameDay(t.Date, r.date) && Math.abs(t.Amount + r.amount) < 0.005 && t.Description === r.description); remember(old, r); return !old; })
-      .map(r => ({ row: r, pln: -r.amount, toSavings: !r.ownAccount || Csv.isSavingsTransfer(r) })).sort((a, b) => b.row.date - a.row.date);
+      .map(r => ({ row: r, pln: -r.amount,
+        // To your current account in another bank: a move, not savings (unless it says so)
+        toSavings: mine.has(digits(r.info?.OtherAccount)) ? Csv.isSavingsTransfer(r) : !r.ownAccount || Csv.isSavingsTransfer(r) })).sort((a, b) => b.row.date - a.row.date);
     const received = [];
     for (const r of incoming) {
       const v = toPln(r.amount, r.currency);
       if (v === null) continue;
+      if (ownMove(r)) { ownIn++; continue; }   // from your own account in another bank: not income
       const old = d.Received.find(x => sameDay(x.Date, r.date) && Math.abs(x.Amount - v) < 0.005 && x.Description === r.description);
       if (old) { remember(old, r); continue; }
       received.push({ Id: uuid(), Date: isoDate(r.date), Amount: v, Description: r.description, Kind: RECEIVED.income, ...withInfo(r) });
     }
     received.sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
-    state = { ...state, items, transfers, received, known, dup, foreign, total: rows.length, skippedByDate: all.length - rows.length };
+    state = { ...state, mine, digits, items, transfers, received, known, dup, foreign, ownIn, total: rows.length, skippedByDate: all.length - rows.length };
   };
 
   const p = popup("", { width: 900, cls: "wide-popup" });
@@ -476,6 +485,7 @@ export async function openBankImport() {
     if (transfers.length) lines.push(T("{0} transfers to your own accounts – not expenses. Choose below which ones are savings.", transfers.length));
     if (received.length) lines.push(T("{0} payments received – choose below how each one counts.", received.length));
     if (foreign) lines.push(T("{0} payments in other currencies are skipped (no exchange rate).", foreign));
+    if (state.ownIn) lines.push(T("{0} payments came from your own accounts in other banks – not counted as income.", state.ownIn));
     const cols = Csv.columnCount(file);
     const colOptions = [[-1, "–"], ...Array.from({ length: cols }, (_, i) => [i, Csv.columnName(file, i)])];
     const byCat = {};
@@ -550,6 +560,17 @@ export async function openBankImport() {
       d.Expenses.push({ Id: uuid(), Date: isoDate(i.row.date), Description: i.row.description, Category: c ? c.Name : OTHER, Amount: i.pln, Essential: !!c?.Essential, ...withInfo(i.row) });
     }
     d.Received.push(...received);
+    // Money received earlier from an account that turns out to be yours (now that this bank is imported too): not income
+    let fixedOwn = 0;
+    for (const x of d.Received) if (x.Kind !== RECEIVED.none && state.mine.has(state.digits(x.Info?.OtherAccount))) { x.Kind = RECEIVED.none; fixedOwn++; }
+    // …and money sent earlier to such an account: a move between your accounts, not an expense
+    const moved = d.Expenses.filter(x => state.mine.has(state.digits(x.Info?.OtherAccount)));
+    if (moved.length) {
+      d.Expenses = d.Expenses.filter(x => !moved.includes(x));
+      d.Transfers.push(...moved.map(x => ({ Id: uuid(), Date: x.Date, Amount: x.Amount, Description: x.Description, Saved: false, ...(x.Info ? { Info: x.Info } : {}) })));
+      fixedOwn += moved.length;
+    }
+    if (fixedOwn) toast(T("{0} earlier payments were moves between your own accounts in different banks – no longer counted as income or expenses.", fixedOwn), "good");
     const saved = transfers.filter(t => t.toSavings);
     let target = null;
     if (saved.length) {

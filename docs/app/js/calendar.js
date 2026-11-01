@@ -2,7 +2,7 @@
 // loan payments – in a month calendar and as a preview for 1, 3, 6 or 12 months.
 import {
   T, State, save, Calc, pln, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addDays, addMonths, monthStart, monthName,
-  uuid, categories, categoryLabel, moduleOn, FREQUENCIES, ONE_TIME, locale, monthsCount, repeatingExpenses, setRepeat, freqLabel, repeatingReceived, setReceivedRepeat, seriesKey, LOAN_CATEGORY,
+  uuid, categories, categoryLabel, moduleOn, FREQUENCIES, ONE_TIME, locale, monthsCount, repeatingExpenses, setRepeat, freqLabel, repeatingReceived, setReceivedRepeat, seriesKey, LOAN_CATEGORY, isRecurringPayment,
 } from "./core.js";
 import { NEW_CAT } from "./ui.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, button, values, confirmBox, toast } from "./ui.js";
@@ -134,7 +134,7 @@ function pastEvents(d, from, to) {
     let next = Calc.nextPayment(r, from), guard = 0;
     while (next && next <= until && (!last || next <= last) && guard++ < 62) {
       const n = next;
-      const known = r.Kind !== "saving" && d.Expenses.some(e => Math.abs(parseDate(e.Date) - n) <= 5 * 86400000 && Math.abs(e.Amount - r.Amount) <= r.Amount * 0.05);
+      const known = r.Kind !== "saving" && d.Expenses.some(e => isRecurringPayment(e, r, n));
       if (!known) list.push({ date: n, name: r.Name, amount: r.Amount, type: r.Kind === "saving" ? "save" : "out", past: true,
         note: (r.Kind === "saving" ? T("Transfer to savings") : T(r.Category || "Other")) + (r.Frequency !== ONE_TIME ? " · 🔁 " + freqLabel(r.Frequency) : "") });
       if (r.Frequency === ONE_TIME) break;

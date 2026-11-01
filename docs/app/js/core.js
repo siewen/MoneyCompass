@@ -357,6 +357,17 @@ export function freqLabel(f) {
 }
 export const RECEIVED = { income: "income", salary: "salary", none: "none" };
 
+/** Is this expense the regular payment r on day n (already imported, so it must not be counted twice)?
+ *  Within 5 days and about the same amount – and the same category, or the name in the description, or the exact amount.
+ *  So a 42 zł gym membership is not mistaken for a 42,50 zł shopping trip a day later. */
+export function isRecurringPayment(e, r, n) {
+  if (Math.abs(parseDate(e.Date) - n) > 5 * 86400000) return false;
+  const diff = Math.abs(e.Amount - r.Amount);
+  if (diff > r.Amount * 0.05) return false;
+  if (e.Category === (r.Category || OTHER) || diff < 0.005) return true;
+  const word = matchKey(r.Name).split(" ").find(w => w.length >= 3);
+  return !!word && matchKey(e.Description).includes(word);
+}
 export const Calc = {
   emergency(s) {
     const monthly = (s.MonthlyEssentials || 0) + (s.YearlyCosts || 0) / 12;
@@ -382,8 +393,11 @@ export const Calc = {
     let units = 0, days = 0, partial = false, from = null, to = null;
     for (const m of months) {
       const start = m.start, monthEnd = addDays(addMonths(start, 1), -1), end = monthEnd < today() ? monthEnd : today();
-      const inM = all.filter(t => t >= start && t <= end);
+      let inM = all.filter(t => t >= start && t <= end);
+      // Only entries dated later this month (planned): use their own dates, so nothing turns into "NaN"
+      if (!inM.length) inM = m.items.map(x => parseDate(x.Date));
       let a = new Date(Math.min(...inM)), b = new Date(Math.max(...inM));
+      if (b > end) b = new Date(Math.max(end, a));
       if ((a - start) / 86400000 <= 4) a = start;          // starts near the 1st: from the 1st
       if ((end - b) / 86400000 <= 4) b = end;              // ends near the month end (or today): until then
       const span = Math.round((b - a) / 86400000) + 1, len = Math.round((monthEnd - start) / 86400000) + 1;
@@ -447,7 +461,7 @@ export const Calc = {
       let next = this.nextPayment(r, start), guard = 0;
       while (next && next <= end && (!last || next <= last) && guard++ < 62) {
         const n = next;
-        const known = d.Expenses.some(e => Math.abs(parseDate(e.Date) - n) <= 5 * 86400000 && Math.abs(e.Amount - r.Amount) <= r.Amount * 0.05);
+        const known = d.Expenses.some(e => isRecurringPayment(e, r, n));
         if (!known) out.push({ category: r.Category || OTHER, amount: r.Amount, essential: !!findCategory(r.Category)?.Essential });
         if (r.Frequency === ONE_TIME) break;
         next = this.nextPayment(r, addDays(next, 1));
@@ -653,12 +667,12 @@ export const Advisor = {
       for (const h of d.Holdings.filter(h => h.Safe)) {
         const v = Calc.toPln(h.Amount, h.Currency, d.Settings);
         const movable = best.limit > 0 ? Math.min(v, best.limit) : v;
-        const gain = movable * (best.rate - (h.RatePercent || 0)) / 100 * (1 - BELKA);
+        const gain = movable * (best.rate - currentRate(h)) / 100 * (1 - BELKA);   // after a promotion: the rate it pays now
         if (v >= 1000 && gain >= 50)
-          add("money", T("Move \"{0}\" to a better offer", h.Name), T("It earns {0}. Your best saved offer \"{1}\" pays on average {2} per year (promo and the rate after it together). Check that you meet the offer's conditions (new money, card payments...).", fmtPct(h.RatePercent), best.name, fmtPct(best.rate)), gain, "savings");
+          add("money", T("Move \"{0}\" to a better offer", h.Name), T("It earns {0}. Your best saved offer \"{1}\" pays on average {2} per year (promo and the rate after it together). Check that you meet the offer's conditions (new money, card payments...).", fmtPct(currentRate(h)), best.name, fmtPct(best.rate)), gain, "savings");
       }
     } else {
-      const low = d.Holdings.filter(h => h.Safe && (h.RatePercent || 0) < 2 && Calc.toPln(h.Amount, h.Currency, d.Settings) >= 1000);
+      const low = d.Holdings.filter(h => h.Safe && currentRate(h) < 2 && Calc.toPln(h.Amount, h.Currency, d.Settings) >= 1000);
       if (low.length)
         add("money", T("Your savings earn almost nothing"), T("{0} sits in accounts paying under 2%. Banks often offer 5–6% for new money. Enter a few offers in the Compare offers tab and MoneyCompass shows you exactly how much you'd gain.", pln(low.reduce((s, h) => s + Calc.toPln(h.Amount, h.Currency, d.Settings), 0))), 0, "savings", T("Compare offers"));
     }
