@@ -604,8 +604,12 @@ export function infoBtn(kind, x) {
   return hasInfo(kind, x) ? `<button class="icon-btn c-info" data-info="${kind}:${x.Id}" title="${esc(T("Details from your bank"))}">ⓘ</button>` : "";
 }
 function infoRows(info) {
-  const labels = [["Bank", "Bank"], ["Account", "Your account"], ["Name", "From / to"], ["OtherAccount", "Their account"], ["Title", "Title"], ["Category", "Bank category"]];
-  return labels.filter(([k]) => info[k]).map(([k, l]) => row(T(l), `<span class="info-val">${esc(info[k])}</span>`)).join("");
+  const labels = [["Bank", "Bank"], ["Type", "Type"], ["Account", "Your account"], ["Name", "From / to"], ["OtherAccount", "Their account"], ["Title", "Title"], ["Category", "Bank category"]];
+  // Card payments, BLIK and cash: the bank file has no account of the shop – say so instead of leaving it out
+  const card = /kart|card|blik|bankomat|atm|wypłata|withdrawal/i.test((info.Type || "") + " " + (info.Title || ""));
+  const missing = T(card ? "– not in the bank file (card payment: banks don't give the shop's account)" : "– not in the bank file");
+  return labels.filter(([k]) => info[k] || (k === "OtherAccount" && info.Bank)).map(([k, l]) =>
+    row(T(l), info[k] ? `<span class="info-val">${esc(info[k])}</span>` : `<span class="hint">${esc(missing)}</span>`)).join("");
 }
 export function showInfo(kind, id) {
   const d = State.data, x = (d[INFO_LISTS[kind]] || []).find(y => y.Id === id);

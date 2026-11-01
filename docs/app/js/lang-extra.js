@@ -192,7 +192,9 @@ export const EXTRA = {
 "Modules: goals, loans, budget, payment calendar": "Module: Sparziele, Kredite, Budget, Zahlungskalender",
 "Income: salary {0} + extra income {1}.": "Einkommen: Gehalt {0} + zusätzliches Einkommen {1}.",
 "Income as received (salary and extra income) – where nothing was imported, as planned from your income sources. Expenses as entered.": "Einkommen wie erhalten (Gehalt und Zusatzeinkommen) – wo nichts importiert wurde, wie aus Ihren Einkommensquellen geplant. Ausgaben wie eingetragen.",
-"{0}: salary {1} + extra income {2} per month, the same months as your expenses.": "{0}: Gehalt {1} + Zusatzeinkommen {2} pro Monat, dieselben Monate wie Ihre Ausgaben."
+"{0}: salary {1} + extra income {2} per month, the same months as your expenses.": "{0}: Gehalt {1} + Zusatzeinkommen {2} pro Monat, dieselben Monate wie Ihre Ausgaben.",
+"– not in the bank file (card payment: banks don't give the shop's account)": "– nicht in der Bankdatei (Kartenzahlung: Banken geben das Konto des Geschäfts nicht an)",
+"– not in the bank file": "– nicht in der Bankdatei"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -386,7 +388,9 @@ export const EXTRA = {
 "Modules: goals, loans, budget, payment calendar": "Modules : objectifs, prêts, budget, calendrier des paiements",
 "Income: salary {0} + extra income {1}.": "Revenus : salaire {0} + revenus supplémentaires {1}.",
 "Income as received (salary and extra income) – where nothing was imported, as planned from your income sources. Expenses as entered.": "Revenus tels que reçus (salaire et revenus supplémentaires) – sans import, tels que prévus par vos sources de revenus. Dépenses telles que saisies.",
-"{0}: salary {1} + extra income {2} per month, the same months as your expenses.": "{0} : salaire {1} + revenus supplémentaires {2} par mois, les mêmes mois que vos dépenses."
+"{0}: salary {1} + extra income {2} per month, the same months as your expenses.": "{0} : salaire {1} + revenus supplémentaires {2} par mois, les mêmes mois que vos dépenses.",
+"– not in the bank file (card payment: banks don't give the shop's account)": "– absent du fichier bancaire (paiement par carte : les banques ne donnent pas le compte du commerçant)",
+"– not in the bank file": "– absent du fichier bancaire"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -580,6 +584,8 @@ export const EXTRA = {
 "Modules: goals, loans, budget, payment calendar": "Moduły: cele, kredyty, budżet, kalendarz płatności",
 "Income: salary {0} + extra income {1}.": "Dochód: wynagrodzenie {0} + dodatkowy dochód {1}.",
 "Income as received (salary and extra income) – where nothing was imported, as planned from your income sources. Expenses as entered.": "Dochód tak, jak wpłynął (wynagrodzenie i dodatkowy dochód) – gdzie nic nie zaimportowano, według Twoich źródeł dochodu. Wydatki tak, jak wpisane.",
-"{0}: salary {1} + extra income {2} per month, the same months as your expenses.": "{0}: wynagrodzenie {1} + dodatkowy dochód {2} miesięcznie, te same miesiące co Twoje wydatki."
+"{0}: salary {1} + extra income {2} per month, the same months as your expenses.": "{0}: wynagrodzenie {1} + dodatkowy dochód {2} miesięcznie, te same miesiące co Twoje wydatki.",
+"– not in the bank file (card payment: banks don't give the shop's account)": "– brak w pliku z banku (płatność kartą: banki nie podają konta sklepu)",
+"– not in the bank file": "– brak w pliku z banku"
 }
 };

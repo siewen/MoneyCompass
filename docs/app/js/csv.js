@@ -72,6 +72,7 @@ function fromHeader(h) {
       "benefeciary/sender", "beneficiary/sender", "sender/recipient", "recipient/sender", "counterparty", "payee"),
     Category: find(h, "kategoria", "category"),
     Currency: find(h, "waluta", "currency"),
+    Type: exact(h, "rodzaj transakcji", "typ transakcji", "typ operacji", "transaction type", "type"),
     // Account numbers, when the bank puts them in the file (only shown in the ⓘ info of an entry)
     OwnAccount: exact(h, "numer rachunku/karty", "account/card number", "account / card number", "account number/card", "card/account number", "account number",
       "own account", "rachunek źródłowy", "rachunek zrodlowy", "rachunek", "konto", "numer rachunku", "numer karty", "card number", "account"),
@@ -180,7 +181,7 @@ export function parse(text) {
   const lines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
   const d = findDelimiter(lines);
   let rows = splitRows(text, d).map(r => r.map(cleanCell)).filter(r => r.some(c => c.length));
-  const file = { header: [], rows: [], columns: { Date: -1, Amount: -1, Debit: -1, Credit: -1, Description: -1, Counterparty: -1, Category: -1, Currency: -1, OwnAccount: -1, OtherAccount: -1 }, bank: "", ownAccount: "" };
+  const file = { header: [], rows: [], columns: { Date: -1, Amount: -1, Debit: -1, Credit: -1, Description: -1, Counterparty: -1, Category: -1, Currency: -1, OwnAccount: -1, OtherAccount: -1, Type: -1 }, bank: "", ownAccount: "" };
   const hi = rows.findIndex(isHeader);
   if (hi >= 0) {
     file.header = rows[hi]; file.rows = rows.slice(hi + 1);
@@ -256,7 +257,7 @@ function rowInfo(file, c, r, cell, amount) {
   }
   if (!own.trim()) own = file.ownAccount || "";
   const info = { Bank: file.bank || "", Account: formatAccount(own), Name: cell(c.Counterparty).trim(), OtherAccount: formatAccount(other),
-    Title: cell(c.Description).trim(), Category: cell(c.Category).trim() };
+    Title: cell(c.Description).trim(), Category: cell(c.Category).trim(), Type: c.Type >= 0 ? cell(c.Type).trim() : "" };
   for (const k of Object.keys(info)) if (!info[k]) delete info[k];
   return info;
 }
