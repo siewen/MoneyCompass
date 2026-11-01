@@ -1,7 +1,7 @@
 // The free tabs: Overview, Income, Expenses, Emergency fund, My savings.
 import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
-  today, addDays, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
+  today, addDays, addMonths, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
   addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
 } from "./core.js";
 import { hbars, donut, legend, monthBars, progress } from "./charts.js";
@@ -92,11 +92,21 @@ export const Overview = {
     parts.push(`<button class="btn second" data-action="export">⬇ ${esc(T("Export report (Excel, PDF, Word)"))}</button>`);
 
     const pin = Calc.periodIncome(d);
-    parts.push(card(heading(T("Money in and out (per month)")) +
-      (pin.months ? hint(pin.extra > 0 ? T("{0}: salary {1} + extra income {2} per month, the same months as your expenses.",
-        Calc.groupMonths(Calc.countedExpenses(d)).slice(0, 3).reverse().map(m => monthName(m.start)).join(", "), pln(pin.salary), pln(pin.extra))
-        : T("{0}: salary {1} per month, the same months as your expenses.", Calc.groupMonths(Calc.countedExpenses(d)).slice(0, 3).reverse().map(m => monthName(m.start)).join(", "), pln(pin.salary))) : "") +
-      (ChartData.hasInOut(d) ? hbars(ChartData.inOut(d)) : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"income"));
+    // Like the banks show it: balance of inflows and outflows, with a green/red split bar
+    const basisMonths = Calc.groupMonths(Calc.countedExpenses(d)).slice(0, 3).reverse();
+    const inflow = income, outflow = spending, bal = inflow - outflow, sum = inflow + outflow;
+    const pIn = sum > 0 ? Math.round(inflow / sum * 100) : 0;
+    const period = basisMonths.length ? fmtDate(basisMonths[0].start) + " – " + fmtDate(addDays(addMonths(basisMonths[basisMonths.length - 1].start, 1), -1)) : "";
+    parts.push(card(heading(T("Inflows and outflows (per month)")) + (ChartData.hasInOut(d) ? `
+      <div class="flow-balance"><span>${esc(T("Balance of inflows and outflows"))}</span><b class="${bal < 0 ? "bad" : "good"}">${bal < 0 ? "−" : ""}${pln(Math.abs(bal))}</b>
+        ${period ? `<small class="hint">${esc(T("Details for the period: {0}", period))}${basisMonths.length > 1 ? " · " + esc(T("average per month")) : ""}</small>` : ""}</div>
+      <div class="flow-bar">
+        <div class="in" style="flex:${Math.max(pIn, 28)}"><span>⬇ ${esc(T("Inflows"))}</span></div>
+        <div class="out" style="flex:${Math.max(100 - pIn, 28)}"><span>⬆ ${esc(T("Outflows"))}</span></div></div>
+      <div class="flow-values">
+        <b class="in" data-tip="${esc(pin.months ? T("Salary {0} + extra income {1}", pln(pin.salary), pln(pin.extra)) : T("From your income sources"))}">${pln(inflow)} <small>${pIn}%</small></b>
+        <b class="out" data-tip="${esc(T("Essential {0} + not essential {1}", pln(avg.essential), pln(avg.nonEssential)))}">${pln(outflow)} <small>${100 - pIn}%</small></b>
+      </div>` : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"income"));
     const cur = months.find(m => m.current);
     parts.push(card(heading(T("Income and expenses by month")) + hint(T("Income as received (salary and extra income) – where nothing was imported, as planned from your income sources. Expenses as entered.")) +
       (showTrend ? monthBars(months, axis, pln, [T("Income"), T("Expenses")]) + legend([

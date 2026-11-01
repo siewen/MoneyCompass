@@ -411,7 +411,16 @@ export const EXTRA = {
 "Details from the bank statement": "Details aus dem Kontoauszug",
 "From the imported bank file. It stays only in this browser.": "Aus der importierten Bankdatei. Bleibt nur in diesem Browser.",
 "Transfers from bank imports": "Überweisungen aus Bankimporten",
-"The bank statement (CSV) – yours or one you manage for someone – becomes expenses, sorted into categories.": "Der Kontoauszug (CSV) – Ihrer oder einer, den Sie für jemanden verwalten – wird zu Ausgaben, nach Kategorien sortiert."
+"The bank statement (CSV) – yours or one you manage for someone – becomes expenses, sorted into categories.": "Der Kontoauszug (CSV) – Ihrer oder einer, den Sie für jemanden verwalten – wird zu Ausgaben, nach Kategorien sortiert.",
+"Inflows and outflows (per month)": "Eingänge und Ausgänge (pro Monat)",
+"Balance of inflows and outflows": "Saldo der Ein- und Ausgänge",
+"Details for the period: {0}": "Zeitraum: {0}",
+"average per month": "Durchschnitt pro Monat",
+"Inflows": "Eingänge",
+"Outflows": "Ausgänge",
+"Salary {0} + extra income {1}": "Gehalt {0} + Zusatzeinkommen {1}",
+"From your income sources": "Aus Ihren Einkommensquellen",
+"Essential {0} + not essential {1}": "Notwendig {0} + nicht notwendig {1}"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -824,7 +833,16 @@ export const EXTRA = {
 "Details from the bank statement": "Détails du relevé bancaire",
 "From the imported bank file. It stays only in this browser.": "Issu du fichier bancaire importé. Reste uniquement dans ce navigateur.",
 "Transfers from bank imports": "Virements des imports bancaires",
-"The bank statement (CSV) – yours or one you manage for someone – becomes expenses, sorted into categories.": "Le relevé bancaire (CSV) – le vôtre ou celui d'une personne que vous aidez – devient des dépenses, triées par catégorie."
+"The bank statement (CSV) – yours or one you manage for someone – becomes expenses, sorted into categories.": "Le relevé bancaire (CSV) – le vôtre ou celui d'une personne que vous aidez – devient des dépenses, triées par catégorie.",
+"Inflows and outflows (per month)": "Entrées et sorties (par mois)",
+"Balance of inflows and outflows": "Solde des entrées et sorties",
+"Details for the period: {0}": "Période : {0}",
+"average per month": "moyenne par mois",
+"Inflows": "Entrées",
+"Outflows": "Sorties",
+"Salary {0} + extra income {1}": "Salaire {0} + revenus supplémentaires {1}",
+"From your income sources": "D'après vos sources de revenus",
+"Essential {0} + not essential {1}": "Essentiel {0} + non essentiel {1}"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1237,6 +1255,15 @@ export const EXTRA = {
 "Details from the bank statement": "Szczegóły z wyciągu bankowego",
 "From the imported bank file. It stays only in this browser.": "Z zaimportowanego pliku bankowego. Zostaje tylko w tej przeglądarce.",
 "Transfers from bank imports": "Przelewy z importów bankowych",
-"The bank statement (CSV) – yours or one you manage for someone – becomes expenses, sorted into categories.": "Wyciąg bankowy (CSV) – Twój albo osoby, której pomagasz – zamienia się w wydatki posortowane według kategorii."
+"The bank statement (CSV) – yours or one you manage for someone – becomes expenses, sorted into categories.": "Wyciąg bankowy (CSV) – Twój albo osoby, której pomagasz – zamienia się w wydatki posortowane według kategorii.",
+"Inflows and outflows (per month)": "Wpływy i wydatki (miesięcznie)",
+"Balance of inflows and outflows": "Bilans wpływów i wydatków",
+"Details for the period: {0}": "Dane za okres: {0}",
+"average per month": "średnio miesięcznie",
+"Inflows": "Wpływy",
+"Outflows": "Wydatki",
+"Salary {0} + extra income {1}": "Wynagrodzenie {0} + dodatkowy dochód {1}",
+"From your income sources": "Z Twoich źródeł dochodu",
+"Essential {0} + not essential {1}": "Niezbędne {0} + inne {1}"
 }
 };

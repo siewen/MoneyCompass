@@ -455,3 +455,16 @@ svg.donut text { pointer-events: none; }
 :root[data-theme="dark"] .data-menu button:hover { background: rgba(255,255,255,.08); }
 :root[data-theme="dark"] .data-menu button.danger-item { color: #F87171; }
 .help-shield:has(+ .data-menu) { background: rgba(0,0,0,.12); }
+/* Inflows and outflows – like the bank's overview */
+.flow-balance { display: flex; flex-direction: column; gap: 2px; margin: 4px 0 12px; }
+.flow-balance > span { font-size: 13px; color: var(--muted); }
+.flow-balance > b { font-size: 30px; line-height: 1.15; letter-spacing: -.01em; }
+.flow-bar { display: flex; border-radius: 10px 10px 0 0; overflow: hidden; }
+.flow-bar > div { min-width: 0; }
+.flow-bar span { display: block; color: #fff; font-weight: 700; font-size: 13px; padding: 8px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.flow-bar .in span { background: #2E9E5B; } .flow-bar .out span { background: #B3131B; text-align: right; }
+.flow-values { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--border); border-top: 0; border-radius: 0 0 10px 10px; }
+.flow-values b { padding: 10px; font-size: 17px; white-space: nowrap; }
+.flow-values .in { color: #2E9E5B; border-left: 3px solid #2E9E5B; } .flow-values .out { color: #C81E26; text-align: right; border-right: 3px solid #B3131B; }
+:root[data-theme="dark"] .flow-values .in { color: #4ADE80; } :root[data-theme="dark"] .flow-values .out { color: #F87171; }
+.flow-values small { font-weight: 500; opacity: .85; font-size: 13px; }
