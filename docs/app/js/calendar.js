@@ -6,7 +6,7 @@ import {
 } from "./core.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, button, values, confirmBox, toast } from "./ui.js";
 import { App } from "./app.js";
-import { binCard } from "./pages-main.js";
+import { binCard, infoBtn } from "./pages-main.js";
 import { toBin } from "./core.js";
 
 const D = () => State.data;
@@ -59,6 +59,28 @@ export function events(d, from, to) {
   return list.sort((a, b) => a.date - b.date || (a.type === "in" ? -1 : 1));
 }
 
+/** What really happened before today: your expenses, money received and transfers to savings (typed in or imported). */
+function pastEvents(d, from, to) {
+  const list = [], inRange = x => { const t = parseDate(x.Date); return t >= from && t <= to && t < today(); };
+  for (const e of d.Expenses.filter(inRange))
+    list.push({ date: parseDate(e.Date), name: e.Description || T(e.Category), amount: e.Amount, type: "out", note: T(e.Category), past: true, info: ["expense", e] });
+  for (const r of d.Received.filter(r => r.Kind !== "none" && inRange(r)))
+    list.push({ date: parseDate(r.Date), name: r.Description || T("Money received"), amount: r.Amount, type: "in", note: T(r.Kind === "salary" ? "Salary" : "Extra income"), past: true, info: ["received", r] });
+  for (const t of d.Transfers.filter(t => t.Saved && inRange(t))) {
+    const h = d.Holdings.find(x => x.Id === t.HoldingId);
+    list.push({ date: parseDate(t.Date), name: h ? h.Name : (t.Description || T("Transfer to savings")), amount: t.Amount, type: "save", note: T("Transfer to savings") + (t.Info?.Account ? " · " + T("from {0}", t.Info.Account) : ""), past: true, info: ["transfer", t] });
+  }
+  return list;
+}
+/** The first month with any of your data – the calendar can go back to it. */
+function firstMonth(d) {
+  const dates = [...d.Expenses, ...d.Received, ...d.Transfers.filter(t => t.Saved)].map(x => parseDate(x.Date)).filter(x => x && !isNaN(x));
+  const start = monthStart(today());
+  if (!dates.length) return start;
+  const first = monthStart(new Date(Math.min(...dates)));
+  return first < start ? first : start;
+}
+
 /** Expenses that look like they come back every month (same name, similar amount, in 2 or more months). */
 function suggestions(d) {
   const key = s => (s || "").toLowerCase().replace(/[0-9.,/#*-]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 40);
@@ -89,8 +111,9 @@ export const Calendar = {
     const d = D();
     if (!d.Recurring) d.Recurring = [];
     const start = monthStart(today());
-    // The calendar starts with the current month (also when the app stayed open over midnight into a new month)
-    if (!shown || shown < start) shown = start;
+    // The calendar starts with the oldest month of your data (typed in or imported) and goes into the future
+    const first = firstMonth(d);
+    if (!shown || shown < first) shown = first;
     const end = addDays(addMonths(start, range), -1);
     const all = events(d, today(), end);
     const sums = t => all.filter(e => e.type === t).reduce((s, e) => s + e.amount, 0);
@@ -98,7 +121,9 @@ export const Calendar = {
 
     // ---------- Month calendar ----------
     const mEnd = addDays(addMonths(shown, 1), -1);
-    const monthEvents = events(d, shown, mEnd);
+    // Before today: what really happened. From today: what is planned.
+    const monthEvents = [...pastEvents(d, shown, mEnd), ...(mEnd >= today() ? events(d, new Date(Math.max(shown.getTime(), today().getTime())), mEnd) : [])]
+      .sort((a, b) => a.date - b.date || (a.type === "in" ? -1 : 1));
     const firstDow = (shown.getDay() + 6) % 7;   // Monday first
     const days = mEnd.getDate();
     const dayNames = [...Array(7)].map((_, i) => new Date(2024, 0, 1 + i).toLocaleDateString(locale(), { weekday: "short" }));
@@ -109,7 +134,7 @@ export const Calendar = {
       const ev = monthEvents.filter(e => e.date.getDate() === day);
       const isToday = date.getTime() === today().getTime();
       const net = ev.reduce((s, e) => s + (e.type === "in" ? e.amount : -e.amount), 0);
-      cells += `<button class="cal-cell${isToday ? " today" : ""}${ev.length ? " has" : ""}${selectedDay === day ? " sel" : ""}" data-day="${day}">
+      cells += `<button class="cal-cell${isToday ? " today" : ""}${date < today() ? " past" : ""}${ev.length ? " has" : ""}${selectedDay === day ? " sel" : ""}" data-day="${day}">
         <span class="cal-day">${day}</span>${ev.slice(0, 3).map(e => `<span class="cal-dot ${e.type}" title="${esc(e.name)}: ${esc(pln(e.amount))}"></span>`).join("")}
         ${ev.length ? `<span class="cal-net ${net >= 0 ? "good" : "bad"}">${net >= 0 ? "+" : "−"}${esc(short(Math.abs(net)))}</span>` : ""}</button>`;
     }
@@ -133,8 +158,8 @@ export const Calendar = {
     const sugg = suggestions(d);
     const reps = repeatingExpenses(d);
     const deps = d.Holdings.filter(h => h.Deposit > 0 && h.DepositDate);
-    const evRow = e => `<div class="item"><span class="cal-dot ${e.type}"></span><div><b>${esc(e.name)}</b><span class="hint">${fmtDate(e.date)} · ${esc(e.note)}</span></div>
-      <b class="${e.type === "in" ? "good" : e.type === "save" ? "primary" : "bad"}">${e.type === "in" ? "+" : "−"}${pln(e.amount)}</b></div>`;
+    const evRow = e => `<div class="item"><span class="cal-dot ${e.type}"></span><div><b>${esc(e.name)}</b><span class="hint">${fmtDate(e.date)} · ${esc(e.note)}${e.past ? "" : " · " + esc(T("planned"))}</span></div>
+      <b class="${e.type === "in" ? "good" : e.type === "save" ? "primary" : "bad"}">${e.type === "in" ? "+" : "−"}${pln(e.amount)}</b>${e.info ? infoBtn(...e.info) : ""}</div>`;
 
     el.innerHTML = `<div class="grid">
       ${card(heading(T("Next {0}", monthsLabel(range)), "📅") +
@@ -142,9 +167,10 @@ export const Calendar = {
         row(T("Money in"), `<span class="good">+${pln(inSum)}</span>`) + row(T("Payments"), `<span class="bad">−${pln(outSum)}</span>`) +
         row(T("To savings"), `<span class="primary">${pln(saveSum)}</span>`) + row(T("Left over"), pln(inSum - outSum - saveSum), "big" + (inSum - outSum - saveSum < 0 ? " bad" : " good")) +
         hint(T("From today to {0}: your income sources, the regular payments below and loan payments.", fmtDate(end))))}
-      ${card(`<div class="cal-head"><button class="icon-btn" data-month="-1"${shown <= start ? ` disabled title="${esc(T("The calendar shows the future – past months are in Overview and Expenses."))}"` : ""}>◀</button><h3>${esc(monthName(shown))}</h3><button class="icon-btn" data-month="1">▶</button></div>
+      ${card(`<div class="cal-head"><button class="icon-btn" data-month="-1"${shown <= first ? ` disabled title="${esc(T("This is the first month of your data."))}"` : ""}>◀</button><h3>${esc(monthName(shown))}</h3>${shown.getTime() !== start.getTime() ? `<button class="chip" data-month="now">${esc(T("Today"))}</button>` : ""}<button class="icon-btn" data-month="1">▶</button></div>
         <div class="cal-grid">${dayNames.map(n => `<div class="cal-dow">${esc(n)}</div>`).join("")}${cells}</div>
         <div class="cal-legend"><span><i class="cal-dot in"></i>${esc(T("Money in"))}</span><span><i class="cal-dot out"></i>${esc(T("Payments"))}</span><span><i class="cal-dot save"></i>${esc(T("To savings"))}</span></div>` +
+        hint(T("Before today: what really happened (your entries and bank imports). From today: what is planned.")) +
         (selectedDay ? `<h3>${esc(fmtDate(new Date(shown.getFullYear(), shown.getMonth(), selectedDay)))}</h3>` + (dayList.length ? `<div class="list">${dayList.map(evRow).join("")}</div>` : hint(T("Nothing on this day."))) : hint(T("Click a day to see its payments."))))}
       ${card(`<form id="rec">${heading(r ? T("Edit: {0}", r.Name) : T("Add a regular payment"))}
         ${hint(T("Rent, bills, subscriptions, insurance, a standing order to your savings – anything that comes back. Your income comes from the Income tab."))}
@@ -178,7 +204,7 @@ export const Calendar = {
     </div>`;
 
     el.querySelectorAll("[data-range]").forEach(b => b.onclick = () => { range = +b.dataset.range; App.refresh(); });
-    el.querySelectorAll("[data-month]").forEach(b => b.onclick = () => { shown = addMonths(shown, +b.dataset.month); selectedDay = null; App.refresh(); });
+    el.querySelectorAll("[data-month]").forEach(b => b.onclick = () => { shown = b.dataset.month === "now" ? start : addMonths(shown, +b.dataset.month); selectedDay = null; App.refresh(); });
     el.querySelectorAll("[data-day]").forEach(b => b.onclick = () => { selectedDay = +b.dataset.day === selectedDay ? null : +b.dataset.day; App.refresh(); });
     const fm = el.querySelector("#rec");
     fm.kind.onchange = () => { fm.category.disabled = fm.kind.value === "saving"; };

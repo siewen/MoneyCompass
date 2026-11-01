@@ -370,7 +370,7 @@ export async function openBankImport() {
       const v = toPln(r.amount, r.currency);
       if (v === null) continue;
       if (d.Received.some(x => sameDay(x.Date, r.date) && Math.abs(x.Amount - v) < 0.005 && x.Description === r.description)) continue;
-      received.push({ Id: uuid(), Date: isoDate(r.date), Amount: v, Description: r.description, Kind: RECEIVED.income });
+      received.push({ Id: uuid(), Date: isoDate(r.date), Amount: v, Description: r.description, Kind: RECEIVED.income, ...withInfo(r) });
     }
     received.sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
     state = { ...state, items, transfers, received, dup, foreign, total: rows.length, skippedByDate: all.length - rows.length };
@@ -456,7 +456,7 @@ export async function openBankImport() {
     transfers.forEach((t, n) => { if (v["tr-" + n] !== undefined) { t.toSavings = v["tr-" + n] !== "0"; t.monthly = v["tr-" + n] === "m"; } });
     for (const i of items) {
       const c = findCategory(i.category);
-      d.Expenses.push({ Id: uuid(), Date: isoDate(i.row.date), Description: i.row.description, Category: c ? c.Name : OTHER, Amount: i.pln, Essential: !!c?.Essential });
+      d.Expenses.push({ Id: uuid(), Date: isoDate(i.row.date), Description: i.row.description, Category: c ? c.Name : OTHER, Amount: i.pln, Essential: !!c?.Essential, ...withInfo(i.row) });
     }
     d.Received.push(...received);
     const saved = transfers.filter(t => t.toSavings);
@@ -468,9 +468,10 @@ export async function openBankImport() {
       target.Amount += saved.reduce((a, t) => a + t.pln, 0);
       // Marked "every month": the newest such transfer becomes the regular deposit of that savings entry
       const monthly = saved.filter(t => t.monthly).sort((a, b) => b.row.date - a.row.date)[0];
-      if (monthly) Object.assign(target, { Deposit: monthly.pln, DepositFrequency: "Monthly", DepositDate: isoDate(monthly.row.date), DepositFrom: target.DepositFrom || "" });
+      if (monthly) Object.assign(target, { Deposit: monthly.pln, DepositFrequency: "Monthly", DepositDate: isoDate(monthly.row.date),
+        DepositFrom: target.DepositFrom || accountName(monthly.row.info), ...(monthly.row.info && Object.keys(monthly.row.info).length ? { DepositInfo: monthly.row.info } : {}) });
     }
-    for (const t of transfers) d.Transfers.push({ Id: uuid(), Date: isoDate(t.row.date), Amount: t.pln, Description: t.row.description, Saved: t.toSavings, HoldingId: t.toSavings ? target?.Id ?? null : null });
+    for (const t of transfers) d.Transfers.push({ Id: uuid(), Date: isoDate(t.row.date), Amount: t.pln, Description: t.row.description, Saved: t.toSavings, HoldingId: t.toSavings ? target?.Id ?? null : null, ...withInfo(t.row) });
     save();
     let msg = !received.length ? T("{0} expenses were added. You find them in the Expenses tab.", items.length)
       : T("{0} expenses were added (Expenses tab) and {1} payments received (Income tab).", items.length, received.length);
@@ -481,4 +482,13 @@ export async function openBankImport() {
     App.refresh();
   };
   draw();
+}
+
+// The bank's details of an imported transaction (accounts, name, title), for the ⓘ button
+const withInfo = r => r.info && Object.keys(r.info).length ? { Info: r.info } : {};
+/** "ING ··2874": your bank and the end of your account number, as the "from" of a regular deposit */
+function accountName(info) {
+  if (!info) return "";
+  const digits = (info.Account || "").replace(/\D/g, "");
+  return [info.Bank, digits.length >= 4 ? "··" + digits.slice(-4) : info.Account].filter(Boolean).join(" ");
 }

@@ -72,7 +72,24 @@ function fromHeader(h) {
       "benefeciary/sender", "beneficiary/sender", "sender/recipient", "recipient/sender", "counterparty", "payee"),
     Category: find(h, "kategoria", "category"),
     Currency: find(h, "waluta", "currency"),
+    // Account numbers, when the bank puts them in the file (only shown in the ⓘ info of an entry)
+    OwnAccount: exact(h, "numer rachunku/karty", "rachunek", "konto", "numer rachunku", "account", "own account", "rachunek źródłowy", "rachunek zrodlowy"),
+    OtherAccount: exact(h, "nr rachunku", "na konto/z konta", "rachunek kontrahenta", "rachunek odbiorcy/nadawcy", "rachunek nadawcy/odbiorcy",
+      "rachunek docelowy", "counterparty account", "beneficiary account", "account number"),
   };
+}
+function exact(header, ...names) {
+  const cells = header.map(norm);
+  for (const n of names) { const i = cells.indexOf(n); if (i >= 0) return i; }
+  return -1;
+}
+const ACCOUNT = /\b(?:PL)?\d{2}(?:[ ]?\d{4}){6}\b/;
+/** "PL61 1090 1014 0000 0712 1981 2874" – an account number in the usual groups of 4 */
+export function formatAccount(v) {
+  const t = (v || "").replace(/\s+/g, "");
+  const m = /^(PL)?(\d{26})$/.exec(t);
+  if (!m) return (v || "").trim();
+  return (m[1] || "") + m[2].slice(0, 2) + " " + m[2].slice(2).match(/.{4}/g).join(" ");
 }
 function recogniseBank(header) {
   const all = header.map(norm).join("|");
@@ -148,11 +165,13 @@ export function parse(text) {
   const lines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
   const d = findDelimiter(lines);
   let rows = splitRows(text, d).map(r => r.map(cleanCell)).filter(r => r.some(c => c.length));
-  const file = { header: [], rows: [], columns: { Date: -1, Amount: -1, Debit: -1, Credit: -1, Description: -1, Counterparty: -1, Category: -1, Currency: -1 }, bank: "" };
+  const file = { header: [], rows: [], columns: { Date: -1, Amount: -1, Debit: -1, Credit: -1, Description: -1, Counterparty: -1, Category: -1, Currency: -1, OwnAccount: -1, OtherAccount: -1 }, bank: "", ownAccount: "" };
   const hi = rows.findIndex(isHeader);
   if (hi >= 0) {
     file.header = rows[hi]; file.rows = rows.slice(hi + 1);
     file.columns = fromHeader(file.header); file.bank = recogniseBank(file.header);
+    // mBank & co. write your own account number above the table
+    for (const r of rows.slice(0, hi)) { const m = r.map(c => ACCOUNT.exec(c)).find(Boolean); if (m) { file.ownAccount = m[0]; break; } }
   } else {
     if (rows.length > 1 && rows[0].some(c => /^(PL)?\d{2}( ?\d{4}){6}$/.test(c))) rows = rows.slice(1);
     file.rows = rows;
@@ -203,10 +222,27 @@ export function transactions(file, c) {
       bankCategory: cell(c.Category),
       allText: r.filter(x => parseAmount(x) === null && !parseDate(x)).join(" "),
       counterparty: cell(c.Counterparty), ownAccount: false,
+      info: rowInfo(file, c, r, cell, amount),
     });
   }
   markOwnAccounts(list);
   return list;
+}
+/** What the bank says about one transaction: accounts, name, title – kept as the ⓘ info of the entry. */
+function rowInfo(file, c, r, cell, amount) {
+  let own = c.OwnAccount >= 0 ? cell(c.OwnAccount) : "", other = c.OtherAccount >= 0 ? cell(c.OtherAccount) : "";
+  // Pekao: "source" and "target" account – which one is yours depends on the direction
+  const hdr = i => i >= 0 ? norm(file.header[i] || "") : "";
+  if (/docelowy/.test(hdr(c.OtherAccount)) && /źródłowy|zrodlowy/.test(hdr(c.OwnAccount)) && amount > 0) [own, other] = [other, own];
+  for (const x of r) {
+    const m = /Rachunek (?:odbiorcy|nadawcy|kontrahenta)\s*:\s*((?:PL)?[\d ]{20,40})/i.exec(x);
+    if (m && !other.trim()) other = m[1].trim();
+  }
+  if (!own.trim()) own = file.ownAccount || "";
+  const info = { Bank: file.bank || "", Account: formatAccount(own), Name: cell(c.Counterparty).trim(), OtherAccount: formatAccount(other),
+    Title: cell(c.Description).trim(), Category: cell(c.Category).trim() };
+  for (const k of Object.keys(info)) if (!info[k]) delete info[k];
+  return info;
 }
 function words(s) { return new Set((s.toLowerCase().match(/\p{L}{3,}/gu) || [])); }
 function markOwnAccounts(rows) {

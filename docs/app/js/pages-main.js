@@ -187,7 +187,7 @@ export const Income = {
       ${card(heading(T("Received (bank import)")) + hint(T("Money that came into your account, from your bank imports. Choose for each payment how it counts: Extra income – only in that month. Salary – your regular pay, counted every month through Your income sources. Not income – ignored.")) +
         (d.Received.length ? `<div class="list">${[...d.Received].sort((a, b) => parseDate(b.Date) - parseDate(a.Date)).slice(0, 150).map(r => `
           <div class="item"><div><b>${esc(r.Description || "–")}</b><span class="hint">${fmtDate(r.Date)} · +${pln(r.Amount)}</span></div>
-          ${select("kind-" + r.Id, KINDS.map(k => [k[0], T(k[1])]), r.Kind)}
+          ${select("kind-" + r.Id, KINDS.map(k => [k[0], T(k[1])]), r.Kind)}${infoBtn("received", r)}
           <button class="icon-btn danger" data-del-received="${r.Id}" title="${esc(T("Delete"))}">🗑</button></div>`).join("")}</div>`
           : hint(T("Nothing imported yet."))))}
       ${binCard(["income", "received"])}
@@ -333,7 +333,7 @@ function expenseRow(e) {
   return `<div class="item expense" data-id="${e.Id}">
     <div class="toggle" data-toggle="${e.Id}" title="${esc(T("Click to switch between essential and not essential"))}"><b>${esc(e.Description || T(e.Category))}</b>
       <span class="hint">${fmtDate(e.Date)} · ${esc((icon ? icon + " " : "") + T(e.Category))} · <span class="${e.Essential ? "ess" : "noness"}">${esc(e.Essential ? T("Essential") : T("Not essential"))}</span>${rep ? ` · <span class="rep-tag">🔁 ${esc(T(rep))}</span>` : ""}</span></div>
-    <b>${pln(e.Amount)}</b>
+    <b>${pln(e.Amount)}</b>${infoBtn("expense", e)}
     <button class="icon-btn c-repeat${rep ? " on" : ""}" data-repeat="${e.Id}" title="${esc(rep ? T("Repeats {0} – click to stop", T(rep).toLowerCase()) : T("Click to repeat every month"))}">${ICON.repeat}</button>
     <button class="icon-btn c-edit${e.Edited ? " on" : ""}" data-edit="${e.Id}" title="${esc(e.Edited ? T("Changed by you – click to change again") : T("Change"))}">${ICON.edit}</button>
     <button class="icon-btn c-del" data-del="${e.Id}" title="${esc(T("Delete"))}">${ICON.trash}</button></div>`;
@@ -507,7 +507,7 @@ export const Portfolio = {
       ${card(heading(T("Your savings")) + hint(T("Tap an item to edit it, for example to update the amount.")) + (d.Holdings.length ? `<div class="list">${d.Holdings.map(x => `
         <div class="item clickable" data-edit-holding="${x.Id}"><div><b>${esc(x.Name)}</b><span class="hint">${esc(T(x.Place))} · ${esc(x.Safe ? T("Safe") : T("Risky"))} · ${rate(x.RatePercent || 0)}</span></div>
         <div class="right"><b>${amount(x.Amount, x.Currency)}</b>${x.RatePercent ? `<span class="hint">${esc(T("{0} / year", pln(Calc.toPln(x.Amount, x.Currency, s) * x.RatePercent / 100)))}</span>` : ""}${x.Deposit > 0 ? `<span class="hint primary">🔁 +${esc(pln(x.Deposit))} · ${esc(T(x.DepositFrequency || "Monthly"))}${x.DepositFrom ? " · " + esc(T("from {0}", x.DepositFrom)) : ""}</span>` : ""}</div>
-        <button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("Nothing added yet."))))}
+        ${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("Nothing added yet."))))}
       ${card(`<form id="fx">${heading(T("Exchange rates"))}${hint(T("Used to convert dollars and euros to złoty."))}
         ${check("auto", T("Update automatically with the official NBP rates"), s.AutoExchangeRates)}
         <div class="two">${field("1 USD = … zł", numInput("usd", plain(s.UsdToPln)))}${field("1 EUR = … zł", numInput("eur", plain(s.EurToPln)))}</div>${hint(rateInfo)}</form>`)}
@@ -527,7 +527,7 @@ export const Portfolio = {
     form.place.onchange = () => { form.safe.checked = ["Bank", "Cash"].includes(form.place.value); };
     el.querySelector('[data-action="save-holding"]').onclick = saveIt;
     const c = el.querySelector('[data-action="cancel-holding"]'); if (c) c.onclick = () => { editHolding = null; App.refresh(); };
-    el.querySelectorAll("[data-edit-holding]").forEach(x => x.onclick = ev => { if (ev.target.closest("[data-del-holding]")) return; editHolding = x.dataset.editHolding; App.refresh(); window.scrollTo({ top: 0, behavior: "smooth" }); });
+    el.querySelectorAll("[data-edit-holding]").forEach(x => x.onclick = ev => { if (ev.target.closest("[data-del-holding], [data-info]")) return; editHolding = x.dataset.editHolding; App.refresh(); window.scrollTo({ top: 0, behavior: "smooth" }); });
     el.querySelectorAll("[data-del-holding]").forEach(b => b.onclick = async () => {
       const x = d.Holdings.find(y => y.Id === b.dataset.delHolding);
       if (await confirmBox(T("Delete?"), x.Name, T("Delete"), T("Cancel"), true)) { toBin("holding", x); d.Holdings = d.Holdings.filter(y => y !== x); save(); App.refresh(); }
@@ -556,7 +556,39 @@ export function binCard(kinds) {
       ${l.value !== undefined ? `<b>${pln(l.value)}</b>` : ""}<button class="btn second small" data-restore="${x.Id}">↩ ${esc(T("Restore"))}</button></div>`; }).join("")}</div>
     <div class="buttons">${button("🗑 " + esc(T("Empty the list")), "empty-bin", "second small", `data-kinds="${kinds.join(",")}"`)}</div></details>`, "wide bin-card");
 }
+// ---------- ⓘ: what the bank file says about an entry (accounts, name, title) ----------
+const INFO_LISTS = { expense: "Expenses", received: "Received", transfer: "Transfers", holding: "Holdings" };
+const hasInfo = (kind, x) => kind === "holding"
+  ? !!(x.DepositInfo || x.DepositFrom || State.data.Transfers.some(t => t.HoldingId === x.Id && t.Info))
+  : !!(x.Info && Object.keys(x.Info).length);
+/** The ⓘ button – only for entries that have details from the bank import. */
+export function infoBtn(kind, x) {
+  return hasInfo(kind, x) ? `<button class="icon-btn c-info" data-info="${kind}:${x.Id}" title="${esc(T("Details from your bank"))}">ⓘ</button>` : "";
+}
+function infoRows(info) {
+  const labels = [["Bank", "Bank"], ["Account", "Your account"], ["Name", "From / to"], ["OtherAccount", "Their account"], ["Title", "Title"], ["Category", "Bank category"]];
+  return labels.filter(([k]) => info[k]).map(([k, l]) => row(T(l), `<span class="info-val">${esc(info[k])}</span>`)).join("");
+}
+export function showInfo(kind, id) {
+  const d = State.data, x = (d[INFO_LISTS[kind]] || []).find(y => y.Id === id);
+  if (!x) return;
+  let body = "";
+  if (kind === "holding") {
+    if (x.Deposit > 0) body += `<h3>🔁 ${esc(T("Regular deposit"))}</h3>` + row(T("Amount"), pln(x.Deposit)) + row(T("How often"), T(x.DepositFrequency || "Monthly")) +
+      (x.DepositFrom ? row(T("From which account"), esc(x.DepositFrom)) : "") + (x.DepositInfo ? infoRows(x.DepositInfo) : "");
+    const tr = d.Transfers.filter(t => t.HoldingId === x.Id).sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
+    if (tr.length) body += `<h3>⬆ ${esc(T("Transfers from your bank imports"))}</h3><div class="list">${tr.slice(0, 50).map(t => `<div class="item"><div><b>${esc(t.Description || "–")}</b>
+      <span class="hint">${fmtDate(t.Date)}${t.Info?.Account ? " · " + esc(T("from {0}", t.Info.Account)) : ""}${t.Info?.OtherAccount ? " → " + esc(t.Info.OtherAccount) : ""}</span></div><b class="primary">${pln(t.Amount)}</b></div>`).join("")}</div>`;
+  } else {
+    body = row(T("Date"), fmtDate(x.Date)) + row(T("Amount"), pln(x.Amount)) + infoRows(x.Info || {});
+  }
+  const p = popup(`<div class="box-head"><span class="box-icon">ⓘ</span><h2>${esc(x.Description || x.Name || "–")}</h2></div>${body}
+    ${hint(T("From your bank file. It stays only in this browser."))}
+    <div class="box-buttons"><button class="btn main" data-close>${esc(T("OK"))}</button></div>`, { width: 520, cls: "box" });
+  return p;
+}
 export function bindBin(el) {
+  el.querySelectorAll("[data-info]").forEach(b => b.onclick = ev => { ev.stopPropagation(); const [k, id] = b.dataset.info.split(":"); showInfo(k, id); });
   el.querySelectorAll("[data-restore]").forEach(b => b.onclick = () => {
     const entry = restoreFromBin(b.dataset.restore);
     if (entry) { toast(T("Restored: {0}.", binLabel(entry).name)); App.refresh(); }

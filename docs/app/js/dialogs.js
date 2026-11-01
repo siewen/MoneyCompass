@@ -306,3 +306,19 @@ async function exportExcel() {
   for (const [title, rows] of sections) { let n = title.slice(0, 31); while (used.has(n)) n = n.slice(0, 29) + "2"; used.add(n); add(n, rows); }
   X.writeFile(wb, `MoneyCompass-report-${stamp()}.xlsx`);
 }
+
+// ---------- Language: from the 🌐 button in the top bar and from the guide ----------
+export const FLAGS = { en: "🇬🇧", de: "🇩🇪", fr: "🇫🇷", pl: "🇵🇱" };
+export function setLanguage(code) {
+  const s = State.data.Settings;
+  if (s.Language === code) return;
+  s.Language = code; store.set("mc-lang", code); save();
+  App.rebuild();
+}
+export function languageChips() {
+  return `<div class="lang-chips">${LANGS.map(([c, n]) => `<button class="chip${c === lang() ? " on" : ""}" data-lang="${c}">${FLAGS[c] || ""} ${esc(n)}</button>`).join("")}</div>`;
+}
+export function openLanguage() {
+  const p = popup(`<h3>🌐 ${esc(T("Language"))}</h3>${hint(T("Your data stays the same; only the texts change."))}${languageChips()}`, { width: 320, anchor: "top-right", cls: "lang-panel" });
+  p.el.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { p.close(); setLanguage(b.dataset.lang); });
+}

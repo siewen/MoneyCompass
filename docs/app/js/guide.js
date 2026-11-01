@@ -3,6 +3,7 @@
 import { T, State, save, license } from "./core.js";
 import { esc, popup } from "./ui.js";
 import { App } from "./app.js";
+import { languageChips, setLanguage } from "./dialogs.js";
 
 const STEPS = [
   { route: "income", color: "#1D4ED8", title: "Income", text: "Income: add your salary and any other money that comes in, with its payday.",
@@ -32,7 +33,7 @@ export function openGuide(step) {
     const s = STEPS[current];
     const doneCount = STEPS.filter(x => x.done(d)).length;
     p.el.innerHTML = `
-      <div class="guide-head"><h2>🧭 ${esc(T("Getting started"))}</h2>
+      <div class="guide-head"><div class="guide-lang"><h2>🧭 ${esc(T("Getting started"))}</h2>${languageChips()}</div>
         <p class="hint">${esc(T("Follow these steps – or jump to any of them. You can open this guide again with the ? button."))}</p>
         <div class="progress"><span style="width:${doneCount / STEPS.length * 100}%;background:#15803D"></span></div></div>
       <div class="guide-steps">${STEPS.map((x, i) => `
@@ -56,6 +57,7 @@ export function openGuide(step) {
           ${current < STEPS.length - 1 ? `<button class="btn second" data-g="next">${esc(T("Next step"))} →</button>` : ""}
           <button class="btn second" data-close>${esc(T("Close"))}</button></div></div>`;
     p.el.querySelectorAll("[data-step]").forEach(b => b.onclick = () => { current = +b.dataset.step; draw(); });
+    p.el.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { setLanguage(b.dataset.lang); draw(); });
     p.el.querySelector('[name="hide"]').onchange = e => { d.Settings.GuideHidden = e.target.checked; save(); };
     const act = (k, fn) => { const b = p.el.querySelector(`[data-g="${k}"]`); if (b) b.onclick = fn; };
     act("back", () => { current--; draw(); });

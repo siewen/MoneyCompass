@@ -356,3 +356,19 @@ details.bin summary h3 { padding-right: 40px; }
 .rep-tag { color: #2563EB; font-weight: 700; }
 :root[data-theme="dark"] .rep-tag { color: #60A5FA; }
 .icon-btn:disabled { opacity: .35; cursor: default; }
+.icon-btn.c-info { color: #0D9488; opacity: .8; font-weight: 700; font-size: 1.05em; }
+.icon-btn.c-info:hover { opacity: 1; background: rgba(13,148,136,.14); }
+:root[data-theme="dark"] .icon-btn.c-info { color: #2DD4BF; }
+.info-val { font-family: inherit; overflow-wrap: anywhere; text-align: right; }
+.cal-cell.past { opacity: .75; }
+.cal-cell.past .cal-day { font-weight: 500; }
+.cal-head .chip { margin-left: auto; }
+.cal-head .chip + .icon-btn { margin-left: 6px; }
+.lang-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.lang-panel .lang-chips { flex-direction: column; }
+.lang-panel .lang-chips .chip { text-align: left; }
+.guide-lang { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.guide-lang .chip { padding: 3px 9px; font-size: .85em; }
+.act.lang-btn { gap: 3px; }
+.act.lang-btn b { font-size: .8em; letter-spacing: .02em; }
+.act.lang-btn { background: #475569; }

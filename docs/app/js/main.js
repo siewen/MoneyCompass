@@ -9,7 +9,7 @@ import { hasNews, openNews } from "./news.js";
 import { Overview, Income, Expenses, Emergency, Portfolio, bindBin } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
 import { Calendar } from "./calendar.js";
-import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile } from "./dialogs.js";
+import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile, openLanguage } from "./dialogs.js";
 
 const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", savings: "#7E22CE" };
 const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget, calendar: Calendar };
@@ -44,6 +44,7 @@ function buildShell() {
         <button class="act blue" data-act="import" title="${esc(T("Import"))}">⬆<span>${esc(T("Import"))}</span></button>
         <button class="act green" data-act="export" title="${esc(T("Export"))}">⬇<span>${esc(T("Export"))}</span></button>
         ${installed() ? "" : `<button class="act teal" data-act="install" title="${esc(T("Install app"))}">📲<span>${esc(T("Install app"))}</span></button>`}
+        <button class="act lang-btn" data-act="lang" title="${esc(T("Language"))}">🌐<b>${esc(lang().toUpperCase())}</b></button>
         <button class="profile-btn" data-act="profile" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}</button>
         ${installed() ? `<button class="act exit" data-act="exit" title="${esc(T("Close"))}">⏻</button>` : ""}
       </div>
@@ -52,7 +53,7 @@ function buildShell() {
     <main id="page"></main>
     <button class="help-fab" data-act="help-menu" title="${esc(T("Help & About"))}">?</button>`;
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => App.go(b.dataset.tab));
-  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, install, exit: closeApp };
+  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage() };
   document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
   setupHelpButton();
   render();
