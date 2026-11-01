@@ -206,7 +206,7 @@ function welcome() {
 async function closeApp() {
   const s = State.data.Settings;
   const choice = s.CloseChoice || "";
-  if (choice === "with") { saveProfileFile(); return setTimeout(() => finishClose(true), 900); }
+  if (choice === "with") { saveProfileFile(); return savedThenClose(); }
   if (choice === "without" || choice === "none") return finishClose(false);
   const p = popup(`<div class="box-head"><span class="box-icon">💾</span><h2>${esc(T("Save your profile before closing?"))}</h2></div>
     <p class="hint">${esc(T("Your entries are always kept in this browser. The profile is an extra copy, for example as a backup."))}</p>
@@ -221,10 +221,23 @@ async function closeApp() {
     p.close();
     if (c === "cancel") return;
     if (p.el.querySelector('[name="remember"]').checked) { s.CloseChoice = c; save(); }
-    if (c === "with") saveProfileFile();
-    setTimeout(() => finishClose(c === "with"), c === "with" ? 900 : 200);
+    if (c === "with") { saveProfileFile(); savedThenClose(); }
+    else setTimeout(() => finishClose(false), 200);
   });
 }
+// The browser must finish the download before the window may close (Edge otherwise asks "Your file is still downloading"):
+// so after saving, the user closes with one more click
+function savedThenClose() {
+  const p = popup(`<div class="box-head"><span class="box-icon go">💾</span><h2>${esc(T("Profile saved"))}</h2></div>
+    <p class="hint">${esc(T("Your profile file is in your Downloads folder."))}</p>
+    <div class="box-buttons"><button class="btn main" data-x="close">⏻ ${esc(T("Close MoneyCompass"))}</button>
+    <button class="btn second" data-close>${esc(T("Stay"))}</button></div>`, { width: 420, cls: "box" });
+  const btn = p.el.querySelector('[data-x="close"]');
+  btn.disabled = true;
+  setTimeout(() => { btn.disabled = false; }, 1500);
+  btn.onclick = () => { p.close(); setTimeout(() => finishClose(true), 150); };
+}
+
 function finishClose(fileSaved) {
   save();
   try { window.close(); } catch { /* not allowed */ }
