@@ -630,6 +630,7 @@ export function reset(parts) {
   if (parts.emergency) Object.assign(d.Settings, { MonthlyEssentials: 0, YearlyCosts: 0, EmergencyMonths: 3, BufferPercent: 10 });
   if (parts.rates) Object.assign(d.Settings, { UsdToPln: 0, EurToPln: 0 });
   if (parts.modules) { d.Goals = []; d.Loans = []; d.Budgets = []; d.Recurring = []; }
+  if (parts.bin) d.Deleted = [];
   if (parts.categories) {
     const own = new Set(d.Categories.map(c => c.Name));
     d.Expenses.forEach(e => { if (own.has(e.Category)) e.Category = OTHER; });

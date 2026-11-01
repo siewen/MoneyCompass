@@ -173,16 +173,20 @@ export function openOptions() {
 
 export function openDelete() {
   const d = D();
-  const parts = [["incomes", T("Income sources"), d.Incomes.length], ["expenses", T("Expenses"), d.Expenses.length], ["holdings", T("My savings"), d.Holdings.length],
+  const parts = [["incomes", T("Income sources"), d.Incomes.length], ["expenses", T("Expenses, money received and transfers (bank imports)"), d.Expenses.length + d.Received.length + d.Transfers.length], ["holdings", T("My savings"), d.Holdings.length],
     ["offers", T("Saved savings offers"), d.Offers.length], ["emergency", T("Emergency fund settings"), T("monthly costs, yearly costs, months, buffer")],
-    ["rates", T("Exchange rates"), ""], ["modules", T("Modules: goals, loans, budget"), d.Goals.length + d.Loans.length + d.Budgets.length],
-    ["categories", T("Your own expense categories"), d.Categories.length || T("none")]];
+    ["rates", T("Exchange rates"), ""], ["modules", T("Modules: goals, loans, budget, payment calendar"), d.Goals.length + d.Loans.length + d.Budgets.length + (d.Recurring || []).length],
+    ["categories", T("Your own expense categories"), d.Categories.length || T("none")], ["bin", T("Deleted items"), (d.Deleted || []).length]];
   const p = popup(`<h2 class="popup-title bad">🗑 ${esc(T("Delete data"))}</h2>${hint(T("Choose exactly what to delete."))}
+    <label class="check select-all"><input type="checkbox" data-all><span><b>${esc(T("Select all"))}</b></span></label><hr>
     ${parts.map(x => check(x[0], `${x[1]}${x[2] !== "" ? ` (${x[2]})` : ""}`, false)).join("")}
     ${hint(T("Tip: save your profile first (your profile, top right), so you can load it again if you change your mind."))}
     <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button><button class="btn danger" data-go>${esc(T("Delete"))}</button></div>`, { width: 560 });
+  const boxes = parts.map(x => p.el.querySelector(`input[name="${x[0]}"]`)), all = p.el.querySelector("[data-all]");
+  all.onchange = () => boxes.forEach(b => { b.checked = all.checked; });
+  boxes.forEach(b => b.onchange = () => { all.checked = boxes.every(x => x.checked); all.indeterminate = !all.checked && boxes.some(x => x.checked); });
   p.el.querySelector("[data-go]").onclick = async () => {
-    const v = values(p.el);
+    const v = values(p.el); delete v[""];
     if (!Object.values(v).some(Boolean)) { p.close(); return; }
     if (!(await confirmBox(T("Delete?"), T("This cannot be undone."), T("Delete"), T("Cancel"), true))) return;
     reset(v); p.close(); App.rebuild(); toast(T("Deleted."));

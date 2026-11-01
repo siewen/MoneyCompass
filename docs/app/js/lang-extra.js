@@ -187,7 +187,9 @@ export const EXTRA = {
 "{0} repeats: {1} – see the Payment calendar.": "{0} wiederholt sich: {1} – siehe Zahlungskalender.",
 "Money coming in": "Geld, das hereinkommt",
 "Account numbers found: {0}.": "Kontonummern gefunden: {0}.",
-"No account numbers found in this file. If it has them, choose the columns with \"Change columns\".": "In dieser Datei wurden keine Kontonummern gefunden. Wenn sie welche enthält, wählen Sie die Spalten mit „Spalten ändern“."
+"No account numbers found in this file. If it has them, choose the columns with \"Change columns\".": "In dieser Datei wurden keine Kontonummern gefunden. Wenn sie welche enthält, wählen Sie die Spalten mit „Spalten ändern“.",
+"Expenses, money received and transfers (bank imports)": "Ausgaben, Geldeingänge und Überweisungen (Bankimporte)",
+"Modules: goals, loans, budget, payment calendar": "Module: Sparziele, Kredite, Budget, Zahlungskalender"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -376,7 +378,9 @@ export const EXTRA = {
 "{0} repeats: {1} – see the Payment calendar.": "{0} se répète : {1} – voir le calendrier des paiements.",
 "Money coming in": "Argent qui arrive",
 "Account numbers found: {0}.": "Numéros de compte trouvés : {0}.",
-"No account numbers found in this file. If it has them, choose the columns with \"Change columns\".": "Aucun numéro de compte trouvé dans ce fichier. S'il en contient, choisissez les colonnes avec « Modifier les colonnes »."
+"No account numbers found in this file. If it has them, choose the columns with \"Change columns\".": "Aucun numéro de compte trouvé dans ce fichier. S'il en contient, choisissez les colonnes avec « Modifier les colonnes ».",
+"Expenses, money received and transfers (bank imports)": "Dépenses, argent reçu et virements (imports bancaires)",
+"Modules: goals, loans, budget, payment calendar": "Modules : objectifs, prêts, budget, calendrier des paiements"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -519,7 +523,7 @@ export const EXTRA = {
 "Your expenses from {0} to {1} (1 month).": "Twoje wydatki od {0} do {1} (1 miesiąc).",
 "Average per month of your expenses from {0} to {1} ({2} months).": "Średnio miesięcznie z Twoich wydatków od {0} do {1} ({2} mies.).",
 "Changed by you – click to change again": "Zmienione przez Ciebie – kliknij, aby zmienić ponownie",
-"Deleted items": "Usunięte pozycje",
+"Deleted items": "Usunięte elementy",
 "What you deleted on this tab. Put an item back with ↩, or empty the list to delete for good.": "To, co usunięto w tej karcie. Przywróć pozycję przyciskiem ↩ albo opróżnij listę, aby usunąć na zawsze.",
 "deleted {0}": "usunięto {0}",
 "Restore": "Przywróć",
@@ -565,6 +569,8 @@ export const EXTRA = {
 "{0} repeats: {1} – see the Payment calendar.": "{0} powtarza się: {1} – zobacz kalendarz płatności.",
 "Money coming in": "Wpływy",
 "Account numbers found: {0}.": "Znalezione numery kont: {0}.",
-"No account numbers found in this file. If it has them, choose the columns with \"Change columns\".": "Nie znaleziono numerów kont w tym pliku. Jeśli je zawiera, wybierz kolumny przyciskiem „Zmień kolumny”."
+"No account numbers found in this file. If it has them, choose the columns with \"Change columns\".": "Nie znaleziono numerów kont w tym pliku. Jeśli je zawiera, wybierz kolumny przyciskiem „Zmień kolumny”.",
+"Expenses, money received and transfers (bank imports)": "Wydatki, wpływy i przelewy (importy z banku)",
+"Modules: goals, loans, budget, payment calendar": "Moduły: cele, kredyty, budżet, kalendarz płatności"
 }
 };
