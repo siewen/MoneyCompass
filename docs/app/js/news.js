@@ -71,10 +71,10 @@ export const NEWS = [
     de: ["👤 Ihr Profil öffnet sich unter Ihrem Bild (oben rechts).", "ℹ Version und letzte Aktualisierung unter ? → Über."],
     fr: ["👤 Votre profil s'ouvre sous votre photo (en haut à droite).", "ℹ Version et dernière mise à jour dans ? → À propos."] } },
   { build: 2, date: "2026-10-31", items: {
-    en: ["📲 Install MoneyCompass as an app on your phone, tablet or computer – it also opens without internet.", "💾 \"Save your profile before closing?\" with the ⏻ button."],
-    pl: ["📲 Zainstaluj MoneyCompass jako aplikację na telefonie, tablecie lub komputerze – działa też bez internetu.", "💾 „Zapisać profil przed zamknięciem?” przyciskiem ⏻."],
-    de: ["📲 MoneyCompass als App auf Handy, Tablet oder Computer installieren – öffnet sich auch ohne Internet.", "💾 „Profil vor dem Schließen speichern?“ mit der ⏻-Taste."],
-    fr: ["📲 Installez MoneyCompass comme application sur téléphone, tablette ou ordinateur – elle s'ouvre aussi sans Internet.", "💾 « Enregistrer le profil avant de fermer ? » avec le bouton ⏻."] } },
+    en: ["📲 Install MoneyCompass as an app on your phone, tablet or computer – it also opens without internet.", "💾 \"Save your profile before closing?\" with the ⏻ button.", "🎯 “My savings” is now called “Savings”, and your Savings goals (Pro) are shown right inside it – one tab less."],
+    pl: ["📲 Zainstaluj MoneyCompass jako aplikację na telefonie, tablecie lub komputerze – działa też bez internetu.", "💾 „Zapisać profil przed zamknięciem?” przyciskiem ⏻.", "🎯 „Moje oszczędności” to teraz „Oszczędności”, a Cele oszczędnościowe (Pro) są pokazane bezpośrednio w tej zakładce – o jedną zakładkę mniej."],
+    de: ["📲 MoneyCompass als App auf Handy, Tablet oder Computer installieren – öffnet sich auch ohne Internet.", "💾 „Profil vor dem Schließen speichern?“ mit der ⏻-Taste.", "🎯 „Meine Ersparnisse“ heißt jetzt „Ersparnisse“, und Ihre Sparziele (Pro) erscheinen direkt darin – ein Tab weniger."],
+    fr: ["📲 Installez MoneyCompass comme application sur téléphone, tablette ou ordinateur – elle s'ouvre aussi sans Internet.", "💾 « Enregistrer le profil avant de fermer ? » avec le bouton ⏻.", "🎯 « Mon épargne » s’appelle maintenant « Épargne », et vos objectifs d’épargne (Pro) s’affichent directement dedans – un onglet de moins."] } },
 ];
 
 const SEEN = "mc-seen-build";
