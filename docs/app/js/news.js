@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 14, date: "2026-11-01", items: {
+    en: ["🏦 Compare offers: fill in an offer from My savings with one click, to see what your money earns now compared with other banks."],
+    pl: ["🏦 Porównaj oferty: uzupełnij ofertę z Moich oszczędności jednym kliknięciem i zobacz, ile Twoje pieniądze zarabiają teraz w porównaniu z innymi bankami."],
+    de: ["🏦 Angebote vergleichen: ein Angebot mit einem Klick aus Meine Ersparnisse ausfüllen – und sehen, was Ihr Geld jetzt im Vergleich zu anderen Banken bringt."],
+    fr: ["🏦 Comparer les offres : remplissez une offre depuis Mon épargne en un clic, pour voir ce que rapporte votre argent par rapport aux autres banques."] } },
   { build: 12, date: "2026-11-01", items: {
     en: ["⠿ Moving cards is easier: drag a card by its title or its handle – the page scrolls by itself when you reach the edge."],
     pl: ["⠿ Łatwiejsze przesuwanie kart: przeciągnij kartę za tytuł lub uchwyt – strona sama się przewija przy krawędzi."],

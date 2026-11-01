@@ -30,6 +30,8 @@ export const Savings = {
     const ranked = d.Offers.map(o => ({ o, r: Calc.savings(o) })).sort((a, b) => b.r.net - a.r.net);
     el.innerHTML = `<div class="grid">
       ${card(`<form id="offer">${heading(T("Savings offer"))}
+        ${d.Holdings.length ? field(T("Fill in from My savings"), select("from-holding", [["", T("Choose…")], ...d.Holdings.map(h => [h.Id, `${h.Name} · ${pln(Calc.toPln(h.Amount, h.Currency, d.Settings))} · ${rate(h.RatePercent || 0)}`])], "")) +
+          hint(T("Compare what your savings earn now with other offers.")) : ""}
         ${field(T("Name"), textInput("Name", f.Name, T("e.g. {0}", "Bank X – konto oszczędnościowe")))}
         ${field(T("Amount you put in (zł)"), numInput("Amount", plain(num(f.Amount)), T("e.g. {0}", "50000")))}
         <div class="two">${field(T("Promo rate (% per year)"), numInput("PromoRate", plain(num(f.PromoRate)), "7"))}${field(T("Promo limit (zł)"), numInput("PromoLimit", plain(num(f.PromoLimit)), T("e.g. 100000 (empty = no limit)")))}</div>
@@ -44,6 +46,14 @@ export const Savings = {
         <div class="right"><b class="good">${pln(x.r.net)}</b><span class="hint">${rate(x.r.effective)}</span></div><button class="icon-btn danger" data-del-offer="${x.o.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No saved offers yet."))), "wide")}
     </div>`;
     const fm = el.querySelector("#offer");
+    const pick = fm.querySelector('[name="from-holding"]');
+    if (pick) pick.onchange = () => {
+      const h = d.Holdings.find(x => x.Id === pick.value);
+      if (!h) return;
+      form = { Name: h.Name, Amount: Math.round(Calc.toPln(h.Amount, h.Currency, d.Settings) * 100) / 100, PromoRate: h.RatePercent || 0, PromoLimit: "", PromoDays: 0,
+        StandardRate: h.RatePercent || 0, PeriodDays: 365, ApplyTax: true };
+      App.refresh();
+    };
     fm.querySelectorAll("input").forEach(i => i.addEventListener("change", () => { form = values(fm); App.refresh(); }));
     el.querySelector('[data-action="save-offer"]').onclick = () => {
       const v = values(fm);

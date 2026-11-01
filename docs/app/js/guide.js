@@ -27,7 +27,7 @@ export function openGuide(step) {
   hideBar();
   const d = State.data;
   current = step ?? Math.max(0, STEPS.findIndex(s => !s.done(d)));
-  const p = popup("", { width: 1000, cls: "guide-popup" });
+  const p = popup("", { width: 760, cls: "guide-popup" });
   const draw = () => {
     const s = STEPS[current];
     const doneCount = STEPS.filter(x => x.done(d)).length;
