@@ -139,7 +139,8 @@ export const EXTRA = {
 "Income and expenses by month": "Einnahmen und Ausgaben pro Monat",
 "{0} is not finished: income as planned from your income sources, expenses entered so far.": "{0} ist noch nicht vorbei: Einnahmen wie geplant aus Ihren Einkommensquellen, Ausgaben bisher eingetragen.",
 "Your expenses from {0} to {1} (1 month).": "Ihre Ausgaben vom {0} bis {1} (1 Monat).",
-"Average per month of your expenses from {0} to {1} ({2} months).": "Durchschnitt pro Monat Ihrer Ausgaben vom {0} bis {1} ({2} Monate)."
+"Average per month of your expenses from {0} to {1} ({2} months).": "Durchschnitt pro Monat Ihrer Ausgaben vom {0} bis {1} ({2} Monate).",
+"Changed by you – click to change again": "Von Ihnen geändert – zum erneuten Ändern klicken"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -280,7 +281,8 @@ export const EXTRA = {
 "Income and expenses by month": "Revenus et dépenses par mois",
 "{0} is not finished: income as planned from your income sources, expenses entered so far.": "{0} n'est pas terminé : revenus prévus d'après vos sources de revenus, dépenses saisies jusqu'ici.",
 "Your expenses from {0} to {1} (1 month).": "Vos dépenses du {0} au {1} (1 mois).",
-"Average per month of your expenses from {0} to {1} ({2} months).": "Moyenne par mois de vos dépenses du {0} au {1} ({2} mois)."
+"Average per month of your expenses from {0} to {1} ({2} months).": "Moyenne par mois de vos dépenses du {0} au {1} ({2} mois).",
+"Changed by you – click to change again": "Modifiée par vous – cliquez pour modifier à nouveau"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -421,6 +423,7 @@ export const EXTRA = {
 "Income and expenses by month": "Dochody i wydatki w miesiącach",
 "{0} is not finished: income as planned from your income sources, expenses entered so far.": "{0} jeszcze trwa: dochody zaplanowane ze źródeł dochodu, wydatki wpisane do tej pory.",
 "Your expenses from {0} to {1} (1 month).": "Twoje wydatki od {0} do {1} (1 miesiąc).",
-"Average per month of your expenses from {0} to {1} ({2} months).": "Średnio miesięcznie z Twoich wydatków od {0} do {1} ({2} mies.)."
+"Average per month of your expenses from {0} to {1} ({2} months).": "Średnio miesięcznie z Twoich wydatków od {0} do {1} ({2} mies.).",
+"Changed by you – click to change again": "Zmienione przez Ciebie – kliknij, aby zmienić ponownie"
 }
 };

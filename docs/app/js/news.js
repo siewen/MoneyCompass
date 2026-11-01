@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 23, date: "2026-11-01", items: {
+    en: ["🎨 Expenses: coloured buttons – blue 🔁 repeat (bright when on), amber ✎ edit (with a light background when you changed the expense), red 🗑 delete."],
+    pl: ["🎨 Wydatki: kolorowe przyciski – niebieskie 🔁 powtarzanie (jasne, gdy włączone), bursztynowa ✎ edycja (z jasnym tłem, gdy wydatek został zmieniony), czerwone 🗑 usuwanie."],
+    de: ["🎨 Ausgaben: farbige Schaltflächen – blau 🔁 Wiederholung (kräftig, wenn an), bernstein ✎ Bearbeiten (mit hellem Hintergrund, wenn Sie die Ausgabe geändert haben), rot 🗑 Löschen."],
+    fr: ["🎨 Dépenses : boutons en couleur – bleu 🔁 répétition (vif quand activé), ambre ✎ modifier (fond clair quand vous avez modifié la dépense), rouge 🗑 supprimer."] } },
   { build: 22, date: "2026-11-01", items: {
     en: ["📊 Clearer charts: \"Your expenses\" shows from which date to which date it counts, and the current month is marked as not finished (planned income, expenses so far)."],
     pl: ["📊 Czytelniejsze wykresy: „Twoje wydatki” pokazują, od której do której daty są liczone, a bieżący miesiąc jest oznaczony jako niezakończony (dochody zaplanowane, wydatki do tej pory)."],

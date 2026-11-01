@@ -5,7 +5,7 @@ import {
   addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, repeatingExpenses, setRepeat, seriesKey,
 } from "./core.js";
 import { hbars, donut, legend, monthBars, progress } from "./charts.js";
-import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast } from "./ui.js";
+import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON } from "./ui.js";
 import { App, requirePro } from "./app.js";
 import { Rates } from "./rates.js";
 
@@ -332,9 +332,9 @@ function expenseRow(e) {
     <div class="toggle" data-toggle="${e.Id}" title="${esc(T("Click to switch between essential and not essential"))}"><b>${esc(e.Description || T(e.Category))}</b>
       <span class="hint">${fmtDate(e.Date)} · ${esc((icon ? icon + " " : "") + T(e.Category))} · <span class="${e.Essential ? "ess" : "noness"}">${esc(e.Essential ? T("Essential") : T("Not essential"))}</span></span></div>
     <b>${pln(e.Amount)}</b>
-    <button class="icon-btn repeat${rep ? " on" : ""}" data-repeat="${e.Id}" title="${esc(rep ? T("Repeats {0} – click to stop", T(rep).toLowerCase()) : T("Click to repeat every month"))}">🔁</button>
-    <button class="icon-btn" data-edit="${e.Id}" title="${esc(T("Change"))}">✎</button>
-    <button class="icon-btn danger" data-del="${e.Id}" title="${esc(T("Delete"))}">🗑</button></div>`;
+    <button class="icon-btn c-repeat${rep ? " on" : ""}" data-repeat="${e.Id}" title="${esc(rep ? T("Repeats {0} – click to stop", T(rep).toLowerCase()) : T("Click to repeat every month"))}">${ICON.repeat}</button>
+    <button class="icon-btn c-edit${e.Edited ? " on" : ""}" data-edit="${e.Id}" title="${esc(e.Edited ? T("Changed by you – click to change again") : T("Change"))}">${ICON.edit}</button>
+    <button class="icon-btn c-del" data-del="${e.Id}" title="${esc(T("Delete"))}">${ICON.trash}</button></div>`;
 }
 /** The repeat of this expense's series ("Monthly"…), or "" when it does not repeat. */
 function repeatOn(e) {
@@ -378,7 +378,9 @@ function editExpense(e, after) {
     const v = values(p.el), amt = num(v.amount);
     if (!(amt > 0)) { toast(T("Please enter an amount bigger than 0."), "bad"); return; }
     const before = repeatOn(e);
+    const changed = isoDate(parseDate(v.date)) !== e.Date || amt !== e.Amount || v.category !== e.Category || v.description.trim() !== e.Description;
     Object.assign(e, { Date: isoDate(parseDate(v.date)), Amount: amt, Category: v.category, Description: v.description.trim(), Essential: v.essential });
+    if (changed) e.Edited = true;
     if (v.repeat !== before) { setRepeat(D(), e, ""); if (v.repeat) setRepeat(D(), e, v.repeat); }
     save(); p.close(); after();
   };
