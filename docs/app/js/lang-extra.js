@@ -282,7 +282,8 @@ export const EXTRA = {
 "estimated today": "geschätzt heute",
 "Next payment on (then every month)": "Nächste Rate am (dann jeden Monat)",
 "Paid from which account (optional)": "Von welchem Konto bezahlt (optional)",
-"The loan payment counts every month on this day – also when it is paid from a bank you don't import. If it shows up in a bank import, it is not counted twice.": "Die Rate zählt jeden Monat an diesem Tag – auch wenn sie von einer Bank bezahlt wird, die Sie nicht importieren. Taucht sie in einem Bankimport auf, wird sie nicht doppelt gezählt."
+"The loan payment counts every month on this day – also when it is paid from a bank you don't import. If it shows up in a bank import, it is not counted twice.": "Die Rate zählt jeden Monat an diesem Tag – auch wenn sie von einer Bank bezahlt wird, die Sie nicht importieren. Taucht sie in einem Bankimport auf, wird sie nicht doppelt gezählt.",
+"Click a month to see its payments.": "Klicken Sie auf einen Monat, um seine Zahlungen zu sehen."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -566,7 +567,8 @@ export const EXTRA = {
 "estimated today": "estimé aujourd'hui",
 "Next payment on (then every month)": "Prochaine mensualité le (puis chaque mois)",
 "Paid from which account (optional)": "Payé depuis quel compte (facultatif)",
-"The loan payment counts every month on this day – also when it is paid from a bank you don't import. If it shows up in a bank import, it is not counted twice.": "La mensualité compte chaque mois à ce jour – même si elle est payée depuis une banque que vous n'importez pas. Si elle apparaît dans un import bancaire, elle n'est pas comptée deux fois."
+"The loan payment counts every month on this day – also when it is paid from a bank you don't import. If it shows up in a bank import, it is not counted twice.": "La mensualité compte chaque mois à ce jour – même si elle est payée depuis une banque que vous n'importez pas. Si elle apparaît dans un import bancaire, elle n'est pas comptée deux fois.",
+"Click a month to see its payments.": "Cliquez sur un mois pour voir ses paiements."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -850,6 +852,7 @@ export const EXTRA = {
 "estimated today": "szacunkowo dziś",
 "Next payment on (then every month)": "Następna rata (potem co miesiąc)",
 "Paid from which account (optional)": "Z jakiego konta płacone (opcjonalnie)",
-"The loan payment counts every month on this day – also when it is paid from a bank you don't import. If it shows up in a bank import, it is not counted twice.": "Rata liczy się co miesiąc w tym dniu – także gdy płacisz ją z banku, którego nie importujesz. Jeśli pojawi się w imporcie z banku, nie zostanie policzona dwa razy."
+"The loan payment counts every month on this day – also when it is paid from a bank you don't import. If it shows up in a bank import, it is not counted twice.": "Rata liczy się co miesiąc w tym dniu – także gdy płacisz ją z banku, którego nie importujesz. Jeśli pojawi się w imporcie z banku, nie zostanie policzona dwa razy.",
+"Click a month to see its payments.": "Kliknij miesiąc, aby zobaczyć jego płatności."
 }
 };

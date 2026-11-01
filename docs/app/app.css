@@ -393,10 +393,11 @@ details.bin summary h3 { padding-right: 40px; }
 .advice-card .item.move { flex-wrap: wrap; }
 @media (max-width: 640px) { .advice-card .item.move .row-actions { width: 100%; justify-content: flex-end; } }
 .hint.warn { color: var(--warn); font-weight: 600; } .hint.bad { color: var(--bad); font-weight: 600; } .hint.primary { color: var(--primary); }
-details.cal-month.past > summary { cursor: pointer; list-style: none; }
-details.cal-month.past > summary::-webkit-details-marker { display: none; }
-details.cal-month.past > summary b::before { content: "▸ "; color: var(--muted); }
-details.cal-month.past[open] > summary b::before { content: "▾ "; }
+details.cal-month > summary { cursor: pointer; list-style: none; }
+details.cal-month > summary::-webkit-details-marker { display: none; }
+details.cal-month > summary .m-name::before { content: "▸ "; color: var(--muted); }
+details.cal-month[open] > summary .m-name::before { content: "▾ "; }
+details.cal-month > summary:hover .m-name b { text-decoration: underline; }
 .loan-progress { flex: 1 1 160px; min-width: 120px; display: flex; flex-direction: column; gap: 2px; }
 
 /* Overview: "Your savings" shows where it is going */
@@ -425,3 +426,4 @@ details.cal-month.past[open] > summary b::before { content: "▾ "; }
 .loan-main .alert { margin-top: 4px; }
 .loan-preview { font-weight: 600; margin: 4px 0; }
 .past-chips { margin: 0 0 6px; }
+.m-name .hint { display: inline; margin: 0; }
