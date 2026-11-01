@@ -4,107 +4,119 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MoneyCompass – your money, in the right direction</title>
-<meta name="description" content="MoneyCompass: personal finance for Windows. Income, expenses, emergency fund, savings advice and bank import – private, on your own computer.">
+<meta name="description" content="MoneyCompass: personal finance in your browser and on Windows. Inflows, outflows, savings, loans, emergency fund, bank import and a personal plan – private, on your own device.">
+<meta name="theme-color" content="#121615">
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <style>
+  /* Emerald – the same look as the MoneyCompass web app */
   :root {
-    --bg: #F4F6F9; --card: #FFFFFF; --ink: #0F172A; --muted: #475569; --line: #E2E8F0;
-    --teal: #0F766E; --teal2: #14B8A6; --green: #15803D; --gold: #F59E0B; --red: #B91C1C;
-    --soft: #E6F4F1;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #0B1220; --card: #111A2E; --ink: #E5E7EB; --muted: #9CA3AF; --line: #1F2A44; --soft: #0F2A2A; }
+    --bg: #121615; --card: #1F2826; --card2: #182120; --ink: #EEF3F1; --muted: #9AA9A4; --line: rgba(255,255,255,.08);
+    --hi: #4FC59B; --hi-dark: #0D2B21; --lav: #8B7CF6; --gold: #E9D16A; --coral: #F28B6B; --radius: 24px;
+    color-scheme: dark;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; }
-  a { color: var(--teal2); }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; color: var(--ink); line-height: 1.6;
+    background: radial-gradient(1100px 700px at 85% -10%, #1E4A3C 0%, transparent 60%), radial-gradient(900px 600px at -10% 40%, #1B3A31 0%, transparent 55%), var(--bg); background-attachment: fixed; }
+  a { color: var(--hi); }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 16px; }
 
   /* Top bar */
-  header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-  .top { display: flex; align-items: center; gap: 12px; height: 60px; }
+  header { position: sticky; top: 0; z-index: 10; background: rgba(18,22,21,.78); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .top { display: flex; align-items: center; gap: 12px; height: 64px; }
   .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; color: var(--ink); text-decoration: none; }
   .brand img { width: 34px; height: 34px; }
-  nav { margin-left: auto; display: flex; gap: 18px; align-items: center; }
-  nav a.link { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 15px; }
-  nav a.link:hover { color: var(--ink); }
-  select.lang { background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font: inherit; font-size: 14px; }
-  @media (max-width: 760px) { nav a.link { display: none; } }
+  nav { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  nav a.link { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 15px; padding: 7px 14px; border-radius: 999px; }
+  nav a.link:hover { color: var(--ink); background: rgba(255,255,255,.05); }
+  select.lang { background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; font: inherit; font-size: 14px; margin-left: 6px; }
+  @media (max-width: 820px) { nav a.link { display: none; } }
 
   /* Hero */
-  .hero { padding: 64px 0 40px; display: grid; grid-template-columns: 1.05fr 1fr; gap: 40px; align-items: center; }
-  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; padding-top: 36px; } }
-  h1 { font-size: clamp(32px, 5vw, 50px); line-height: 1.1; margin: 0 0 16px; letter-spacing: -0.5px; }
-  h1 em { font-style: normal; background: linear-gradient(90deg, var(--teal2), var(--green)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .lead { font-size: 19px; color: var(--muted); margin: 0 0 26px; }
+  .hero { padding: 70px 0 40px; display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: center; }
+  @media (max-width: 940px) { .hero { grid-template-columns: 1fr; padding-top: 36px; } }
+  .badge { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--hi); background: rgba(79,197,155,.1); border: 1px solid rgba(79,197,155,.3); border-radius: 999px; padding: 5px 12px; margin-bottom: 18px; }
+  h1 { font-size: clamp(36px, 5.4vw, 60px); line-height: 1.05; margin: 0 0 18px; letter-spacing: -1px; font-weight: 600; }
+  h1 em { font-style: normal; background: linear-gradient(90deg, var(--hi), #A7F3D0 45%, var(--lav)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { font-size: 19px; color: var(--muted); margin: 0 0 28px; max-width: 560px; }
   .cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; border-radius: 12px; font-weight: 700; font-size: 17px; text-decoration: none; border: 0; cursor: pointer; }
-  .btn.go { background: var(--green); color: #fff; box-shadow: 0 6px 18px rgba(21,128,61,.3); }
-  .btn.go:hover { background: #166534; }
-  .btn.second { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
-  .small { font-size: 14px; color: var(--muted); margin-top: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 24px; border-radius: 999px; font-weight: 700; font-size: 16px; text-decoration: none; border: 0; cursor: pointer; transition: transform .15s, filter .15s; }
+  .btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+  .btn.go { background: var(--hi); color: var(--hi-dark); box-shadow: 0 10px 30px rgba(79,197,155,.3); }
+  .btn.second { background: rgba(255,255,255,.06); color: var(--ink); border: 1px solid var(--line); }
+  .small { font-size: 14px; color: var(--muted); margin-top: 14px; }
 
-  /* App preview (drawn, with example numbers) */
-  .preview { background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 20px 50px rgba(15,23,42,.15); overflow: hidden; }
-  .pv-bar { display: flex; gap: 14px; padding: 12px 16px; border-bottom: 3px solid var(--teal2); font-size: 13px; font-weight: 700; flex-wrap: wrap; }
-  .pv-bar span:nth-child(1){color:#0F766E}.pv-bar span:nth-child(2){color:#2563EB}.pv-bar span:nth-child(3){color:#EA580C}.pv-bar span:nth-child(4){color:#CA8A04}.pv-bar span:nth-child(5){color:#16A34A}
-  .pv-body { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .tile { border: 1.5px solid; border-radius: 12px; padding: 10px 12px; }
-  .tile b { display: block; font-size: 20px; }
-  .tile small { font-size: 12px; }
-  .t1 { border-color: #2A78D6; color: #2A78D6; } .t2 { border-color: #EB6834; color: #EB6834; }
-  .t3 { border-color: #1BAF7A; color: #1BAF7A; } .t4 { border-color: #A855F7; color: #A855F7; }
-  .pv-go { grid-column: 1 / -1; background: var(--green); color: #fff; border-radius: 12px; text-align: center; padding: 12px; font-weight: 800; }
-  .pv-chart { grid-column: 1 / -1; display: flex; gap: 16px; align-items: center; padding: 6px 4px; }
-  .donut { width: 110px; height: 110px; border-radius: 50%; flex: none;
-    background: conic-gradient(#2a78d6 0 24%, #eb6834 24% 42%, #1baf7a 42% 58%, #eda100 58% 70%, #e87ba4 70% 80%, #a3a3a0 80% 100%);
-    -webkit-mask: radial-gradient(circle, transparent 52%, #000 53%); mask: radial-gradient(circle, transparent 52%, #000 53%); }
-  .legend { font-size: 13px; display: grid; gap: 3px; }
-  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
-  .note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; }
+  /* App preview: drawn like the Emerald app, with example numbers */
+  .mock { display: grid; grid-template-columns: 62px 1fr; background: rgba(22,28,27,.9); border: 1px solid var(--line); border-radius: 28px; box-shadow: 0 30px 80px rgba(0,0,0,.5); overflow: hidden; }
+  .mock-rail { background: #161C1B; border-right: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 0; }
+  .mock-rail img { width: 30px; height: 30px; margin-bottom: 8px; }
+  .mock-rail span { width: 34px; height: 34px; border-radius: 12px; display: grid; place-items: center; color: var(--muted); }
+  .mock-rail span.on { background: var(--hi); color: var(--hi-dark); border-radius: 999px; }
+  .mock-main { padding: 18px 18px 16px; display: grid; gap: 12px; min-width: 0; }
+  .mock-title { font-size: 26px; font-weight: 500; }
+  .mock-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  @media (max-width: 520px) { .mock-tiles { grid-template-columns: 1fr 1fr; } }
+  .mtile { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; position: relative; overflow: hidden; }
+  .mtile small { display: block; font-size: 11px; color: var(--muted); }
+  .mtile b { font-size: 17px; font-weight: 600; white-space: nowrap; }
+  .mtile::after { content: ""; position: absolute; right: 10px; bottom: 9px; width: 22px; height: 3px; border-radius: 3px; background: var(--c); }
+  .mock-go { background: var(--hi); color: var(--hi-dark); border-radius: 999px; text-align: center; padding: 10px; font-weight: 800; font-size: 15px; }
+  .mock-card { background: linear-gradient(160deg, rgba(255,255,255,.045), rgba(255,255,255,.015)), var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 12px 14px 6px; }
+  .mock-card h4 { margin: 0 0 6px; font-weight: 600; font-size: 14px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.05); border-radius: 999px; padding: 3px 9px; }
+  .chip i { width: 14px; height: 3px; border-radius: 3px; background: var(--c); }
+  .mock svg { width: 100%; height: auto; display: block; }
+  .note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; }
 
-  section { padding: 56px 0; }
-  h2 { font-size: clamp(26px, 3.4vw, 36px); margin: 0 0 10px; letter-spacing: -0.3px; }
-  .sub { color: var(--muted); font-size: 17px; margin: 0 0 30px; max-width: 760px; }
+  section { padding: 64px 0; }
+  h2 { font-size: clamp(28px, 3.6vw, 40px); margin: 0 0 12px; letter-spacing: -.5px; font-weight: 600; }
+  .sub { color: var(--muted); font-size: 17px; margin: 0 0 32px; max-width: 780px; }
 
   /* Features */
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
-  .card .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 22px; margin-bottom: 10px; }
-  .card h3 { margin: 0 0 6px; font-size: 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); gap: 16px; }
+  .card { background: linear-gradient(160deg, rgba(255,255,255,.045), rgba(255,255,255,.012)), var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; transition: transform .2s, border-color .2s; }
+  .card:hover { transform: translateY(-3px); border-color: rgba(79,197,155,.35); }
+  .card .ic { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 22px; margin-bottom: 12px; background: rgba(79,197,155,.12); }
+  .card.lav .ic { background: rgba(139,124,246,.15); } .card.gold .ic { background: rgba(233,209,106,.13); } .card.coral .ic { background: rgba(242,139,107,.14); }
+  .card h3 { margin: 0 0 6px; font-size: 18px; font-weight: 600; }
   .card p { margin: 0; color: var(--muted); font-size: 15px; }
-  .pro-tag { display: inline-block; font-size: 11px; font-weight: 800; color: #fff; background: var(--green); border-radius: 6px; padding: 1px 6px; vertical-align: middle; margin-left: 6px; }
+  .pro-tag { display: inline-block; font-size: 10.5px; font-weight: 800; color: var(--hi-dark); background: var(--hi); border-radius: 999px; padding: 1px 8px; vertical-align: middle; margin-left: 8px; letter-spacing: .03em; }
+  .new-tag { display: inline-block; font-size: 10.5px; font-weight: 800; color: #fff; background: var(--lav); border-radius: 999px; padding: 1px 8px; vertical-align: middle; margin-left: 6px; letter-spacing: .03em; }
 
   /* Pricing */
   .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   @media (max-width: 1000px) { .plans { grid-template-columns: 1fr 1fr; } .plan.pro { grid-column: 1 / -1; } }
-  .table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: 16px; }
-  table.cmp { width: 100%; border-collapse: collapse; min-width: 560px; }
-  .cmp th, .cmp td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 15px; }
-  .cmp th { font-size: 16px; } .cmp td:first-child { font-weight: 700; width: 24%; } .cmp tr:last-child td { border-bottom: 0; }
-  .cmp td:not(:first-child) { color: var(--muted); }
   @media (max-width: 680px) { .plans { grid-template-columns: 1fr; } }
-  .plan { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 26px; }
-  .plan.pro { border: 2px solid var(--green); box-shadow: 0 10px 30px rgba(21,128,61,.15); }
-  .plan h3 { margin: 0; font-size: 22px; }
-  .plan .both { margin: 6px 0 0; font-weight: 700; color: var(--green); font-size: 14px; }
-  .plan .yearly { margin: 0 0 6px; color: var(--green); font-size: 15px; }
+  .table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); }
+  table.cmp { width: 100%; border-collapse: collapse; min-width: 560px; }
+  .cmp th, .cmp td { text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 15px; }
+  .cmp th { font-size: 16px; font-weight: 600; } .cmp td:first-child { font-weight: 600; width: 24%; } .cmp tr:last-child td { border-bottom: 0; }
+  .cmp td:not(:first-child) { color: var(--muted); }
+  .plan { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
+  .plan.pro { border: 1.5px solid var(--hi); background: linear-gradient(160deg, rgba(79,197,155,.12), rgba(79,197,155,.02)), var(--card); box-shadow: 0 20px 50px rgba(79,197,155,.12); }
+  .plan h3 { margin: 0; font-size: 22px; font-weight: 600; }
+  .plan .both { margin: 6px 0 0; font-weight: 700; color: var(--hi); font-size: 14px; }
+  .plan .yearly { margin: 0 0 6px; color: var(--hi); font-size: 15px; }
   .plan .upgrade { margin: 0 0 14px; font-size: 14px; color: var(--muted); }
-  .price { font-size: 38px; font-weight: 800; margin: 8px 0 4px; }
+  .price { font-size: 40px; font-weight: 700; margin: 8px 0 4px; }
   .price small { font-size: 16px; color: var(--muted); font-weight: 600; }
   .plan ul { padding: 0; list-style: none; margin: 16px 0 22px; }
   .plan li { padding: 6px 0 6px 28px; position: relative; }
-  .plan li::before { content: "✓"; position: absolute; left: 0; color: var(--green); font-weight: 800; }
+  .plan li::before { content: "✓"; position: absolute; left: 0; color: var(--hi); font-weight: 800; }
 
   /* Privacy band */
-  .band { background: linear-gradient(135deg, #0F766E, #14532D); color: #fff; border-radius: 22px; padding: 36px; display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; }
-  .band .big { font-size: 54px; }
-  .band p { margin: 6px 0 0; opacity: .9; }
-  @media (max-width: 640px) { .band { grid-template-columns: 1fr; } }
+  .band { background: radial-gradient(600px 300px at 90% 0%, rgba(139,124,246,.25), transparent 60%), linear-gradient(135deg, #1E4A3C, #14302A); border: 1px solid rgba(79,197,155,.25); border-radius: 30px; padding: 40px; display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; }
+  .band .big { font-size: 56px; }
+  .band p { margin: 8px 0 0; color: #CFE3DB; }
+  .band ul { margin: 14px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px 20px; color: #E3F1EB; }
+  .band li::before { content: "✓ "; color: var(--hi); font-weight: 800; }
+  @media (max-width: 640px) { .band { grid-template-columns: 1fr; padding: 28px; } }
 
   /* FAQ */
-  details { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 20px; margin-bottom: 10px; }
-  summary { font-weight: 700; cursor: pointer; font-size: 17px; }
+  details { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 22px; margin-bottom: 10px; }
+  details[open] { border-color: rgba(79,197,155,.3); }
+  summary { font-weight: 600; cursor: pointer; font-size: 17px; }
   details p { color: var(--muted); margin: 10px 0 0; }
 
   footer { border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--muted); font-size: 14px; }
@@ -118,6 +130,7 @@
     <a class="brand" href="#"><img src="logo.svg" alt=""> MoneyCompass</a>
     <nav>
       <a class="link" href="#features" data-t="nav_features">Funkcje</a>
+      <a class="link" href="#security" data-t="nav_security">Bezpieczeństwo</a>
       <a class="link" href="#compare" data-t="nav_compare">Web / Windows</a>
       <a class="link" href="#pricing" data-t="nav_pricing">Cennik</a>
       <a class="link" href="#faq" data-t="nav_faq">Pytania</a>
@@ -134,35 +147,33 @@
 <main>
   <div class="wrap hero">
     <div>
+      <div class="badge">✨ <span data-t="hero_badge"></span></div>
       <h1 data-t="hero_title" data-html>Twoje pieniądze, <em>we właściwym kierunku</em>.</h1>
-      <p class="lead" data-t="hero_lead">Dochody, wydatki, poduszka finansowa i porady, jak lepiej oszczędzać – wszystko w jednej aplikacji na Windows. Twoje dane zostają na Twoim komputerze.</p>
+      <p class="lead" data-t="hero_lead2"></p>
       <div class="cta">
-        <a class="btn go" id="download" href="https://github.com/siewen/MoneyCompass/releases/latest">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg>
-          <span data-t="download">Pobierz za darmo</span>
+        <a class="btn go" href="app/"><span data-t="open_web2"></span> →</a>
+        <a class="btn second" id="download" href="https://github.com/siewen/MoneyCompass/releases/latest">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg>
+          <span data-t="download_win"></span>
         </a>
-        <a class="btn second" href="app/" data-t="open_web">Otwórz w przeglądarce</a>
       </div>
-      <p class="small"><span id="version"></span><span data-t="requirements">Windows 10 i 11 · polski, angielski, niemiecki, francuski</span><br><span data-t="web_note">Wersja w przeglądarce: bez instalacji, dane zostają w Twojej przeglądarce.</span></p>
+      <p class="small"><span data-t="web_note2"></span><br><span id="version"></span><span data-t="requirements"></span></p>
     </div>
     <div>
-      <div class="preview" aria-hidden="true">
-        <div class="pv-bar"><span data-t="tab_overview">Przegląd</span><span data-t="tab_income">Dochody</span><span data-t="tab_expenses">Wydatki</span><span data-t="tab_emergency">Poduszka</span><span data-t="tab_savings">Oszczędności</span></div>
-        <div class="pv-body">
-          <div class="tile t1"><small data-t="pv_income">Dochód miesięcznie</small><b>8 200 zł</b></div>
-          <div class="tile t2"><small data-t="pv_spending">Wydatki miesięcznie</small><b>5 640 zł</b></div>
-          <div class="tile t3"><small data-t="pv_left">Zostaje miesięcznie</small><b>2 560 zł</b></div>
-          <div class="tile t4"><small data-t="pv_rate">Stopa oszczędności</small><b>31%</b></div>
-          <div class="pv-go" data-t="pv_optimize">⚡ Optymalizuj finanse</div>
-          <div class="pv-chart">
-            <div class="donut"></div>
-            <div class="legend">
-              <div><i style="background:#2a78d6"></i><span data-t="c_food">Jedzenie</span></div>
-              <div><i style="background:#eb6834"></i><span data-t="c_home">Mieszkanie</span></div>
-              <div><i style="background:#1baf7a"></i><span data-t="c_transport">Transport</span></div>
-              <div><i style="background:#eda100"></i><span data-t="c_subs">Subskrypcje</span></div>
-              <div><i style="background:#e87ba4"></i><span data-t="c_shopping">Zakupy</span></div>
-            </div>
+      <div class="mock" aria-hidden="true">
+        <aside class="mock-rail"><img src="logo.svg" alt=""><span class="on"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M6 10l6 6 6-6"/><path d="M4 20h16"/></svg></span><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8M6 14l6-6 6 6"/><path d="M4 4h16"/></svg></span><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></span><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13a3 3 0 0 1 3 3v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 8l11-4 2 4"/></svg></span><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg></span><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span></aside>
+        <div class="mock-main">
+          <div class="mock-title" data-t="tab_overview">Przegląd</div>
+          <div class="mock-tiles">
+            <div class="mtile" style="--c:#60A5FA"><small data-t="pv_in"></small><b>8 200 zł</b></div>
+            <div class="mtile" style="--c:#F28B6B"><small data-t="pv_out"></small><b>5 640 zł</b></div>
+            <div class="mtile" style="--c:#4FC59B"><small data-t="pv_bal"></small><b>2 560 zł</b></div>
+            <div class="mtile" style="--c:#8B7CF6"><small data-t="pv_rate"></small><b>31%</b></div>
+          </div>
+          <div class="mock-go" data-t="pv_optimize">⚡ Optymalizuj finanse</div>
+          <div class="mock-card">
+            <div class="chips"><span class="chip" style="--c:#4FC59B"><i></i><span data-t="pv_in_s"></span></span><span class="chip" style="--c:#8B7CF6"><i></i><span data-t="pv_out_s"></span></span><span class="chip" style="--c:#E9D16A"><i></i><span data-t="pv_saved"></span></span><span class="chip" style="--c:#F28B6B"><i></i><span data-t="pv_loans"></span></span></div>
+            <svg viewBox="0 0 400 150" aria-hidden="true"><defs><linearGradient id="g0" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4FC59B" stop-opacity=".3"/><stop offset="1" stop-color="#4FC59B" stop-opacity="0"/></linearGradient><linearGradient id="g1" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#8B7CF6" stop-opacity=".3"/><stop offset="1" stop-color="#8B7CF6" stop-opacity="0"/></linearGradient><linearGradient id="g2" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#E9D16A" stop-opacity=".3"/><stop offset="1" stop-color="#E9D16A" stop-opacity="0"/></linearGradient><linearGradient id="g3" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#F28B6B" stop-opacity=".3"/><stop offset="1" stop-color="#F28B6B" stop-opacity="0"/></linearGradient></defs><line x1="8" x2="392" y1="132.0" y2="132.0" stroke="rgba(255,255,255,.07)" stroke-dasharray="3 4"/><line x1="8" x2="392" y1="101.5" y2="101.5" stroke="rgba(255,255,255,.07)" stroke-dasharray="3 4"/><line x1="8" x2="392" y1="71.0" y2="71.0" stroke="rgba(255,255,255,.07)" stroke-dasharray="3 4"/><line x1="8" x2="392" y1="40.5" y2="40.5" stroke="rgba(255,255,255,.07)" stroke-dasharray="3 4"/><line x1="8" x2="392" y1="10.0" y2="10.0" stroke="rgba(255,255,255,.07)" stroke-dasharray="3 4"/><path d="M8.0,32.0 C17.1,32.0 44.6,32.4 62.9,32.0 C81.1,31.6 99.4,29.5 117.7,29.5 C136.0,29.5 154.3,33.0 172.6,32.0 C190.9,30.9 209.1,23.4 227.4,23.4 C245.7,23.4 264.0,33.4 282.3,32.0 C300.6,30.5 318.9,14.9 337.1,14.9 C355.4,14.9 382.9,29.1 392.0,32.0 L392.0,132 L8.0,132 Z" fill="url(#g0)"/><path d="M8.0,32.0 C17.1,32.0 44.6,32.4 62.9,32.0 C81.1,31.6 99.4,29.5 117.7,29.5 C136.0,29.5 154.3,33.0 172.6,32.0 C190.9,30.9 209.1,23.4 227.4,23.4 C245.7,23.4 264.0,33.4 282.3,32.0 C300.6,30.5 318.9,14.9 337.1,14.9 C355.4,14.9 382.9,29.1 392.0,32.0" fill="none" stroke="#4FC59B" stroke-width="2.4" stroke-linecap="round"/><path d="M8.0,60.0 C17.1,59.2 44.6,54.5 62.9,55.1 C81.1,55.8 99.4,64.7 117.7,63.7 C136.0,62.7 154.3,49.2 172.6,49.0 C190.9,48.8 209.1,61.0 227.4,62.5 C245.7,63.9 264.0,58.0 282.3,57.6 C300.6,57.2 318.9,59.1 337.1,60.0 C355.4,61.0 382.9,62.7 392.0,63.2 L392.0,132 L8.0,132 Z" fill="url(#g1)"/><path d="M8.0,60.0 C17.1,59.2 44.6,54.5 62.9,55.1 C81.1,55.8 99.4,64.7 117.7,63.7 C136.0,62.7 154.3,49.2 172.6,49.0 C190.9,48.8 209.1,61.0 227.4,62.5 C245.7,63.9 264.0,58.0 282.3,57.6 C300.6,57.2 318.9,59.1 337.1,60.0 C355.4,61.0 382.9,62.7 392.0,63.2" fill="none" stroke="#8B7CF6" stroke-width="2.4" stroke-linecap="round"/><path d="M8.0,103.9 C17.1,104.8 44.6,109.8 62.9,108.8 C81.1,107.8 99.4,96.8 117.7,97.8 C136.0,98.9 154.3,115.7 172.6,114.9 C190.9,114.1 209.1,94.4 227.4,93.0 C245.7,91.5 264.0,107.4 282.3,106.4 C300.6,105.4 318.9,87.8 337.1,86.9 C355.4,85.9 382.9,98.5 392.0,100.8 L392.0,132 L8.0,132 Z" fill="url(#g2)"/><path d="M8.0,103.9 C17.1,104.8 44.6,109.8 62.9,108.8 C81.1,107.8 99.4,96.8 117.7,97.8 C136.0,98.9 154.3,115.7 172.6,114.9 C190.9,114.1 209.1,94.4 227.4,93.0 C245.7,91.5 264.0,107.4 282.3,106.4 C300.6,105.4 318.9,87.8 337.1,86.9 C355.4,85.9 382.9,98.5 392.0,100.8" fill="none" stroke="#E9D16A" stroke-width="2.4" stroke-linecap="round"/><path d="M8.0,117.4 C17.1,117.4 44.6,117.4 62.9,117.4 C81.1,117.4 99.4,117.4 117.7,117.4 C136.0,117.4 154.3,117.4 172.6,117.4 C190.9,117.4 209.1,117.4 227.4,117.4 C245.7,117.4 264.0,117.4 282.3,117.4 C300.6,117.4 318.9,117.4 337.1,117.4 C355.4,117.4 382.9,117.4 392.0,117.4 L392.0,132 L8.0,132 Z" fill="url(#g3)"/><path d="M8.0,117.4 C17.1,117.4 44.6,117.4 62.9,117.4 C81.1,117.4 99.4,117.4 117.7,117.4 C136.0,117.4 154.3,117.4 172.6,117.4 C190.9,117.4 209.1,117.4 227.4,117.4 C245.7,117.4 264.0,117.4 282.3,117.4 C300.6,117.4 318.9,117.4 337.1,117.4 C355.4,117.4 382.9,117.4 392.0,117.4" fill="none" stroke="#F28B6B" stroke-width="2.4" stroke-linecap="round"/><text x="8.0" y="146" text-anchor="middle" font-size="9" fill="#9AA9A4">Apr</text><text x="62.9" y="146" text-anchor="middle" font-size="9" fill="#9AA9A4">May</text><text x="117.7" y="146" text-anchor="middle" font-size="9" fill="#9AA9A4">Jun</text><text x="172.6" y="146" text-anchor="middle" font-size="9" fill="#9AA9A4">Jul</text><text x="227.4" y="146" text-anchor="middle" font-size="9" fill="#9AA9A4">Aug</text><text x="282.3" y="146" text-anchor="middle" font-size="9" fill="#9AA9A4">Sep</text><text x="337.1" y="146" text-anchor="middle" font-size="9" fill="#9AA9A4">Oct</text><text x="392.0" y="146" text-anchor="middle" font-size="9" fill="#9AA9A4">Nov</text></svg>
           </div>
         </div>
       </div>
@@ -172,28 +183,33 @@
 
   <section id="features">
     <div class="wrap">
-      <h2 data-t="f_title">Wszystko, czego potrzebujesz – bez arkuszy</h2>
-      <p class="sub" data-t="f_sub">MoneyCompass pokazuje, ile zarabiasz, ile wydajesz i co zrobić z resztą. Stworzony dla Polski: stopy NBP, obligacje skarbowe, IKE/IKZE i aktualne oferty banków.</p>
+      <h2 data-t="f_title"></h2>
+      <p class="sub" data-t="f_sub"></p>
       <div class="grid">
-        <div class="card"><div class="ic" style="background:#DBEAFE">💰</div><h3 data-t="f1_t">Dochody i wydatki</h3><p data-t="f1_p">Pensja, dodatkowe wpływy i wszystkie wydatki w kategoriach – ze średnimi miesięcznymi i wykresami.</p></div>
-        <div class="card"><div class="ic" style="background:#DCFCE7">🛟</div><h3 data-t="f2_t">Poduszka finansowa</h3><p data-t="f2_p">Ile potrzebujesz na 3–6 miesięcy i jak szybko tam dojdziesz.</p></div>
-        <div class="card"><div class="ic" style="background:#FEF3C7">⚡</div><h3><span data-t="f3_t">Optymalizuj finanse</span><span class="pro-tag">PRO</span></h3><p data-t="f3_p">Osobisty plan krok po kroku, najlepsze konta oszczędnościowe i lokaty dnia, obligacje i IKE/IKZE.</p></div>
-        <div class="card"><div class="ic" style="background:#E0E7FF">🏦</div><h3><span data-t="f4_t">Import z banku</span><span class="pro-tag">PRO</span></h3><p data-t="f4_p">Plik CSV z PKO BP, mBanku, ING, Millennium, Pekao, Santandera i innych – wydatki same trafiają do kategorii.</p></div>
-        <div class="card"><div class="ic" style="background:#FCE7F3">👥</div><h3 data-t="f5_t">Profile</h3><p data-t="f5_p">Osobne dane dla każdej osoby lub gospodarstwa – przełączanie jednym kliknięciem.</p></div>
-        <div class="card"><div class="ic" style="background:#F3E8FF">🎯</div><h3><span data-t="f6_t">Cele, kredyty, budżet</span><span class="pro-tag">PRO</span></h3><p data-t="f6_p">Cele oszczędnościowe, kredyty z ratami i datą spłaty, miesięczne limity na kategorie.</p></div>
-        <div class="card"><div class="ic" style="background:#DCFCE7">📊</div><h3 data-t="f7_t">Raporty</h3><p data-t="f7_p">Eksport do Excela, PDF i Worda – z wykresami.</p></div>
-        <div class="card"><div class="ic" style="background:#E6F4F1">🔄</div><h3 data-t="f8_t">Aktualizacje jednym kliknięciem</h3><p data-t="f8_p">MoneyCompass sam informuje o nowej wersji i instaluje ją w tle.</p></div>
+        <div class="card"><div class="ic">💸</div><h3><span data-t="n1_t"></span></h3><p data-t="n1_p"></p></div>
+        <div class="card"><div class="ic">🛟</div><h3><span data-t="n2_t"></span></h3><p data-t="n2_p"></p></div>
+        <div class="card"><div class="ic">⚡</div><h3><span data-t="n3_t"></span><span class="pro-tag">PRO</span></h3><p data-t="n3_p"></p></div>
+        <div class="card lav"><div class="ic">🏦</div><h3><span data-t="n4_t"></span><span class="pro-tag">PRO</span></h3><p data-t="n4_p"></p></div>
+        <div class="card lav"><div class="ic">🏷</div><h3><span data-t="n5_t"></span><span class="pro-tag">PRO</span><span class="new-tag" data-t="new">NEW</span></h3><p data-t="n5_p"></p></div>
+        <div class="card gold"><div class="ic">〰️</div><h3><span data-t="n6_t"></span><span class="new-tag" data-t="new">NEW</span></h3><p data-t="n6_p"></p></div>
+        <div class="card gold"><div class="ic">📅</div><h3><span data-t="n7_t"></span><span class="pro-tag">PRO</span></h3><p data-t="n7_p"></p></div>
+        <div class="card coral"><div class="ic">💳</div><h3><span data-t="n8_t"></span><span class="pro-tag">PRO</span><span class="new-tag" data-t="new">NEW</span></h3><p data-t="n8_p"></p></div>
+        <div class="card"><div class="ic">🎯</div><h3><span data-t="n9_t"></span><span class="pro-tag">PRO</span></h3><p data-t="n9_p"></p></div>
+        <div class="card lav"><div class="ic">🔒</div><h3><span data-t="n10_t"></span><span class="new-tag" data-t="new">NEW</span></h3><p data-t="n10_p"></p></div>
+        <div class="card gold"><div class="ic">🎨</div><h3><span data-t="n11_t"></span><span class="new-tag" data-t="new">NEW</span></h3><p data-t="n11_p"></p></div>
+        <div class="card coral"><div class="ic">📲</div><h3><span data-t="n12_t"></span></h3><p data-t="n12_p"></p></div>
       </div>
     </div>
   </section>
 
-  <section>
+  <section id="security">
     <div class="wrap">
       <div class="band">
         <div class="big">🔒</div>
         <div>
-          <h2 style="margin:0" data-t="p_title">Twoje dane zostają u Ciebie</h2>
-          <p data-t="p_text">Bez konta, bez logowania, bez chmury. MoneyCompass zapisuje wszystko tylko na Twoim komputerze. Z internetu pobiera jedynie publiczne dane: kursy walut i stopy NBP, oprocentowanie obligacji i oferty banków.</p>
+          <h2 style="margin:0" data-t="p_title"></h2>
+          <p data-t="p_text2"></p>
+          <ul><li data-t="s1"></li><li data-t="s2"></li><li data-t="s3"></li><li data-t="s4"></li><li data-t="s5"></li><li data-t="s6"></li></ul>
         </div>
       </div>
     </div>
@@ -297,6 +313,8 @@
       <details><summary data-t="q11"></summary><p data-t="a11"></p></details>
       <details><summary data-t="q12"></summary><p data-t="a12"></p></details>
       <details><summary data-t="q13"></summary><p data-t="a13"></p></details>
+      <details><summary data-t="q14"></summary><p data-t="a14"></p></details>
+      <details><summary data-t="q15"></summary><p data-t="a15"></p></details>
     </div>
   </section>
 </main>
@@ -469,6 +487,123 @@ const T = {
     yearly_line: "ou 79 zł / an – 34 % d'économie", up_line: "Envie de plus ? Pro à 9,99 zł / mois ou 79 zł / an – une licence pour les deux versions", buy_note: "Mensuel : valable 1 mois à partir du paiement. Annuel : valable 1 an à partir du paiement. Vous recevez votre clé de licence par e-mail – saisissez-la dans votre profil (en haut à droite), dans l'application Windows ou dans le navigateur.", q8: "Combien de temps Pro est-il valable ? Y a-t-il un abonnement annuel ?", a8: "Pro mensuel (9,99 zł) est valable 1 mois à partir du jour du paiement, Pro annuel (79 zł) 1 an – environ 4 mois offerts par rapport au mensuel. Ensuite, MoneyCompass repasse en version gratuite – toutes vos données restent. Achetez un nouveau mois ou une nouvelle année pour continuer avec Pro.",
   }
 };
+
+// Newer texts (Emerald website, web app features from November 2026): they replace or add to the ones above
+const T2 = {
+  en: {
+    new: "NEW", nav_security: "Security", hero_badge: "New: Emerald design, PIN lock and encrypted backups",
+    hero_lead2: "Inflows, outflows, savings, loans and your emergency fund – with clear charts and a personal plan to get more from your money. In your browser or on Windows; your data stays with you.",
+    open_web2: "Open MoneyCompass", download_win: "Windows app", web_note2: "Free in the browser – nothing to install, and you can install it like an app on phone, tablet or computer.",
+    tab_overview: "Overview", pv_in: "Inflows / month", pv_out: "Outflows / month", pv_bal: "Balance / month", pv_rate: "Savings rate",
+    pv_trends: "Trends month by month", pv_in_s: "Inflows", pv_out_s: "Outflows", pv_saved: "Saved", pv_loans: "Loan payments",
+    f_title: "Everything you need – without spreadsheets",
+    f_sub: "MoneyCompass shows what comes in, what goes out and what to do with the rest. Made for Poland: NBP rates, treasury bonds, IKE/IKZE and today's bank and loan offers – checked every day.",
+    n1_t: "Inflows & outflows", n1_p: "Salary, extra income and every expense in categories – with averages over your real period, filters, search and repeats.",
+    n2_t: "Emergency fund", n2_p: "How much you need for 3–6 months, how far you are, and a clear red warning when it's missing.",
+    n3_t: "Optimize my finances", n3_p: "Your personal plan: where your savings earn most, which loan to pay off first and whether overpaying beats saving.",
+    n4_t: "Bank import (CSV)", n4_p: "PKO BP, mBank, ING, Millennium, Pekao, Santander and others – with account numbers, From → To and bank fees.",
+    n5_t: "Smart categories", n5_p: "Change one payment and all the same ones follow – new imports from that shop get the category automatically.",
+    n6_t: "Trend waves", n6_p: "Smooth lines for inflows, outflows, what you saved and loan payments – month by month, from your very first entry.",
+    n7_t: "Payment calendar", n7_p: "Everything that comes back – salary, rent, subscriptions, loan instalments – in a calendar and a forecast for the coming months.",
+    n8_t: "Loans vs. the market", n8_p: "Your rate compared with today's best mortgage and cash-loan offers: new payment, what you'd save after switching costs, link to the ranking.",
+    n9_t: "Savings & goals", n9_p: "All your money in one place, safe vs. risky, promotion reminders – and your savings goals right inside the Savings tab.",
+    n10_t: "PIN & automatic lock", n10_p: "A PIN for each profile and a lock after a few minutes without use. Backups can be encrypted with a password (AES-256).",
+    n11_t: "Your design", n11_p: "Emerald, Navy or Classic light and dark – with a side menu that folds away and opens when you point at it.",
+    n12_t: "Install as an app", n12_p: "On phone, tablet, Mac or PC: its own icon, full screen, also without internet. Or use the Windows app.",
+    p_title: "Your data stays with you",
+    p_text2: "No account, no sign-in, no cloud. MoneyCompass keeps everything on your own device. From the internet it only downloads public numbers: NBP rates, bond rates and bank offers.",
+    s1: "No account and no server – nothing is uploaded", s2: "PIN for each profile, never saved as such", s3: "Automatic lock after the minutes you choose",
+    s4: "Backup files encrypted with your password (AES-256)", s5: "Works offline once installed", s6: "Polish law, clear Terms of use",
+    pr7: "Unlimited reports and several profiles everywhere", pr8: "Payment calendar and loan comparison with today's offers",
+    q14: "How do the PIN and the encrypted backup work?", a14: "In your profile (top right) you can set a 4–8 digit PIN; it is asked when MoneyCompass opens, after the automatic lock (Options) and when you switch profile. Only a secure hash of it is kept. In Options → Backup & restore you can protect profile files with a password: saved files are then encrypted with AES-256 and can only be opened with that password, in the browser version. A forgotten PIN or password can't be recovered – keep it somewhere safe.",
+    q15: "Can I change the look?", a15: "Yes – the Design switch at the top right: Emerald (the look of this page), Navy, or Classic light or dark. With Emerald and Navy the menu sits on the left and folds away until you point at it.",
+  },
+  pl: {
+    new: "NOWOŚĆ", nav_security: "Bezpieczeństwo", hero_badge: "Nowość: wygląd Emerald, blokada PIN i szyfrowane kopie",
+    hero_lead2: "Wpływy, wydatki, oszczędności, kredyty i poduszka finansowa – z czytelnymi wykresami i osobistym planem, jak lepiej wykorzystać pieniądze. W przeglądarce lub na Windows; Twoje dane zostają u Ciebie.",
+    open_web2: "Otwórz MoneyCompass", download_win: "Aplikacja na Windows", web_note2: "Za darmo w przeglądarce – bez instalacji, a na telefonie, tablecie i komputerze możesz zainstalować ją jak aplikację.",
+    tab_overview: "Przegląd", pv_in: "Wpływy / mies.", pv_out: "Wydatki / mies.", pv_bal: "Bilans / mies.", pv_rate: "Stopa oszczędności",
+    pv_trends: "Trendy miesiąc po miesiącu", pv_in_s: "Wpływy", pv_out_s: "Wydatki", pv_saved: "Zaoszczędzone", pv_loans: "Raty kredytów",
+    f_title: "Wszystko, czego potrzebujesz – bez arkuszy",
+    f_sub: "MoneyCompass pokazuje, co wpływa, co wypływa i co zrobić z resztą. Stworzony dla Polski: stopy NBP, obligacje skarbowe, IKE/IKZE oraz aktualne oferty banków i kredytów – sprawdzane codziennie.",
+    n1_t: "Wpływy i wydatki", n1_p: "Pensja, dodatkowe wpływy i każdy wydatek w kategoriach – ze średnimi z rzeczywistego okresu, filtrami, wyszukiwaniem i powtórzeniami.",
+    n2_t: "Poduszka finansowa", n2_p: "Ile potrzebujesz na 3–6 miesięcy, ile już masz – i wyraźne czerwone ostrzeżenie, gdy jej brakuje.",
+    n3_t: "Optymalizuj finanse", n3_p: "Twój osobisty plan: gdzie oszczędności zarobią najwięcej, który kredyt spłacić najpierw i czy nadpłata opłaca się bardziej niż oszczędzanie.",
+    n4_t: "Import z banku (CSV)", n4_p: "PKO BP, mBank, ING, Millennium, Pekao, Santander i inne – z numerami kont, Od → Do i opłatami bankowymi.",
+    n5_t: "Inteligentne kategorie", n5_p: "Zmień jedną płatność, a wszystkie takie same pójdą za nią – nowe importy z tego sklepu dostaną kategorię automatycznie.",
+    n6_t: "Fale trendów", n6_p: "Płynne linie wpływów, wydatków, oszczędności i rat – miesiąc po miesiącu, od pierwszego wpisu.",
+    n7_t: "Kalendarz płatności", n7_p: "Wszystko, co się powtarza – pensja, czynsz, subskrypcje, raty – w kalendarzu i prognozie na kolejne miesiące.",
+    n8_t: "Kredyty kontra rynek", n8_p: "Twoje oprocentowanie porównane z najlepszymi dziś ofertami hipotecznymi i gotówkowymi: nowa rata, oszczędność po kosztach zmiany, link do rankingu.",
+    n9_t: "Oszczędności i cele", n9_p: "Wszystkie pieniądze w jednym miejscu, bezpieczne i ryzykowne, przypomnienia o promocjach – i cele oszczędnościowe w zakładce Oszczędności.",
+    n10_t: "PIN i automatyczna blokada", n10_p: "PIN dla każdego profilu i blokada po kilku minutach bez używania. Kopie zapasowe można zaszyfrować hasłem (AES-256).",
+    n11_t: "Twój wygląd", n11_p: "Emerald, Navy lub klasyczny jasny i ciemny – z menu bocznym, które się chowa i otwiera po najechaniu myszką.",
+    n12_t: "Instalacja jak aplikacja", n12_p: "Na telefonie, tablecie, Macu lub PC: własna ikona, pełny ekran, także bez internetu. Albo aplikacja na Windows.",
+    p_title: "Twoje dane zostają u Ciebie",
+    p_text2: "Bez konta, bez logowania, bez chmury. MoneyCompass trzyma wszystko na Twoim urządzeniu. Z internetu pobiera tylko publiczne dane: stopy NBP, oprocentowanie obligacji i oferty banków.",
+    s1: "Bez konta i bez serwera – nic nie jest wysyłane", s2: "PIN dla każdego profilu, nigdy nie zapisywany wprost", s3: "Automatyczna blokada po wybranym czasie",
+    s4: "Kopie zapasowe szyfrowane Twoim hasłem (AES-256)", s5: "Po instalacji działa bez internetu", s6: "Polskie prawo, jasny regulamin",
+    pr7: "Nieograniczone raporty i kilka profili wszędzie", pr8: "Kalendarz płatności i porównanie kredytów z dzisiejszymi ofertami",
+    q14: "Jak działają PIN i szyfrowana kopia zapasowa?", a14: "W swoim profilu (prawy górny róg) możesz ustawić PIN z 4–8 cyfr; jest wymagany przy otwieraniu MoneyCompass, po automatycznej blokadzie (Opcje) i przy zmianie profilu. Zapisywany jest tylko jego bezpieczny skrót (hash). W Opcje → Kopia zapasowa możesz chronić pliki profilu hasłem: zapisane pliki są wtedy szyfrowane AES-256 i można je otworzyć tylko z tym hasłem, w wersji w przeglądarce. Zapomnianego PIN-u ani hasła nie da się odzyskać – zapisz je w bezpiecznym miejscu.",
+    q15: "Czy mogę zmienić wygląd?", a15: "Tak – przełącznik Wygląd w prawym górnym rogu: Emerald (wygląd tej strony), Navy albo klasyczny jasny lub ciemny. W Emerald i Navy menu jest po lewej i chowa się, dopóki nie najedziesz na nie myszką.",
+  },
+  de: {
+    new: "NEU", nav_security: "Sicherheit", hero_badge: "Neu: Emerald-Design, PIN-Sperre und verschlüsselte Sicherungen",
+    hero_lead2: "Eingänge, Ausgänge, Ersparnisse, Kredite und Notgroschen – mit klaren Diagrammen und einem persönlichen Plan für mehr aus Ihrem Geld. Im Browser oder unter Windows; Ihre Daten bleiben bei Ihnen.",
+    open_web2: "MoneyCompass öffnen", download_win: "Windows-App", web_note2: "Kostenlos im Browser – nichts zu installieren, und auf Handy, Tablet oder Computer lässt es sich wie eine App installieren.",
+    tab_overview: "Überblick", pv_in: "Eingänge / Monat", pv_out: "Ausgänge / Monat", pv_bal: "Saldo / Monat", pv_rate: "Sparquote",
+    pv_trends: "Trends Monat für Monat", pv_in_s: "Eingänge", pv_out_s: "Ausgänge", pv_saved: "Gespart", pv_loans: "Kreditraten",
+    f_title: "Alles, was Sie brauchen – ohne Tabellen",
+    f_sub: "MoneyCompass zeigt, was hereinkommt, was hinausgeht und was Sie mit dem Rest tun können. Gemacht für Polen: NBP-Zinsen, Staatsanleihen, IKE/IKZE und aktuelle Bank- und Kreditangebote – täglich geprüft.",
+    n1_t: "Eingänge & Ausgänge", n1_p: "Gehalt, Zusatzeinkommen und jede Ausgabe in Kategorien – mit Durchschnitt über Ihren echten Zeitraum, Filtern, Suche und Wiederholungen.",
+    n2_t: "Notgroschen", n2_p: "Wie viel Sie für 3–6 Monate brauchen, wie weit Sie sind – und eine klare rote Warnung, wenn er fehlt.",
+    n3_t: "Finanzen optimieren", n3_p: "Ihr persönlicher Plan: wo Ihr Erspartes am meisten bringt, welchen Kredit Sie zuerst tilgen und ob Sondertilgung mehr bringt als Sparen.",
+    n4_t: "Bankimport (CSV)", n4_p: "PKO BP, mBank, ING, Millennium, Pekao, Santander und andere – mit Kontonummern, Von → An und Bankgebühren.",
+    n5_t: "Kluge Kategorien", n5_p: "Ändern Sie eine Zahlung, und alle gleichen folgen – neue Importe von diesem Geschäft bekommen die Kategorie automatisch.",
+    n6_t: "Trend-Wellen", n6_p: "Weiche Linien für Eingänge, Ausgänge, Gespartes und Kreditraten – Monat für Monat, ab Ihrem ersten Eintrag.",
+    n7_t: "Zahlungskalender", n7_p: "Alles, was wiederkommt – Gehalt, Miete, Abos, Kreditraten – im Kalender und als Prognose für die nächsten Monate.",
+    n8_t: "Kredite vs. Markt", n8_p: "Ihr Zinssatz im Vergleich mit den besten Hypotheken- und Barkreditangeboten von heute: neue Rate, Ersparnis nach Wechselkosten, Link zum Ranking.",
+    n9_t: "Ersparnisse & Ziele", n9_p: "Ihr ganzes Geld an einem Ort, sicher vs. riskant, Erinnerungen an Aktionen – und Ihre Sparziele direkt im Tab Ersparnisse.",
+    n10_t: "PIN & automatische Sperre", n10_p: "Eine PIN für jedes Profil und eine Sperre nach einigen Minuten ohne Nutzung. Sicherungen lassen sich mit Passwort verschlüsseln (AES-256).",
+    n11_t: "Ihr Design", n11_p: "Emerald, Navy oder klassisch hell und dunkel – mit Seitenmenü, das sich einklappt und beim Zeigen öffnet.",
+    n12_t: "Als App installieren", n12_p: "Auf Handy, Tablet, Mac oder PC: eigenes Symbol, Vollbild, auch ohne Internet. Oder die Windows-App.",
+    p_title: "Ihre Daten bleiben bei Ihnen",
+    p_text2: "Kein Konto, keine Anmeldung, keine Cloud. MoneyCompass speichert alles auf Ihrem eigenen Gerät. Aus dem Internet lädt es nur öffentliche Zahlen: NBP-Zinsen, Anleihezinsen und Bankangebote.",
+    s1: "Kein Konto und kein Server – nichts wird hochgeladen", s2: "PIN für jedes Profil, nie im Klartext gespeichert", s3: "Automatische Sperre nach der gewählten Zeit",
+    s4: "Sicherungsdateien mit Ihrem Passwort verschlüsselt (AES-256)", s5: "Funktioniert nach der Installation offline", s6: "Polnisches Recht, klare Nutzungsbedingungen",
+    pr7: "Unbegrenzte Berichte und mehrere Profile überall", pr8: "Zahlungskalender und Kreditvergleich mit aktuellen Angeboten",
+    q14: "Wie funktionieren PIN und verschlüsselte Sicherung?", a14: "In Ihrem Profil (oben rechts) können Sie eine 4- bis 8-stellige PIN festlegen; sie wird beim Öffnen, nach der automatischen Sperre (Optionen) und beim Profilwechsel abgefragt. Gespeichert wird nur ein sicherer Hash. Unter Optionen → Sicherung können Sie Profildateien mit einem Passwort schützen: Gespeicherte Dateien werden dann mit AES-256 verschlüsselt und lassen sich nur mit diesem Passwort in der Browserversion öffnen. Eine vergessene PIN oder ein vergessenes Passwort lässt sich nicht wiederherstellen.",
+    q15: "Kann ich das Aussehen ändern?", a15: "Ja – mit dem Design-Schalter oben rechts: Emerald (das Aussehen dieser Seite), Navy oder klassisch hell oder dunkel. Bei Emerald und Navy sitzt das Menü links und klappt sich ein, bis Sie darauf zeigen.",
+  },
+  fr: {
+    new: "NOUVEAU", nav_security: "Sécurité", hero_badge: "Nouveau : apparence Emerald, verrouillage par code PIN et sauvegardes chiffrées",
+    hero_lead2: "Entrées, sorties, épargne, prêts et épargne de précaution – avec des graphiques clairs et un plan personnel pour tirer le meilleur de votre argent. Dans votre navigateur ou sous Windows ; vos données restent chez vous.",
+    open_web2: "Ouvrir MoneyCompass", download_win: "Application Windows", web_note2: "Gratuit dans le navigateur – rien à installer, et vous pouvez l'installer comme une application sur téléphone, tablette ou ordinateur.",
+    tab_overview: "Vue d'ensemble", pv_in: "Entrées / mois", pv_out: "Sorties / mois", pv_bal: "Solde / mois", pv_rate: "Taux d'épargne",
+    pv_trends: "Tendances mois par mois", pv_in_s: "Entrées", pv_out_s: "Sorties", pv_saved: "Épargné", pv_loans: "Mensualités",
+    f_title: "Tout ce qu'il vous faut – sans tableur",
+    f_sub: "MoneyCompass montre ce qui entre, ce qui sort et quoi faire du reste. Conçu pour la Pologne : taux NBP, obligations d'État, IKE/IKZE et les offres de banques et de prêts du jour – vérifiées chaque jour.",
+    n1_t: "Entrées et sorties", n1_p: "Salaire, revenus supplémentaires et chaque dépense par catégorie – avec des moyennes sur votre vraie période, des filtres, la recherche et les répétitions.",
+    n2_t: "Épargne de précaution", n2_p: "Combien il vous faut pour 3 à 6 mois, où vous en êtes – et une alerte rouge claire quand elle manque.",
+    n3_t: "Optimiser mes finances", n3_p: "Votre plan personnel : où votre épargne rapporte le plus, quel prêt rembourser d'abord et si un remboursement anticipé vaut mieux qu'épargner.",
+    n4_t: "Import bancaire (CSV)", n4_p: "PKO BP, mBank, ING, Millennium, Pekao, Santander et d'autres – avec numéros de compte, De → À et frais bancaires.",
+    n5_t: "Catégories intelligentes", n5_p: "Changez un paiement et tous les identiques suivent – les nouveaux imports de ce magasin reçoivent la catégorie automatiquement.",
+    n6_t: "Courbes de tendance", n6_p: "Des lignes douces pour les entrées, les sorties, l'épargne et les mensualités – mois par mois, depuis votre première saisie.",
+    n7_t: "Calendrier des paiements", n7_p: "Tout ce qui revient – salaire, loyer, abonnements, mensualités – dans un calendrier et une prévision pour les mois à venir.",
+    n8_t: "Prêts face au marché", n8_p: "Votre taux comparé aux meilleures offres immobilières et de crédit du jour : nouvelle mensualité, économie après frais de changement, lien vers le classement.",
+    n9_t: "Épargne et objectifs", n9_p: "Tout votre argent au même endroit, sûr ou risqué, rappels de promotions – et vos objectifs d'épargne directement dans l'onglet Épargne.",
+    n10_t: "Code PIN et verrouillage", n10_p: "Un code PIN par profil et un verrouillage après quelques minutes sans utilisation. Les sauvegardes peuvent être chiffrées par mot de passe (AES-256).",
+    n11_t: "Votre apparence", n11_p: "Emerald, Navy ou classique clair et sombre – avec un menu latéral qui se replie et s'ouvre au survol.",
+    n12_t: "Installer comme une app", n12_p: "Sur téléphone, tablette, Mac ou PC : sa propre icône, plein écran, même sans internet. Ou l'application Windows.",
+    p_title: "Vos données restent chez vous",
+    p_text2: "Pas de compte, pas de connexion, pas de cloud. MoneyCompass garde tout sur votre appareil. D'internet, il ne télécharge que des chiffres publics : taux NBP, taux des obligations et offres bancaires.",
+    s1: "Pas de compte ni de serveur – rien n'est envoyé", s2: "Code PIN par profil, jamais enregistré en clair", s3: "Verrouillage automatique après le délai choisi",
+    s4: "Sauvegardes chiffrées avec votre mot de passe (AES-256)", s5: "Fonctionne hors ligne une fois installé", s6: "Droit polonais, conditions d'utilisation claires",
+    pr7: "Rapports illimités et plusieurs profils partout", pr8: "Calendrier des paiements et comparaison des prêts avec les offres du jour",
+    q14: "Comment fonctionnent le code PIN et la sauvegarde chiffrée ?", a14: "Dans votre profil (en haut à droite), vous pouvez définir un code de 4 à 8 chiffres ; il est demandé à l'ouverture, après le verrouillage automatique (Options) et au changement de profil. Seule une empreinte sécurisée est conservée. Dans Options → Sauvegarde, vous pouvez protéger les fichiers de profil par mot de passe : ils sont alors chiffrés en AES-256 et ne s'ouvrent qu'avec ce mot de passe, dans la version navigateur. Un code ou un mot de passe oublié ne peut pas être récupéré.",
+    q15: "Puis-je changer l'apparence ?", a15: "Oui – avec le bouton Apparence en haut à droite : Emerald (l'apparence de cette page), Navy, ou classique clair ou sombre. Avec Emerald et Navy, le menu est à gauche et se replie jusqu'à ce que vous le survoliez.",
+  },
+};
+for (const l in T2) Object.assign(T[l], T2[l]);
 
 let latestVersion = "";
 

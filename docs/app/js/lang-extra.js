@@ -633,7 +633,10 @@ export const EXTRA = {
 "Saved": "Gespart",
 "Trends month by month": "Trends Monat für Monat",
 "Saved = inflows minus outflows in that month. Click a name to show or hide its line.": "Gespart = Eingänge minus Ausgänge im jeweiligen Monat. Klicken Sie auf einen Namen, um die Linie ein- oder auszublenden.",
-"avg. {0}": "Ø {0}"
+"avg. {0}": "Ø {0}",
+"Emerald": "Smaragd",
+"Navy": "Marine",
+"Standard design: side menu, dark green with lavender": "Standard-Design: Seitenmenü, Dunkelgrün mit Lavendel"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1268,7 +1271,10 @@ export const EXTRA = {
 "Saved": "Épargné",
 "Trends month by month": "Tendances mois par mois",
 "Saved = inflows minus outflows in that month. Click a name to show or hide its line.": "Épargné = entrées moins sorties du mois. Cliquez sur un nom pour afficher ou masquer sa ligne.",
-"avg. {0}": "moy. {0}"
+"avg. {0}": "moy. {0}",
+"Emerald": "Émeraude",
+"Navy": "Marine",
+"Standard design: side menu, dark green with lavender": "Apparence standard : menu latéral, vert foncé avec lavande"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1903,6 +1909,9 @@ export const EXTRA = {
 "Saved": "Zaoszczędzone",
 "Trends month by month": "Trendy miesiąc po miesiącu",
 "Saved = inflows minus outflows in that month. Click a name to show or hide its line.": "Zaoszczędzone = wpływy minus wydatki w danym miesiącu. Kliknij nazwę, aby pokazać lub ukryć linię.",
-"avg. {0}": "śr. {0}"
+"avg. {0}": "śr. {0}",
+"Emerald": "Szmaragdowy",
+"Navy": "Granatowy",
+"Standard design: side menu, dark green with lavender": "Standardowy wygląd: menu boczne, ciemna zieleń z lawendą"
 }
 };

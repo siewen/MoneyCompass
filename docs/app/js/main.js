@@ -40,7 +40,8 @@ const TAB_ICON = {
 };
 /** Beta design: "navy" or "emerald" (saved in this browser), or "" for the normal design. */
 const BETA_KEY = "mc-beta";
-const beta = () => { try { return localStorage.getItem(BETA_KEY) || ""; } catch { return ""; } };
+// Emerald is the standard design; "classic" is saved when someone chooses Classic light or dark
+const beta = () => { let v = null; try { v = localStorage.getItem(BETA_KEY); } catch { /* private window */ } return v === "classic" ? "" : v || "emerald"; };
 /** Beta side menu: "auto" folds to icons and opens when the mouse is on it, "pinned" stays open. */
 const side = () => { try { return localStorage.getItem("mc-side") || "auto"; } catch { return "auto"; } };
 function toggleSide() {
@@ -49,7 +50,7 @@ function toggleSide() {
   document.documentElement.dataset.side = v;
   const b = document.querySelector(".side-toggle"); if (b) { b.textContent = v === "pinned" ? "‹" : "›"; b.title = T(v === "pinned" ? "Fold the menu (it opens when you point at it)" : "Keep the menu open"); }
 }
-function setBeta(v) { try { v ? localStorage.setItem(BETA_KEY, v) : localStorage.removeItem(BETA_KEY); } catch { /* private window */ } buildShell(); }
+function setBeta(v) { try { localStorage.setItem(BETA_KEY, v || "classic"); } catch { /* private window */ } buildShell(); }
 function betaMenu() {
   const btn = document.querySelector('[data-act="beta"]'), r = btn.getBoundingClientRect();
   const now = beta() || (State.data.Settings.Design === "dark" ? "dark" : "light");
@@ -57,7 +58,7 @@ function betaMenu() {
   const menu = document.createElement("div"); menu.className = "tab-menu data-menu beta-menu";
   const opt = (v, sw, label, sub) => `<button data-b="${v}"${now === v ? ' class="on"' : ""}><span class="swatch ${sw}"></span><span><b>${esc(label)}</b><small>${esc(sub)}</small></span>${now === v ? "<i>✓</i>" : ""}</button>`;
   menu.innerHTML = `<div class="menu-title">${esc(T("Design"))}</div>` + opt("light", "classic", T("Classic – Light"), T("The design you know")) + opt("dark", "classic-dark", T("Classic – Dark"), T("Same layout, dark background")) + "<hr>" +
-    opt("navy", "navy", T("Beta – Navy"), T("Side menu, dark blue with mint and magenta")) + opt("emerald", "emerald", T("Beta – Emerald"), T("Side menu, dark green with lavender"));
+    opt("navy", "navy", T("Navy"), T("Side menu, dark blue with mint and magenta")) + opt("emerald", "emerald", T("Emerald"), T("Standard design: side menu, dark green with lavender"));
   document.body.append(shield, menu);
   const w = menu.offsetWidth, h = menu.offsetHeight;
   menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + "px";

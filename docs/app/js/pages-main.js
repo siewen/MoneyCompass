@@ -131,9 +131,8 @@ export const Overview = {
       ];
       if (moduleOn("loans") && d.Loans.some(l => l.MonthlyPayment > 0)) ser.push({ key: "loan", label: T("Loan payments"), color: "var(--w-loan)", values: months.map(m => Calc.loanPayments(d, m.start)) });
       const avgOf = s => s.values.reduce((a, b) => a + b, 0) / s.values.length;
-      parts.push(card(heading(T("Trends month by month"), "〰️") +
-        hint(T("Saved = inflows minus outflows in that month. Click a name to show or hide its line.")) +
-        `<div class="wave-legend">${ser.map(s => `<button class="wave-key${hid.has(s.key) ? " off" : ""}" data-wave="${s.key}" style="--c:${s.color}"><i></i>${esc(s.label)}<small>${esc(T("avg. {0}", pln(avgOf(s))))}</small></button>`).join("")}</div>` +
+      // No title: the lines and their names speak for themselves (the explanation is in the tooltip)
+      parts.push(card(`<div class="wave-legend" data-tip="${esc(T("Saved = inflows minus outflows in that month. Click a name to show or hide its line."))}">${ser.map(s => `<button class="wave-key${hid.has(s.key) ? " off" : ""}" data-wave="${s.key}" style="--c:${s.color}"><i></i>${esc(s.label)}<small>${esc(T("avg. {0}", pln(avgOf(s))))}</small></button>`).join("")}</div>` +
         waveChart(months.map(m => m.month + (m.current ? " *" : "")), ser, axis, pln, hid)));
     }
     parts.push(card(heading(T("Outflows by category")) + hint(basisText(d)) +
