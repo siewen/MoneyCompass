@@ -370,7 +370,10 @@ export const EXTRA = {
 "Save profile (backup)": "Profil speichern (Sicherung)",
 "Low risk": "Geringes Risiko",
 "Medium risk": "Mittleres Risiko",
-"High risk": "Hohes Risiko"
+"High risk": "Hohes Risiko",
+"New category…": "Neue Kategorie…",
+"New category": "Neue Kategorie",
+"Name of the category": "Name der Kategorie"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -742,7 +745,10 @@ export const EXTRA = {
 "Save profile (backup)": "Enregistrer le profil (sauvegarde)",
 "Low risk": "Risque faible",
 "Medium risk": "Risque moyen",
-"High risk": "Risque élevé"
+"High risk": "Risque élevé",
+"New category…": "Nouvelle catégorie…",
+"New category": "Nouvelle catégorie",
+"Name of the category": "Nom de la catégorie"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1114,6 +1120,9 @@ export const EXTRA = {
 "Save profile (backup)": "Zapisz profil (kopia zapasowa)",
 "Low risk": "Niskie ryzyko",
 "Medium risk": "Średnie ryzyko",
-"High risk": "Wysokie ryzyko"
+"High risk": "Wysokie ryzyko",
+"New category…": "Nowa kategoria…",
+"New category": "Nowa kategoria",
+"Name of the category": "Nazwa kategorii"
 }
 };

@@ -74,6 +74,29 @@ export function confirmBox(title, text, ok = T("OK"), cancel = T("Cancel"), dang
 }
 export const alertBox = (title, text) => confirmBox(title, text, T("OK"), null);
 
+/** "＋ New category…" at the end of every category list: choosing it asks for a name and creates the category. */
+export const NEW_CAT = () => ["__new__", "＋ " + T("New category…")];
+document.addEventListener("change", async e => {
+  const sel = e.target;
+  if (!(sel instanceof HTMLSelectElement) || sel.value !== "__new__") return;
+  const prev = sel.dataset.prev ?? sel.options[0]?.value ?? "";
+  const name = await promptBox(T("New category"), T("Name of the category"));
+  const { addCategory, categoryLabel } = await import("./core.js");
+  const err = name === null ? "" : addCategory(name, false, "");
+  if (name === null || err) { if (err) toast(err, "bad"); sel.value = prev; return; }
+  const clean = name.trim();
+  // Add the new category to every category list on screen, and choose it here
+  document.querySelectorAll("select").forEach(s => {
+    const n = s.querySelector('option[value="__new__"]');
+    if (!n || s.querySelector(`option[value="${CSS.escape(clean)}"]`)) return;
+    const o = document.createElement("option"); o.value = clean; o.textContent = categoryLabel(clean); s.insertBefore(o, n);
+  });
+  sel.value = clean; sel.dataset.prev = clean;
+  sel.dispatchEvent(new Event("change", { bubbles: true }));
+  toast(T("Added: {0}.", clean));
+}, true);
+document.addEventListener("focusin", e => { if (e.target instanceof HTMLSelectElement && e.target.value !== "__new__") e.target.dataset.prev = e.target.value; });
+
 export function promptBox(title, label, value = "") {
   return new Promise(resolve => {
     const p = popup(`<div class="box-head"><span class="box-icon">✎</span><h2>${esc(title)}</h2></div>${field(label, textInput("v", value))}

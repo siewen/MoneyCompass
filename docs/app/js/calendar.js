@@ -4,6 +4,7 @@ import {
   T, State, save, Calc, pln, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addDays, addMonths, monthStart, monthName,
   uuid, categories, categoryLabel, moduleOn, FREQUENCIES, ONE_TIME, locale, monthsCount, repeatingExpenses, setRepeat, freqLabel, repeatingReceived, setReceivedRepeat, seriesKey, LOAN_CATEGORY,
 } from "./core.js";
+import { NEW_CAT } from "./ui.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, button, values, confirmBox, toast } from "./ui.js";
 import { App } from "./app.js";
 import { binCard, infoBtn } from "./pages-main.js";
@@ -243,7 +244,7 @@ export const Calendar = {
         ${hint(T("Rent, bills, subscriptions, insurance or a standing order to savings – anything that recurs. Payments added here are included in your spending, budget and forecasts, unless the same payment is already in your expenses. Income is managed in the Income tab."))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", "Netflix, czynsz, PZU")))}
         <div class="two">${field(T("Type"), select("kind", KINDS.map(k => [k[0], T(k[1])]), f.Kind))}${field(T("Amount (zł)"), numInput("amount", plain(f.Amount)))}</div>
-        <div class="two">${field(T("Category"), select("category", categories().map(c => [c.Name, categoryLabel(c.Name)]), f.Category))}${field(T("How often"), select("frequency", FREQUENCIES.map(x => [x[0], T(x[0])]), f.Frequency))}</div>
+        <div class="two">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], f.Category))}${field(T("How often"), select("frequency", FREQUENCIES.map(x => [x[0], T(x[0])]), f.Frequency))}</div>
         <div class="two">${field(T("Date of a payment (past or upcoming)"), dateInput("date", inputDate(parseDate(f.Date))))}
         ${field(T("Final payment (optional)"), `<input type="date" name="end" value="${f.EndDate ? inputDate(parseDate(f.EndDate)) : ""}">`)}</div>
         ${hint(T("For payments that end, such as a contract: enter the final payment date and it stops counting after that. You can also switch a payment off in the list below."))}

@@ -5,6 +5,7 @@ import {
 } from "./core.js";
 import { progress, hbars } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
+import { NEW_CAT } from "./ui.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, alertBox, toast, pickFile } from "./ui.js";
 import { App, requirePro } from "./app.js";
 import { Rates, BOND_CODES, BONDS_WEBSITE, SAVINGS_RANKING, DEPOSITS_RANKING } from "./rates.js";
@@ -372,7 +373,7 @@ export const Budget = {
       ${card(heading(monthName(today())) + row(T("Spent in categories with a limit"), pln(spent)) + row(T("Your limits together"), pln(total)) +
         row(T("Left this month"), pln(total - spent), total - spent < 0 ? "bad" : "good"))}
       ${card(`<form id="budget">${heading(T("Set a monthly limit"))}${hint(T("Choose a category and how much you want to spend on it at most each month. Setting it again changes the limit."))}
-        ${field(T("Category"), select("category", categories().map(c => [c.Name, categoryLabel(c.Name)]), categories()[0].Name))}
+        ${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], categories()[0].Name))}
         ${field(T("Limit per month (zł)"), numInput("limit", "", T("e.g. {0}", "800")))}
         ${button(T("Save limit"), "save-limit", "main")}</form>`)}
       ${card(heading(T("Limits this month")) + hint(T("From your entries in the Expenses tab. Green: on track, amber: almost used, red: over the limit.")) +
@@ -495,7 +496,7 @@ export async function openBankImport() {
         Object.entries(byCat).sort((a, b) => b[1].sum - a[1].sum).map(([c, v]) => row(`${categoryLabel(c)} (${v.n})`, pln(v.sum))).join(""))}
       ${unsorted.length ? card(heading(T("Not sorted yet")) + hint(T("MoneyCompass could not tell what these are. Choose a category, or leave them as \"Other\".")) +
         `<div class="list">${unsorted.map((i, n) => `<div class="item"><div><b>${esc(i.row.description || "–")}</b><span class="hint">${date(i.row)} · ${pln(i.pln)}</span></div>
-        ${select("cat-" + items.indexOf(i), categories().map(c => [c.Name, categoryLabel(c.Name)]), i.category)}</div>`).join("")}</div>`, "wide") : ""}
+        ${select("cat-" + items.indexOf(i), [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], i.category)}</div>`).join("")}</div>`, "wide") : ""}
       ${received.length ? card(heading(T("Money received")) + hint(T("All money coming in counts as extra income for its month. Choose Salary for your regular pay: MoneyCompass then counts it every month. Not income is ignored.")) +
         `<div class="list">${received.slice(0, 150).map((r, n) => `<div class="item"><div><b>${esc(r.Description || "–")}</b><span class="hint">${fmtDate(r.Date)} · +${pln(r.Amount)}</span></div>
         ${select("kind-" + n, [[RECEIVED.income, T("Extra income (this month)")], [RECEIVED.salary, T("Salary (regular pay)")], [RECEIVED.none, T("Not income")]], r.Kind)}</div>`).join("")}</div>`, "wide") : ""}

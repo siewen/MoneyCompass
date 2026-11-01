@@ -5,6 +5,7 @@ import {
   addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
 } from "./core.js";
 import { hbars, donut, legend, monthBars, progress } from "./charts.js";
+import { NEW_CAT } from "./ui.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON } from "./ui.js";
 import { App, requirePro } from "./app.js";
 import { Rates } from "./rates.js";
@@ -352,7 +353,7 @@ export const Expenses = {
     el.innerHTML = `<div class="grid">
       ${card(`<form id="expense-form">${heading(T("Add an expense"))}
         <div class="two">${field(T("Date"), dateInput("date", inputDate(today())))}${field(T("Amount (zł)"), numInput("amount", "", T("e.g. {0}", "120,50")))}</div>
-        <div class="cat-row">${field(T("Category"), select("category", categories().map(c => [c.Name, categoryLabel(c.Name)]), cat0.Name))}
+        <div class="cat-row">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], cat0.Name))}
           ${button(T("Categories…"), "categories", "second small")}</div>
         ${field(T("Description (optional)"), textInput("description", "", T("e.g. {0}", "Biedronka")))}
         <div class="two">${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), ""))}<div class="hint">${esc(T("Repeating expenses appear automatically in the Payment calendar, also in the next months."))}</div></div>
@@ -463,7 +464,7 @@ function bindExpenseRows(root, after = () => App.refresh()) {
 function editExpense(e, after) {
   const p = popup(`<h2 class="popup-title">${esc(T("Change expense"))}</h2><form>
     <div class="two">${field(T("Date"), dateInput("date", inputDate(parseDate(e.Date))))}${field(T("Amount (zł)"), numInput("amount", plain(e.Amount)))}</div>
-    ${field(T("Category"), select("category", categories().map(c => [c.Name, categoryLabel(c.Name)]), e.Category))}
+    ${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], e.Category))}
     ${field(T("Description"), textInput("description", e.Description))}
     ${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(repeatOn(e)), repeatOn(e)))}
     ${check("essential", T("Essential (must pay even in a crisis)"), e.Essential)}</form>
