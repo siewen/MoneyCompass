@@ -419,7 +419,10 @@ export async function openBankImport() {
       ${card(`<b>${esc(fileObj.name)}</b>` + hint(T("{0} – {1}, {2} rows.", file.bank || T("bank recognised from the columns"), "CSV", file.rows.length)) +
         hint(file.bank ? T("Found automatically for {0}. Change them only if the preview looks wrong.", file.bank) : T("Found from the content of the file. Check that date, amount and description are right.")) +
         button(esc(showColumns ? T("Hide columns") : T("Change columns")), "columns", "second small") +
-        (showColumns ? `<div class="two">${["Date", "Amount", "Debit", "Credit", "Description", "Counterparty", "Category", "Currency"].map(k => field(T(k === "Debit" ? "Amount" : k === "Credit" ? "Amount" : k === "Counterparty" ? "Name" : k) + (k === "Debit" ? " −" : k === "Credit" ? " +" : ""), select("col-" + k, colOptions, file.columns[k]))).join("")}</div>` : "") +
+        (showColumns ? `<div class="two">${["Date", "Amount", "Debit", "Credit", "Description", "Counterparty", "Category", "Currency", "OwnAccount", "OtherAccount"].map(k => field(T(k === "Debit" ? "Amount" : k === "Credit" ? "Amount" : k === "Counterparty" ? "Name" : k === "OwnAccount" ? "Your account" : k === "OtherAccount" ? "Their account" : k) + (k === "Debit" ? " −" : k === "Credit" ? " +" : ""), select("col-" + k, colOptions, file.columns[k] ?? -1))).join("")}</div>` : "") +
+        hint(file.columns.OwnAccount >= 0 || file.columns.OtherAccount >= 0 || file.ownAccount
+          ? "ⓘ " + T("Account numbers found: {0}.", [file.columns.OwnAccount >= 0 ? T("Your account") + " = " + Csv.columnName(file, file.columns.OwnAccount) : file.ownAccount ? T("Your account") + " = " + file.ownAccount : "", file.columns.OtherAccount >= 0 ? T("Their account") + " = " + Csv.columnName(file, file.columns.OtherAccount) : ""].filter(Boolean).join(", "))
+          : "ⓘ " + T("No account numbers found in this file. If it has them, choose the columns with \"Change columns\".")) +
         hint(T("The file is only read on this computer.")))}
       ${dateCard}
       ${card(heading(T("3. What will be added")) + lines.map(l => `<p>${esc(l)}</p>`).join("") +

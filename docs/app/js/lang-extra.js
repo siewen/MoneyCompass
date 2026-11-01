@@ -185,7 +185,9 @@ export const EXTRA = {
 "Repeats: {0} – click to change": "Wiederholt sich: {0} – klicken zum Ändern",
 "Click to choose how often it repeats": "Klicken, um zu wählen, wie oft es sich wiederholt",
 "{0} repeats: {1} – see the Payment calendar.": "{0} wiederholt sich: {1} – siehe Zahlungskalender.",
-"Money coming in": "Geld, das hereinkommt"
+"Money coming in": "Geld, das hereinkommt",
+"Account numbers found: {0}.": "Kontonummern gefunden: {0}.",
+"No account numbers found in this file. If it has them, choose the columns with \"Change columns\".": "In dieser Datei wurden keine Kontonummern gefunden. Wenn sie welche enthält, wählen Sie die Spalten mit „Spalten ändern“."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -372,7 +374,9 @@ export const EXTRA = {
 "Repeats: {0} – click to change": "Se répète : {0} – cliquer pour modifier",
 "Click to choose how often it repeats": "Cliquer pour choisir la fréquence",
 "{0} repeats: {1} – see the Payment calendar.": "{0} se répète : {1} – voir le calendrier des paiements.",
-"Money coming in": "Argent qui arrive"
+"Money coming in": "Argent qui arrive",
+"Account numbers found: {0}.": "Numéros de compte trouvés : {0}.",
+"No account numbers found in this file. If it has them, choose the columns with \"Change columns\".": "Aucun numéro de compte trouvé dans ce fichier. S'il en contient, choisissez les colonnes avec « Modifier les colonnes »."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -559,6 +563,8 @@ export const EXTRA = {
 "Repeats: {0} – click to change": "Powtarza się: {0} – kliknij, aby zmienić",
 "Click to choose how often it repeats": "Kliknij, aby wybrać, jak często się powtarza",
 "{0} repeats: {1} – see the Payment calendar.": "{0} powtarza się: {1} – zobacz kalendarz płatności.",
-"Money coming in": "Wpływy"
+"Money coming in": "Wpływy",
+"Account numbers found: {0}.": "Znalezione numery kont: {0}.",
+"No account numbers found in this file. If it has them, choose the columns with \"Change columns\".": "Nie znaleziono numerów kont w tym pliku. Jeśli je zawiera, wybierz kolumny przyciskiem „Zmień kolumny”."
 }
 };
