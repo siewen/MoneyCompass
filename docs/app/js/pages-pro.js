@@ -357,7 +357,7 @@ export async function openBankImport() {
     const outgoing = rows.filter(r => r.amount < 0), incoming = rows.filter(r => r.amount > 0);
     const items = [], known = []; let dup = 0, foreign = 0;
     // Already imported earlier: only the bank details (ⓘ) are added, if they are missing
-    const remember = (x, r) => { if (x && !x.Info && r.info && Object.keys(r.info).length) known.push([x, r.info]); };
+    const remember = (x, r) => { if (x && r.info && Object.keys(r.info).length > Object.keys(x.Info || {}).length) known.push([x, r.info]); };
     for (const r of outgoing.filter(r => !Csv.isOwnTransfer(r))) {
       const v = toPln(-r.amount, r.currency);
       if (v === null) { foreign++; continue; }

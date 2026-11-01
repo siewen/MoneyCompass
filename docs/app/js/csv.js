@@ -73,9 +73,10 @@ function fromHeader(h) {
     Category: find(h, "kategoria", "category"),
     Currency: find(h, "waluta", "currency"),
     // Account numbers, when the bank puts them in the file (only shown in the ⓘ info of an entry)
-    OwnAccount: exact(h, "numer rachunku/karty", "rachunek", "konto", "numer rachunku", "account", "own account", "rachunek źródłowy", "rachunek zrodlowy"),
+    OwnAccount: exact(h, "numer rachunku/karty", "account/card number", "account / card number", "account number/card", "card/account number", "account number",
+      "own account", "rachunek źródłowy", "rachunek zrodlowy", "rachunek", "konto", "numer rachunku", "numer karty", "card number", "account"),
     OtherAccount: exact(h, "nr rachunku", "na konto/z konta", "rachunek kontrahenta", "rachunek odbiorcy/nadawcy", "rachunek nadawcy/odbiorcy",
-      "rachunek docelowy", "counterparty account", "beneficiary account", "account number"),
+      "rachunek docelowy", "counterparty account", "beneficiary account", "to account/from account", "to/from account", "from/to account", "beneficiary/sender account"),
   };
 }
 function exact(header, ...names) {
@@ -153,6 +154,20 @@ function guessMissing(file) {
     c.Description = best;
   }
 }
+/** Account columns found from the content, when the header names are unknown (e.g. an English export). */
+const looksLikeAccount = v => { const t = (v || "").replace(/^'|'$/g, "").trim(); return ACCOUNT.test(t) || /^\d{4}[ ]?[*xX•.]{2,}[ *xX•.\d]*\d{4}$/.test(t); };
+function guessAccounts(file) {
+  const c = file.columns, sample = file.rows.slice(0, 200);
+  if (!sample.length) return;
+  const count = columnCount(file), used = new Set(Object.values(c).filter(i => i >= 0));
+  const share = i => sample.filter(r => i < r.length && looksLikeAccount(r[i])).length / sample.length;
+  for (let i = 0; i < count; i++) {
+    if (used.has(i)) continue;
+    const sh = share(i);
+    if (c.OwnAccount < 0 && sh > 0.7) { c.OwnAccount = i; used.add(i); }
+    else if (c.OtherAccount < 0 && sh > 0.02) { c.OtherAccount = i; used.add(i); }
+  }
+}
 export const columnCount = f => Math.max(f.header.length, ...f.rows.map(r => r.length), 0);
 export function columnName(f, i) {
   let name = i < f.header.length ? f.header[i].replace(/^[#\s]+|[#\s]+$/g, "") : "";
@@ -177,6 +192,7 @@ export function parse(text) {
     file.rows = rows;
   }
   guessMissing(file);
+  guessAccounts(file);
   if (file.columns.Date >= 0) file.rows = file.rows.filter(r => file.columns.Date < r.length && parseDate(r[file.columns.Date]));
   return file;
 }
