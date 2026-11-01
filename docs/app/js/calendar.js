@@ -13,7 +13,7 @@ const D = () => State.data;
 const KINDS = [["expense", "Payment"], ["saving", "Transfer to savings"]];
 const RANGES = [1, 3, 6, 12];
 let range = 3, shown = null, editId = null, selectedDay = null, allPast = false;
-const folded = new Map();   // month → open (true) or closed (false), as you left it; past months start closed
+const folded = new Map();   // month → open (true) or closed (false), as you left it; all months start closed
 const mkey = ms => ms.getFullYear() * 12 + ms.getMonth();
 
 /** All payments between two dates: income, recurring payments, savings transfers and loans. */
@@ -268,10 +268,10 @@ export const Calendar = {
       ${card(heading(T("Month by month")) + `<div class="chips past-chips"><button class="chip${allPast ? "" : " on"}" data-past="0">🔁 ${esc(T("Recurring only"))}</button><button class="chip${allPast ? " on" : ""}" data-past="1">${esc(T("All transactions"))}</button></div>` +
         hint(allPast ? T("Past months show every transaction from your entries and bank imports.") : T("Past months show recurring items only: expenses marked 🔁, salary, recurring income and transfers to savings. Mark an expense with 🔁 in the Expenses tab to include it.")) + pastMonths.map(m => `<details class="cal-month past" data-m="${mkey(m.ms)}"${folded.get(mkey(m.ms)) ? " open" : ""}><summary class="cal-month-head"><span class="m-name"><b>${esc(monthName(m.ms))}</b> <small class="hint">· ${esc(T("actual"))}</small></span>
         <span><span class="good">+${pln(m.inn)}</span> · <span class="bad">−${pln(m.out)}</span>${m.sav ? ` · <span class="primary">${pln(m.sav)}</span>` : ""} · <b class="${m.inn - m.out - m.sav >= 0 ? "good" : "bad"}">${pln(m.inn - m.out - m.sav)}</b></span></summary>
-        <div class="list">${m.ev.map(evRow).join("") || hint(T("Nothing in this month."))}</div></details>`).join("") + months.map(m => `<details class="cal-month" data-m="${mkey(m.ms)}"${folded.get(mkey(m.ms)) ?? range <= 3 ? " open" : ""}><summary class="cal-month-head"><span class="m-name"><b>${esc(monthName(m.ms))}</b></span>
+        <div class="list">${m.ev.map(evRow).join("") || hint(T("Nothing in this month."))}</div></details>`).join("") + months.map(m => `<details class="cal-month" data-m="${mkey(m.ms)}"${folded.get(mkey(m.ms)) ? " open" : ""}><summary class="cal-month-head"><span class="m-name"><b>${esc(monthName(m.ms))}</b></span>
         <span><span class="good">+${pln(m.inn)}</span> · <span class="bad">−${pln(m.out)}</span>${m.sav ? ` · <span class="primary">${pln(m.sav)}</span>` : ""} · <b class="${m.inn - m.out - m.sav >= 0 ? "good" : "bad"}">${pln(m.inn - m.out - m.sav)}</b></span></summary>
         <div class="list">${m.ev.map(evRow).join("") || hint(T("No payments scheduled for this period."))}</div></details>`).join("") +
-        (range > 3 ? hint(T("Click a month to see its payments.")) : "") +
+        hint(T("Click a month to see its payments.")) +
         row(T("Balance after {0}", monthsLabel(range)), pln(running), "big" + (running < 0 ? " bad" : " good")), "wide")}
       ${binCard(["recurring"])}
     </div>`;
