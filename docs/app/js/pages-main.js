@@ -48,10 +48,13 @@ export const Overview = {
     if (top) parts.push(`<button class="tip" data-go="${top.route || ""}">💡 ${esc(T("Best next step: {0}", top.title))}${top.route ? "  →" : ""}</button>`);
     parts.push(`<button class="btn second" data-action="export">⬇ ${esc(T("Export report (Excel, PDF, Word)"))}</button>`);
 
+    const pin = Calc.periodIncome(d);
     parts.push(card(heading(T("Money in and out (per month)")) +
+      (pin.months ? hint(T("{0}: salary {1} + extra income {2} per month, the same months as your expenses.",
+        Calc.groupMonths(Calc.countedExpenses(d)).slice(0, 3).reverse().map(m => monthName(m.start)).join(", "), pln(pin.salary), pln(pin.extra))) : "") +
       (ChartData.hasInOut(d) ? hbars(ChartData.inOut(d)) : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"income"));
     const cur = months.find(m => m.current);
-    parts.push(card(heading(T("Income and expenses by month")) + hint(T("Income from your current income sources, expenses as entered.")) +
+    parts.push(card(heading(T("Income and expenses by month")) + hint(T("Income as received (salary and extra income) – where nothing was imported, as planned from your income sources. Expenses as entered.")) +
       (showTrend ? monthBars(months, axis, pln, [T("Income"), T("Expenses")]) + legend([
         { color: COLORS.income, label: T("Income"), text: pln(months.reduce((s, m) => s + m.income, 0) / Math.max(1, months.length)) + " " + T("avg.") },
         { color: COLORS.expenses, label: T("Expenses"), text: pln(months.reduce((s, m) => s + m.expenses, 0) / Math.max(1, months.length)) + " " + T("avg.") },

@@ -381,7 +381,28 @@ export const Calc = {
     const start = monthStart(month), end = addMonths(start, 1);
     return d.Received.filter(r => r.Kind === RECEIVED.income && parseDate(r.Date) >= start && parseDate(r.Date) < end).reduce((s, r) => s + r.Amount, 0);
   },
-  totalIncome(d) { return this.income(d).monthlyTotal; },
+  /** Money in during one month: salary as really received (or as planned from your income sources) + extra income received. */
+  monthIncome(d, start, end) {
+    const inMonth = r => { const t = parseDate(r.Date); return t >= start && t <= end; };
+    const salary = d.Received.filter(r => r.Kind === RECEIVED.salary && inMonth(r)).reduce((s, r) => s + r.Amount, 0);
+    const planned = this.upcoming(d, start, end).reduce((s, p) => s + p.amount, 0);
+    const extra = d.Received.filter(r => r.Kind === RECEIVED.income && inMonth(r)).reduce((s, r) => s + r.Amount, 0);
+    return { salary: salary > 0 ? salary : planned, extra, total: (salary > 0 ? salary : planned) + extra };
+  },
+  /** Income per month for the same months as the expense averages (your imported or entered period).
+   *  Without expenses yet: your regular income from the income sources. */
+  periodIncome(d) {
+    const months = this.groupMonths(this.countedExpenses(d)).slice(0, 3);
+    if (!months.length) return { perMonth: this.income(d).monthlyTotal, salary: this.income(d).monthlyTotal, extra: 0, months: 0 };
+    let salary = 0, extra = 0;
+    for (const m of months) {
+      const start = monthStart(m.start), end = addDays(addMonths(start, 1), -1);
+      const x = this.monthIncome(d, start, end);
+      salary += x.salary; extra += x.extra;
+    }
+    return { perMonth: (salary + extra) / months.length, salary: salary / months.length, extra: extra / months.length, months: months.length };
+  },
+  totalIncome(d) { return this.periodIncome(d).perMonth; },
   loanPayments(d, month) {
     if (!moduleOn("loans")) return 0;
     const start = monthStart(month || today());
@@ -505,8 +526,10 @@ export const ChartData = {
     const out = [];
     for (let n = 0; n < count; n++) {
       const start = addMonths(first, n), end = addDays(addMonths(start, 1), -1);
-      const income = Calc.upcoming(d, start, end).reduce((s, p) => s + p.amount, 0)
-        + d.Received.filter(r => r.Kind === RECEIVED.income && parseDate(r.Date) >= start && parseDate(r.Date) <= end).reduce((s, r) => s + r.Amount, 0);
+      // Past months: salary as really received when imported; the current month: as planned
+      const income = start.getTime() === thisMonth.getTime()
+        ? Calc.upcoming(d, start, end).reduce((s, p) => s + p.amount, 0) + Calc.receivedIn(d, start)
+        : Calc.monthIncome(d, start, end).total;
       const expenses = Calc.countedExpenses(d).filter(e => parseDate(e.Date) >= start && parseDate(e.Date) <= end).reduce((s, e) => s + e.Amount, 0)
         + Calc.loanPayments(d, start);
       out.push({ month: monthShort(start), start, income, expenses, current: start.getTime() === thisMonth.getTime() });
