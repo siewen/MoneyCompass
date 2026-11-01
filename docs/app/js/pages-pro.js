@@ -355,25 +355,29 @@ export async function openBankImport() {
     const rows = all.filter(r => (!from || r.date >= from) && (!to || r.date <= to));
     state = { allDates: all.map(r => r.date) };
     const outgoing = rows.filter(r => r.amount < 0), incoming = rows.filter(r => r.amount > 0);
-    const items = []; let dup = 0, foreign = 0;
+    const items = [], known = []; let dup = 0, foreign = 0;
+    // Already imported earlier: only the bank details (ⓘ) are added, if they are missing
+    const remember = (x, r) => { if (x && !x.Info && r.info && Object.keys(r.info).length) known.push([x, r.info]); };
     for (const r of outgoing.filter(r => !Csv.isOwnTransfer(r))) {
       const v = toPln(-r.amount, r.currency);
       if (v === null) { foreign++; continue; }
-      if (d.Expenses.some(e => sameDay(e.Date, r.date) && Math.abs(e.Amount - v) < 0.005 && e.Description === r.description)) { dup++; continue; }
+      const old = d.Expenses.find(e => sameDay(e.Date, r.date) && Math.abs(e.Amount - v) < 0.005 && e.Description === r.description);
+      if (old) { dup++; remember(old, r); continue; }
       items.push({ row: r, pln: v, category: Csv.category(r) });
     }
     const transfers = outgoing.filter(Csv.isOwnTransfer).filter(r => r.currency === "PLN")
-      .filter(r => !d.Transfers.some(t => sameDay(t.Date, r.date) && Math.abs(t.Amount + r.amount) < 0.005 && t.Description === r.description))
+      .filter(r => { const old = d.Transfers.find(t => sameDay(t.Date, r.date) && Math.abs(t.Amount + r.amount) < 0.005 && t.Description === r.description); remember(old, r); return !old; })
       .map(r => ({ row: r, pln: -r.amount, toSavings: !r.ownAccount || Csv.isSavingsTransfer(r) })).sort((a, b) => b.row.date - a.row.date);
     const received = [];
     for (const r of incoming) {
       const v = toPln(r.amount, r.currency);
       if (v === null) continue;
-      if (d.Received.some(x => sameDay(x.Date, r.date) && Math.abs(x.Amount - v) < 0.005 && x.Description === r.description)) continue;
+      const old = d.Received.find(x => sameDay(x.Date, r.date) && Math.abs(x.Amount - v) < 0.005 && x.Description === r.description);
+      if (old) { remember(old, r); continue; }
       received.push({ Id: uuid(), Date: isoDate(r.date), Amount: v, Description: r.description, Kind: RECEIVED.income, ...withInfo(r) });
     }
     received.sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
-    state = { ...state, items, transfers, received, dup, foreign, total: rows.length, skippedByDate: all.length - rows.length };
+    state = { ...state, items, transfers, received, known, dup, foreign, total: rows.length, skippedByDate: all.length - rows.length };
   };
 
   const p = popup("", { width: 900, cls: "wide-popup" });
@@ -386,6 +390,7 @@ export async function openBankImport() {
       lines.push(T("{0} expenses from {1} to {2}, together {3}.", items.length, fmtDate(new Date(Math.min(...dates))), fmtDate(new Date(Math.max(...dates))), pln(items.reduce((a, i) => a + i.pln, 0))));
     } else lines.push(T("Nothing new to add."));
     if (dup) lines.push(T("{0} are already in MoneyCompass and are skipped.", dup));
+    if (state.known.length) lines.push(T("ⓘ {0} entries you imported before get the details from your bank (accounts, title).", state.known.length));
     if (transfers.length) lines.push(T("{0} transfers to your own accounts – not expenses. Choose below which ones are savings.", transfers.length));
     if (received.length) lines.push(T("{0} payments received – choose below how each one counts.", received.length));
     if (foreign) lines.push(T("{0} payments in other currencies are skipped (no exchange rate).", foreign));
@@ -394,7 +399,7 @@ export async function openBankImport() {
     const byCat = {};
     items.forEach(i => { (byCat[i.category] ||= { n: 0, sum: 0 }); byCat[i.category].n++; byCat[i.category].sum += i.pln; });
     const unsorted = items.filter(i => i.category === OTHER).slice(0, 100);
-    const anything = items.length || received.length || transfers.length;
+    const anything = items.length || received.length || transfers.length || state.known.length;
     const holdNames = [...d.Holdings.map((h, i) => [i, h.Name]), [-1, T("New: Savings account")]];
     const defaultTarget = d.Holdings.findIndex(h => h.Place === "Bank");
     const date = r => fmtDate(r.date);
@@ -432,7 +437,7 @@ export async function openBankImport() {
         hint(T("\"Savings – every month\" also adds it as a regular deposit to My savings, so it appears in the Payment calendar.")), "wide") : ""}
       </div>
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button>
-      <button class="btn main" data-import ${anything ? "" : "disabled"}>${esc(!anything ? T("Import") : !received.length ? T("Import {0} expenses", items.length) : T("Import {0} expenses and {1} payments received", items.length, received.length))}</button></div>`;
+      <button class="btn main" data-import ${anything ? "" : "disabled"}>${esc(!anything ? T("Import") : !items.length && !received.length && !transfers.length ? T("Add the bank details") : !received.length ? T("Import {0} expenses", items.length) : T("Import {0} expenses and {1} payments received", items.length, received.length))}</button></div>`;
     p.el.querySelector('[data-action="columns"]').onclick = () => { showColumns = !showColumns; draw(); };
     p.el.querySelectorAll("[data-range]").forEach(b => b.onclick = () => {
       if (b.dataset.range === "all") { from = to = null; }
@@ -450,7 +455,8 @@ export async function openBankImport() {
   };
   const doImport = async () => {
     const v = values(p.el);
-    const { items, transfers, received } = state;
+    const { items, transfers, received, known } = state;
+    for (const [x, info] of known) x.Info = info;
     items.forEach((i, n) => { if (v["cat-" + n]) i.category = v["cat-" + n]; });
     received.forEach((r, n) => { if (v["kind-" + n]) r.Kind = v["kind-" + n]; });
     transfers.forEach((t, n) => { if (v["tr-" + n] !== undefined) { t.toSavings = v["tr-" + n] !== "0"; t.monthly = v["tr-" + n] === "m"; } });

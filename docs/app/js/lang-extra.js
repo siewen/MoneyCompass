@@ -169,7 +169,9 @@ export const EXTRA = {
 "planned": "geplant",
 "This is the first month of your data.": "Das ist der erste Monat Ihrer Daten.",
 "Today": "Heute",
-"Before today: what really happened (your entries and bank imports). From today: what is planned.": "Vor heute: was wirklich passiert ist (Ihre Einträge und Bankimporte). Ab heute: was geplant ist."
+"Before today: what really happened (your entries and bank imports). From today: what is planned.": "Vor heute: was wirklich passiert ist (Ihre Einträge und Bankimporte). Ab heute: was geplant ist.",
+"ⓘ {0} entries you imported before get the details from your bank (accounts, title).": "ⓘ {0} früher importierte Einträge erhalten die Details Ihrer Bank (Konten, Verwendungszweck).",
+"Add the bank details": "Bankdetails hinzufügen"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -340,7 +342,9 @@ export const EXTRA = {
 "planned": "prévu",
 "This is the first month of your data.": "C'est le premier mois de vos données.",
 "Today": "Aujourd'hui",
-"Before today: what really happened (your entries and bank imports). From today: what is planned.": "Avant aujourd'hui : ce qui s'est vraiment passé (vos saisies et imports bancaires). À partir d'aujourd'hui : ce qui est prévu."
+"Before today: what really happened (your entries and bank imports). From today: what is planned.": "Avant aujourd'hui : ce qui s'est vraiment passé (vos saisies et imports bancaires). À partir d'aujourd'hui : ce qui est prévu.",
+"ⓘ {0} entries you imported before get the details from your bank (accounts, title).": "ⓘ {0} opérations importées auparavant reçoivent les détails de votre banque (comptes, libellé).",
+"Add the bank details": "Ajouter les détails bancaires"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -511,6 +515,8 @@ export const EXTRA = {
 "planned": "planowane",
 "This is the first month of your data.": "To pierwszy miesiąc Twoich danych.",
 "Today": "Dziś",
-"Before today: what really happened (your entries and bank imports). From today: what is planned.": "Przed dziś: co naprawdę się wydarzyło (Twoje wpisy i importy z banku). Od dziś: co jest zaplanowane."
+"Before today: what really happened (your entries and bank imports). From today: what is planned.": "Przed dziś: co naprawdę się wydarzyło (Twoje wpisy i importy z banku). Od dziś: co jest zaplanowane.",
+"ⓘ {0} entries you imported before get the details from your bank (accounts, title).": "ⓘ {0} wcześniej zaimportowanych wpisów otrzyma szczegóły z banku (konta, tytuł).",
+"Add the bank details": "Dodaj szczegóły z banku"
 }
 };
