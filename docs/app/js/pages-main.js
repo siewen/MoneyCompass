@@ -5,7 +5,7 @@ import {
   addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
   matchKey, learnCategory, similarExpenses, setCategory,
 } from "./core.js";
-import { hbars, donut, legend, monthBars, progress } from "./charts.js";
+import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
 import { NEW_CAT } from "./ui.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON } from "./ui.js";
 import { App, requirePro } from "./app.js";
@@ -121,6 +121,21 @@ export const Overview = {
         { color: "#C81E26", label: T("Outflows"), text: pln(months.reduce((s, m) => s + m.expenses, 0) / Math.max(1, months.length)) + " " + T("avg.") },
       ]) + (Calc.coverage(d).partial ? hint(T("Months with only part of the data show what was entered, not a whole month.")) : "") + (cur ? `<p class="hint planned-note"><span class="planned-swatch"></span>${esc(T("{0} is not finished: income as planned from your income sources, expenses entered so far.", monthName(cur.start)))}</p>` : "")
       : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"expenses"));
+    // Wave lines: inflows, outflows, saved (inflows − outflows) and, with the module, loan payments – month by month
+    if (showTrend && months.length >= 2) {
+      const hid = new Set(d.Settings.WaveHidden || []);
+      const ser = [
+        { key: "in", label: T("Inflows"), color: "var(--w-in)", values: months.map(m => m.income) },
+        { key: "out", label: T("Outflows"), color: "var(--w-out)", values: months.map(m => m.expenses) },
+        { key: "save", label: T("Saved"), color: "var(--w-save)", values: months.map(m => m.income - m.expenses) },
+      ];
+      if (moduleOn("loans") && d.Loans.some(l => l.MonthlyPayment > 0)) ser.push({ key: "loan", label: T("Loan payments"), color: "var(--w-loan)", values: months.map(m => Calc.loanPayments(d, m.start)) });
+      const avgOf = s => s.values.reduce((a, b) => a + b, 0) / s.values.length;
+      parts.push(card(heading(T("Trends month by month"), "〰️") +
+        hint(T("Saved = inflows minus outflows in that month. Click a name to show or hide its line.")) +
+        `<div class="wave-legend">${ser.map(s => `<button class="wave-key${hid.has(s.key) ? " off" : ""}" data-wave="${s.key}" style="--c:${s.color}"><i></i>${esc(s.label)}<small>${esc(T("avg. {0}", pln(avgOf(s))))}</small></button>`).join("")}</div>` +
+        waveChart(months.map(m => m.month + (m.current ? " *" : "")), ser, axis, pln, hid)));
+    }
     parts.push(card(heading(T("Outflows by category")) + hint(basisText(d)) +
       (cats.slices.length ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.slices.map(s => ({ color: s.color, label: (s.icon ? s.icon + " " : "") + s.label, text: s.text, share: ChartData.share(s.value, cats.total) })))}</div>`
         : hint(T("Add expenses to see where your money goes."))), "link\" data-go=\"expenses"));
@@ -163,6 +178,12 @@ export const Overview = {
         (best ? `<hr><p class="good">🏦 ${esc(T("Best rate right now: {0} – {1} ({2}).", best.Bank, best.Name || best.Bank, rate(best.Rate)))}</p>` : ""), "link\" data-go=\"savings"));
     }
     el.innerHTML = `<div class="grid">${parts.join("")}</div>`;
+    el.querySelectorAll("[data-wave]").forEach(b => b.onclick = ev => {
+      ev.stopPropagation();
+      const h = new Set(d.Settings.WaveHidden || []), k = b.dataset.wave;
+      h.has(k) ? h.delete(k) : h.add(k);
+      d.Settings.WaveHidden = [...h]; save(); App.refresh();
+    });
   },
 };
 /** What the expense averages are based on: the months that really have expenses (imported or entered). */

@@ -616,3 +616,17 @@ body.is-locked #page { visibility: hidden; }
 @keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
 body.is-locked .popup-back { visibility: hidden; }
 body.is-locked .lock-screen ~ .popup-back { visibility: visible; z-index: 1100; }
+
+/* Wave lines on the Overview */
+:root { --w-in: #2E9E5B; --w-out: #C81E26; --w-save: #2563EB; --w-loan: #D97706; }
+:root[data-theme="dark"] { --w-in: #4ADE80; --w-out: #F87171; --w-save: #60A5FA; --w-loan: #FBBF24; }
+:root[data-design="navy"] { --w-in: #2EE6A8; --w-out: #D63AF9; --w-save: #5AA9FF; --w-loan: #FFC75A; }
+:root[data-design="emerald"] { --w-in: #4FC59B; --w-out: #9D8CFF; --w-save: #E9D16A; --w-loan: #F28B6B; }
+.wave-chart { width: 100%; height: auto; display: block; margin-top: 6px; overflow: visible; }
+.wave-line { filter: drop-shadow(0 3px 6px color-mix(in srgb, currentColor 0%, rgba(0,0,0,.18))); }
+.wave-dot { transition: r .15s; cursor: default; } .wave-dot:hover { r: 6; }
+.wave-legend { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 2px; }
+.wave-key { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border); background: var(--soft); color: var(--ink); border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.wave-key i { width: 18px; height: 4px; border-radius: 4px; background: var(--c); }
+.wave-key small { color: var(--muted); font-weight: 500; }
+.wave-key.off { opacity: .45; } .wave-key.off i { background: var(--muted); }

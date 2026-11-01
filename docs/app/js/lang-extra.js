@@ -629,7 +629,11 @@ export const EXTRA = {
 "At least 8 characters. Every profile file you save from now on is encrypted with it.": "Mindestens 8 Zeichen. Jede Profildatei, die Sie ab jetzt speichern, wird damit verschlüsselt.",
 "Profile files are now protected.": "Profildateien sind jetzt geschützt.",
 "Turn off the password?": "Passwort ausschalten?",
-"New profile files will be plain text again. Files you saved before stay protected with the old password.": "Neue Profildateien sind wieder Klartext. Früher gespeicherte Dateien bleiben mit dem alten Passwort geschützt."
+"New profile files will be plain text again. Files you saved before stay protected with the old password.": "Neue Profildateien sind wieder Klartext. Früher gespeicherte Dateien bleiben mit dem alten Passwort geschützt.",
+"Saved": "Gespart",
+"Trends month by month": "Trends Monat für Monat",
+"Saved = inflows minus outflows in that month. Click a name to show or hide its line.": "Gespart = Eingänge minus Ausgänge im jeweiligen Monat. Klicken Sie auf einen Namen, um die Linie ein- oder auszublenden.",
+"avg. {0}": "Ø {0}"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1260,7 +1264,11 @@ export const EXTRA = {
 "At least 8 characters. Every profile file you save from now on is encrypted with it.": "Au moins 8 caractères. Chaque fichier de profil enregistré à partir de maintenant sera chiffré avec.",
 "Profile files are now protected.": "Les fichiers de profil sont maintenant protégés.",
 "Turn off the password?": "Désactiver le mot de passe ?",
-"New profile files will be plain text again. Files you saved before stay protected with the old password.": "Les nouveaux fichiers seront à nouveau en texte clair. Les fichiers enregistrés avant restent protégés par l'ancien mot de passe."
+"New profile files will be plain text again. Files you saved before stay protected with the old password.": "Les nouveaux fichiers seront à nouveau en texte clair. Les fichiers enregistrés avant restent protégés par l'ancien mot de passe.",
+"Saved": "Épargné",
+"Trends month by month": "Tendances mois par mois",
+"Saved = inflows minus outflows in that month. Click a name to show or hide its line.": "Épargné = entrées moins sorties du mois. Cliquez sur un nom pour afficher ou masquer sa ligne.",
+"avg. {0}": "moy. {0}"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1891,6 +1899,10 @@ export const EXTRA = {
 "At least 8 characters. Every profile file you save from now on is encrypted with it.": "Co najmniej 8 znaków. Każdy zapisany odtąd plik profilu będzie nim zaszyfrowany.",
 "Profile files are now protected.": "Pliki profilu są teraz chronione.",
 "Turn off the password?": "Wyłączyć hasło?",
-"New profile files will be plain text again. Files you saved before stay protected with the old password.": "Nowe pliki profilu znów będą zwykłym tekstem. Wcześniej zapisane pliki pozostaną chronione starym hasłem."
+"New profile files will be plain text again. Files you saved before stay protected with the old password.": "Nowe pliki profilu znów będą zwykłym tekstem. Wcześniej zapisane pliki pozostaną chronione starym hasłem.",
+"Saved": "Zaoszczędzone",
+"Trends month by month": "Trendy miesiąc po miesiącu",
+"Saved = inflows minus outflows in that month. Click a name to show or hide its line.": "Zaoszczędzone = wpływy minus wydatki w danym miesiącu. Kliknij nazwę, aby pokazać lub ukryć linię.",
+"avg. {0}": "śr. {0}"
 }
 };
