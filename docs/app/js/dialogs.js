@@ -135,6 +135,7 @@ export function openOptions() {
       hint(T("The file works in the Windows app too.")) +
       hint(s.LastProfileSaved ? T("Last saved: {0}", fmtDate(s.LastProfileSaved) + " " + String(s.LastProfileSaved).slice(11, 16)) : T("Your profile has not been saved yet.")) +
       check("askstart", T("Ask what to do when MoneyCompass starts"), s.AskOnStart) +
+      check("showguide", T("Show the step-by-step guide when MoneyCompass starts"), !s.GuideHidden) +
       field(T("When I close MoneyCompass"), select("closechoice", [["", T("Ask every time")], ["with", T("Save profile and close")], ["without", T("Close without saving")]], s.CloseChoice === "none" ? "without" : s.CloseChoice || "")) +
       `<div class="buttons">${button(esc(T("Save profile now")), "save-file", "second")}${button(esc(T("Load a profile…")), "load-file", "second")}</div>`)}
     ${card(heading(T("Reset")) + hint(T("Delete all or only some of your entries: income, expenses, savings, saved offers, emergency fund settings or exchange rates. Your language and other options stay.")) +
@@ -152,6 +153,7 @@ export function openOptions() {
   el.querySelectorAll('input[name^="mod-"]').forEach(c => c.onchange = () => setModule(c.name.slice(4), c.checked));
   el.querySelector('input[name="online"]').onchange = e => { s.OnlineRates = e.target.checked; save(); if (s.OnlineRates) Rates.refresh(true); };
   el.querySelector('select[name="closechoice"]').onchange = e => { s.CloseChoice = e.target.value; save(); };
+  el.querySelector('input[name="showguide"]').onchange = e => { s.GuideHidden = !e.target.checked; save(); };
   el.querySelector('input[name="askstart"]').onchange = e => { s.AskOnStart = e.target.checked; save(); };
   el.querySelector('[data-action="save-file"]').onclick = saveProfileFile;
   el.querySelector('[data-action="reset-layout"]').onclick = () => {

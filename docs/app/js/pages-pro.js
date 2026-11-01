@@ -288,11 +288,15 @@ export async function openBankImport() {
   const d = D(), s = d.Settings;
   let showColumns = false;
   let state = null;
+  // Which dates to import: the whole file, or only some of it (e.g. 1 month of a 3-month statement)
+  let from = null, to = null;
   const toPln = (a, cur) => cur === "PLN" ? a : ((cur === "USD" || cur === "EUR") && !Calc.rateMissing(cur, s)) ? Math.round(Calc.toPln(a, cur, s) * 100) / 100 : null;
   const sameDay = (a, b) => parseDate(a).getTime() === new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime();
 
   const compute = () => {
-    const rows = Csv.transactions(file, file.columns);
+    const all = Csv.transactions(file, file.columns);
+    const rows = all.filter(r => (!from || r.date >= from) && (!to || r.date <= to));
+    state = { allDates: all.map(r => r.date) };
     const outgoing = rows.filter(r => r.amount < 0), incoming = rows.filter(r => r.amount > 0);
     const items = []; let dup = 0, foreign = 0;
     for (const r of outgoing.filter(r => !Csv.isOwnTransfer(r))) {
@@ -312,7 +316,7 @@ export async function openBankImport() {
       received.push({ Id: uuid(), Date: isoDate(r.date), Amount: v, Description: r.description, Kind: RECEIVED.income });
     }
     received.sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
-    state = { items, transfers, received, dup, foreign, total: rows.length };
+    state = { ...state, items, transfers, received, dup, foreign, total: rows.length, skippedByDate: all.length - rows.length };
   };
 
   const p = popup("", { width: 900, cls: "wide-popup" });
@@ -337,6 +341,16 @@ export async function openBankImport() {
     const holdNames = [...d.Holdings.map((h, i) => [i, h.Name]), [-1, T("New: Savings account")]];
     const defaultTarget = d.Holdings.findIndex(h => h.Place === "Bank");
     const date = r => fmtDate(r.date);
+    const dates = state.allDates;
+    const first = dates.length ? new Date(Math.min(...dates)) : today(), last = dates.length ? new Date(Math.max(...dates)) : today();
+    const months = [];
+    for (let m = new Date(first.getFullYear(), first.getMonth(), 1); m <= last; m = addMonths(m, 1)) months.push(m);
+    const isMonth = m => from && to && from.getTime() === m.getTime() && to.getTime() === addMonths(m, 1).getTime() - 86400000;
+    const dateCard = card(heading(T("Which dates?"), "📅") + hint(T("The file has transactions from {0} to {1}. Import all of them, or only some.", fmtDate(first), fmtDate(last))) +
+      `<div class="chips"><button class="chip${!from && !to ? " on" : ""}" data-range="all">${esc(T("All"))}</button>${months.map((m, i) =>
+        `<button class="chip${isMonth(m) ? " on" : ""}" data-range="${i}">${esc(monthName(m))}</button>`).join("")}</div>` +
+      `<div class="two">${field(T("From"), dateInput("from", inputDate(from || first)))}${field(T("To"), dateInput("to", inputDate(to || last)))}</div>` +
+      (state.skippedByDate ? hint(T("{0} transactions outside these dates are not imported.", state.skippedByDate)) : ""));
     p.el.innerHTML = `<h2 class="popup-title">⬆ ${esc(T("Import from your bank"))}</h2>
       ${hint(T("Your bank statement (CSV) becomes expenses, sorted into categories."))}
       <div class="grid">
@@ -345,6 +359,7 @@ export async function openBankImport() {
         button(esc(showColumns ? T("Hide columns") : T("Change columns")), "columns", "second small") +
         (showColumns ? `<div class="two">${["Date", "Amount", "Debit", "Credit", "Description", "Counterparty", "Category", "Currency"].map(k => field(T(k === "Debit" ? "Amount" : k === "Credit" ? "Amount" : k === "Counterparty" ? "Name" : k) + (k === "Debit" ? " −" : k === "Credit" ? " +" : ""), select("col-" + k, colOptions, file.columns[k]))).join("")}</div>` : "") +
         hint(T("The file is only read on this computer.")))}
+      ${dateCard}
       ${card(heading(T("3. What will be added")) + lines.map(l => `<p>${esc(l)}</p>`).join("") +
         Object.entries(byCat).sort((a, b) => b[1].sum - a[1].sum).map(([c, v]) => row(`${categoryLabel(c)} (${v.n})`, pln(v.sum))).join(""))}
       ${unsorted.length ? card(heading(T("Not sorted yet")) + hint(T("MoneyCompass could not tell what these are. Choose a category, or leave them as \"Other\".")) +
@@ -361,6 +376,17 @@ export async function openBankImport() {
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button>
       <button class="btn main" data-import ${anything ? "" : "disabled"}>${esc(!anything ? T("Import") : !received.length ? T("Import {0} expenses", items.length) : T("Import {0} expenses and {1} payments received", items.length, received.length))}</button></div>`;
     p.el.querySelector('[data-action="columns"]').onclick = () => { showColumns = !showColumns; draw(); };
+    p.el.querySelectorAll("[data-range]").forEach(b => b.onclick = () => {
+      if (b.dataset.range === "all") { from = to = null; }
+      else { const m = months[+b.dataset.range]; from = m; to = new Date(addMonths(m, 1).getTime() - 86400000); }
+      draw();
+    });
+    p.el.querySelectorAll('input[name="from"], input[name="to"]').forEach(inp => inp.onchange = () => {
+      const f = p.el.querySelector('input[name="from"]').value, t = p.el.querySelector('input[name="to"]').value;
+      from = f ? parseDate(f) : null; to = t ? parseDate(t) : null;
+      if (from && to && from > to) [from, to] = [to, from];
+      draw();
+    });
     p.el.querySelectorAll('select[name^="col-"]').forEach(sel => sel.onchange = () => { file.columns[sel.name.slice(4)] = +sel.value; draw(); });
     p.el.querySelector("[data-import]").onclick = () => doImport();
   };

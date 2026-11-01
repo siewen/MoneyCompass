@@ -4,6 +4,7 @@ import { esc, popup, toast } from "./ui.js";
 import { App, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
 import { WEB_VERSION, WEB_BUILD, WEB_DATE } from "./version.js";
+import { openGuide, shouldShowGuide } from "./guide.js";
 import { Overview, Income, Expenses, Emergency, Portfolio } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
 import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile } from "./dialogs.js";
@@ -124,7 +125,7 @@ function helpMenu() {
   if (document.querySelector(".help-menu")) return closeHelpMenu();
   const shield = document.createElement("div"); shield.className = "help-shield";
   const menu = document.createElement("div"); menu.className = "help-menu";
-  const items = [["about", "ℹ  " + T("About")], ["help", "?  " + T("Help")], ["options", "⚙  " + T("Options")]];
+  const items = [["guide", "🧭  " + T("Guide")], ["about", "ℹ  " + T("About")], ["help", "?  " + T("Help")], ["options", "⚙  " + T("Options")]];
   if (!installed()) items.push(["install", "📲  " + T("Install app")]);
   items.push(["exit", "⏻  " + T("Close")]);
   menu.innerHTML = items.map(([k, t]) => `<button data-m="${k}">${esc(t)}</button>`).join("");
@@ -139,7 +140,7 @@ function helpMenu() {
   menu.querySelectorAll("[data-m]").forEach(b => b.onclick = () => {
     closeHelpMenu();
     const m = b.dataset.m;
-    if (m === "help") openHelp(); else if (m === "options") openOptions(); else if (m === "install") install(); else if (m === "exit") closeApp(); else about();
+    if (m === "guide") openGuide(); else if (m === "help") openHelp(); else if (m === "options") openOptions(); else if (m === "install") install(); else if (m === "exit") closeApp(); else about();
   });
 }
 function closeHelpMenu() {
@@ -274,7 +275,8 @@ Object.assign(App, {
   refresh: render,
   rebuild: buildShell,
   applyTheme,
-  openProfile, openOptions, openHelp, openExport, openImport, openDelete, openOptimize, openBankImport,
+  openProfile, openOptions, openHelp, openExport, openImport, openDelete, openOptimize, openBankImport, install, openGuide,
+  saveProfile: saveProfileFile,
 });
 
 async function start() {
@@ -283,7 +285,7 @@ async function start() {
   const hash = location.hash.slice(1);
   if (hash) current = hash;
   buildShell();
-  welcome();
+  if (shouldShowGuide()) openGuide(); else welcome();
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
   Rates.listeners.push(() => { if (!document.querySelector(".popup-back, .dragging")) render(); });
   Rates.refresh();

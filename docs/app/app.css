@@ -236,3 +236,40 @@ textarea { font-family: Consolas, monospace; font-size: 13px; resize: vertical; 
 .tab-menu { position: fixed; z-index: 31; min-width: 220px; display: flex; flex-direction: column; padding: 6px; gap: 2px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,.25); }
 .tab-menu button { text-align: left; background: none; border: 0; font: inherit; font-weight: 700; padding: 10px 12px; border-radius: 8px; cursor: pointer; }
 .tab-menu button:hover { background: var(--soft); }
+
+/* Import: which dates */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.chip { border: 1px solid var(--border); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Step-by-step guide */
+.guide-popup { background: var(--card) !important; }
+.guide-head h2 { margin: 0 0 4px; font-size: 26px; }
+.guide-steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 18px 0 8px; align-items: start; }
+.guide-step { background: none; border: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; font: inherit; color: var(--ink); padding: 0; }
+.guide-step.low { margin-top: 46px; }
+.guide-step .ring { width: 112px; height: 112px; border-radius: 50%; border: 3px solid var(--c); padding: 6px; display: grid; transition: transform .2s; }
+.guide-step .circle { border-radius: 50%; background: var(--card); box-shadow: 0 6px 16px rgba(0,0,0,.12), inset 0 0 0 2px color-mix(in srgb, var(--c) 35%, transparent); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.guide-step small { font-weight: 800; font-size: 14px; color: var(--ink); }
+.guide-step b { font-size: 36px; line-height: 1; color: var(--c); }
+.guide-step .label { font-weight: 700; color: var(--c); font-size: 15px; text-align: center; }
+.guide-step.on .ring { transform: scale(1.08); background: color-mix(in srgb, var(--c) 15%, transparent); }
+.guide-step.done .circle { background: var(--c); } .guide-step.done small, .guide-step.done b { color: #fff; }
+.guide-detail { display: flex; gap: 18px; align-items: flex-start; border: 2px solid var(--c); border-radius: 16px; padding: 18px; margin-top: 14px; background: color-mix(in srgb, var(--c) 6%, var(--card)); }
+.guide-num { flex: none; width: 54px; height: 54px; border-radius: 50%; background: var(--c); color: #fff; font-size: 28px; font-weight: 800; display: grid; place-items: center; }
+.guide-body h3 { color: var(--c); font-size: 20px; }
+.guide-body p { margin: 0; font-size: 16px; }
+.done-tag { font-size: 13px; color: #fff; background: #15803D; border-radius: 999px; padding: 2px 10px; }
+.guide-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.guide-foot .buttons { margin: 0; }
+@media (max-width: 760px) {
+  .guide-steps { grid-template-columns: repeat(3, 1fr); row-gap: 14px; }
+  .guide-step.low { margin-top: 0; }
+  .guide-step .ring { width: 84px; height: 84px; } .guide-step b { font-size: 26px; } .guide-step small { font-size: 11px; }
+}
+.guide-bar { position: fixed; left: 50%; bottom: 20px; z-index: 29; transform: translate(-50%, 30px); opacity: 0; transition: .25s; display: flex; align-items: center; gap: 12px;
+  background: var(--card); border: 2px solid var(--c); border-radius: 999px; padding: 6px 8px 6px 6px; box-shadow: 0 10px 30px rgba(0,0,0,.25); max-width: calc(100% - 100px); }
+.guide-bar.open { transform: translate(-50%, 0); opacity: 1; }
+.guide-bar .dot { width: 34px; height: 34px; border-radius: 50%; background: var(--c); color: #fff; font-weight: 800; display: grid; place-items: center; flex: none; }
+.guide-bar .btn.main { background: var(--c); white-space: nowrap; }
+.guide-detail .btn.main { background: var(--c); }
