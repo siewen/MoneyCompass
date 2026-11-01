@@ -234,7 +234,14 @@ export const EXTRA = {
 "Nothing in this month.": "Nichts in diesem Monat.",
 "instead of {0} (then {1})": "statt {0} (danach {1})",
 "Best moved when your promotion ends on {0}.": "Am besten umziehen, wenn Ihre Aktion am {0} endet.",
-"{0}: salary {1} per month, the same months as your expenses.": "{0}: Gehalt {1} pro Monat, dieselben Monate wie Ihre Ausgaben."
+"{0}: salary {1} per month, the same months as your expenses.": "{0}: Gehalt {1} pro Monat, dieselben Monate wie Ihre Ausgaben.",
+"Borrowed at the start (zł)": "Anfangs geliehen (zł)",
+"optional": "optional",
+"With the amount at the start, MoneyCompass shows how much you have already paid back.": "Mit dem Anfangsbetrag zeigt MoneyCompass, wie viel Sie schon zurückgezahlt haben.",
+"The amount at the start can't be smaller than what is still to pay back.": "Der Anfangsbetrag kann nicht kleiner sein als der Restbetrag.",
+"Paid back {0} of {1} ({2}%)": "Zurückgezahlt {0} von {1} ({2} %)",
+"Paid back": "Zurückgezahlt",
+"Tip: enter how much you borrowed at the start (Loans & debts tab) to see how much is already paid back.": "Tipp: Geben Sie den Anfangsbetrag ein (Tab Kredite & Schulden), um zu sehen, wie viel schon zurückgezahlt ist."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -470,7 +477,14 @@ export const EXTRA = {
 "Nothing in this month.": "Rien ce mois-ci.",
 "instead of {0} (then {1})": "au lieu de {0} (puis {1})",
 "Best moved when your promotion ends on {0}.": "À déplacer de préférence à la fin de votre promotion le {0}.",
-"{0}: salary {1} per month, the same months as your expenses.": "{0} : salaire {1} par mois, les mêmes mois que vos dépenses."
+"{0}: salary {1} per month, the same months as your expenses.": "{0} : salaire {1} par mois, les mêmes mois que vos dépenses.",
+"Borrowed at the start (zł)": "Emprunté au départ (zł)",
+"optional": "facultatif",
+"With the amount at the start, MoneyCompass shows how much you have already paid back.": "Avec le montant de départ, MoneyCompass montre combien vous avez déjà remboursé.",
+"The amount at the start can't be smaller than what is still to pay back.": "Le montant de départ ne peut pas être inférieur au reste à rembourser.",
+"Paid back {0} of {1} ({2}%)": "Remboursé {0} sur {1} ({2} %)",
+"Paid back": "Remboursé",
+"Tip: enter how much you borrowed at the start (Loans & debts tab) to see how much is already paid back.": "Astuce : indiquez le montant emprunté au départ (onglet Prêts & dettes) pour voir combien est déjà remboursé."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -706,6 +720,13 @@ export const EXTRA = {
 "Nothing in this month.": "Nic w tym miesiącu.",
 "instead of {0} (then {1})": "zamiast {0} (potem {1})",
 "Best moved when your promotion ends on {0}.": "Najlepiej przenieść, gdy promocja skończy się {0}.",
-"{0}: salary {1} per month, the same months as your expenses.": "{0}: wynagrodzenie {1} miesięcznie, te same miesiące co Twoje wydatki."
+"{0}: salary {1} per month, the same months as your expenses.": "{0}: wynagrodzenie {1} miesięcznie, te same miesiące co Twoje wydatki.",
+"Borrowed at the start (zł)": "Pożyczone na początku (zł)",
+"optional": "opcjonalnie",
+"With the amount at the start, MoneyCompass shows how much you have already paid back.": "Z kwotą początkową MoneyCompass pokaże, ile już spłaciłeś.",
+"The amount at the start can't be smaller than what is still to pay back.": "Kwota początkowa nie może być mniejsza niż pozostało do spłaty.",
+"Paid back {0} of {1} ({2}%)": "Spłacono {0} z {1} ({2}%)",
+"Paid back": "Spłacono",
+"Tip: enter how much you borrowed at the start (Loans & debts tab) to see how much is already paid back.": "Wskazówka: wpisz, ile pożyczyłeś na początku (zakładka Kredyty i długi), aby zobaczyć, ile już spłaciłeś."
 }
 };

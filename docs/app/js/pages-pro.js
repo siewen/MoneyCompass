@@ -266,14 +266,17 @@ export const Loans = {
     el.innerHTML = `<div class="grid">
       ${card(`<form id="loan">${heading(l ? T("Edit loan") : T("Add a loan"))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("Car loan, credit card, mortgage"))))}
-        <div class="two">${field(T("Still to pay back (zł)"), numInput("remaining", plain(f.Remaining)))}${field(T("Monthly payment (zł)"), numInput("payment", plain(f.MonthlyPayment)))}</div>
+        <div class="two">${field(T("Borrowed at the start (zł)"), numInput("original", plain(f.Original), T("optional")))}${field(T("Still to pay back (zł)"), numInput("remaining", plain(f.Remaining)))}</div>
+        ${hint(T("With the amount at the start, MoneyCompass shows how much you have already paid back."))}
+        <div class="two">${field(T("Monthly payment (zł)"), numInput("payment", plain(f.MonthlyPayment)))}<span></span></div>
         <div class="two">${field(T("Interest rate (% per year, 0 if none)"), numInput("rate", plain(f.RatePercent), "0"))}${field(T("Last payment"), dateInput("end", inputDate(parseDate(f.EndDate))))}</div>
         <div class="buttons">${button(l ? T("Save changes") : T("Add"), "save-loan", "main")}${l ? button(T("Cancel"), "cancel-loan") : ""}</div></form>`)}
-      ${card(heading(T("Your debts")) + row(T("Still to pay back"), pln(running.reduce((s, x) => s + x.Remaining, 0))) + row(T("Payments per month"), pln(payments)) +
+      ${card(heading(T("Your debts")) + loanProgress(running) + row(T("Still to pay back"), pln(running.reduce((s, x) => s + x.Remaining, 0))) + row(T("Payments per month"), pln(payments)) +
         row(T("Share of your income"), income > 0 ? Math.round(share * 100) + "%" : "–") + row(T("Debt-free"), running.length ? monthName(new Date(Math.max(...running.map(x => parseDate(x.EndDate).getTime())))) : "–") +
         level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Expenses tab.")))}
       ${card(heading(T("Loans")) + hint(T("Tap a loan to edit it, for example to update what is left.")) + (d.Loans.length ? `<div class="list">${d.Loans.map(x => `
         <div class="item clickable" data-edit-loan="${x.Id}"><div><b>${esc(x.Name)}</b><span class="hint">${esc(T("{0} per month · {1} per year · last payment {2} ({3} months left)", pln(x.MonthlyPayment), rate(x.RatePercent || 0), fmtDate(x.EndDate), monthsLeft(x)))}</span></div>
+        ${x.Original > 0 ? `<div class="loan-progress">${progress(1 - x.Remaining / x.Original, "#1BAF7A")}<span class="hint">${esc(T("Paid back {0} of {1} ({2}%)", pln(x.Original - x.Remaining), pln(x.Original), Math.round((1 - x.Remaining / x.Original) * 100)))}</span></div>` : ""}
         <b>${pln(x.Remaining)}</b><button class="icon-btn danger" data-del-loan="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No loans – great! Add one above if you have any."))), "wide")}
       ${binCard(["loan"])}
     </div>`;
@@ -281,7 +284,9 @@ export const Loans = {
     el.querySelector('[data-action="save-loan"]').onclick = () => {
       const v = values(fm), rem = num(v.remaining);
       if (!v.name.trim() || !(rem > 0)) { toast(T("Please enter a name and the amount still to pay back."), "bad"); return; }
-      const item = { Name: v.name.trim(), Remaining: rem, MonthlyPayment: num(v.payment) || 0, RatePercent: num(v.rate) || 0, EndDate: isoDate(parseDate(v.end)) };
+      const orig = num(v.original) || 0;
+      if (orig > 0 && orig < rem) { toast(T("The amount at the start can't be smaller than what is still to pay back."), "bad"); return; }
+      const item = { Name: v.name.trim(), Original: orig > 0 ? orig : null, Remaining: rem, MonthlyPayment: num(v.payment) || 0, RatePercent: num(v.rate) || 0, EndDate: isoDate(parseDate(v.end)) };
       if (l) Object.assign(l, item); else d.Loans.push({ Id: uuid(), ...item });
       editLoan = null; save(); toast(T("Saved.")); App.refresh();
     };
@@ -500,4 +505,12 @@ function accountName(info) {
   if (!info) return "";
   const digits = (info.Account || "").replace(/\D/g, "");
   return [info.Bank, digits.length >= 4 ? "··" + digits.slice(-4) : info.Account].filter(Boolean).join(" ");
+}
+
+/** All loans together: paid back so far (green) of what was borrowed – for loans with the amount at the start. */
+export function loanProgress(loans) {
+  const known = loans.filter(l => l.Original > 0);
+  if (!known.length) return "";
+  const orig = known.reduce((s, l) => s + l.Original, 0), rem = known.reduce((s, l) => s + l.Remaining, 0), f = orig > 0 ? 1 - rem / orig : 0;
+  return progress(f, "#1BAF7A") + `<p class="good"><b>${esc(T("Paid back {0} of {1} ({2}%)", pln(orig - rem), pln(orig), Math.round(f * 100)))}</b></p>`;
 }

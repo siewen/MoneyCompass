@@ -397,3 +397,4 @@ details.cal-month.past > summary { cursor: pointer; list-style: none; }
 details.cal-month.past > summary::-webkit-details-marker { display: none; }
 details.cal-month.past > summary b::before { content: "▸ "; color: var(--muted); }
 details.cal-month.past[open] > summary b::before { content: "▾ "; }
+.loan-progress { flex: 1 1 160px; min-width: 120px; display: flex; flex-direction: column; gap: 2px; }
