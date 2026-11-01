@@ -89,7 +89,8 @@ export const Calendar = {
     const d = D();
     if (!d.Recurring) d.Recurring = [];
     const start = monthStart(today());
-    shown = shown || start;
+    // The calendar starts with the current month (also when the app stayed open over midnight into a new month)
+    if (!shown || shown < start) shown = start;
     const end = addDays(addMonths(start, range), -1);
     const all = events(d, today(), end);
     const sums = t => all.filter(e => e.type === t).reduce((s, e) => s + e.amount, 0);
@@ -141,7 +142,7 @@ export const Calendar = {
         row(T("Money in"), `<span class="good">+${pln(inSum)}</span>`) + row(T("Payments"), `<span class="bad">−${pln(outSum)}</span>`) +
         row(T("To savings"), `<span class="primary">${pln(saveSum)}</span>`) + row(T("Left over"), pln(inSum - outSum - saveSum), "big" + (inSum - outSum - saveSum < 0 ? " bad" : " good")) +
         hint(T("From today to {0}: your income sources, the regular payments below and loan payments.", fmtDate(end))))}
-      ${card(`<div class="cal-head"><button class="icon-btn" data-month="-1">◀</button><h3>${esc(monthName(shown))}</h3><button class="icon-btn" data-month="1">▶</button></div>
+      ${card(`<div class="cal-head"><button class="icon-btn" data-month="-1"${shown <= start ? ` disabled title="${esc(T("The calendar shows the future – past months are in Overview and Expenses."))}"` : ""}>◀</button><h3>${esc(monthName(shown))}</h3><button class="icon-btn" data-month="1">▶</button></div>
         <div class="cal-grid">${dayNames.map(n => `<div class="cal-dow">${esc(n)}</div>`).join("")}${cells}</div>
         <div class="cal-legend"><span><i class="cal-dot in"></i>${esc(T("Money in"))}</span><span><i class="cal-dot out"></i>${esc(T("Payments"))}</span><span><i class="cal-dot save"></i>${esc(T("To savings"))}</span></div>` +
         (selectedDay ? `<h3>${esc(fmtDate(new Date(shown.getFullYear(), shown.getMonth(), selectedDay)))}</h3>` + (dayList.length ? `<div class="list">${dayList.map(evRow).join("")}</div>` : hint(T("Nothing on this day."))) : hint(T("Click a day to see its payments."))))}

@@ -3,7 +3,7 @@ import {
   T, State, save, license, LANGS, lang, currentName, initials, picture, setPicture, profiles, switchTo, createProfile, deleteProfile,
   replaceData, normalise, looksLikeProfile, summary, reset, MODULES, setModule, moduleOn, Calc, Advisor, ChartData, pln, rate, fmtDate,
   parseDate, categoryLabel, monthName, ONE_TIME, store,
-} from "./core.js";
+  markFileBase } from "./core.js";
 import { esc, card, heading, hint, row, field, textInput, select, check, button, values, popup, confirmBox, alertBox, promptBox, toast, pickFile, download, stamp } from "./ui.js";
 import { App, requirePro, windowsOrPro, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
@@ -100,6 +100,7 @@ export function saveProfileFile() {
   D().Settings.LastProfileSaved = new Date().toISOString().slice(0, 19);
   save();
   download(`MoneyCompass-profile-${stamp()}.json`, JSON.stringify(D(), null, 2), "application/json");
+  markFileBase();
   toast(T("Profile saved"));
 }
 export async function loadProfileFile() {
@@ -110,7 +111,7 @@ export async function loadProfileFile() {
   if (!looksLikeProfile(data)) { await alertBox(T("Profile not loaded"), T("This file is not a MoneyCompass profile.")); return false; }
   const n = normalise(data);
   if (!(await confirmBox(T("Load this profile?"), T("It contains: {0}.\n\nThis replaces everything you have entered now. Tip: save your current profile first.", summary(n)), T("Load"), T("Cancel")))) return false;
-  replaceData(n); App.rebuild(); return true;
+  replaceData(n); markFileBase(); App.rebuild(); return true;
 }
 
 // ================================================================= Options

@@ -153,7 +153,8 @@ export const EXTRA = {
 "Current account": "Girokonto",
 "from {0}": "von {0}",
 "Savings – every month": "Sparen – jeden Monat",
-"\"Savings – every month\" also adds it as a regular deposit to My savings, so it appears in the Payment calendar.": "„Sparen – jeden Monat“ legt es zusätzlich als regelmäßige Einzahlung in Meine Ersparnisse an, damit es im Zahlungskalender erscheint."
+"\"Savings – every month\" also adds it as a regular deposit to My savings, so it appears in the Payment calendar.": "„Sparen – jeden Monat“ legt es zusätzlich als regelmäßige Einzahlung in Meine Ersparnisse an, damit es im Zahlungskalender erscheint.",
+"The calendar shows the future – past months are in Overview and Expenses.": "Der Kalender zeigt die Zukunft – vergangene Monate finden Sie in Übersicht und Ausgaben."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -308,7 +309,8 @@ export const EXTRA = {
 "Current account": "Compte courant",
 "from {0}": "depuis {0}",
 "Savings – every month": "Épargne – chaque mois",
-"\"Savings – every month\" also adds it as a regular deposit to My savings, so it appears in the Payment calendar.": "« Épargne – chaque mois » l'ajoute aussi comme versement régulier dans Mon épargne, pour qu'il apparaisse dans le calendrier des paiements."
+"\"Savings – every month\" also adds it as a regular deposit to My savings, so it appears in the Payment calendar.": "« Épargne – chaque mois » l'ajoute aussi comme versement régulier dans Mon épargne, pour qu'il apparaisse dans le calendrier des paiements.",
+"The calendar shows the future – past months are in Overview and Expenses.": "Le calendrier montre l'avenir – les mois passés sont dans Aperçu et Dépenses."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -463,6 +465,7 @@ export const EXTRA = {
 "Current account": "Konto osobiste",
 "from {0}": "z {0}",
 "Savings – every month": "Oszczędności – co miesiąc",
-"\"Savings – every month\" also adds it as a regular deposit to My savings, so it appears in the Payment calendar.": "„Oszczędności – co miesiąc” dodaje to także jako regularną wpłatę w Moich oszczędnościach, więc pojawi się w kalendarzu płatności."
+"\"Savings – every month\" also adds it as a regular deposit to My savings, so it appears in the Payment calendar.": "„Oszczędności – co miesiąc” dodaje to także jako regularną wpłatę w Moich oszczędnościach, więc pojawi się w kalendarzu płatności.",
+"The calendar shows the future – past months are in Overview and Expenses.": "Kalendarz pokazuje przyszłość – minione miesiące znajdziesz w Przeglądzie i Wydatkach."
 }
 };

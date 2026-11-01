@@ -84,11 +84,12 @@ export function loadCurrent() {
   if (!idx.current || !idx.ids.includes(idx.current)) {
     const id = uuid();
     idx.ids.push(id); idx.current = id; writeIndex(idx);
-    State.id = id; State.data = newData(); save(); return;
+    State.id = id; State.data = newData(); save(); markFileBase(); return;
   }
   State.id = idx.current;
   try { State.data = normalise(JSON.parse(store.get("mc-p:" + idx.current))); }
   catch { State.data = newData(); }
+  markFileBase();
 }
 let saveFailed = false;
 export function save() {
@@ -96,6 +97,13 @@ export function save() {
   saveFailed = !ok;
 }
 export const lastSaveFailed = () => saveFailed;
+
+// Changes since the profile was opened or last saved as a file (layout and settings don't count):
+// used to ask before the window is closed with the X
+const fingerprint = () => { const { Settings, ...rest } = State.data; return State.id + JSON.stringify(rest); };
+let fileBase = "";
+export const markFileBase = () => { fileBase = fingerprint(); };
+export const changedSinceFile = () => fileBase !== "" && fileBase !== fingerprint();
 
 export function profiles() {
   const idx = readIndex();

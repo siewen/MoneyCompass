@@ -1,5 +1,5 @@
 // MoneyCompass web: the window, the tabs and starting up.
-import { store, T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed, summary, fmtDate } from "./core.js";
+import { store, T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed, summary, fmtDate, changedSinceFile } from "./core.js";
 import { esc, popup, toast } from "./ui.js";
 import { App, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
@@ -244,8 +244,10 @@ function savedThenClose() {
   btn.onclick = () => { p.close(); setTimeout(() => finishClose(true), 150); };
 }
 
+let closing = false;
 function finishClose(fileSaved) {
   save();
+  closing = true;
   try { window.close(); } catch { /* not allowed */ }
   // The browser may not allow a page to close its own window or tab: then say so honestly
   setTimeout(() => {
@@ -323,6 +325,14 @@ async function start() {
   Rates.refresh();
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
   try { navigator.storage?.persist?.(); } catch { /* not supported */ }
+  // Closed with the X of the window or tab: a page can't show its own box there, only the browser's
+  // "Leave?" question – asked when there are changes that are not in a profile file yet
+  window.addEventListener("beforeunload", e => {
+    save();
+    const c = State.data.Settings.CloseChoice || "";
+    if (closing || c === "without" || c === "none" || !changedSinceFile()) return;
+    e.preventDefault(); e.returnValue = "";
+  });
   window.addEventListener("storage", e => { if (e.key && e.key.startsWith("mc-")) { loadCurrent(); buildShell(); } });
 }
 start();

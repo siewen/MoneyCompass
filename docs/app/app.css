@@ -355,3 +355,4 @@ details.bin[open] summary h3::after { content: "▴"; }
 details.bin summary h3 { padding-right: 40px; }
 .rep-tag { color: #2563EB; font-weight: 700; }
 :root[data-theme="dark"] .rep-tag { color: #60A5FA; }
+.icon-btn:disabled { opacity: .35; cursor: default; }
