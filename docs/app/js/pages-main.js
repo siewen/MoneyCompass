@@ -1,4 +1,4 @@
-// The free tabs: Overview, Income, Expenses, Emergency fund, My savings.
+// The free tabs: Overview, Inflows, Outflows, Emergency fund, Savings (with Savings goals for Pro).
 import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, addMonths, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
@@ -10,7 +10,7 @@ import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, s
 import { App, requirePro } from "./app.js";
 import { Rates } from "./rates.js";
 import { adviceCard, bindAdvice, promoBadge, moves } from "./advice.js";
-import { loanWarning } from "./pages-pro.js";
+import { loanWarning, Goals as SavingsGoals } from "./pages-pro.js";
 
 const D = () => State.data;
 const tile = (label, value, route, colors, cls = "", tip = "") =>
@@ -89,7 +89,7 @@ export const Overview = {
     parts.push(`<button class="btn go big" data-action="optimize">⚡ ${esc(T("Optimize my finances"))}</button>`);
     const due = duePromos(d)[0];
     if (due) parts.push(`<button class="tip warn-tip" data-go="portfolio">⏰ ${esc(due.p.ended ? T("The promotion at {0} ended on {1} – see where to move the money", due.h.Name, fmtDate(due.p.end)) : T("The promotion at {0} ends in {1} days – see where to move the money", due.h.Name, due.p.daysLeft))}  →</button>`);
-    else { const m = moves(d)[0]; if (m) parts.push(`<button class="tip" data-go="portfolio">🧭 ${esc(T("Your savings could earn about {0} more at {1} – see My savings", pln(m.gain), m.o.Bank))}  →</button>`); }
+    else { const m = moves(d)[0]; if (m) parts.push(`<button class="tip" data-go="portfolio">🧭 ${esc(T("Your savings could earn about {0} more at {1} – see Savings", pln(m.gain), m.o.Bank))}  →</button>`); }
     if (top) parts.push(`<button class="tip" data-go="${top.route || ""}">💡 ${esc(T("Best next step: {0}", top.title))}${top.route ? "  →" : ""}</button>`);
     parts.push(`<button class="btn second" data-action="export">⬇ ${esc(T("Export report (Excel, PDF, Word)"))}</button>`);
 
@@ -123,7 +123,7 @@ export const Overview = {
     parts.push(card(`<div class="link" data-go="portfolio">${heading(T("Your savings"))}${state ? `<span class="status-chip ${state}">${esc(state === "good" ? T("Growing") : state === "warn" ? T("Slow") : T("Shrinking"))}</span>` : ""}
       ${headline}${bars}${growthLine}${p.total > 0
         ? `<div class="chart-row">${donut(ChartData.money(p), pln(p.total), T("in total"))}${legend([...ChartData.money(p).map(s => ({ color: s.color, label: s.label, text: s.text, share: ChartData.share(s.value, p.total) })), { label: T("Interest per year"), text: pln(p.yearly) }])}</div>`
-        : hint(T("Add your savings in the My savings tab to see this chart."))}</div>
+        : hint(T("Add your savings in the Savings tab to see this chart."))}</div>
       <hr><div class="link" data-go="emergency">${heading(T("Emergency fund"))}${emergency}</div>`, "savings-card status-" + (state || "none") + " em-" + emState));
 
     if (moduleOn("loans")) {
@@ -147,7 +147,7 @@ export const Overview = {
         const f = g.Target > 0 ? g.Saved / g.Target : 0, done = g.Target > 0 && g.Saved >= g.Target;
         return `<div class="bar-item"><b>${esc(g.Name)}</b>${progress(f, done ? COLORS.leftOver : "var(--goals)")}<span class="hint">${esc(done ? T("Goal reached – well done!")
           : T("{0} of {1} ({2}%) · by {3}", pln(Math.min(g.Saved, g.Target)), pln(g.Target), Math.round(Math.min(100, f * 100)), fmtDate(g.TargetDate)))}</span></div>`;
-      }).join("") : hint(T("Add your goals in the Savings goals tab to see them here."))), "link\" data-go=\"goals"));
+      }).join("") : hint(T("Add your goals in the Savings tab to see them here."))), "link\" data-go=\"portfolio"));
     }
     if (moduleOn("budget")) parts.push(card(heading(T("Budget plan")) + hint(monthName(today())) + budgetBars(), "link\" data-go=\"budget"));
     if (license.isPro) {
@@ -238,7 +238,7 @@ export const Income = {
         row(T("Average outflows per month (Outflows tab)"), avg.monthsUsed ? pln(spending) : esc(T("no data yet"))) +
         row(T("Balance per month"), avg.monthsUsed ? pln(left) : "–", avg.monthsUsed && left < 0 ? "bad" : "good") +
         row(T("Savings rate"), avg.monthsUsed && inc.monthlyTotal > 0 ? Math.round(left / inc.monthlyTotal * 100) + "%" : "–") +
-        hint(message) + (inc.missing ? hint(T("Some income is in USD or EUR but the exchange rate is empty, so it counts as 0 zł. Enter the rates in the My savings tab."), "bad") : ""))}
+        hint(message) + (inc.missing ? hint(T("Some income is in USD or EUR but the exchange rate is empty, so it counts as 0 zł. Enter the rates in the Savings tab."), "bad") : ""))}
       ${card(`<form id="income-form">${heading(e ? T("Edit: {0}", e.Name) : T("Add income"))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("Salary, side job"))))}
         <div class="two">${field(T("Type"), select("type", INCOME_TYPES.map(t => [t, T(t)]), f.Type))}
@@ -584,7 +584,7 @@ export const Emergency = {
     const d = D(), s = d.Settings, r = Calc.emergency(s), safe = Calc.portfolio(d).safe;
     let status;
     if (r.target <= 0) status = hint(T("Enter your costs above to see your target."));
-    else if (!d.Holdings.length) status = hint(T("Add your safe savings in the My savings tab to see how much of this target you already have."));
+    else if (!d.Holdings.length) status = hint(T("Add your safe savings in the Savings tab to see how much of this target you already have."));
     else if (safe >= r.target) status = `<p class="good">${esc(T("Your safe money ({0}) fully covers this target.", pln(safe)))}</p>`;
     else status = progress(safe / r.target, safe / r.target >= 0.5 ? "#F59E0B" : "#DC2626") + `<p class="warn">${esc(T("Your safe money ({0}) covers {1}% of this target. Still missing: {2}.", pln(safe), Math.round(safe / r.target * 100), pln(r.target - safe)))}</p>`;
     el.innerHTML = `<div class="grid">
@@ -621,7 +621,7 @@ export const Emergency = {
 const PLACES = ["Bank", "Crypto platform", "Broker", "Cash", "Other"];
 let editHolding = null;
 export const Portfolio = {
-  route: "portfolio", title: "My savings",
+  route: "portfolio", title: "Savings",
   render(el) {
     const d = D(), s = d.Settings, p = Calc.portfolio(d), r = Calc.emergency(s);
     const h = editHolding ? d.Holdings.find(x => x.Id === editHolding) : null;
@@ -665,6 +665,13 @@ export const Portfolio = {
         <div class="two">${field("1 USD = … zł", numInput("usd", plain(s.UsdToPln)))}${field("1 EUR = … zł", numInput("eur", plain(s.EurToPln)))}</div>${hint(rateInfo)}</form>`)}
       ${binCard(["holding"])}
     </div>`;
+    // Savings goals (Pro module): shown under your savings, in the same tab
+    if (moduleOn("goals")) {
+      const sec = document.createElement("section"); sec.className = "goals-section";
+      sec.innerHTML = `<h2 class="section-title">🎯 ${esc(T("Savings goals"))}</h2><div class="goals-host"></div>`;
+      el.appendChild(sec);
+      SavingsGoals.render(sec.querySelector(".goals-host"));
+    }
     bindAdvice(el, d);
     const form = el.querySelector("#hold");
     const saveIt = () => {
@@ -699,7 +706,7 @@ export const Portfolio = {
 
 // ---------------------------------------------------------------- "Deleted items" card at the bottom of a tab
 
-const BIN_NAMES = { expense: "Expenses", income: "Income", received: "Received (bank import)", holding: "My savings", offer: "Compare offers", goal: "Savings goals", loan: "Loans & debts", budget: "Budget plan", recurring: "Regular payments" };
+const BIN_NAMES = { expense: "Expenses", income: "Income", received: "Received (bank import)", holding: "Savings", offer: "Compare offers", goal: "Savings goals", loan: "Loans & debts", budget: "Budget plan", recurring: "Regular payments" };
 export function binCard(kinds) {
   const items = (State.data.Deleted || []).filter(x => kinds.includes(x.Kind));
   if (!items.length) return "";

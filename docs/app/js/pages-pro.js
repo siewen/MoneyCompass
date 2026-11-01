@@ -66,7 +66,7 @@ export const Savings = {
       hint(T("Top rates from the {0} rankings, checked {1}. Conditions apply – always check the bank's own terms.", "rankomat.pl", fmtDate(String(Rates.checked).slice(0, 10)))), "wide");
     el.innerHTML = `<div class="grid">
       ${card(`<form id="offer">${heading(T("Savings offer"))}
-        ${d.Holdings.length ? field(T("Fill in from My savings"), select("from-holding", [["", T("Choose…")], ...d.Holdings.map(h => [h.Id, `${h.Name} · ${pln(Calc.toPln(h.Amount, h.Currency, d.Settings))} · ${rate(h.RatePercent || 0)}`])], "")) +
+        ${d.Holdings.length ? field(T("Fill in from Savings"), select("from-holding", [["", T("Choose…")], ...d.Holdings.map(h => [h.Id, `${h.Name} · ${pln(Calc.toPln(h.Amount, h.Currency, d.Settings))} · ${rate(h.RatePercent || 0)}`])], "")) +
           hint(T("Compare what your savings earn now with other offers.")) : ""}
         ${field(T("Name"), textInput("Name", f.Name, T("e.g. {0}", "Bank X – konto oszczędnościowe")))}
         ${field(T("Amount you put in (zł)"), numInput("Amount", plain(num(f.Amount)), T("e.g. {0}", "50000")))}
@@ -124,7 +124,7 @@ export const Savings = {
 
 const IKE = 28260, IKZE = 11304, IKZE_SELF = 16956, LIMITS_YEAR = 2026;
 const BOND_NAMES = { OTS: "3 months · fixed", ROR: "1 year · variable", DOR: "2 years · variable", TOS: "3 years · fixed", COI: "4 years · inflation-linked", EDO: "10 years · inflation-linked", ROS: "6 years · family bond (800+)", ROD: "12 years · family bond (800+)" };
-const TAB_NAMES = { income: "Inflows", expenses: "Outflows", emergency: "Emergency fund", portfolio: "My savings", savings: "Compare offers" };
+const TAB_NAMES = { income: "Inflows", expenses: "Outflows", emergency: "Emergency fund", portfolio: "Savings", savings: "Compare offers" };
 
 export async function openOptimize() {
   if (!(await requirePro(T("Optimize my finances")))) return;
@@ -512,11 +512,11 @@ export async function openBankImport() {
       ${received.length ? card(heading(T("Money received")) + hint(T("All money coming in counts as extra income for its month. Choose Salary for your regular pay: MoneyCompass then counts it every month. Not income is ignored.")) +
         `<div class="list">${received.slice(0, 150).map((r, n) => `<div class="item"><div><b>${esc(r.Description || "–")}</b><span class="hint">${fmtDate(r.Date)} · +${pln(r.Amount)}</span></div>
         ${select("kind-" + n, [[RECEIVED.income, T("Extra income (this month)")], [RECEIVED.salary, T("Salary (regular pay)")], [RECEIVED.none, T("Not income")]], r.Kind)}</div>`).join("")}</div>`, "wide") : ""}
-      ${transfers.length ? card(heading(T("Moved to your own accounts")) + hint(T("These are not expenses. Choose which ones went into savings: they are added to My savings.")) +
+      ${transfers.length ? card(heading(T("Moved to your own accounts")) + hint(T("These are not expenses. Choose which ones went into savings: they are added to Savings.")) +
         field(T("Add savings to"), select("target", holdNames, defaultTarget >= 0 ? defaultTarget : -1)) +
         `<div class="list">${transfers.map((t, n) => `<div class="item"><div><b>${esc(t.row.description || "–")}</b><span class="hint">${date(t.row)} · ${pln(t.pln)}</span></div>
         ${select("tr-" + n, [["1", T("Savings")], ["m", "🔁 " + T("Savings – every month")], ["0", T("Not savings")]], t.toSavings ? "1" : "0")}</div>`).join("")}</div>` +
-        hint(T("\"Savings – every month\" also adds it as a regular deposit to My savings, so it appears in the Payment calendar.")), "wide") : ""}
+        hint(T("\"Savings – every month\" also adds it as a regular deposit to Savings, so it appears in the Payment calendar.")), "wide") : ""}
       </div>
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button>
       <button class="btn main" data-import ${anything ? "" : "disabled"}>${esc(!anything ? T("Import") : !items.length && !received.length && !transfers.length ? T("Add the bank details") : !received.length ? T("Import {0} expenses", items.length) : T("Import {0} expenses and {1} payments received", items.length, received.length))}</button></div>`;
@@ -563,7 +563,7 @@ export async function openBankImport() {
     save();
     let msg = !received.length ? T("{0} expenses were added. You find them in the Outflows tab.", items.length)
       : T("{0} expenses were added (Outflows tab) and {1} payments received (Inflows tab).", items.length, received.length);
-    if (target) msg += "\n" + T("{0} went into savings: added to \"{1}\" (My savings tab).", pln(saved.reduce((a, t) => a + t.pln, 0)), target.Name);
+    if (target) msg += "\n" + T("{0} went into savings: added to \"{1}\" (Savings tab).", pln(saved.reduce((a, t) => a + t.pln, 0)), target.Name);
     p.close();
     await alertBox(T("Import finished"), msg);
     for (const r of received.filter(r => r.Kind === RECEIVED.salary)) await offerSalary(r);

@@ -173,7 +173,7 @@ export function openOptions() {
 
 export function openDelete() {
   const d = D();
-  const parts = [["incomes", T("Income sources"), d.Incomes.length], ["expenses", T("Expenses, money received and transfers (bank imports)"), d.Expenses.length + d.Received.length + d.Transfers.length], ["holdings", T("My savings"), d.Holdings.length],
+  const parts = [["incomes", T("Income sources"), d.Incomes.length], ["expenses", T("Expenses, money received and transfers (bank imports)"), d.Expenses.length + d.Received.length + d.Transfers.length], ["holdings", T("Savings"), d.Holdings.length],
     ["offers", T("Saved savings offers"), d.Offers.length], ["emergency", T("Emergency fund settings"), T("monthly costs, yearly costs, months, buffer")],
     ["rates", T("Exchange rates"), ""], ["modules", T("Modules: goals, loans, budget, payment calendar"), d.Goals.length + d.Loans.length + d.Budgets.length + (d.Recurring || []).length],
     ["categories", T("Your own expense categories"), d.Categories.length || T("none")], ["bin", T("Deleted items"), (d.Deleted || []).length]];
@@ -211,18 +211,18 @@ export function openHelp() {
     ["Inflows", "Add every source of income: salary, side jobs, bonuses – each with its own amount, frequency, currency and payday, and gross → net for a salary. Money received from bank imports is listed here too."],
     ["Outflows", "Enter what you spend or import a bank statement. Mark expenses essential or not, set repeats (🔁), filter and search. With whole months of data you see reliable averages."],
     ["Emergency fund", "Shows how much you should keep aside for bad times (3–6 months of essential costs)."],
-    ["My savings", "All your savings in one place (bank, crypto, cash), safe vs risky, and how much interest they earn."],
+    ["Savings", "All your savings in one place (bank, crypto, cash), safe vs risky, and how much interest they earn."],
     ...MODULES.map(m => [m.name, m.description]),
     ["Compare offers", "Compare bank offers: promo rate, promo limit and length, the rate afterwards and the 19% Belka tax."]];
   popup(`<h2 class="popup-title">? ${esc(T("Help"))}</h2><div class="grid">
     ${card(heading(T("Getting started")) + `<ol>${["Inflows: add your salary and any other money that comes in, with its payday.", "Outflows: write down what you spend, or enter your usual monthly bills once.",
-      "Emergency fund: enter your essential monthly costs to see how much to keep aside.", "My savings: add your bank accounts, cash and other savings with their interest rate.",
+      "Emergency fund: enter your essential monthly costs to see how much to keep aside.", "Savings: add your bank accounts, cash and other savings with their interest rate.",
       "Overview: see everything together, then press \"Optimize my finances\" for your personal plan."].map(x => `<li>${esc(T(x))}</li>`).join("")}</ol>` + hint(T("Numbers can be typed with a dot or a comma: 1234.50 or 1234,50.")))}
     ${card(heading(T("The tabs")) + tabs.map(t => `<p><b>${esc(T(t[0]))}</b><br><span class="hint">${esc(T(t[1]))}</span></p>`).join("") + hint(T("Savings goals, Loans & debts and Budget plan are modules: switch them on in Options → Modules.")))}
     ${card(heading("MoneyCompass Pro") + `<p>${esc(T("The free version has all the basics. A license key unlocks:"))}</p><ul>${[
       ["Optimize my finances", "Your personal plan for savings and loans, with current rates from NBP, the Ministry of Finance and bank rankings."], ["Compare offers", "See which bank offer really pays the most after tax."],
       ["Import bank statement", "The bank statement (CSV) becomes expenses, sorted into categories."], ["Own categories", "Make your own expense categories, each with an icon of your choice."],
-      ["Modules", "Savings goals, Loans & debts and Budget plan: switch them on in Options → Modules, and each one adds its own tab."],
+      ["Modules", "Savings goals, Loans & debts and Budget plan (Pro): switch them on in Options → Modules. Savings goals appear in the Savings tab; the others add their own tab."],
       ["Appearance", "The Dark, Colourful and System default themes."]].map(x => `<li><b>${esc(T(x[0]))}</b> – ${esc(T(x[1]))}</li>`).join("")}
       <li><b>${esc(T("Export"))}</b> – ${esc(T("Reports as Excel, PDF or Word."))}</li><li><b>${esc(T("Profiles"))}</b> – ${esc(T("Separate data for each person or household."))}</li></ul>` +
       hint(T("To unlock: click your profile picture (top right), paste your key under Activation and press Activate.")))}
@@ -275,7 +275,7 @@ function reportParts() {
   const holdings = [[T("Name"), T("Where"), T("In złoty"), T("Interest rate"), T("Safe")], ...d.Holdings.map(h => [h.Name, T(h.Place), round(Calc.toPln(h.Amount, h.Currency, d.Settings)), (h.RatePercent || 0) + "%", h.Safe ? T("Yes") : T("No")])];
   const offers = [[T("Name"), T("Promo rate"), T("Promo days"), T("Rate after"), T("You keep"), T("Real yearly rate after tax")], ...d.Offers.map(o => ({ o, r: Calc.savings(o) })).sort((a, b) => b.r.net - a.r.net).map(x => [x.o.Name, x.o.PromoRate + "%", x.o.PromoDays, x.o.StandardRate + "%", round(x.r.net), rate(x.r.effective)])];
   const plan = [[T("Step"), T("Details"), T("Worth per year")], ...Advisor.analyse(d).map(a => [a.title, a.text, a.benefit > 0 ? round(a.benefit) : ""])];
-  return { summaryRows, sections: [[T("Income"), income], [T("Monthly totals"), months], [T("Outflows by category"), byCat], [T("Outflows"), expenses], [T("My savings"), holdings], [T("Comparison"), offers], [T("Your personal plan"), plan]] };
+  return { summaryRows, sections: [[T("Income"), income], [T("Monthly totals"), months], [T("Outflows by category"), byCat], [T("Outflows"), expenses], [T("Savings"), holdings], [T("Comparison"), offers], [T("Your personal plan"), plan]] };
 }
 const round = v => Math.round(v * 100) / 100;
 

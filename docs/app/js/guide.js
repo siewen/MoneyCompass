@@ -12,7 +12,7 @@ const STEPS = [
     done: d => d.Expenses.length > 0, import: true },
   { route: "emergency", color: "#B45309", title: "Emergency fund", text: "Emergency fund: enter your essential monthly costs to see how much to keep aside.",
     done: d => d.Settings.MonthlyEssentials > 0 },
-  { route: "portfolio", color: "#15803D", title: "My savings", text: "My savings: add your bank accounts, cash and other savings with their interest rate.",
+  { route: "portfolio", color: "#15803D", title: "Savings", text: "Savings: add your bank accounts, cash and other savings with their interest rate.",
     done: d => d.Holdings.length > 0 },
   { route: "overview", color: "#0F766E", title: "Overview", text: "Overview: see everything together, then press \"Optimize my finances\" for your personal plan.",
     done: d => STEPS.slice(0, 4).every(s => s.done(d)), optimize: true },

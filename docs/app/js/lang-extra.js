@@ -520,7 +520,19 @@ export const EXTRA = {
 "best cash loan offers about 7.6–8.8% (RRSO about 7.9–9.2%)": "beste Ratenkredite etwa 7,6–8,8 % (RRSO etwa 7,9–9,2 %)",
 "about like cash loans": "etwa wie Ratenkredite",
 "{0}: {1} is above the legal maximum": "{0}: {1} liegt über dem gesetzlichen Höchstzins",
-"In Poland the maximum interest is {0} now (2 × the NBP reference rate + 3.5%). Check the rate in your contract – it may include fees, or the lender may be charging too much.": "In Polen liegt der Höchstzins derzeit bei {0} (2 × NBP-Referenzzins + 3,5 %). Prüfen Sie den Zins in Ihrem Vertrag – er kann Gebühren enthalten, oder der Kreditgeber verlangt zu viel."
+"In Poland the maximum interest is {0} now (2 × the NBP reference rate + 3.5%). Check the rate in your contract – it may include fees, or the lender may be charging too much.": "In Polen liegt der Höchstzins derzeit bei {0} (2 × NBP-Referenzzins + 3,5 %). Prüfen Sie den Zins in Ihrem Vertrag – er kann Gebühren enthalten, oder der Kreditgeber verlangt zu viel.",
+"Yes, update Savings": "Ja, Ersparnisse aktualisieren",
+"Some income is in USD or EUR but the exchange rate is empty, so it counts as 0 zł. Enter the rates in the Savings tab.": "Ein Teil des Einkommens ist in USD oder EUR, aber der Wechselkurs fehlt, daher zählt er als 0 zł. Tragen Sie die Kurse unter „Ersparnisse“ ein.",
+"Your savings could earn about {0} more at {1} – see Savings": "Ihre Ersparnisse könnten bei {1} etwa {0} mehr bringen – siehe Ersparnisse",
+"Add your savings in the Savings tab to see this chart.": "Tragen Sie Ihre Ersparnisse unter „Ersparnisse“ ein, um dieses Diagramm zu sehen.",
+"Add your safe savings in the Savings tab to see how much of this target you already have.": "Tragen Sie Ihr sicheres Erspartes unter „Ersparnisse“ ein, um zu sehen, wie viel Sie davon schon haben.",
+"These are not expenses. Choose which ones went into savings: they are added to Savings.": "Das sind keine Ausgaben. Wählen Sie, welche ins Sparen gingen: Sie werden zu „Ersparnisse“ addiert.",
+"\"Savings – every month\" also adds it as a regular deposit to Savings, so it appears in the Payment calendar.": "„Sparen – jeden Monat“ legt es zusätzlich als regelmäßige Einzahlung in Ersparnisse an, damit es im Zahlungskalender erscheint.",
+"{0} went into savings: added to \"{1}\" (Savings tab).": "{0} gingen ins Sparen: zu „{1}“ addiert (Reiter Ersparnisse).",
+"Fill in from Savings": "Aus Ersparnisse ausfüllen",
+"Add your goals in the Savings tab to see them here.": "Tragen Sie Ihre Ziele im Tab Ersparnisse ein, um sie hier zu sehen.",
+"Goals like a car or a holiday: progress and how much to save per month – shown in the Savings tab.": "Ziele wie ein Auto oder ein Urlaub: Fortschritt und wie viel Sie pro Monat sparen – im Tab Ersparnisse.",
+"Savings goals, Loans & debts and Budget plan (Pro): switch them on in Options → Modules. Savings goals appear in the Savings tab; the others add their own tab.": "Sparziele, Kredite & Schulden und Budgetplan (Pro): in Optionen → Module einschalten. Sparziele erscheinen im Tab Ersparnisse; die anderen bekommen einen eigenen Tab."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1042,7 +1054,19 @@ export const EXTRA = {
 "best cash loan offers about 7.6–8.8% (RRSO about 7.9–9.2%)": "meilleurs prêts personnels environ 7,6–8,8 % (TAEG environ 7,9–9,2 %)",
 "about like cash loans": "à peu près comme les prêts personnels",
 "{0}: {1} is above the legal maximum": "{0} : {1} dépasse le taux maximal légal",
-"In Poland the maximum interest is {0} now (2 × the NBP reference rate + 3.5%). Check the rate in your contract – it may include fees, or the lender may be charging too much.": "En Pologne, le taux maximal est actuellement de {0} (2 × taux de référence NBP + 3,5 %). Vérifiez le taux dans votre contrat – il peut inclure des frais, ou le prêteur facture trop."
+"In Poland the maximum interest is {0} now (2 × the NBP reference rate + 3.5%). Check the rate in your contract – it may include fees, or the lender may be charging too much.": "En Pologne, le taux maximal est actuellement de {0} (2 × taux de référence NBP + 3,5 %). Vérifiez le taux dans votre contrat – il peut inclure des frais, ou le prêteur facture trop.",
+"Yes, update Savings": "Oui, mettre à jour Épargne",
+"Some income is in USD or EUR but the exchange rate is empty, so it counts as 0 zł. Enter the rates in the Savings tab.": "Certains revenus sont en USD ou EUR mais le taux de change est vide, ils comptent donc pour 0 zł. Saisissez les taux dans l'onglet Épargne.",
+"Your savings could earn about {0} more at {1} – see Savings": "Votre épargne pourrait rapporter environ {0} de plus chez {1} – voir Épargne",
+"Add your savings in the Savings tab to see this chart.": "Ajoutez votre épargne dans l'onglet Épargne pour voir ce diagramme.",
+"Add your safe savings in the Savings tab to see how much of this target you already have.": "Ajoutez votre épargne sûre dans l'onglet Épargne pour voir quelle part de l'objectif vous avez déjà.",
+"These are not expenses. Choose which ones went into savings: they are added to Savings.": "Ce ne sont pas des dépenses. Choisissez ceux qui sont allés dans l'épargne : ils sont ajoutés à « Épargne ».",
+"\"Savings – every month\" also adds it as a regular deposit to Savings, so it appears in the Payment calendar.": "« Épargne – chaque mois » l'ajoute aussi comme versement régulier dans Épargne, pour qu'il apparaisse dans le calendrier des paiements.",
+"{0} went into savings: added to \"{1}\" (Savings tab).": "{0} sont allés dans l'épargne : ajoutés à « {1} » (onglet Épargne).",
+"Fill in from Savings": "Remplir depuis Épargne",
+"Add your goals in the Savings tab to see them here.": "Ajoutez vos objectifs dans l'onglet Épargne pour les voir ici.",
+"Goals like a car or a holiday: progress and how much to save per month – shown in the Savings tab.": "Objectifs comme une voiture ou des vacances : progression et combien épargner par mois – dans l'onglet Épargne.",
+"Savings goals, Loans & debts and Budget plan (Pro): switch them on in Options → Modules. Savings goals appear in the Savings tab; the others add their own tab.": "Objectifs d'épargne, Prêts & dettes et Plan budgétaire (Pro) : activez-les dans Options → Modules. Les objectifs apparaissent dans l'onglet Épargne ; les autres ajoutent leur propre onglet."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1564,6 +1588,18 @@ export const EXTRA = {
 "best cash loan offers about 7.6–8.8% (RRSO about 7.9–9.2%)": "najlepsze kredyty gotówkowe ok. 7,6–8,8% (RRSO ok. 7,9–9,2%)",
 "about like cash loans": "mniej więcej jak kredyty gotówkowe",
 "{0}: {1} is above the legal maximum": "{0}: {1} to więcej niż odsetki maksymalne",
-"In Poland the maximum interest is {0} now (2 × the NBP reference rate + 3.5%). Check the rate in your contract – it may include fees, or the lender may be charging too much.": "W Polsce odsetki maksymalne wynoszą teraz {0} (2 × stopa referencyjna NBP + 3,5%). Sprawdź oprocentowanie w umowie – może zawierać opłaty albo pożyczkodawca pobiera za dużo."
+"In Poland the maximum interest is {0} now (2 × the NBP reference rate + 3.5%). Check the rate in your contract – it may include fees, or the lender may be charging too much.": "W Polsce odsetki maksymalne wynoszą teraz {0} (2 × stopa referencyjna NBP + 3,5%). Sprawdź oprocentowanie w umowie – może zawierać opłaty albo pożyczkodawca pobiera za dużo.",
+"Yes, update Savings": "Tak, zaktualizuj Oszczędności",
+"Some income is in USD or EUR but the exchange rate is empty, so it counts as 0 zł. Enter the rates in the Savings tab.": "Część dochodów jest w USD lub EUR, ale kurs wymiany jest pusty, więc liczy się jako 0 zł. Wpisz kursy w karcie Oszczędności.",
+"Your savings could earn about {0} more at {1} – see Savings": "Twoje oszczędności mogłyby zarobić ok. {0} więcej w {1} – zobacz Oszczędności",
+"Add your savings in the Savings tab to see this chart.": "Dodaj oszczędności w karcie Oszczędności, aby zobaczyć ten wykres.",
+"Add your safe savings in the Savings tab to see how much of this target you already have.": "Dodaj bezpieczne oszczędności w karcie Oszczędności, aby zobaczyć, ile z tego celu już masz.",
+"These are not expenses. Choose which ones went into savings: they are added to Savings.": "To nie są wydatki. Wybierz, które trafiły na oszczędności: zostaną dodane do „Oszczędności”.",
+"\"Savings – every month\" also adds it as a regular deposit to Savings, so it appears in the Payment calendar.": "„Oszczędności – co miesiąc” dodaje to także jako regularną wpłatę w Oszczędnościach, więc pojawi się w kalendarzu płatności.",
+"{0} went into savings: added to \"{1}\" (Savings tab).": "{0} trafiło na oszczędności: dodano do „{1}” (zakładka Oszczędności).",
+"Fill in from Savings": "Uzupełnij z Oszczędności",
+"Add your goals in the Savings tab to see them here.": "Dodaj cele w zakładce Oszczędności, aby je tu zobaczyć.",
+"Goals like a car or a holiday: progress and how much to save per month – shown in the Savings tab.": "Cele, np. samochód lub wakacje: postęp i ile odkładać co miesiąc – w zakładce Oszczędności.",
+"Savings goals, Loans & debts and Budget plan (Pro): switch them on in Options → Modules. Savings goals appear in the Savings tab; the others add their own tab.": "Cele oszczędnościowe, Kredyty i długi oraz Plan budżetu (Pro): włącz je w Opcje → Moduły. Cele oszczędnościowe pojawiają się w zakładce Oszczędności; pozostałe dodają własną zakładkę."
 }
 };

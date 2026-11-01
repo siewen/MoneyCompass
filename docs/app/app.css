@@ -470,3 +470,4 @@ svg.donut text { pointer-events: none; }
 .flow-values small { font-weight: 500; opacity: .85; font-size: 13px; }
 .amount-range { display: inline-flex; align-items: center; gap: 4px; } .amount-range input { width: 110px; }
 .terms-list { margin: 6px 0 10px; padding-left: 20px; } .terms-list li { margin: 4px 0; }
+.goals-section { margin-top: 26px; } .section-title { font-size: 20px; margin: 0 0 12px; padding-left: 4px; }

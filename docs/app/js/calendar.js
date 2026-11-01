@@ -37,7 +37,7 @@ export function events(d, from, to) {
     const rule = { Date: h.DepositDate, Frequency: h.DepositFrequency || "Monthly" };
     let next = Calc.nextPayment(rule, from), guard = 0;
     while (next && next <= to && guard++ < 400) {
-      list.push({ date: next, name: h.Name, amount: h.Deposit, type: "save", note: T("My savings") + " · 🔁 " + freqLabel(h.DepositFrequency || "Monthly") + (h.DepositFrom ? " · " + T("from {0}", h.DepositFrom) : "") });
+      list.push({ date: next, name: h.Name, amount: h.Deposit, type: "save", note: T("Savings") + " · 🔁 " + freqLabel(h.DepositFrequency || "Monthly") + (h.DepositFrom ? " · " + T("from {0}", h.DepositFrom) : "") });
       next = Calc.nextPayment(rule, addDays(next, 1));
     }
   }

@@ -283,7 +283,7 @@ export const freeExportsLeft = () => Math.max(0, FREE_EXPORTS - (State.data.Sett
 // ---------------------------------------------------------------- modules
 
 export const MODULES = [
-  { code: "goals", name: "Savings goals", description: "Goals like a car or a holiday: progress and how much to save per month." },
+  { code: "goals", name: "Savings goals", description: "Goals like a car or a holiday: progress and how much to save per month – shown in the Savings tab." },
   { code: "loans", name: "Loans & debts", description: "Credits and loans: what is left to pay, monthly payments and when you are debt-free." },
   { code: "budget", name: "Budget plan", description: "A monthly limit per expense category, with a warning when you go over." },
   { code: "calendar", name: "Payment calendar", description: "Everything that comes back every month – salary, bills, subscriptions, savings – in a calendar, with a preview of the next 1 to 12 months." },

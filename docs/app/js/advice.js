@@ -82,7 +82,7 @@ export function bindAdvice(el, d) {
 async function movedIt(m) {
   const d = State.data;
   const end = addDays(today(), m.days);
-  if (!(await confirmBox(T("Moved to {0}?", m.o.Bank), T("MoneyCompass then:\n• takes {0} from \"{1}\"\n• adds \"{2}\" with {3} until {4}\n• reminds you 2 weeks before the promotion ends.", pln(m.moved), m.h.Name, m.o.Bank, rate(m.o.Rate), fmtDate(end)), T("Yes, update My savings"), T("Cancel")))) return;
+  if (!(await confirmBox(T("Moved to {0}?", m.o.Bank), T("MoneyCompass then:\n• takes {0} from \"{1}\"\n• adds \"{2}\" with {3} until {4}\n• reminds you 2 weeks before the promotion ends.", pln(m.moved), m.h.Name, m.o.Bank, rate(m.o.Rate), fmtDate(end)), T("Yes, update Savings"), T("Cancel")))) return;
   m.h.Amount = Math.round((m.h.Amount - m.moved) * 100) / 100;
   d.Holdings.push({ Id: uuid(), Name: m.o.Bank, Place: "Bank", Amount: m.moved, Currency: "PLN", RatePercent: m.o.Rate, Safe: true, PromoEnd: isoDate(end), RateAfter: null });
   if (m.h.Amount <= 0) d.Holdings = d.Holdings.filter(x => x !== m.h);
