@@ -1,5 +1,5 @@
 // Small UI helpers: escaping, cards, fields, pop-up windows, messages.
-import { T } from "./core.js";
+import { T, State, save } from "./core.js";
 
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -114,18 +114,31 @@ export const stamp = () => { const d = new Date(), p = n => String(n).padStart(2
 
 // ---------------------------------------------------------------- card layout like the app (CardBoard)
 
-/** Puts the cards of every .grid in 1, 2 or 3 columns: card 1 left, card 2 middle, card 3 right, then the next row. */
+/** Puts the cards of every .grid in 1, 2 or 3 columns: card 1 left, card 2 middle, card 3 right, then the next row.
+ *  On the tabs (grid with data-key) the cards can be moved with their handle ⠿, like in the app. */
+const isFull = el => el.matches(".tiles, .btn, .tip, .wide");
 function layoutGrid(grid) {
-  if (!grid._items) grid._items = [...grid.children];
+  if (!grid._items) {
+    grid._items = [...grid.children];
+    grid._orig = grid._items.filter(x => !isFull(x));
+    const key = grid.dataset.key;
+    const saved = key && State.data.Settings.CardOrder?.[key];
+    if (Array.isArray(saved) && saved.length) {
+      const ordered = [...new Set(saved)].filter(i => i >= 0 && i < grid._orig.length).map(i => grid._orig[i]);
+      grid._orig.forEach(c => { if (!ordered.includes(c)) ordered.push(c); });
+      let k = 0;
+      grid._items = grid._items.map(x => isFull(x) ? x : ordered[k++]);
+    }
+    if (key) grid._orig.forEach(card => addHandle(grid, card));
+  }
   const width = grid.clientWidth || grid.parentElement?.clientWidth || window.innerWidth;
   const n = width >= 1100 ? 3 : width >= 720 ? 2 : 1;
   if (grid._cols === n) return;
   grid._cols = n;
-  const full = el => el.matches(".tiles, .btn, .tip, .wide");
   const parts = [];
   let group = null;
   for (const item of grid._items) {
-    if (full(item)) { parts.push(item); group = null; continue; }
+    if (isFull(item)) { parts.push(item); group = null; continue; }
     if (!group) {
       group = document.createElement("div"); group.className = "cols";
       group.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
@@ -135,6 +148,41 @@ function layoutGrid(grid) {
     group.children[group._count++ % n].appendChild(item);
   }
   grid.replaceChildren(...parts);
+}
+
+function addHandle(grid, card) {
+  if (card.querySelector(":scope > .drag-handle")) return;
+  const h = document.createElement("span");
+  h.className = "drag-handle"; h.textContent = "⠿"; h.title = T("Drag to move this card");
+  card.prepend(h);
+  h.addEventListener("click", e => e.stopPropagation());
+  h.addEventListener("pointerdown", e => {
+    e.preventDefault(); e.stopPropagation();
+    h.setPointerCapture(e.pointerId);
+    card.classList.add("dragging");
+    let target = null;
+    const move = ev => {
+      const under = document.elementFromPoint(ev.clientX, ev.clientY);
+      const t = under && grid._orig.find(c => c !== card && c.contains(under));
+      if (t !== target) { target?.classList.remove("drop-target"); target = t || null; target?.classList.add("drop-target"); }
+    };
+    const up = () => {
+      h.removeEventListener("pointermove", move); h.removeEventListener("pointerup", up); h.removeEventListener("pointercancel", up);
+      card.classList.remove("dragging"); target?.classList.remove("drop-target");
+      if (!target) return;
+      const movable = grid._items.filter(x => !isFull(x));
+      const from = movable.indexOf(card), to = movable.indexOf(target);
+      movable.splice(from, 1); movable.splice(to, 0, card);
+      let k = 0;
+      grid._items = grid._items.map(x => isFull(x) ? x : movable[k++]);
+      const s = State.data.Settings;
+      s.CardOrder = s.CardOrder || {};
+      s.CardOrder[grid.dataset.key] = movable.map(c => grid._orig.indexOf(c));
+      save();
+      grid._cols = 0; layoutGrid(grid);
+    };
+    h.addEventListener("pointermove", move); h.addEventListener("pointerup", up); h.addEventListener("pointercancel", up);
+  });
 }
 const resize = new ResizeObserver(entries => entries.forEach(e => layoutGrid(e.target)));
 new MutationObserver(() => {

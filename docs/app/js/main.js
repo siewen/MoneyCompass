@@ -1,5 +1,5 @@
 // MoneyCompass web: the window, the tabs and starting up.
-import { T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed, summary, fmtDate } from "./core.js";
+import { store, T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed, summary, fmtDate } from "./core.js";
 import { esc, popup, toast } from "./ui.js";
 import { App, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
@@ -49,10 +49,75 @@ function buildShell() {
     <main id="page"></main>
     <button class="help-fab" data-act="help-menu" title="${esc(T("Help & About"))}">?</button>`;
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => App.go(b.dataset.tab));
-  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, "help-menu": helpMenu, install, exit: closeApp };
-  document.querySelectorAll("[data-act]").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
+  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, install, exit: closeApp };
+  document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
+  setupHelpButton();
   render();
+  fitTabs();
 }
+
+// ---------- Many tabs (more modules later): the ones that don't fit go into "More ▾" ----------
+function fitTabs() {
+  const nav = document.getElementById("tabs");
+  if (!nav) return;
+  nav.querySelector(".tab-more")?.remove();
+  const tabsEls = [...nav.querySelectorAll("[data-tab]")];
+  tabsEls.forEach(t => t.hidden = false);
+  if (window.innerWidth < 720 || nav.scrollWidth <= nav.clientWidth + 1) return;
+  const more = document.createElement("button");
+  more.className = "tab tab-more";
+  nav.appendChild(more);
+  const hidden = [];
+  for (let i = tabsEls.length - 1; i >= 0 && nav.scrollWidth > nav.clientWidth + 1; i--) {
+    if (tabsEls[i].classList.contains("active")) continue;
+    tabsEls[i].hidden = true; hidden.unshift(tabsEls[i]);
+  }
+  more.textContent = T("More") + " ▾";
+  more.onclick = () => {
+    const r = more.getBoundingClientRect();
+    const shield = document.createElement("div"); shield.className = "help-shield";
+    const menu = document.createElement("div"); menu.className = "tab-menu";
+    menu.style.left = Math.min(r.left, window.innerWidth - 230) + "px"; menu.style.top = (r.bottom + 4) + "px";
+    menu.innerHTML = hidden.map(t => `<button data-t="${t.dataset.tab}" style="color:${ACCENT[t.dataset.tab]}">${esc(t.textContent)}</button>`).join("");
+    document.body.append(shield, menu);
+    const close = () => { shield.remove(); menu.remove(); };
+    shield.onclick = close;
+    menu.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { close(); App.go(b.dataset.t); });
+  };
+}
+window.addEventListener("resize", () => { clearTimeout(fitTabs._t); fitTabs._t = setTimeout(fitTabs, 150); });
+
+// ---------- The ? button can be dragged anywhere, like in the app ----------
+function helpPos() { try { return JSON.parse(store.get("mc-help-pos")) || null; } catch { return null; } }
+function placeHelp(fab, pos) {
+  if (!pos) { fab.style.left = fab.style.top = ""; return; }
+  const x = Math.min(Math.max(8, pos.x), window.innerWidth - 58), y = Math.min(Math.max(70, pos.y), window.innerHeight - 58);
+  fab.style.left = x + "px"; fab.style.top = y + "px"; fab.style.right = fab.style.bottom = "auto";
+}
+function setupHelpButton() {
+  const fab = document.querySelector(".help-fab");
+  placeHelp(fab, helpPos());
+  fab.title = T("Help & about  (drag to move)");
+  fab.onclick = null;
+  fab.addEventListener("pointerdown", e => {
+    const r = fab.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top, sx = e.clientX, sy = e.clientY;
+    let moved = false;
+    fab.setPointerCapture(e.pointerId);
+    const move = ev => {
+      if (!moved && Math.hypot(ev.clientX - sx, ev.clientY - sy) < 6) return;
+      moved = true; closeHelpMenu();
+      placeHelp(fab, { x: ev.clientX - dx, y: ev.clientY - dy });
+    };
+    const up = () => {
+      fab.removeEventListener("pointermove", move); fab.removeEventListener("pointerup", up);
+      if (moved) store.set("mc-help-pos", JSON.stringify({ x: parseFloat(fab.style.left), y: parseFloat(fab.style.top) }));
+      else helpMenu();
+    };
+    fab.addEventListener("pointermove", move); fab.addEventListener("pointerup", up);
+  });
+}
+App.resetHelpButton = () => { store.remove("mc-help-pos"); placeHelp(document.querySelector(".help-fab"), null); };
+window.addEventListener("resize", () => { const f = document.querySelector(".help-fab"); if (f) placeHelp(f, helpPos()); });
 
 function helpMenu() {
   // Small buttons above the round ? button, like the app (not a window in the middle)
@@ -64,6 +129,11 @@ function helpMenu() {
   items.push(["exit", "⏻  " + T("Close")]);
   menu.innerHTML = items.map(([k, t]) => `<button data-m="${k}">${esc(t)}</button>`).join("");
   document.body.append(shield, menu);
+  const r = document.querySelector(".help-fab").getBoundingClientRect();
+  const h = menu.offsetHeight, w = menu.offsetWidth;
+  const top = r.top - h - 10 > 64 ? r.top - h - 10 : r.bottom + 10;
+  const left = Math.min(Math.max(8, r.right - w), window.innerWidth - w - 8);
+  Object.assign(menu.style, { left: left + "px", top: top + "px", right: "auto", bottom: "auto" });
   requestAnimationFrame(() => menu.classList.add("open"));
   shield.onclick = closeHelpMenu;
   menu.querySelectorAll("[data-m]").forEach(b => b.onclick = () => {
@@ -179,6 +249,8 @@ function render() {
   const el = document.getElementById("page");
   const y = window.scrollY;
   page.render(el);
+  const grid = el.querySelector(".grid");
+  if (grid) grid.dataset.key = "web:" + page.route;
   el.querySelectorAll("[data-go]").forEach(x => x.addEventListener("click", ev => {
     const inner = ev.target.closest("button,a,input,select,label,[data-cat]");
     if (inner && inner !== x) return;
@@ -194,7 +266,7 @@ function render() {
 Object.assign(App, {
   go(route) {
     if (!tabs().some(t => t.route === route)) route = "overview";
-    current = route; render(); window.scrollTo(0, 0);
+    current = route; render(); fitTabs(); window.scrollTo(0, 0);
     const tab = document.querySelector(`[data-tab="${route}"]`);
     if (tab) tab.scrollIntoView({ inline: "center", block: "nearest" });
     try { history.replaceState(null, "", "#" + route); } catch { /* file */ }
@@ -213,7 +285,7 @@ async function start() {
   buildShell();
   welcome();
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
-  Rates.listeners.push(() => { if (!document.querySelector(".popup-back")) render(); });
+  Rates.listeners.push(() => { if (!document.querySelector(".popup-back, .dragging")) render(); });
   Rates.refresh();
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
   try { navigator.storage?.persist?.(); } catch { /* not supported */ }
