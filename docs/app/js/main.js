@@ -72,7 +72,7 @@ function dataMenu() {
   ];
   const shield = document.createElement("div"); shield.className = "help-shield";
   const menu = document.createElement("div"); menu.className = "tab-menu data-menu";
-  menu.innerHTML = items.map(([k, i, l, c]) => k === "-" ? "<hr>" : `<button data-d="${k}" style="color:${c}"><span class="mi">${i}</span>${esc(l)}</button>`).join("");
+  menu.innerHTML = items.map(([k, i, l]) => k === "-" ? "<hr>" : `<button data-d="${k}"${k === "delete" ? ' class="danger-item"' : ""}><span class="mi">${i}</span>${esc(l)}</button>`).join("");
   document.body.append(shield, menu);
   const w = menu.offsetWidth;
   menu.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + "px"; menu.style.top = (r.bottom + 6) + "px";
