@@ -18,13 +18,13 @@ let range = 3, shown = null, editId = null, selectedDay = null;
 export function events(d, from, to) {
   const list = [];
   for (const p of Calc.upcoming(d, from, to))
-    list.push({ date: p.date, name: p.source.Name, amount: p.amount, type: "in", note: T(p.source.Type) });
+    list.push({ date: p.date, name: p.source.Name, amount: p.amount, type: "in", note: T(p.source.Type) + (p.source.Frequency && p.source.Frequency !== ONE_TIME ? " · 🔁 " + freqLabel(p.source.Frequency) : "") });
   for (const r of (d.Recurring || []).filter(r => r.Active !== false)) {
     const amount = r.Amount || 0;
     const last = r.EndDate ? parseDate(r.EndDate) : null;
     let next = Calc.nextPayment(r, from), guard = 0;
     while (next && next <= to && (!last || next <= last) && guard++ < 400) {
-      list.push({ date: next, name: r.Name, amount, type: r.Kind === "saving" ? "save" : "out", note: r.Kind === "saving" ? T("Transfer to savings") : T(r.Category || "Other"), id: r.Id });
+      list.push({ date: next, name: r.Name, amount, type: r.Kind === "saving" ? "save" : "out", note: (r.Kind === "saving" ? T("Transfer to savings") : T(r.Category || "Other")) + (r.Frequency !== ONE_TIME ? " · 🔁 " + freqLabel(r.Frequency) : ""), id: r.Id });
       if (r.Frequency === ONE_TIME) break;
       next = Calc.nextPayment(r, addDays(next, 1));
     }
@@ -34,7 +34,7 @@ export function events(d, from, to) {
     const rule = { Date: h.DepositDate, Frequency: h.DepositFrequency || "Monthly" };
     let next = Calc.nextPayment(rule, from), guard = 0;
     while (next && next <= to && guard++ < 400) {
-      list.push({ date: next, name: h.Name, amount: h.Deposit, type: "save", note: T("My savings") + " · 🔁" + (h.DepositFrom ? " · " + T("from {0}", h.DepositFrom) : "") });
+      list.push({ date: next, name: h.Name, amount: h.Deposit, type: "save", note: T("My savings") + " · 🔁 " + freqLabel(h.DepositFrequency || "Monthly") + (h.DepositFrom ? " · " + T("from {0}", h.DepositFrom) : "") });
       next = Calc.nextPayment(rule, addDays(next, 1));
     }
   }
@@ -43,7 +43,7 @@ export function events(d, from, to) {
     const lastPaid = parseDate(e.Date);
     let next = Calc.nextPayment({ Date: e.Date, Frequency: e.Repeat }, from), guard = 0;
     while (next && next <= to && guard++ < 400) {
-      if (next > lastPaid) list.push({ date: next, name: e.Description || T(e.Category), amount: e.Amount, type: "out", note: T(e.Category) + " · 🔁", expense: e.Id });
+      if (next > lastPaid) list.push({ date: next, name: e.Description || T(e.Category), amount: e.Amount, type: "out", note: T(e.Category) + " · 🔁 " + freqLabel(e.Repeat), expense: e.Id });
       next = Calc.nextPayment({ Date: e.Date, Frequency: e.Repeat }, addDays(next, 1));
     }
   }
@@ -52,7 +52,7 @@ export function events(d, from, to) {
     const lastPaid = parseDate(r.Date), rule = { Date: r.Date, Frequency: r.Repeat };
     let next = Calc.nextPayment(rule, from), guard = 0;
     while (next && next <= to && guard++ < 400) {
-      if (next > lastPaid) list.push({ date: next, name: r.Description || T("Money received"), amount: r.Amount, type: "in", note: T("Extra income") + " · 🔁", received: r.Id });
+      if (next > lastPaid) list.push({ date: next, name: r.Description || T("Money received"), amount: r.Amount, type: "in", note: T("Extra income") + " · 🔁 " + freqLabel(r.Repeat), received: r.Id });
       next = Calc.nextPayment(rule, addDays(next, 1));
     }
   }
@@ -61,7 +61,7 @@ export function events(d, from, to) {
       const end = parseDate(l.EndDate);
       let next = Calc.nextPayment({ Date: l.EndDate, Frequency: "Monthly" }, from), guard = 0;
       while (next && next <= to && next <= end && guard++ < 400) {
-        list.push({ date: next, name: l.Name, amount: l.MonthlyPayment, type: "out", note: T("Loan payments") });
+        list.push({ date: next, name: l.Name, amount: l.MonthlyPayment, type: "out", note: T("Loan payments") + " · 🔁 " + freqLabel("Monthly") });
         next = Calc.nextPayment({ Date: l.EndDate, Frequency: "Monthly" }, addDays(next, 1));
       }
     }
