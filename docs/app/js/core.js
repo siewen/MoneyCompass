@@ -372,13 +372,35 @@ export const Calc = {
     }
     return [...map.values()].sort((a, b) => b.key - a.key);
   },
-  averages(expenses, maxMonths = 3) {
+  /** Which days your data really covers: the last 1–3 months with expenses, and for each month the days from the
+   *  first to the last entry (a whole month when it starts and ends near the month's edges). "units" is the number
+   *  of months this is worth – e.g. one week of October ≈ 0,23 – used to turn totals into "per month". */
+  coverage(d) {
+    const months = this.groupMonths(this.countedExpenses(d)).slice(0, 3);
+    if (!months.length) return { months: [], units: 0, days: 0, partial: false, from: null, to: null };
+    const all = [...d.Expenses, ...d.Received, ...d.Transfers].map(x => parseDate(x.Date)).filter(x => x && !isNaN(x));
+    let units = 0, days = 0, partial = false, from = null, to = null;
+    for (const m of months) {
+      const start = m.start, monthEnd = addDays(addMonths(start, 1), -1), end = monthEnd < today() ? monthEnd : today();
+      const inM = all.filter(t => t >= start && t <= end);
+      let a = new Date(Math.min(...inM)), b = new Date(Math.max(...inM));
+      if ((a - start) / 86400000 <= 4) a = start;          // starts near the 1st: from the 1st
+      if ((end - b) / 86400000 <= 4) b = end;              // ends near the month end (or today): until then
+      const span = Math.round((b - a) / 86400000) + 1, len = Math.round((monthEnd - start) / 86400000) + 1;
+      if (span < len - 0.5) partial = true;
+      units += span / len; days += span;
+      from = !from || a < from ? a : from; to = !to || b > to ? b : to;
+    }
+    return { months, units: Math.max(units, 1 / 31), days, partial, short: days < 21, from, to };
+  },
+  averages(expenses, maxMonths = 3, units = null) {
     const months = this.groupMonths(expenses).slice(0, maxMonths);
     if (!months.length) return { essential: 0, nonEssential: 0, monthsUsed: 0, label: "" };
     let ess = 0, other = 0;
     for (const m of months) for (const e of m.items) (e.Essential ? (ess += e.Amount) : (other += e.Amount));
     const label = [...months].reverse().map(m => `${pad(m.start.getMonth() + 1)}.${m.start.getFullYear()}`).join(", ");
-    return { essential: ess / months.length, nonEssential: other / months.length, monthsUsed: months.length, label };
+    const div = units || months.length;
+    return { essential: ess / div, nonEssential: other / div, monthsUsed: months.length, label };
   },
   receivedIn(d, month) {
     const start = monthStart(month), end = addMonths(start, 1);
@@ -395,7 +417,7 @@ export const Calc = {
   /** Income per month for the same months as the expense averages (your imported or entered period).
    *  Without expenses yet: your regular income from the income sources. */
   periodIncome(d) {
-    const months = this.groupMonths(this.countedExpenses(d)).slice(0, 3);
+    const cov = this.coverage(d), months = cov.months;
     if (!months.length) return { perMonth: this.income(d).monthlyTotal, salary: this.income(d).monthlyTotal, extra: 0, months: 0 };
     let salary = 0, extra = 0;
     for (const m of months) {
@@ -403,7 +425,9 @@ export const Calc = {
       const x = this.monthIncome(d, start, end);
       salary += x.salary; extra += x.extra;
     }
-    return { perMonth: (salary + extra) / months.length, salary: salary / months.length, extra: extra / months.length, months: months.length };
+    // Salary is paid once a month; extra income is turned into "per month" by the days really covered
+    salary /= months.length; extra /= cov.units;
+    return { perMonth: salary + extra, salary, extra, months: months.length };
   },
   totalIncome(d) { return this.periodIncome(d).perMonth; },
   loanPayments(d, month) {
@@ -438,6 +462,7 @@ export const Calc = {
   },
   recurringPerMonth(d) {
     const months = this.basisMonths(d), list = [];
+    // Regular payments count once per month – they are known monthly amounts, so no estimate is needed
     for (const m of months) list.push(...this.recurringIn(d, m, addDays(addMonths(m, 1), -1)));
     const per = { essential: 0, other: 0, byCategory: new Map() };
     for (const x of list) {
@@ -447,7 +472,8 @@ export const Calc = {
     return per;
   },
   spending(d) {
-    const avg = this.averages(this.countedExpenses(d));
+    const cov = this.coverage(d);
+    const avg = { ...this.averages(this.countedExpenses(d), 3, cov.units), estimate: cov.partial, days: cov.days, from: cov.from, to: cov.to };
     const loans = this.loanPayments(d), rec = this.recurringPerMonth(d);
     if (loans <= 0 && rec.essential + rec.other <= 0) return avg;
     return { ...avg, essential: avg.essential + loans + rec.essential, nonEssential: avg.nonEssential + rec.other, monthsUsed: Math.max(1, avg.monthsUsed) };
@@ -667,11 +693,11 @@ export const Advisor = {
     return { name: best.o.Name, rate: Math.round(gross * 100) / 100, limit: best.o.PromoLimit || 0 };
   },
   perCategory(d, filter) {
-    const months = Calc.groupMonths(Calc.countedExpenses(d)).slice(0, 3);
+    const cov = Calc.coverage(d), months = cov.months;
     if (!months.length) return [];
     const map = new Map();
     for (const m of months) for (const e of m.items) if (!filter || filter(e)) map.set(e.Category, (map.get(e.Category) || 0) + e.Amount);
-    return [...map.entries()].map(([category, sum]) => ({ category, perMonth: sum / months.length }));
+    return [...map.entries()].map(([category, sum]) => ({ category, perMonth: sum / cov.units }));
   },
   topNonEssential(d) { return this.perCategory(d, e => !e.Essential).sort((a, b) => b.perMonth - a.perMonth).slice(0, 3); },
   spendingByCategory(d) {

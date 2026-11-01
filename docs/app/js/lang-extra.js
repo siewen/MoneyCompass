@@ -427,7 +427,15 @@ export const EXTRA = {
 "Last {0} days": "Letzte {0} Tage",
 "Amount from": "Betrag von",
 "Amount to": "Betrag bis",
-"Expense history": "Ausgabenverlauf"
+"Expense history": "Ausgabenverlauf",
+"Based on {0} days of data ({1} – {2}). Amounts per month are an estimate – import or enter at least one whole month for reliable numbers.": "Basierend auf {0} Tagen ({1} – {2}). Monatsbeträge sind eine Schätzung – importieren oder erfassen Sie mindestens einen ganzen Monat für verlässliche Zahlen.",
+"Based on {0} days of data ({1} – {2}), converted to amounts per month.": "Basierend auf {0} Tagen ({1} – {2}), umgerechnet auf einen Monat.",
+"Based on one whole month: {0} – {1}.": "Basierend auf einem ganzen Monat: {0} – {1}.",
+"Average per month of {0} whole months: {1} – {2}.": "Durchschnitt pro Monat aus {0} ganzen Monaten: {1} – {2}.",
+"Only {0} days of data – the amounts per month are a rough estimate.": "Nur {0} Tage Daten – die Monatsbeträge sind eine grobe Schätzung.",
+"converted to one month": "auf einen Monat umgerechnet",
+"Import or enter at least one whole month.": "Importieren oder erfassen Sie mindestens einen ganzen Monat.",
+"Months with only part of the data show what was entered, not a whole month.": "Monate mit nur einem Teil der Daten zeigen das Erfasste, nicht einen ganzen Monat."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -856,7 +864,15 @@ export const EXTRA = {
 "Last {0} days": "{0} derniers jours",
 "Amount from": "Montant de",
 "Amount to": "Montant à",
-"Expense history": "Historique des dépenses"
+"Expense history": "Historique des dépenses",
+"Based on {0} days of data ({1} – {2}). Amounts per month are an estimate – import or enter at least one whole month for reliable numbers.": "Sur la base de {0} jours de données ({1} – {2}). Les montants mensuels sont une estimation – importez ou saisissez au moins un mois complet pour des chiffres fiables.",
+"Based on {0} days of data ({1} – {2}), converted to amounts per month.": "Sur la base de {0} jours de données ({1} – {2}), convertis en montants mensuels.",
+"Based on one whole month: {0} – {1}.": "Sur la base d'un mois complet : {0} – {1}.",
+"Average per month of {0} whole months: {1} – {2}.": "Moyenne mensuelle sur {0} mois complets : {1} – {2}.",
+"Only {0} days of data – the amounts per month are a rough estimate.": "Seulement {0} jours de données – les montants mensuels sont une estimation approximative.",
+"converted to one month": "converti sur un mois",
+"Import or enter at least one whole month.": "Importez ou saisissez au moins un mois complet.",
+"Months with only part of the data show what was entered, not a whole month.": "Les mois avec une partie seulement des données montrent ce qui a été saisi, pas un mois complet."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1285,6 +1301,14 @@ export const EXTRA = {
 "Last {0} days": "Ostatnie {0} dni",
 "Amount from": "Kwota od",
 "Amount to": "Kwota do",
-"Expense history": "Historia wydatków"
+"Expense history": "Historia wydatków",
+"Based on {0} days of data ({1} – {2}). Amounts per month are an estimate – import or enter at least one whole month for reliable numbers.": "Na podstawie {0} dni danych ({1} – {2}). Kwoty miesięczne to szacunek – zaimportuj lub wpisz co najmniej jeden pełny miesiąc, aby liczby były wiarygodne.",
+"Based on {0} days of data ({1} – {2}), converted to amounts per month.": "Na podstawie {0} dni danych ({1} – {2}), przeliczone na miesiąc.",
+"Based on one whole month: {0} – {1}.": "Na podstawie jednego pełnego miesiąca: {0} – {1}.",
+"Average per month of {0} whole months: {1} – {2}.": "Średnia miesięczna z {0} pełnych miesięcy: {1} – {2}.",
+"Only {0} days of data – the amounts per month are a rough estimate.": "Tylko {0} dni danych – kwoty miesięczne to przybliżony szacunek.",
+"converted to one month": "przeliczone na miesiąc",
+"Import or enter at least one whole month.": "Zaimportuj lub wpisz co najmniej jeden pełny miesiąc.",
+"Months with only part of the data show what was entered, not a whole month.": "Miesiące z częścią danych pokazują to, co wpisano, a nie cały miesiąc."
 }
 };

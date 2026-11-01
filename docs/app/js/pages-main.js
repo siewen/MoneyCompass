@@ -84,6 +84,8 @@ export const Overview = {
       ${tile(T("Left over per month"), both ? pln(left) : "–", "income", ["#0E7C55", "#34D399", "#E7F7F0", "#1BAF7A"], both && left < 0 ? "bad" : "", T("Income minus spending: what you can save each month."))}
       ${tile(T("Savings rate"), both ? Math.round(left / income * 100) + "%" : "–", "portfolio", ["#7E22CE", "#C084FC", "#F5EDFD", "#A855F7"], "", T("The part of your income you keep. A good aim is 10–20% or more."))}
     </div>`);
+    const sw = shortDataWarning(d);
+    if (sw) parts.push(`<div class="tip warn-tip short-data">${sw.replace(/<\/?p[^>]*>/g, "")} ${esc(T("Import or enter at least one whole month."))}</div>`);
     parts.push(`<button class="btn go big" data-action="optimize">⚡ ${esc(T("Optimize my savings"))}</button>`);
     const due = duePromos(d)[0];
     if (due) parts.push(`<button class="tip warn-tip" data-go="portfolio">⏰ ${esc(due.p.ended ? T("The promotion at {0} ended on {1} – see where to move the money", due.h.Name, fmtDate(due.p.end)) : T("The promotion at {0} ends in {1} days – see where to move the money", due.h.Name, due.p.daysLeft))}  →</button>`);
@@ -96,10 +98,11 @@ export const Overview = {
     const basisMonths = Calc.groupMonths(Calc.countedExpenses(d)).slice(0, 3).reverse();
     const inflow = income, outflow = spending, bal = inflow - outflow, sum = inflow + outflow;
     const pIn = sum > 0 ? Math.round(inflow / sum * 100) : 0;
-    const period = basisMonths.length ? fmtDate(basisMonths[0].start) + " – " + fmtDate(addDays(addMonths(basisMonths[basisMonths.length - 1].start, 1), -1)) : "";
+    const cov = Calc.coverage(d);
+    const period = cov.from ? fmtDate(cov.from) + " – " + fmtDate(cov.to) + " (" + T("{0} days", cov.days) + ")" : "";
     parts.push(card(heading(T("Inflows and outflows (per month)")) + (ChartData.hasInOut(d) ? `
       <div class="flow-balance"><span>${esc(T("Balance of inflows and outflows"))}</span><b class="${bal < 0 ? "bad" : "good"}">${bal < 0 ? "−" : ""}${pln(Math.abs(bal))}</b>
-        ${period ? `<small class="hint">${esc(T("Details for the period: {0}", period))}${basisMonths.length > 1 ? " · " + esc(T("average per month")) : ""}</small>` : ""}</div>
+        ${period ? `<small class="hint">${esc(T("Details for the period: {0}", period))}${cov.partial ? " · " + esc(T("converted to one month")) : basisMonths.length > 1 ? " · " + esc(T("average per month")) : ""}</small>` : ""}</div>
       <div class="flow-bar">
         <div class="in" style="flex:${Math.max(pIn, 28)}"><span>⬇ ${esc(T("Inflows"))}</span></div>
         <div class="out" style="flex:${Math.max(100 - pIn, 28)}"><span>⬆ ${esc(T("Outflows"))}</span></div></div>
@@ -112,7 +115,7 @@ export const Overview = {
       (showTrend ? monthBars(months, axis, pln, [T("Inflows"), T("Outflows")]) + legend([
         { color: "#2E9E5B", label: T("Inflows"), text: pln(months.reduce((s, m) => s + m.income, 0) / Math.max(1, months.length)) + " " + T("avg.") },
         { color: "#C81E26", label: T("Outflows"), text: pln(months.reduce((s, m) => s + m.expenses, 0) / Math.max(1, months.length)) + " " + T("avg.") },
-      ]) + (cur ? `<p class="hint planned-note"><span class="planned-swatch"></span>${esc(T("{0} is not finished: income as planned from your income sources, expenses entered so far.", monthName(cur.start)))}</p>` : "")
+      ]) + (Calc.coverage(d).partial ? hint(T("Months with only part of the data show what was entered, not a whole month.")) : "") + (cur ? `<p class="hint planned-note"><span class="planned-swatch"></span>${esc(T("{0} is not finished: income as planned from your income sources, expenses entered so far.", monthName(cur.start)))}</p>` : "")
       : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"expenses"));
     parts.push(card(heading(T("Your expenses")) + hint(basisText(d)) +
       (cats.slices.length ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.slices.map(s => ({ color: s.color, label: (s.icon ? s.icon + " " : "") + s.label, text: s.text, share: ChartData.share(s.value, cats.total) })))}</div>`
@@ -160,12 +163,18 @@ export const Overview = {
 };
 /** What the expense averages are based on: the months that really have expenses (imported or entered). */
 export function basisText(d) {
-  const months = Calc.groupMonths(Calc.countedExpenses(d)).slice(0, 3);
-  if (!months.length) return "";
-  const dates = months.flatMap(m => m.items.map(e => parseDate(e.Date).getTime()));
-  const from = fmtDate(new Date(Math.min(...dates))), to = fmtDate(new Date(Math.max(...dates)));
-  return months.length === 1 ? T("Your expenses from {0} to {1} (1 month).", from, to)
-    : T("Average per month of your expenses from {0} to {1} ({2} months).", from, to, months.length);
+  const c = Calc.coverage(d);
+  if (!c.months.length) return "";
+  const from = fmtDate(c.from), to = fmtDate(c.to);
+  if (c.short) return T("Based on {0} days of data ({1} – {2}). Amounts per month are an estimate – import or enter at least one whole month for reliable numbers.", c.days, from, to);
+  if (c.partial) return T("Based on {0} days of data ({1} – {2}), converted to amounts per month.", c.days, from, to);
+  return c.months.length === 1 ? T("Based on one whole month: {0} – {1}.", from, to)
+    : T("Average per month of {0} whole months: {1} – {2}.", c.months.length, from, to);
+}
+/** A short orange warning when the data covers less than 3 weeks. */
+export function shortDataWarning(d) {
+  const c = Calc.coverage(d);
+  return c.months.length && c.short ? `<p class="hint warn">⚠ ${esc(T("Only {0} days of data – the amounts per month are a rough estimate.", c.days))}</p>` : "";
 }
 const fmtNum = v => (Math.round(v * 10) / 10).toString().replace(".", ",");
 const fmtMonthKey = k => monthName(new Date(+k.slice(0, 4), +k.slice(5, 7) - 1, 1));
@@ -390,7 +399,7 @@ export const Expenses = {
         ${check("essential", T("Essential (must pay even in a crisis)"), cat0.Essential)}
         <div class="buttons">${button(T("Add expense"), "add-expense", "main")}${button("⬆ " + esc(T("Import bank statement (CSV)…")), "import", "second")}</div></form>`)}
       ${card(heading(T("Monthly average")) + (avg.monthsUsed ? row(T("Essential"), pln(avg.essential)) + row(T("Not essential"), pln(avg.nonEssential)) + row(T("Total per month"), pln(avg.essential + avg.nonEssential)) +
-          hint(T("Based on the last {0} month(s) with expenses: {1}. For accurate numbers, enter whole months. The current month is counted even if it's not finished.", Calc.averages(Calc.countedExpenses(d)).monthsUsed, Calc.averages(Calc.countedExpenses(d)).label)) +
+          hint(basisText(d)) +
           (loans > 0 ? hint(T("Includes {0} per month of loan payments from the Loans & debts tab. Expenses in the \"Loan payments\" category are not counted, so nothing is counted twice.", pln(loans))) : "")
         : hint(T("Add expenses to see your averages."))))}
       ${card(heading(T("By category")) + hint(basisText(d)) + (cats.all.length
