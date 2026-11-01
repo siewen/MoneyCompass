@@ -252,3 +252,34 @@ export const ICON = {
   edit: svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>'),
   repeat: svg('<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>'),
 };
+
+// ---------------------------------------------------------------- hover details (a styled tooltip instead of the slow browser one)
+// Shows for anything with data-tip, a title, or an SVG <title> (chart bars and rings).
+(() => {
+  if (!window.matchMedia?.("(hover: hover)").matches) return;   // phones: no hover
+  const box = document.createElement("div"); box.className = "tip-box"; box.hidden = true;
+  document.addEventListener("DOMContentLoaded", () => document.body.appendChild(box));
+  if (document.body) document.body.appendChild(box);
+  let cur = null;
+  const textOf = el => {
+    if (el.dataset?.tip) return el.dataset.tip;
+    if (el.getAttribute?.("title")) { el.dataset.tip = el.getAttribute("title"); el.removeAttribute("title"); return el.dataset.tip; }
+    const t = el.querySelector?.(":scope > title"); return t ? t.textContent : "";
+  };
+  document.addEventListener("mouseover", e => {
+    const el = e.target.closest?.("[data-tip], [title], svg rect, svg circle");
+    const text = el ? textOf(el) : "";
+    if (!text) { box.hidden = true; cur = null; return; }
+    cur = el; box.textContent = text; box.hidden = false;
+  });
+  document.addEventListener("mousemove", e => {
+    if (box.hidden) return;
+    const w = box.offsetWidth, h = box.offsetHeight;
+    let x = e.clientX + 14, y = e.clientY + 18;
+    if (x + w > innerWidth - 8) x = Math.max(8, e.clientX - w - 14);
+    if (y + h > innerHeight - 8) y = e.clientY - h - 12;
+    box.style.left = x + "px"; box.style.top = y + "px";
+  });
+  document.addEventListener("mouseout", e => { if (cur && !cur.contains(e.relatedTarget)) { box.hidden = true; cur = null; } });
+  document.addEventListener("pointerdown", () => { box.hidden = true; }, true);
+})();

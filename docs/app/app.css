@@ -442,3 +442,7 @@ details.cal-month > summary:hover .m-name b { text-decoration: underline; }
 .filter-bar select { flex: 0 1 220px; width: auto; }
 .filter-bar .check { margin: 0; }
 .filter-result { font-weight: 700; color: var(--primary); margin: 4px 0 8px; }
+.tip-box { position: fixed; z-index: 1000; max-width: 320px; padding: 8px 11px; border-radius: 9px; background: #0F172A; color: #F1F5F9; font-size: 13px; line-height: 1.4; box-shadow: 0 8px 24px rgba(0,0,0,.3); pointer-events: none; }
+:root[data-theme="dark"] .tip-box { background: #F1F5F9; color: #0F172A; }
+.tip-box[hidden] { display: none; }
+svg.donut text { pointer-events: none; }

@@ -13,8 +13,8 @@ import { adviceCard, bindAdvice, promoBadge, moves } from "./advice.js";
 import { loanWarning } from "./pages-pro.js";
 
 const D = () => State.data;
-const tile = (label, value, route, colors, cls = "") =>
-  `<button class="tile" data-go="${route}" style="--t1:${colors[0]};--t2:${colors[1]};--t3:${colors[2]};--t4:${colors[3]}">
+const tile = (label, value, route, colors, cls = "", tip = "") =>
+  `<button class="tile" data-go="${route}"${tip ? ` data-tip="${esc(tip)}"` : ""} style="--t1:${colors[0]};--t2:${colors[1]};--t3:${colors[2]};--t4:${colors[3]}">
      <span>${esc(label)}</span><b class="${cls}">${value}</b></button>`;
 
 // ================================================================= Overview
@@ -34,6 +34,10 @@ export const Overview = {
     const target = Calc.emergency(d.Settings).target;
 
     recordSavings(d, p.total);
+    // Hover details for the four tiles
+    const pinc = Calc.periodIncome(d);
+    const tipIncome = pinc.months ? T("Salary {0} + extra income {1} per month, from the same months as your expenses. Click for the Income tab.", pln(pinc.salary), pln(pinc.extra)) : T("From your income sources. Click for the Income tab.");
+    const tipSpending = avg.monthsUsed ? T("Essential {0} + not essential {1} per month, including loan instalments and regular payments. Click for the Expenses tab.", pln(avg.essential), pln(avg.nonEssential)) : "";
     // Emergency fund: how many months of essential costs your safe money covers
     const essentialMonth = Calc.emergency(d.Settings).monthly || avg.essential || 0;
     const covered = essentialMonth > 0 ? p.safe / essentialMonth : 0;
@@ -75,10 +79,10 @@ export const Overview = {
 
     const parts = [];
     parts.push(`<div class="tiles">
-      ${tile(T("Income per month"), pln(income), "income", ["#1E5FB0", "#60A5FA", "#EAF2FC", "#2A78D6"])}
-      ${tile(T("Spending per month"), avg.monthsUsed ? pln(spending) : "–", "expenses", ["#C2410C", "#FB923C", "#FDF0E9", "#EB6834"])}
-      ${tile(T("Left over per month"), both ? pln(left) : "–", "income", ["#0E7C55", "#34D399", "#E7F7F0", "#1BAF7A"], both && left < 0 ? "bad" : "")}
-      ${tile(T("Savings rate"), both ? Math.round(left / income * 100) + "%" : "–", "portfolio", ["#7E22CE", "#C084FC", "#F5EDFD", "#A855F7"])}
+      ${tile(T("Income per month"), pln(income), "income", ["#1E5FB0", "#60A5FA", "#EAF2FC", "#2A78D6"], "", tipIncome)}
+      ${tile(T("Spending per month"), avg.monthsUsed ? pln(spending) : "–", "expenses", ["#C2410C", "#FB923C", "#FDF0E9", "#EB6834"], "", tipSpending)}
+      ${tile(T("Left over per month"), both ? pln(left) : "–", "income", ["#0E7C55", "#34D399", "#E7F7F0", "#1BAF7A"], both && left < 0 ? "bad" : "", T("Income minus spending: what you can save each month."))}
+      ${tile(T("Savings rate"), both ? Math.round(left / income * 100) + "%" : "–", "portfolio", ["#7E22CE", "#C084FC", "#F5EDFD", "#A855F7"], "", T("The part of your income you keep. A good aim is 10–20% or more."))}
     </div>`);
     parts.push(`<button class="btn go big" data-action="optimize">⚡ ${esc(T("Optimize my savings"))}</button>`);
     const due = duePromos(d)[0];

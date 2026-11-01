@@ -381,7 +381,13 @@ export const EXTRA = {
 "Clear filter": "Filter löschen",
 "{0} expenses found · together {1}": "{0} Ausgaben gefunden · zusammen {1}",
 "No expenses match this filter.": "Keine Ausgaben passen zu diesem Filter.",
-"Expenses found: {0} · together {1}": "Gefundene Ausgaben: {0} · zusammen {1}"
+"Expenses found: {0} · together {1}": "Gefundene Ausgaben: {0} · zusammen {1}",
+"Income minus spending: what you can save each month.": "Einkommen minus Ausgaben: was Sie jeden Monat sparen können.",
+"The part of your income you keep. A good aim is 10–20% or more.": "Der Teil Ihres Einkommens, der Ihnen bleibt. Ein gutes Ziel sind 10–20 % oder mehr.",
+"Salary {0} + extra income {1} per month, from the same months as your expenses. Click for the Income tab.": "Gehalt {0} + Zusatzeinkommen {1} pro Monat, aus denselben Monaten wie Ihre Ausgaben. Klicken für den Tab Einkommen.",
+"From your income sources. Click for the Income tab.": "Aus Ihren Einkommensquellen. Klicken für den Tab Einkommen.",
+"Essential {0} + not essential {1} per month (average of {2}), including loan instalments and regular payments. Click for the Expenses tab.": "Notwendig {0} + nicht notwendig {1} pro Monat (Durchschnitt: {2}), mit Kreditraten und regelmäßigen Zahlungen. Klicken für den Tab Ausgaben.",
+"Essential {0} + not essential {1} per month, including loan instalments and regular payments. Click for the Expenses tab.": "Notwendig {0} + nicht notwendig {1} pro Monat, mit Kreditraten und regelmäßigen Zahlungen. Klicken für den Tab Ausgaben."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -764,7 +770,13 @@ export const EXTRA = {
 "Clear filter": "Effacer le filtre",
 "{0} expenses found · together {1}": "{0} dépenses trouvées · total {1}",
 "No expenses match this filter.": "Aucune dépense ne correspond à ce filtre.",
-"Expenses found: {0} · together {1}": "Dépenses trouvées : {0} · total {1}"
+"Expenses found: {0} · together {1}": "Dépenses trouvées : {0} · total {1}",
+"Income minus spending: what you can save each month.": "Revenus moins dépenses : ce que vous pouvez épargner chaque mois.",
+"The part of your income you keep. A good aim is 10–20% or more.": "La part de vos revenus que vous gardez. Un bon objectif : 10–20 % ou plus.",
+"Salary {0} + extra income {1} per month, from the same months as your expenses. Click for the Income tab.": "Salaire {0} + revenus supplémentaires {1} par mois, sur les mêmes mois que vos dépenses. Cliquez pour l'onglet Revenus.",
+"From your income sources. Click for the Income tab.": "D'après vos sources de revenus. Cliquez pour l'onglet Revenus.",
+"Essential {0} + not essential {1} per month (average of {2}), including loan instalments and regular payments. Click for the Expenses tab.": "Essentiel {0} + non essentiel {1} par mois (moyenne : {2}), mensualités de prêt et paiements réguliers compris. Cliquez pour l'onglet Dépenses.",
+"Essential {0} + not essential {1} per month, including loan instalments and regular payments. Click for the Expenses tab.": "Essentiel {0} + non essentiel {1} par mois, mensualités de prêt et paiements réguliers compris. Cliquez pour l'onglet Dépenses."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1147,6 +1159,12 @@ export const EXTRA = {
 "Clear filter": "Wyczyść filtr",
 "{0} expenses found · together {1}": "Znaleziono wydatków: {0} · razem {1}",
 "No expenses match this filter.": "Żaden wydatek nie pasuje do filtra.",
-"Expenses found: {0} · together {1}": "Znalezione wydatki: {0} · razem {1}"
+"Expenses found: {0} · together {1}": "Znalezione wydatki: {0} · razem {1}",
+"Income minus spending: what you can save each month.": "Dochód minus wydatki: tyle możesz odłożyć co miesiąc.",
+"The part of your income you keep. A good aim is 10–20% or more.": "Część dochodu, która Ci zostaje. Dobry cel to 10–20% lub więcej.",
+"Salary {0} + extra income {1} per month, from the same months as your expenses. Click for the Income tab.": "Wynagrodzenie {0} + dodatkowy dochód {1} miesięcznie, z tych samych miesięcy co wydatki. Kliknij, aby przejść do Dochodów.",
+"From your income sources. Click for the Income tab.": "Z Twoich źródeł dochodu. Kliknij, aby przejść do Dochodów.",
+"Essential {0} + not essential {1} per month (average of {2}), including loan instalments and regular payments. Click for the Expenses tab.": "Niezbędne {0} + inne {1} miesięcznie (średnia: {2}), z ratami kredytów i płatnościami cyklicznymi. Kliknij, aby przejść do Wydatków.",
+"Essential {0} + not essential {1} per month, including loan instalments and regular payments. Click for the Expenses tab.": "Niezbędne {0} + inne {1} miesięcznie, z ratami kredytów i płatnościami cyklicznymi. Kliknij, aby przejść do Wydatków."
 }
 };
