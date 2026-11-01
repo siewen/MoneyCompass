@@ -9,7 +9,7 @@ import { App, requirePro } from "./app.js";
 import { Rates, BOND_CODES, BONDS_WEBSITE, SAVINGS_RANKING, DEPOSITS_RANKING } from "./rates.js";
 import { budgetBars, offerSalary, binCard, bindBin } from "./pages-main.js";
 import * as Csv from "./csv.js";
-import { toBin } from "./core.js";
+import { toBin, loanCheck } from "./core.js";
 
 const D = () => State.data;
 const locked = (title, text) => `<div class="grid">${card(`<div class="locked">🔒<h3>${esc(title)}</h3><p>${esc(text)}</p>${button(esc(T("Enter license key")), "unlock", "main")}</div>`)}</div>`;
@@ -276,7 +276,7 @@ export const Loans = {
         level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Expenses tab.")))}
       ${card(heading(T("Loans")) + hint(T("Tap a loan to edit it, for example to update what is left.")) + (d.Loans.length ? `<div class="list">${d.Loans.map(x => `
         <div class="item clickable" data-edit-loan="${x.Id}"><div><b>${esc(x.Name)}</b><span class="hint">${esc(T("{0} per month · {1} per year · last payment {2} ({3} months left)", pln(x.MonthlyPayment), rate(x.RatePercent || 0), fmtDate(x.EndDate), monthsLeft(x)))}</span></div>
-        ${x.Original > 0 ? `<div class="loan-progress">${progress(1 - x.Remaining / x.Original, "#1BAF7A")}<span class="hint">${esc(T("Paid back {0} of {1} ({2}%)", pln(x.Original - x.Remaining), pln(x.Original), Math.round((1 - x.Remaining / x.Original) * 100)))}</span></div>` : ""}
+        ${loanWarning(x)}${x.Original > 0 ? `<div class="loan-progress">${progress(1 - x.Remaining / x.Original, "#1BAF7A")}<span class="hint">${esc(T("Paid back {0} of {1} ({2}%)", pln(x.Original - x.Remaining), pln(x.Original), Math.round((1 - x.Remaining / x.Original) * 100)))}</span></div>` : ""}
         <b>${pln(x.Remaining)}</b><button class="icon-btn danger" data-del-loan="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No loans – great! Add one above if you have any."))), "wide")}
       ${binCard(["loan"])}
     </div>`;
@@ -288,7 +288,9 @@ export const Loans = {
       if (orig > 0 && orig < rem) { toast(T("The amount at the start can't be smaller than what is still to pay back."), "bad"); return; }
       const item = { Name: v.name.trim(), Original: orig > 0 ? orig : null, Remaining: rem, MonthlyPayment: num(v.payment) || 0, RatePercent: num(v.rate) || 0, EndDate: isoDate(parseDate(v.end)) };
       if (l) Object.assign(l, item); else d.Loans.push({ Id: uuid(), ...item });
-      editLoan = null; save(); toast(T("Saved.")); App.refresh();
+      editLoan = null; save(); App.refresh();
+      const saved = l || d.Loans[d.Loans.length - 1];
+      if (loanCheck(saved)) toast(T("Saved – but the numbers don't add up, see the warning."), "bad"); else toast(T("Saved."));
     };
     const c = el.querySelector('[data-action="cancel-loan"]'); if (c) c.onclick = () => { editLoan = null; App.refresh(); };
     el.querySelectorAll("[data-edit-loan]").forEach(x => x.onclick = ev => { if (ev.target.closest("[data-del-loan]")) return; editLoan = x.dataset.editLoan; App.refresh(); window.scrollTo({ top: 0, behavior: "smooth" }); });
@@ -513,4 +515,16 @@ export function loanProgress(loans) {
   if (!known.length) return "";
   const orig = known.reduce((s, l) => s + l.Original, 0), rem = known.reduce((s, l) => s + l.Remaining, 0), f = orig > 0 ? 1 - rem / orig : 0;
   return progress(f, "#1BAF7A") + `<p class="good"><b>${esc(T("Paid back {0} of {1} ({2}%)", pln(orig - rem), pln(orig), Math.round(f * 100)))}</b></p>`;
+}
+
+/** "This doesn't add up": the monthly payment until the last payment date is far from what is left. */
+export function loanWarning(l, short = false) {
+  const c = loanCheck(l);
+  if (!c) return "";
+  const text = c.needed === Infinity
+    ? T("{0} a month doesn't even cover the interest – the loan would never be paid back. Check the monthly payment.", pln(l.MonthlyPayment || 0))
+    : T("This doesn't add up: {0} × {1} months until {2} = {3}, but {4} is still to pay back. At {0} a month it takes about {5} months (until {6}). To finish by {2} you would pay about {7} a month. Check the last payment date or the monthly payment.",
+        pln(l.MonthlyPayment || 0), c.monthsLeft, fmtDate(l.EndDate), pln(c.paidByEnd), pln(l.Remaining), c.needed, monthName(c.neededEnd), pln(c.payNeeded));
+  return short ? `<p class="hint warn">⚠ ${esc(T("{0}: the monthly payment, the last payment date and what is left don't fit together – check it in Loans & debts.", l.Name))}</p>`
+    : `<div class="alert warn loan-warn">⚠ ${esc(text)}</div>`;
 }

@@ -765,3 +765,26 @@ export function duePromos(d) {
   return d.Holdings.map(h => ({ h, p: promo(h) })).filter(x => x.p && x.p.daysLeft <= 14 && x.p.daysLeft >= -60 && x.h.Amount > 0)
     .sort((a, b) => a.p.daysLeft - b.p.daysLeft);
 }
+
+// ---------------------------------------------------------------- loans: does it add up?
+
+/** Months needed to pay back what is left with this monthly payment (with interest), or Infinity. */
+export function loanMonthsNeeded(l) {
+  const A = +l.Remaining || 0, P = +l.MonthlyPayment || 0, r = (+l.RatePercent || 0) / 100 / 12;
+  if (A <= 0) return 0;
+  if (P <= 0) return Infinity;
+  if (r <= 0) return Math.ceil(A / P);
+  if (P <= A * r) return Infinity;            // the payment doesn't even cover the interest
+  return Math.ceil(-Math.log(1 - r * A / P) / Math.log(1 + r));
+}
+/** A loan whose last payment date, monthly payment and amount left don't fit together (more than 10% off). */
+export function loanCheck(l) {
+  if (!(l.Remaining > 0) || !l.EndDate) return null;
+  const end = parseDate(l.EndDate), now = today();
+  const monthsLeft = Math.max(0, (end.getFullYear() - now.getFullYear()) * 12 + end.getMonth() - now.getMonth() + 1);
+  const needed = loanMonthsNeeded(l);
+  const paidByEnd = (+l.MonthlyPayment || 0) * monthsLeft;
+  if (needed !== Infinity && Math.abs(needed - monthsLeft) <= Math.max(1, monthsLeft * 0.1)) return null;
+  const neededEnd = needed === Infinity ? null : addMonths(monthStart(now), Math.max(0, needed - 1));
+  return { monthsLeft, needed, paidByEnd, neededEnd, payNeeded: monthsLeft > 0 ? (+l.Remaining) / monthsLeft : 0 };
+}

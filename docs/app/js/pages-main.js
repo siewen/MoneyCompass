@@ -9,6 +9,7 @@ import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, s
 import { App, requirePro } from "./app.js";
 import { Rates } from "./rates.js";
 import { adviceCard, bindAdvice, promoBadge, moves } from "./advice.js";
+import { loanWarning } from "./pages-pro.js";
 
 const D = () => State.data;
 const tile = (label, value, route, colors, cls = "") =>
@@ -31,12 +32,45 @@ export const Overview = {
     const cats = ChartData.categories(d);
     const target = Calc.emergency(d.Settings).target;
 
-    let emergency;
+    recordSavings(d, p.total);
+    // Emergency fund: how many months of essential costs your safe money covers
+    const essentialMonth = Calc.emergency(d.Settings).monthly || avg.essential || 0;
+    const covered = essentialMonth > 0 ? p.safe / essentialMonth : 0;
+    let emergency, emState;
     if (target > 0) {
       const f = p.safe / target;
+      emState = f >= 1 ? "good" : f >= 0.5 ? "warn" : "bad";
       const color = f >= 1 ? COLORS.leftOver : f >= 0.5 ? "#F59E0B" : "#DC2626";
-      emergency = progress(f, color) + `<p class="${f >= 1 ? "good" : f >= 0.5 ? "warn" : "bad"}">${esc(T("{0} of {1} ({2}%)", pln(Math.min(p.safe, target)), pln(target), Math.round(Math.min(100, f * 100))))}</p>`;
-    } else emergency = hint(T("Set your target in the Emergency fund tab."));
+      emergency = progress(f, color) + `<p class="${emState}"><b>${esc(T("{0} of {1} ({2}%)", pln(Math.min(p.safe, target)), pln(target), Math.round(Math.min(100, f * 100))))}</b></p>` +
+        hint(f >= 1 ? T("Well done – your safe money covers your emergency fund.") : T("Covers {0} of {1} months of essential costs. Still missing {2}.", fmtNum(covered), d.Settings.EmergencyMonths || 0, pln(target - p.safe)));
+    } else {
+      emState = "bad";
+      const lo = essentialMonth * 3, hi = essentialMonth * 6;
+      emergency = `<div class="alert bad"><b>⚠ ${esc(T("No emergency fund yet"))}</b>
+        <p>${esc(T("Without one, an unexpected bill or losing your job goes straight onto a loan or credit card. Keep 3–6 months of essential costs aside, in safe money."))}</p>
+        ${essentialMonth > 0 ? `<p>${esc(T("With your essential costs ({0} per month) that is about {1} – {2}. Your safe money now covers {3} months.", pln(essentialMonth), pln(lo), pln(hi), fmtNum(covered)))}</p>` : ""}
+        <span class="alert-link">${esc(T("Set it up in the Emergency fund tab"))} →</span></div>`;
+    }
+    // Is it going somewhere? Money left over each month (income − expenses), and the trend of your savings
+    const done = months.filter(m => !m.current && (m.income > 0 || m.expenses > 0)).slice(-6);
+    const last = done[done.length - 1];
+    const lastLeft = last ? last.income - last.expenses : null, lastRate = last && last.income > 0 ? lastLeft / last.income : 0;
+    const hist = Object.entries(d.Settings.SavingsHistory || {}).sort();
+    const growth = hist.length >= 2 ? hist[hist.length - 1][1] - hist[0][1] : null;
+    const state = !last ? "" : lastLeft < 0 ? "bad" : lastRate < 0.1 ? "warn" : "good";
+    const headline = !last ? hint(T("Import or enter a full month of income and expenses to see whether your savings are growing."))
+      : `<p class="savings-headline ${state}">${state === "bad" ? "📉" : state === "warn" ? "➖" : "📈"} <b>${esc(lastLeft < 0
+          ? T("In {0} you spent {1} more than you earned.", monthName(last.start), pln(-lastLeft))
+          : T("In {0} you kept {1} – {2}% of your income.", monthName(last.start), pln(lastLeft), Math.round(lastRate * 100)))}</b></p>` +
+        hint(state === "bad" ? T("Your savings shrink when this happens. Look at your biggest categories in Expenses – and set a Budget plan.")
+          : state === "warn" ? T("You are saving, but little. A good aim is at least 10–20% of your income every month.")
+          : T("Great – you are building up money. Keep it in safe savings until your emergency fund is full, then make it work (Compare offers)."));
+    const bars = done.length ? `<div class="mini-bars">${(() => {
+        const max = Math.max(1, ...done.map(m => Math.abs(m.income - m.expenses)));
+        return done.map(m => { const v = m.income - m.expenses, h = Math.max(4, Math.abs(v) / max * 44);
+          return `<div class="mb" title="${esc(monthName(m.start))}: ${esc(pln(v))}"><span class="${v >= 0 ? "pos" : "neg"}" style="height:${h}px"></span><small>${esc(monthName(m.start).slice(0, 3))}</small></div>`; }).join("");
+      })()}<span class="mb-label">${esc(T("Left over per month"))}</span></div>` : "";
+    const growthLine = growth !== null && hist.length >= 2 ? `<p class="${growth >= 0 ? "good" : "bad"}">${growth >= 0 ? "▲" : "▼"} ${esc(T("Your savings since {0}: {1}{2}", fmtMonthKey(hist[0][0]), growth >= 0 ? "+" : "−", pln(Math.abs(growth))))}</p>` : "";
 
     const parts = [];
     parts.push(`<div class="tiles">
@@ -68,10 +102,11 @@ export const Overview = {
     parts.push(card(heading(T("Your expenses")) + hint(basisText(d)) +
       (cats.slices.length ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.slices.map(s => ({ color: s.color, label: (s.icon ? s.icon + " " : "") + s.label, text: s.text, share: ChartData.share(s.value, cats.total) })))}</div>`
         : hint(T("Add expenses to see where your money goes."))), "link\" data-go=\"expenses"));
-    parts.push(card(`<div class="link" data-go="portfolio">${heading(T("Your savings"))}${p.total > 0
+    parts.push(card(`<div class="link" data-go="portfolio">${heading(T("Your savings"))}${state ? `<span class="status-chip ${state}">${esc(state === "good" ? T("Growing") : state === "warn" ? T("Slow") : T("Shrinking"))}</span>` : ""}
+      ${headline}${bars}${growthLine}${p.total > 0
         ? `<div class="chart-row">${donut(ChartData.money(p), pln(p.total), T("in total"))}${legend([...ChartData.money(p).map(s => ({ color: s.color, label: s.label, text: s.text, share: ChartData.share(s.value, p.total) })), { label: T("Interest per year"), text: pln(p.yearly) }])}</div>`
         : hint(T("Add your savings in the My savings tab to see this chart."))}</div>
-      <hr><div class="link" data-go="emergency">${heading(T("Emergency fund"))}${emergency}</div>`));
+      <hr><div class="link" data-go="emergency">${heading(T("Emergency fund"))}${emergency}</div>`, "savings-card status-" + (state || "none") + " em-" + emState));
 
     if (moduleOn("loans")) {
       const loans = d.Loans.filter(l => l.Remaining > 0).sort((a, b) => b.Remaining - a.Remaining);
@@ -84,7 +119,7 @@ export const Overview = {
       parts.push(card(heading(T("Loans & debts")) + (loans.length
         ? `<div class="chart-row">${donut(ring, pln(total), T("Still to pay back"))}${legend(ring.map(s => ({ ...s, share: ChartData.share(s.value, paid > 0 ? borrowed : total) })))}</div>` +
           (paid > 0 ? `<p class="good"><b>${esc(T("Paid back {0} of {1} ({2}%)", pln(paid), pln(borrowed), Math.round(paid / borrowed * 100)))}</b></p>` : hint(T("Tip: enter how much you borrowed at the start (Loans & debts tab) to see how much is already paid back."))) +
-          row(T("Payments per month"), pln(Calc.loanPayments(d))) + row(T("Debt-free"), monthName(new Date(Math.max(...loans.map(l => parseDate(l.EndDate).getTime())))))
+          loans.map(l => loanWarning(l, true)).join("") + row(T("Payments per month"), pln(Calc.loanPayments(d))) + row(T("Debt-free"), monthName(new Date(Math.max(...loans.map(l => parseDate(l.EndDate).getTime())))))
         : hint(T("No loans – great!"))), "link\" data-go=\"loans"));
     }
     if (moduleOn("goals")) {
@@ -115,6 +150,14 @@ export function basisText(d) {
   const from = fmtDate(new Date(Math.min(...dates))), to = fmtDate(new Date(Math.max(...dates)));
   return months.length === 1 ? T("Your expenses from {0} to {1} (1 month).", from, to)
     : T("Average per month of your expenses from {0} to {1} ({2} months).", from, to, months.length);
+}
+const fmtNum = v => (Math.round(v * 10) / 10).toString().replace(".", ",");
+const fmtMonthKey = k => monthName(new Date(+k.slice(0, 4), +k.slice(5, 7) - 1, 1));
+/** Remembers the total of your savings once a month, to show whether it grows. */
+function recordSavings(d, total) {
+  const now = today(), key = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const h = d.Settings.SavingsHistory || (d.Settings.SavingsHistory = {});
+  if (h[key] !== Math.round(total)) { h[key] = Math.round(total); save(); }
 }
 const axis = v => v >= 1000 ? (Math.round(v / 100) / 10).toString().replace(".", ",") + "k" : String(Math.round(v));
 
