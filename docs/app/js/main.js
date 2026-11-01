@@ -293,9 +293,10 @@ function about() {
     <p class="hint">${esc(Rates.data.Updated ? T("Current rates from NBP and the Ministry of Finance, updated {0}.", fmtDate(Rates.data.Updated) + " " + new Date(Rates.data.Updated).toTimeString().slice(0, 5)) : T("Current rates have not been downloaded yet."))}</p>
     <p class="hint">${esc(license.status)}</p>
     <p class="hint">${esc(T("© {0} MoneyCompass. All rights reserved.", new Date().getFullYear()))}</p>
-    <a class="btn go" href="${DOWNLOAD_URL}" target="_blank" rel="noopener">⬇ ${esc(T("Download for Windows"))}</a></div>
+    ${installed() ? `<p class="hint good">✔ ${esc(T("Installed as an app on this device."))}</p>` : `<button class="btn go" data-install>📲 ${esc(T("Install app"))}</button>`}</div>
     <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`, { width: 420 });
   p.el.querySelector("[data-news]").onclick = e => { e.preventDefault(); p.close(); openNews(true); };
+  const ib = p.el.querySelector("[data-install]"); if (ib) ib.onclick = () => { p.close(); install(); };
 }
 
 function render() {

@@ -435,7 +435,8 @@ export const EXTRA = {
 "Only {0} days of data – the amounts per month are a rough estimate.": "Nur {0} Tage Daten – die Monatsbeträge sind eine grobe Schätzung.",
 "converted to one month": "auf einen Monat umgerechnet",
 "Import or enter at least one whole month.": "Importieren oder erfassen Sie mindestens einen ganzen Monat.",
-"Months with only part of the data show what was entered, not a whole month.": "Monate mit nur einem Teil der Daten zeigen das Erfasste, nicht einen ganzen Monat."
+"Months with only part of the data show what was entered, not a whole month.": "Monate mit nur einem Teil der Daten zeigen das Erfasste, nicht einen ganzen Monat.",
+"Installed as an app on this device.": "Als App auf diesem Gerät installiert."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -872,7 +873,8 @@ export const EXTRA = {
 "Only {0} days of data – the amounts per month are a rough estimate.": "Seulement {0} jours de données – les montants mensuels sont une estimation approximative.",
 "converted to one month": "converti sur un mois",
 "Import or enter at least one whole month.": "Importez ou saisissez au moins un mois complet.",
-"Months with only part of the data show what was entered, not a whole month.": "Les mois avec une partie seulement des données montrent ce qui a été saisi, pas un mois complet."
+"Months with only part of the data show what was entered, not a whole month.": "Les mois avec une partie seulement des données montrent ce qui a été saisi, pas un mois complet.",
+"Installed as an app on this device.": "Installée comme application sur cet appareil."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1309,6 +1311,7 @@ export const EXTRA = {
 "Only {0} days of data – the amounts per month are a rough estimate.": "Tylko {0} dni danych – kwoty miesięczne to przybliżony szacunek.",
 "converted to one month": "przeliczone na miesiąc",
 "Import or enter at least one whole month.": "Zaimportuj lub wpisz co najmniej jeden pełny miesiąc.",
-"Months with only part of the data show what was entered, not a whole month.": "Miesiące z częścią danych pokazują to, co wpisano, a nie cały miesiąc."
+"Months with only part of the data show what was entered, not a whole month.": "Miesiące z częścią danych pokazują to, co wpisano, a nie cały miesiąc.",
+"Installed as an app on this device.": "Zainstalowana jako aplikacja na tym urządzeniu."
 }
 };
