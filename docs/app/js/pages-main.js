@@ -671,6 +671,8 @@ export const Portfolio = {
       sec.innerHTML = `<h2 class="section-title">🎯 ${esc(T("Savings goals"))}</h2><div class="goals-host"></div>`;
       el.appendChild(sec);
       SavingsGoals.render(sec.querySelector(".goals-host"));
+      // Own card order, so the goal cards can be moved with ⠿ like the others
+      const gg = sec.querySelector(".goals-host .grid"); if (gg) gg.dataset.key = "web:goals";
     }
     bindAdvice(el, d);
     const form = el.querySelector("#hold");
