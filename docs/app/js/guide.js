@@ -14,7 +14,7 @@ const STEPS = [
     done: d => d.Settings.MonthlyEssentials > 0 },
   { route: "portfolio", color: "#15803D", title: "My savings", text: "My savings: add your bank accounts, cash and other savings with their interest rate.",
     done: d => d.Holdings.length > 0 },
-  { route: "overview", color: "#0F766E", title: "Overview", text: "Overview: see everything together, then press \"Optimize my savings\" for your personal plan.",
+  { route: "overview", color: "#0F766E", title: "Overview", text: "Overview: see everything together, then press \"Optimize my finances\" for your personal plan.",
     done: d => STEPS.slice(0, 4).every(s => s.done(d)), optimize: true },
   { route: null, color: "#7E22CE", title: "Backup & app", text: "Save your profile as a backup, and install MoneyCompass as an app on your phone or computer.",
     done: d => !!d.Settings.LastProfileSaved, backup: true },
@@ -47,7 +47,7 @@ export function openGuide(step) {
           <div class="buttons">
             ${s.route ? `<button class="btn main" data-g="go">${esc(T("Go to {0} →", T(s.title)))}</button>` : ""}
             ${s.import ? `<button class="btn second" data-g="import">⬆ ${esc(T("Import bank statement (CSV)…"))}${license.isPro ? "" : " 🔒"}</button>` : ""}
-            ${s.optimize ? `<button class="btn go" data-g="optimize">⚡ ${esc(T("Optimize my savings"))}</button>` : ""}
+            ${s.optimize ? `<button class="btn go" data-g="optimize">⚡ ${esc(T("Optimize my finances"))}</button>` : ""}
             ${s.backup ? `<button class="btn main" data-g="save">💾 ${esc(T("Save profile"))}</button><button class="btn second" data-g="install">📲 ${esc(T("Install app"))}</button>` : ""}
           </div></div></div>
       <div class="guide-foot">

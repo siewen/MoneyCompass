@@ -31,7 +31,7 @@ export function openProfile() {
       <hr><h3>${license.isPro ? "✔" : "🔒"} ${esc(T("Activation"))}</h3>
       ${license.isPro ? hint(license.status) + hint(T("Thank you! All features are unlocked.")) + button(esc(T("Remove license from this browser")), "remove-license", "second small")
         : (l ? `<p class="bad">${esc(license.status)}</p>` : "") +
-          hint(T("Pro unlocks: Optimize my savings with current rates, Compare offers, Import from your bank, own categories with icons, the Modules, unlimited exports (the free version has {0}), and the Dark, Colourful and System default themes.", 0)) +
+          hint(T("Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules, unlimited exports (the free version has {0}), and the Dark, Colourful and System default themes.", 0)) +
           field(T("License key"), `<textarea name="key" rows="3" placeholder="MC1-…" data-nofocus></textarea>`) + button(esc(T("Activate")), "activate", "main")}
       <hr><h3>${esc(T("Profiles"))}</h3>
       <div class="list">${list.map(x => `<div class="item${x.current ? " current" : " clickable"}" data-switch="${x.id}"><div><b>${esc(x.name)}</b>${x.current ? `<span class="hint">${esc(T("in use"))}</span>` : ""}</div>
@@ -207,7 +207,7 @@ export function openImport() {
 // ================================================================= Help & About
 
 export function openHelp() {
-  const tabs = [["Overview", "Your money at a glance: inflows, outflows, balance and savings rate, with diagrams. The green \"Optimize my savings\" button shows your best next steps and the main ways to save."],
+  const tabs = [["Overview", "Your money at a glance: inflows, outflows, balance and savings rate, with diagrams. The green \"Optimize my finances\" button shows your best next steps and the main ways to save."],
     ["Inflows", "Add every source of income: salary, side jobs, bonuses – each with its own amount, frequency, currency and payday, and gross → net for a salary. Money received from bank imports is listed here too."],
     ["Outflows", "Enter what you spend or import a bank statement. Mark expenses essential or not, set repeats (🔁), filter and search. With whole months of data you see reliable averages."],
     ["Emergency fund", "Shows how much you should keep aside for bad times (3–6 months of essential costs)."],
@@ -217,10 +217,10 @@ export function openHelp() {
   popup(`<h2 class="popup-title">? ${esc(T("Help"))}</h2><div class="grid">
     ${card(heading(T("Getting started")) + `<ol>${["Inflows: add your salary and any other money that comes in, with its payday.", "Outflows: write down what you spend, or enter your usual monthly bills once.",
       "Emergency fund: enter your essential monthly costs to see how much to keep aside.", "My savings: add your bank accounts, cash and other savings with their interest rate.",
-      "Overview: see everything together, then press \"Optimize my savings\" for your personal plan."].map(x => `<li>${esc(T(x))}</li>`).join("")}</ol>` + hint(T("Numbers can be typed with a dot or a comma: 1234.50 or 1234,50.")))}
+      "Overview: see everything together, then press \"Optimize my finances\" for your personal plan."].map(x => `<li>${esc(T(x))}</li>`).join("")}</ol>` + hint(T("Numbers can be typed with a dot or a comma: 1234.50 or 1234,50.")))}
     ${card(heading(T("The tabs")) + tabs.map(t => `<p><b>${esc(T(t[0]))}</b><br><span class="hint">${esc(T(t[1]))}</span></p>`).join("") + hint(T("Savings goals, Loans & debts and Budget plan are modules: switch them on in Options → Modules.")))}
     ${card(heading("MoneyCompass Pro") + `<p>${esc(T("The free version has all the basics. A license key unlocks:"))}</p><ul>${[
-      ["Optimize my savings", "Your personal plan, with current rates from NBP and the Ministry of Finance."], ["Compare offers", "See which bank offer really pays the most after tax."],
+      ["Optimize my finances", "Your personal plan for savings and loans, with current rates from NBP, the Ministry of Finance and bank rankings."], ["Compare offers", "See which bank offer really pays the most after tax."],
       ["Import bank statement", "The bank statement (CSV) becomes expenses, sorted into categories."], ["Own categories", "Make your own expense categories, each with an icon of your choice."],
       ["Modules", "Savings goals, Loans & debts and Budget plan: switch them on in Options → Modules, and each one adds its own tab."],
       ["Appearance", "The Dark, Colourful and System default themes."]].map(x => `<li><b>${esc(T(x[0]))}</b> – ${esc(T(x[1]))}</li>`).join("")}
@@ -231,7 +231,7 @@ export function openHelp() {
     ${card(heading(T("Windows app")) + `<p>${esc(T("The free Windows app has more than the free web version: reports and several profiles. Your profile file works in both."))}</p>
       <a class="btn go" href="${DOWNLOAD_URL}" target="_blank" rel="noopener">⬇ ${esc(T("Download for Windows"))}</a>`)}
     ${card(heading(T("Please note")) + hint(T("MoneyCompass helps you keep an overview. All results are estimates based on what you enter. They are not financial, investment or tax advice. Interest rates and offers change - always check the bank's own terms.")) +
-      hint(T("© {0} MoneyCompass. All rights reserved.", new Date().getFullYear())) + `<a href="../privacy.html" target="_blank">${esc(T("Privacy policy"))}</a>`)}
+      hint(T("© {0} MoneyCompass. All rights reserved.", new Date().getFullYear())) + `<a href="../privacy.html#${lang()}" target="_blank">${esc(T("Privacy policy"))}</a> · <a href="../terms.html#${lang()}" target="_blank">${esc(T("Terms of use"))}</a>`)}
     </div><div class="popup-buttons"><button class="btn main" data-close>${esc(T("Close"))}</button></div>`, { width: 1000, cls: "wide-popup" });
 }
 

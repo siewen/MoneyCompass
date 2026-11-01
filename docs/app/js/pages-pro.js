@@ -1,4 +1,4 @@
-// MoneyCompass Pro: Compare offers, Optimize my savings, Goals, Loans, Budget, bank import.
+// MoneyCompass Pro: Compare offers, Optimize my finances, Goals, Loans, Budget, bank import.
 import {
   T, State, save, Calc, Advisor, pln, rate, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addMonths, monthName,
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA,
@@ -11,7 +11,7 @@ import { App, requirePro } from "./app.js";
 import { Rates, BOND_CODES, BONDS_WEBSITE, SAVINGS_RANKING, DEPOSITS_RANKING } from "./rates.js";
 import { budgetBars, offerSalary, binCard, bindBin } from "./pages-main.js";
 import * as Csv from "./csv.js";
-import { toBin, loanPlan, planLoan, loanNextPayment } from "./core.js";
+import { toBin, loanPlan, planLoan, loanNextPayment, lang } from "./core.js";
 
 const D = () => State.data;
 const locked = (title, text) => `<div class="grid">${card(`<div class="locked">🔒<h3>${esc(title)}</h3><p>${esc(text)}</p>${button(esc(T("Enter license key")), "unlock", "main")}</div>`)}</div>`;
@@ -120,14 +120,14 @@ export const Savings = {
   },
 };
 
-// ================================================================= Optimize my savings (pop-up)
+// ================================================================= Optimize my finances (pop-up)
 
 const IKE = 28260, IKZE = 11304, IKZE_SELF = 16956, LIMITS_YEAR = 2026;
 const BOND_NAMES = { OTS: "3 months · fixed", ROR: "1 year · variable", DOR: "2 years · variable", TOS: "3 years · fixed", COI: "4 years · inflation-linked", EDO: "10 years · inflation-linked", ROS: "6 years · family bond (800+)", ROD: "12 years · family bond (800+)" };
 const TAB_NAMES = { income: "Inflows", expenses: "Outflows", emergency: "Emergency fund", portfolio: "My savings", savings: "Compare offers" };
 
 export async function openOptimize() {
-  if (!(await requirePro(T("Optimize my savings")))) return;
+  if (!(await requirePro(T("Optimize my finances")))) return;
   const p = popup("", { width: 1200, cls: "wide-popup" });
   const draw = () => { p.el.innerHTML = optimizeHtml(); bind(); };
   const bind = () => {
@@ -176,7 +176,7 @@ function optimizeHtml() {
     <span>${esc(T("Access to money"))}</span><div>${esc(access)}</div><span>${esc(T("Best for"))}</span><div>${esc(best)}</div></div>`);
   const bonds = BOND_CODES.filter(c => Rates.bond(c) !== undefined).map(c => `<div class="bond"><b>${c}</b><span>${esc(T(BOND_NAMES[c]))}</span><b class="good">${rate(Rates.bond(c))}</b></div>`).join("") || "–";
 
-  return `<h2 class="popup-title">⚡ ${esc(T("Optimize my savings"))}</h2><div class="grid">
+  return `<h2 class="popup-title">⚡ ${esc(T("Optimize my finances"))}</h2><div class="grid">
     ${card(heading(T("Your personal plan")) + `<p class="${gain > 0 ? "good big-text" : "hint"}">${esc(gain > 0 ? T("Following these steps could be worth about {0} per year.", pln(gain)) : T("Your personal plan, based on what you entered."))}</p>` +
       hint(T("Click a step to go to the right tab.")) +
       (advice.length ? "" : `<h3 class="good">✔ ${esc(T("Well done!"))}</h3><p>${esc(T("Your emergency fund is complete, you save at least 20% and your money is in good places. Check your offers again when promotions end."))}</p>`) +
@@ -201,7 +201,7 @@ function optimizeHtml() {
       esc(T("You pay 2% of your salary (0.5–4% possible), your employer at least 1.5%, and the State adds 250 zł once and 240 zł every year.")), ["mid", T("Medium – invested in funds")], T("Long-term"), T("Almost everyone who is employed"))}
     ${option("📊", T("Crypto savings"), T("Higher rates on stablecoins and crypto, often without time limits. But no state guarantee: if the platform fails, your money can be lost."),
       esc(T("Rates differ a lot between platforms and coins and change often – there is no guarantee.")), ["high", T("High – no BFG guarantee, prices can fall")], T("Usually same day"), T("Only money you can afford to lose"))}
-    ${card(heading(T("Please note")) + hint(T("These suggestions are calculated from what you entered and are estimates. They are not financial, investment or tax advice.")))}
+    ${card(heading(T("Please note")) + hint(T("These suggestions are calculated from what you entered and are estimates. They are not financial, investment or tax advice.")) + `<p class="hint"><a href="../terms.html#${lang()}" target="_blank" rel="noopener">${esc(T("Terms of use"))}</a></p>`)}
   </div><div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
 }
 
@@ -273,6 +273,7 @@ export const Loans = {
     el.innerHTML = `<div class="grid">
       ${card(`<form id="loan">${heading(l ? T("Edit loan") : T("Add a loan"))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("Car loan, credit card, mortgage"))))}
+        ${field(T("Type of loan"), select("kind", LOAN_KINDS.map(([k, n]) => [k, T(n)]), f.Kind || "other"))}
         <div class="two">${field(T("Loan amount at the start (zł)"), numInput("original", plain(f.Original), T("optional")))}${field(T("Remaining principal amount to be repaid (zł)"), numInput("remaining", plain(l ? loanPlan(l).remainingNow : f.Remaining)))}</div>
         ${field(T("Interest repaid so far (zł, optional)"), numInput("interestpaid", l ? plain(Math.round(loanPlan(l).interestRepaid * 100) / 100) : "", T("from your bank, e.g. {0}", "85 171,18")))}
         ${hint(T("Your bank shows these in the loan details: principal amount repaid, interest repaid and remaining principal amount to be repaid. With the amount at the start, MoneyCompass shows how much principal you have already repaid."))}
@@ -319,7 +320,7 @@ export const Loans = {
       const newRate = num(v.rate) || 0;
       if (l && (+l.RatePercent || 0) !== newRate) (l.RateChanges ||= []).push({ Date: isoDate(today()), From: +l.RatePercent || 0, To: newRate });
       const ip = num(v.interestpaid);
-      const item = { Name: v.name.trim(), Original: orig > 0 ? orig : null, Remaining: rem, MonthlyPayment: num(v.payment) || 0, RatePercent: num(v.rate) || 0,
+      const item = { Name: v.name.trim(), Kind: v.kind || "other", Original: orig > 0 ? orig : null, Remaining: rem, MonthlyPayment: num(v.payment) || 0, RatePercent: num(v.rate) || 0,
         InterestPaid: ip > 0 ? ip : null,
         NextPayment: isoDate(parseDate(v.next || isoDate(addMonths(today(), 1)))), PaidFrom: (v.paidfrom || "").trim() };
       const saved = l ? Object.assign(l, item) : (d.Loans.push({ Id: uuid(), ...item }), d.Loans[d.Loans.length - 1]);
@@ -589,6 +590,7 @@ export function loanProgress(loans) {
 }
 
 /** One line about a loan: payment, interest, next payment, payments left, debt-free date. */
+export const LOAN_KINDS = [["mortgage", "Mortgage"], ["cash", "Cash loan"], ["car", "Car loan"], ["card", "Credit card / overdraft"], ["other", "Other loan or debt"]];
 export function loanLine(l, p = loanPlan(l)) {
   return T("{0} per month · {1} per year", pln(l.MonthlyPayment || 0), rate(l.RatePercent || 0)) + (l.PaidFrom ? " · " + T("from {0}", l.PaidFrom) : "") + (p.next ? " · " + T("next payment {0}", fmtDate(p.next)) : "") +
     (p.never ? "" : " · " + T("{0} payments left · debt-free {1}", p.left, monthName(p.end)));

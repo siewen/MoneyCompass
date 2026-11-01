@@ -22,6 +22,19 @@ const BUILT_IN = {
   ],
 };
 
+// Typical interest rates for new loans in Poland, to compare your loans with (checked by hand; sources:
+// finwire.pl – mortgages October 2026, totalmoney.pl – cash loans October/November 2026)
+export const LOAN_MARKET = {
+  checked: "2026-11-01",
+  mortgage: { rate: 5.75, note: "variable: index about 3.55–3.9% + margin about 1.8–2.2%; fixed about 6.2%" },
+  cash: { rate: 7.8, note: "best cash loan offers about 7.6–8.8% (RRSO about 7.9–9.2%)" },
+  car: { rate: 8.5, note: "about like cash loans" },
+  card: { rate: null, note: "most cards charge the legal maximum: 2 × (NBP reference rate + 3.5%)" },
+  links: { mortgage: "https://www.bankier.pl/kredyty-hipoteczne/porownaj-oferty", cash: "https://www.totalmoney.pl/ranking-kredytow-gotowkowych", car: "https://www.totalmoney.pl/ranking-kredytow-gotowkowych" },
+};
+/** The legal maximum interest in Poland: 2 × (reference rate + 3.5 percentage points). */
+export const maxLegalRate = () => 2 * ((Rates.data.ReferenceRate || 3.75) + 3.5);
+
 export const BOND_CODES = ["OTS", "ROR", "DOR", "TOS", "COI", "EDO", "ROS", "ROD"];
 export const BONDS_WEBSITE = "https://www.obligacjeskarbowe.pl/";
 export const SAVINGS_RANKING = "https://rankomat.pl/finanse/rankingi/ranking-kont-oszczednosciowych/";

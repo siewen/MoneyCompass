@@ -469,3 +469,4 @@ svg.donut text { pointer-events: none; }
 :root[data-theme="dark"] .flow-values .in { color: #4ADE80; } :root[data-theme="dark"] .flow-values .out { color: #F87171; }
 .flow-values small { font-weight: 500; opacity: .85; font-size: 13px; }
 .amount-range { display: inline-flex; align-items: center; gap: 4px; } .amount-range input { width: 110px; }
+.terms-list { margin: 6px 0 10px; padding-left: 20px; } .terms-list li { margin: 4px 0; }

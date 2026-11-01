@@ -234,6 +234,27 @@ function welcome() {
   });
 }
 
+// ---------- Terms of use: accepted once (again when they change) ----------
+const TERMS_VERSION = "2026-11-01";
+function termsGate(next) {
+  const s = State.data.Settings;
+  if (s.TermsAccepted === TERMS_VERSION || store.get("mc-terms") === TERMS_VERSION) { s.TermsAccepted = TERMS_VERSION; return next(); }
+  const p = popup(`<div class="box-head"><span class="box-icon">📜</span><h2>${esc(T("Before you start"))}</h2></div>
+    <p>${esc(T("MoneyCompass helps you keep an overview of your money. Please note:"))}</p>
+    <ul class="terms-list">
+      <li>${esc(T("It does not give financial, investment, tax or legal advice – all results are estimates for information only."))}</li>
+      <li>${esc(T("The figures depend on what you enter and on public data, which can be out of date. Always check the bank's own terms before you decide."))}</li>
+      <li>${esc(T("You decide what to do with your money and you are responsible for your decisions and for backups of your data."))}</li>
+    </ul>
+    <p><a href="../terms.html#${lang()}" target="_blank" rel="noopener">${esc(T("Read the full Terms of use"))}</a> · <a href="../privacy.html#${lang()}" target="_blank" rel="noopener">${esc(T("Privacy policy"))}</a></p>
+    <label class="check"><input type="checkbox" name="agree"><span>${esc(T("I have read and accept the Terms of use."))}</span></label>
+    <div class="box-buttons"><button class="btn main" data-ok disabled>${esc(T("Continue"))}</button></div>`, { width: 520, cls: "box terms-box", onClose: () => { if (s.TermsAccepted !== TERMS_VERSION) setTimeout(() => termsGate(next), 50); } });
+  const cb = p.el.querySelector('[name="agree"]'), ok = p.el.querySelector("[data-ok]");
+  p.el.querySelectorAll("[data-close]").forEach(x => x.remove());   // must be answered
+  cb.onchange = () => { ok.disabled = !cb.checked; };
+  ok.onclick = () => { s.TermsAccepted = TERMS_VERSION; store.set("mc-terms", TERMS_VERSION); save(); p.close(); next(); };
+}
+
 // ---------- Closing: the same "Save your profile before closing?" box as the Windows app ----------
 async function closeApp() {
   const s = State.data.Settings;
@@ -293,6 +314,7 @@ function about() {
     <p class="hint">${esc(Rates.data.Updated ? T("Current rates from NBP and the Ministry of Finance, updated {0}.", fmtDate(Rates.data.Updated) + " " + new Date(Rates.data.Updated).toTimeString().slice(0, 5)) : T("Current rates have not been downloaded yet."))}</p>
     <p class="hint">${esc(license.status)}</p>
     <p class="hint">${esc(T("© {0} MoneyCompass. All rights reserved.", new Date().getFullYear()))}</p>
+    <p class="hint"><a href="../terms.html#${lang()}" target="_blank" rel="noopener">${esc(T("Terms of use"))}</a> · <a href="../privacy.html#${lang()}" target="_blank" rel="noopener">${esc(T("Privacy policy"))}</a></p>
     ${installed() ? `<p class="hint good">✔ ${esc(T("Installed as an app on this device."))}</p>` : `<button class="btn go" data-install>📲 ${esc(T("Install app"))}</button>`}</div>
     <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`, { width: 420 });
   p.el.querySelector("[data-news]").onclick = e => { e.preventDefault(); p.close(); openNews(true); };
@@ -349,8 +371,11 @@ async function start() {
   buildShell();
   const d0 = State.data;
   const isNew = d0.Incomes.length + d0.Expenses.length + d0.Holdings.length + d0.Offers.length === 0;
-  if (hasNews(isNew)) openNews(false, () => { if (shouldShowGuide()) openGuide(); });
-  else if (shouldShowGuide()) openGuide(); else if (!promoReminder()) welcome();
+  const afterTerms = () => {
+    if (hasNews(isNew)) openNews(false, () => { if (shouldShowGuide()) openGuide(); });
+    else if (shouldShowGuide()) openGuide(); else if (!promoReminder()) welcome();
+  };
+  termsGate(afterTerms);
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
   Rates.listeners.push(() => { if (!document.querySelector(".popup-back, .dragging")) render(); });
   Rates.refresh();

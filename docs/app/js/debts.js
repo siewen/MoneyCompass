@@ -1,7 +1,7 @@
-// Loans & debts: extra repayments (nadpłata) and advice for "Optimize my savings".
+// Loans & debts: extra repayments (nadpłata) and advice for "Optimize my finances".
 import { T, State, save, Calc, pln, rate, fmtDate, isoDate, parseDate, today, addMonths, monthName, loanPlan, planLoan, loanNextPayment, license } from "./core.js";
 import { esc, card, heading, hint } from "./ui.js";
-import { Rates } from "./rates.js";
+import { Rates, LOAN_MARKET, maxLegalRate } from "./rates.js";
 
 const TAX = 0.81;
 
@@ -51,7 +51,7 @@ export function applyExtra(l, amount, mode, date) {
 
 const endOf = (months, next) => months === Infinity ? T("never") : monthName(addMonths(next, Math.max(0, months - 1)));
 
-/** Hints for your loans in "Optimize my savings". */
+/** Hints for your loans in "Optimize my finances". */
 export function debtAdvice(d) {
   const loans = d.Loans.filter(l => l.Remaining > 0).map(l => ({ l, p: loanPlan(l) })).filter(x => x.p.remainingNow > 0);
   if (!loans.length) return "";
@@ -102,14 +102,35 @@ export function debtAdvice(d) {
         T("The loan costs {0} a year, and the best savings pay about {1} after tax. Keep extra money in savings – it stays available, and you can still overpay later.", rate(loanRate), rate(saveNet)));
     }
   }
-  // 5. Expensive debt: refinance
-  const ref = Rates.data.ReferenceRate || 0;
-  for (const x of loans.filter(x => (+x.l.RatePercent || 0) >= Math.max(10, ref + 6)))
-    add("warn", "🔁 " + esc(T("{0} is expensive ({1})", x.l.Name, rate(+x.l.RatePercent))), T("Ask your bank or other banks about refinancing or consolidating it into a cheaper loan. Credit cards and payday loans are usually the most expensive debt – pay them off first."));
+  // 5. Your rate compared with today's market (by type of loan)
+  const max = maxLegalRate();
+  for (const x of loans) {
+    const r = +x.l.RatePercent || 0, kind = x.l.Kind || "other", m = LOAN_MARKET[kind];
+    if (r <= 0) continue;
+    if (kind === "card" || (!m && r >= Math.max(10, max - 3))) {
+      if (r > max + 0.1) add("bad", "⚠️ " + esc(T("{0}: {1} is above the legal maximum", x.l.Name, rate(r))), T("In Poland the maximum interest is {0} now (2 × the NBP reference rate + 3.5%). Check the rate in your contract – it may include fees, or the lender may be charging too much.", rate(max)));
+      else if (r >= 10) add("warn", "🔁 " + esc(T("{0} is expensive ({1})", x.l.Name, rate(r))), T("Credit cards and overdrafts usually charge the legal maximum ({0} now). A cash loan from about {1} to pay it off at once, then paying off the cash loan, usually costs much less.", rate(max), rate(LOAN_MARKET.cash.rate)));
+      continue;
+    }
+    if (!m || !m.rate) continue;
+    const marketLink = LOAN_MARKET.links[kind] ? ` <a href="${esc(LOAN_MARKET.links[kind])}" target="_blank" rel="noopener">${esc(T("See today's offers"))} ↗</a>` : "";
+    const margin = kind === "mortgage" ? 0.8 : 1.5;
+    if (r > m.rate + margin && !x.p.never) {
+      const now = simulate(x.p.remainingNow, +x.l.MonthlyPayment || 0, r), cheaper = simulate(x.p.remainingNow, +x.l.MonthlyPayment || 0, m.rate);
+      const saved = now.interest === Infinity ? 0 : now.interest - cheaper.interest;
+      tips.push(`<div class="advice warn" data-route="loans"><b>🔁 ${esc(T("{0}: your rate is above today's market", x.l.Name))}</b><p>${esc(T("You pay {0}; new {1} offers are about {2} ({3}). Refinancing at that rate could save about {4} in interest – minus its costs (commission, possible early repayment fee{5}). Ask your bank for a better rate first, then compare other banks.",
+        rate(r), T(kind === "mortgage" ? "mortgage" : kind === "car" ? "car loan" : "cash loan"), rate(m.rate), T(m.note), pln(Math.max(0, saved)), kind === "mortgage" ? ", " + T("valuation and notary costs") : ""))}${marketLink}</p></div>`);
+    } else if (r <= m.rate + margin) {
+      tips.push(`<div class="advice primary" data-route="loans"><b>✔ ${esc(T("{0}: your rate is close to today's market", x.l.Name))}</b><p>${esc(T("You pay {0}; new {1} offers are about {2}. Refinancing is probably not worth its costs right now.", rate(r), T(kind === "mortgage" ? "mortgage" : kind === "car" ? "car loan" : "cash loan"), rate(m.rate)))}</p></div>`);
+    }
+  }
+  if (loans.some(x => !x.l.Kind || x.l.Kind === "other"))
+    tips.push(`<div class="advice primary" data-route="loans"><b>💡 ${esc(T("Compare your loans with the market"))}</b><p>${esc(T("Choose the type of each loan (mortgage, cash loan, car loan, credit card) in Loans & debts – MoneyCompass then compares your rate with today's offers."))}</p></div>`);
   // 6. How to overpay in Poland
   add("primary", "💡 " + esc(T("When you overpay")), T("Choose a shorter loan (skrócenie okresu) if you can still pay the same amount – it saves the most interest. A lower monthly payment (zmniejszenie raty) gives you more room each month. Banks may charge a fee: for consumer loans at most 1% (0.5% with less than a year left), for variable-rate mortgages only in the first 3 years – check your contract."));
 
   const total = loans.reduce((s, x) => s + (x.p.never ? 0 : x.p.interest), 0);
+  tips.push(`<p class="hint">${esc(T("Typical market rates checked {0}. Your bank's offer depends on your income, credit history and the amount – always check the full terms.", fmtDate(LOAN_MARKET.checked)))}</p>`);
   return card(heading(T("Your loans & debts"), "💳") +
     `<p>${esc(T("Remaining principal amount to be repaid: {0} · interest still to be repaid: about {1}", pln(loans.reduce((s, x) => s + x.p.remainingNow, 0)), pln(total)))}</p>` + tips.join(""));
 }

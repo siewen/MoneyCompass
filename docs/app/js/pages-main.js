@@ -86,7 +86,7 @@ export const Overview = {
     </div>`);
     const sw = shortDataWarning(d);
     if (sw) parts.push(`<div class="tip warn-tip short-data">${sw.replace(/<\/?p[^>]*>/g, "")} ${esc(T("Import or enter at least one whole month."))}</div>`);
-    parts.push(`<button class="btn go big" data-action="optimize">⚡ ${esc(T("Optimize my savings"))}</button>`);
+    parts.push(`<button class="btn go big" data-action="optimize">⚡ ${esc(T("Optimize my finances"))}</button>`);
     const due = duePromos(d)[0];
     if (due) parts.push(`<button class="tip warn-tip" data-go="portfolio">⏰ ${esc(due.p.ended ? T("The promotion at {0} ended on {1} – see where to move the money", due.h.Name, fmtDate(due.p.end)) : T("The promotion at {0} ends in {1} days – see where to move the money", due.h.Name, due.p.daysLeft))}  →</button>`);
     else { const m = moves(d)[0]; if (m) parts.push(`<button class="tip" data-go="portfolio">🧭 ${esc(T("Your savings could earn about {0} more at {1} – see My savings", pln(m.gain), m.o.Bank))}  →</button>`); }
@@ -155,7 +155,7 @@ export const Overview = {
       const best = Rates.bestOffer();
       parts.push(card(heading(T("Compare offers")) + hint(T("Your saved offers: interest after the 19% tax.")) +
         (ranked.length ? hbars(ranked.map((x, i) => ({ label: x.o.Name.length > 20 ? x.o.Name.slice(0, 19) + "…" : x.o.Name, value: x.r.net, color: COLORS.series[i], text: `${pln(x.r.net)} · ${rate(x.r.effective)}` })))
-          : hint(T("No offers saved yet. Add them in the Compare offers tab, or with the Compare button in Optimize my savings."))) +
+          : hint(T("No offers saved yet. Add them in the Compare offers tab, or with the Compare button in Optimize my finances."))) +
         (best ? `<hr><p class="good">🏦 ${esc(T("Best rate right now: {0} – {1} ({2}).", best.Bank, best.Name || best.Bank, rate(best.Rate)))}</p>` : ""), "link\" data-go=\"savings"));
     }
     el.innerHTML = `<div class="grid">${parts.join("")}</div>`;
