@@ -41,10 +41,7 @@ function buildShell() {
       <a class="brand" href="../index.html" title="MoneyCompass"><img src="../logo.svg" alt=""><span>MoneyCompass</span></a>
       <nav class="tabs" id="tabs">${list.map(t => `<button class="tab" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}">${esc(T(t.title))}</button>`).join("")}</nav>
       <div class="actions">
-        <button class="act red" data-act="delete" title="${esc(T("Delete data…"))}">🗑<span>${esc(T("Delete data…"))}</span></button>
-        <button class="act blue" data-act="import" title="${esc(T("Import"))}">⬆<span>${esc(T("Import"))}</span></button>
-        <button class="act green" data-act="export" title="${esc(T("Export"))}">⬇<span>${esc(T("Export"))}</span></button>
-        ${installed() ? "" : `<button class="act teal" data-act="install" title="${esc(T("Install app"))}">📲<span>${esc(T("Install app"))}</span></button>`}
+        <button class="act data-btn" data-act="data" title="${esc(T("Data: import, export, backup"))}">🗂<span>${esc(T("Data"))}</span> ▾</button>
         <button class="act lang-btn" data-act="lang" title="${esc(T("Language"))}">🌐<b>${esc(lang().toUpperCase())}</b></button>
         <button class="profile-btn" data-act="profile" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}</button>
         ${installed() ? `<button class="act exit" data-act="exit" title="${esc(T("Close"))}">⏻</button>` : ""}
@@ -54,11 +51,36 @@ function buildShell() {
     <main id="page"></main>
     <button class="help-fab" data-act="help-menu" title="${esc(T("Help & About"))}">?</button>`;
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => App.go(b.dataset.tab));
-  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage() };
+  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu };
   document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
   setupHelpButton();
   render();
   fitTabs();
+}
+
+// ---------- One "Data ▾" menu instead of four buttons: import, export, backup, install, delete ----------
+function dataMenu() {
+  const btn = document.querySelector('[data-act="data"]'), r = btn.getBoundingClientRect();
+  const items = [
+    ["csv", "🏦", T("Import from your bank (CSV)…") + (license.isPro ? "" : " 🔒"), "#1D4ED8"],
+    ["load", "📂", T("Load a profile…"), "#1D4ED8"],
+    ["export", "⬇", T("Export report (Excel, PDF, Word)") + (license.isPro ? "" : " 🔒"), "#15803D"],
+    ["save", "💾", T("Save profile (backup)"), "#15803D"],
+    ...(installed() ? [] : [["install", "📲", T("Install app"), "#0F766E"]]),
+    ["-"],
+    ["delete", "🗑", T("Delete data…"), "#B91C1C"],
+  ];
+  const shield = document.createElement("div"); shield.className = "help-shield";
+  const menu = document.createElement("div"); menu.className = "tab-menu data-menu";
+  menu.innerHTML = items.map(([k, i, l, c]) => k === "-" ? "<hr>" : `<button data-d="${k}" style="color:${c}"><span class="mi">${i}</span>${esc(l)}</button>`).join("");
+  document.body.append(shield, menu);
+  const w = menu.offsetWidth;
+  menu.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + "px"; menu.style.top = (r.bottom + 6) + "px";
+  const close = () => { shield.remove(); menu.remove(); };
+  shield.onclick = close;
+  document.addEventListener("keydown", function esc1(e) { if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc1); } });
+  const run = { csv: () => openBankImport(), load: () => loadProfileFile(), export: openExport, save: saveProfileFile, install, delete: openDelete };
+  menu.querySelectorAll("[data-d]").forEach(b => b.onclick = () => { close(); run[b.dataset.d](); });
 }
 
 // ---------- Many tabs (more modules later): the ones that don't fit go into "More ▾" ----------

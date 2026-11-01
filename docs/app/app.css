@@ -430,3 +430,8 @@ details.cal-month > summary:hover .m-name b { text-decoration: underline; }
 .alert.good-alert { background: rgba(21,128,61,.10); border-color: rgba(21,128,61,.45); }
 .alert.good-alert p { margin: 2px 0; font-weight: 600; color: var(--good); }
 .extra-result { margin: 8px 0; }
+.act.data-btn { background: #334155; }
+:root[data-theme="dark"] .act.data-btn { background: #475569; }
+.data-menu { min-width: 260px; }
+.data-menu hr { margin: 4px 6px; }
+.data-menu .mi { display: inline-block; width: 26px; }

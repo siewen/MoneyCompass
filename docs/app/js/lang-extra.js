@@ -364,7 +364,10 @@ export const EXTRA = {
 "That is more than the principal still owed.": "Das ist mehr als die Restschuld.",
 "{0} paid towards the principal of {1} on {2}. The principal still owed goes down by this amount{3}.": "{0} Sondertilgung für {1} am {2}. Die Restschuld sinkt um diesen Betrag{3}.",
 "Principal still owed (zł)": "Restschuld (zł)",
-"Loan amount at the start (zł)": "Kreditbetrag zu Beginn (zł)"
+"Loan amount at the start (zł)": "Kreditbetrag zu Beginn (zł)",
+"Data": "Daten",
+"Data: import, export, backup": "Daten: Import, Export, Sicherung",
+"Save profile (backup)": "Profil speichern (Sicherung)"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -730,7 +733,10 @@ export const EXTRA = {
 "That is more than the principal still owed.": "C'est plus que le capital restant dû.",
 "{0} paid towards the principal of {1} on {2}. The principal still owed goes down by this amount{3}.": "{0} versés sur le capital de {1} le {2}. Le capital restant dû baisse de ce montant{3}.",
 "Principal still owed (zł)": "Capital restant dû (zł)",
-"Loan amount at the start (zł)": "Montant initial du prêt (zł)"
+"Loan amount at the start (zł)": "Montant initial du prêt (zł)",
+"Data": "Données",
+"Data: import, export, backup": "Données : import, export, sauvegarde",
+"Save profile (backup)": "Enregistrer le profil (sauvegarde)"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1096,6 +1102,9 @@ export const EXTRA = {
 "That is more than the principal still owed.": "To więcej niż pozostały kapitał.",
 "{0} paid towards the principal of {1} on {2}. The principal still owed goes down by this amount{3}.": "{0} nadpłaty kapitału {1} w dniu {2}. Pozostały kapitał zmniejszy się o tę kwotę{3}.",
 "Principal still owed (zł)": "Pozostały kapitał do spłaty (zł)",
-"Loan amount at the start (zł)": "Kwota kredytu na początku (zł)"
+"Loan amount at the start (zł)": "Kwota kredytu na początku (zł)",
+"Data": "Dane",
+"Data: import, export, backup": "Dane: import, eksport, kopia zapasowa",
+"Save profile (backup)": "Zapisz profil (kopia zapasowa)"
 }
 };
