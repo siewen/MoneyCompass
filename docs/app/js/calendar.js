@@ -34,7 +34,7 @@ export function events(d, from, to) {
     const rule = { Date: h.DepositDate, Frequency: h.DepositFrequency || "Monthly" };
     let next = Calc.nextPayment(rule, from), guard = 0;
     while (next && next <= to && guard++ < 400) {
-      list.push({ date: next, name: h.Name, amount: h.Deposit, type: "save", note: T("My savings") + " · 🔁" });
+      list.push({ date: next, name: h.Name, amount: h.Deposit, type: "save", note: T("My savings") + " · 🔁" + (h.DepositFrom ? " · " + T("from {0}", h.DepositFrom) : "") });
       next = Calc.nextPayment(rule, addDays(next, 1));
     }
   }
@@ -156,7 +156,7 @@ export const Calendar = {
         <div class="buttons">${button(r ? T("Save changes") : T("Add"), "save-rec", "main")}${r ? button(T("Cancel"), "cancel-rec") : ""}</div></form>`)}
       ${card(heading(T("Regular payments")) + (deps.length ? `<h3 class="sub-h">🔁 ${esc(T("From My savings"))}</h3><div class="list">${deps.map(h => `
         <div class="item clickable" data-go="portfolio"><span class="cal-dot save"></span><div><b>${esc(h.Name)}</b>
-        <span class="hint">${esc(T(h.DepositFrequency || "Monthly"))} · ${esc(T("Transfer to savings"))} · ${esc(T("next {0}", fmtDate(Calc.nextPayment({ Date: h.DepositDate, Frequency: h.DepositFrequency || "Monthly" }, today()) || h.DepositDate)))}</span></div>
+        <span class="hint">${esc(T(h.DepositFrequency || "Monthly"))} · ${esc(T("Transfer to savings"))}${h.DepositFrom ? " · " + esc(T("from {0}", h.DepositFrom)) : ""} · ${esc(T("next {0}", fmtDate(Calc.nextPayment({ Date: h.DepositDate, Frequency: h.DepositFrequency || "Monthly" }, today()) || h.DepositDate)))}</span></div>
         <b class="primary">${pln(h.Deposit)}</b></div>`).join("")}</div><hr>` : "") + (reps.length ? `<h3 class="sub-h">🔁 ${esc(T("From your expenses"))}</h3><div class="list">${reps.map(e => `
         <div class="item"><span class="cal-dot out"></span><div><b>${esc(e.Description || T(e.Category))}</b>
         <span class="hint">${esc(T(e.Repeat))} · ${esc(T(e.Category))} · ${esc(T("next {0}", fmtDate(Calc.nextPayment({ Date: e.Date, Frequency: e.Repeat }, new Date(Math.max(today().getTime(), addDays(parseDate(e.Date), 1).getTime()))) || e.Date)))}</span></div>

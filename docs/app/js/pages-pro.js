@@ -428,7 +428,8 @@ export async function openBankImport() {
       ${transfers.length ? card(heading(T("Moved to your own accounts")) + hint(T("These are not expenses. Choose which ones went into savings: they are added to My savings.")) +
         field(T("Add savings to"), select("target", holdNames, defaultTarget >= 0 ? defaultTarget : -1)) +
         `<div class="list">${transfers.map((t, n) => `<div class="item"><div><b>${esc(t.row.description || "–")}</b><span class="hint">${date(t.row)} · ${pln(t.pln)}</span></div>
-        ${select("tr-" + n, [["1", T("Savings")], ["0", T("Not savings")]], t.toSavings ? "1" : "0")}</div>`).join("")}</div>`, "wide") : ""}
+        ${select("tr-" + n, [["1", T("Savings")], ["m", "🔁 " + T("Savings – every month")], ["0", T("Not savings")]], t.toSavings ? "1" : "0")}</div>`).join("")}</div>` +
+        hint(T("\"Savings – every month\" also adds it as a regular deposit to My savings, so it appears in the Payment calendar.")), "wide") : ""}
       </div>
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button>
       <button class="btn main" data-import ${anything ? "" : "disabled"}>${esc(!anything ? T("Import") : !received.length ? T("Import {0} expenses", items.length) : T("Import {0} expenses and {1} payments received", items.length, received.length))}</button></div>`;
@@ -452,7 +453,7 @@ export async function openBankImport() {
     const { items, transfers, received } = state;
     items.forEach((i, n) => { if (v["cat-" + n]) i.category = v["cat-" + n]; });
     received.forEach((r, n) => { if (v["kind-" + n]) r.Kind = v["kind-" + n]; });
-    transfers.forEach((t, n) => { if (v["tr-" + n] !== undefined) t.toSavings = v["tr-" + n] === "1"; });
+    transfers.forEach((t, n) => { if (v["tr-" + n] !== undefined) { t.toSavings = v["tr-" + n] !== "0"; t.monthly = v["tr-" + n] === "m"; } });
     for (const i of items) {
       const c = findCategory(i.category);
       d.Expenses.push({ Id: uuid(), Date: isoDate(i.row.date), Description: i.row.description, Category: c ? c.Name : OTHER, Amount: i.pln, Essential: !!c?.Essential });
@@ -465,6 +466,9 @@ export async function openBankImport() {
       target = idx >= 0 ? d.Holdings[idx] : null;
       if (!target) { target = { Id: uuid(), Name: T("Savings account"), Place: "Bank", Amount: 0, Currency: "PLN", RatePercent: 0, Safe: true }; d.Holdings.push(target); }
       target.Amount += saved.reduce((a, t) => a + t.pln, 0);
+      // Marked "every month": the newest such transfer becomes the regular deposit of that savings entry
+      const monthly = saved.filter(t => t.monthly).sort((a, b) => b.row.date - a.row.date)[0];
+      if (monthly) Object.assign(target, { Deposit: monthly.pln, DepositFrequency: "Monthly", DepositDate: isoDate(monthly.row.date), DepositFrom: target.DepositFrom || "" });
     }
     for (const t of transfers) d.Transfers.push({ Id: uuid(), Date: isoDate(t.row.date), Amount: t.pln, Description: t.row.description, Saved: t.toSavings, HoldingId: t.toSavings ? target?.Id ?? null : null });
     save();

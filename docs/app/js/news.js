@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 25, date: "2026-11-01", items: {
+    en: ["🔁 Repeating expenses show \"🔁 Monthly\" in their line.", "🏦 Regular deposits to My savings can say from which account they come (e.g. another bank).", "⬆ Bank import: mark a transfer to savings as \"Savings – every month\" – it becomes a regular deposit in the Payment calendar."],
+    pl: ["🔁 Powtarzające się wydatki pokazują „🔁 Co miesiąc” w swoim wierszu.", "🏦 Przy regularnych wpłatach na oszczędności możesz podać, z jakiego konta pochodzą (np. z innego banku).", "⬆ Import z banku: oznacz przelew na oszczędności jako „Oszczędności – co miesiąc” – stanie się regularną wpłatą w kalendarzu płatności."],
+    de: ["🔁 Wiederkehrende Ausgaben zeigen „🔁 Monatlich“ in ihrer Zeile.", "🏦 Bei regelmäßigen Einzahlungen in Meine Ersparnisse lässt sich angeben, von welchem Konto sie kommen (z. B. andere Bank).", "⬆ Bankimport: eine Sparüberweisung als „Sparen – jeden Monat“ markieren – sie wird zur regelmäßigen Einzahlung im Zahlungskalender."],
+    fr: ["🔁 Les dépenses récurrentes affichent « 🔁 Mensuel » dans leur ligne.", "🏦 Les versements réguliers vers Mon épargne peuvent indiquer de quel compte ils viennent (par ex. une autre banque).", "⬆ Import bancaire : marquez un virement d'épargne comme « Épargne – chaque mois » – il devient un versement régulier dans le calendrier des paiements."] } },
   { build: 24, date: "2026-11-01", items: {
     en: ["🗑 Deleted items: at the bottom of each tab you see what you deleted – put it back with ↩ Restore."],
     pl: ["🗑 Usunięte pozycje: na dole każdej karty widzisz, co usunięto – przywróć to przyciskiem ↩ Przywróć."],

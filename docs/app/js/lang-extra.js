@@ -148,7 +148,12 @@ export const EXTRA = {
 "Empty the list": "Liste leeren",
 "Restored: {0}.": "Wiederhergestellt: {0}.",
 "Empty the list?": "Liste leeren?",
-"These items are then deleted for good.": "Diese Einträge werden dann endgültig gelöscht."
+"These items are then deleted for good.": "Diese Einträge werden dann endgültig gelöscht.",
+"From which account (optional)": "Von welchem Konto (optional)",
+"Current account": "Girokonto",
+"from {0}": "von {0}",
+"Savings – every month": "Sparen – jeden Monat",
+"\"Savings – every month\" also adds it as a regular deposit to My savings, so it appears in the Payment calendar.": "„Sparen – jeden Monat“ legt es zusätzlich als regelmäßige Einzahlung in Meine Ersparnisse an, damit es im Zahlungskalender erscheint."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -298,7 +303,12 @@ export const EXTRA = {
 "Empty the list": "Vider la liste",
 "Restored: {0}.": "Restauré : {0}.",
 "Empty the list?": "Vider la liste ?",
-"These items are then deleted for good.": "Ces éléments seront alors supprimés définitivement."
+"These items are then deleted for good.": "Ces éléments seront alors supprimés définitivement.",
+"From which account (optional)": "Depuis quel compte (facultatif)",
+"Current account": "Compte courant",
+"from {0}": "depuis {0}",
+"Savings – every month": "Épargne – chaque mois",
+"\"Savings – every month\" also adds it as a regular deposit to My savings, so it appears in the Payment calendar.": "« Épargne – chaque mois » l'ajoute aussi comme versement régulier dans Mon épargne, pour qu'il apparaisse dans le calendrier des paiements."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -448,6 +458,11 @@ export const EXTRA = {
 "Empty the list": "Opróżnij listę",
 "Restored: {0}.": "Przywrócono: {0}.",
 "Empty the list?": "Opróżnić listę?",
-"These items are then deleted for good.": "Te pozycje zostaną wtedy usunięte na zawsze."
+"These items are then deleted for good.": "Te pozycje zostaną wtedy usunięte na zawsze.",
+"From which account (optional)": "Z jakiego konta (opcjonalnie)",
+"Current account": "Konto osobiste",
+"from {0}": "z {0}",
+"Savings – every month": "Oszczędności – co miesiąc",
+"\"Savings – every month\" also adds it as a regular deposit to My savings, so it appears in the Payment calendar.": "„Oszczędności – co miesiąc” dodaje to także jako regularną wpłatę w Moich oszczędnościach, więc pojawi się w kalendarzu płatności."
 }
 };

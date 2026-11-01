@@ -353,3 +353,5 @@ details.bin summary h3::after { content: "▾"; margin-left: auto; font-size: 14
 details.bin[open] summary h3::after { content: "▴"; }
 .bin .count { background: var(--soft); border: 1px solid var(--border); border-radius: 999px; padding: 0 8px; font-size: 13px; }
 details.bin summary h3 { padding-right: 40px; }
+.rep-tag { color: #2563EB; font-weight: 700; }
+:root[data-theme="dark"] .rep-tag { color: #60A5FA; }
