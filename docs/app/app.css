@@ -585,11 +585,11 @@ svg.donut text { pointer-events: none; }
   :root[data-design][data-side="auto"] .top:not(:hover) .sw-l,
   :root[data-design][data-side="auto"] .top:not(:hover) .act span,
   :root[data-design][data-side="auto"] .top:not(:hover) .lang-btn,
-  :root[data-design][data-side="auto"] .top:not(:hover) .data-btn,
-  :root[data-design][data-side="auto"] .top:not(:hover) .exit { display: none; }
+  :root[data-design][data-side="auto"] .top:not(:hover) .data-btn { display: none; }
   :root[data-design][data-side="auto"] .top:not(:hover) .brand { padding: 0 0 18px; justify-content: center; }
   :root[data-design][data-side="auto"] .top:not(:hover) .tab { justify-content: center; padding: 10px 0; }
   :root[data-design][data-side="auto"] .top:not(:hover) .actions { justify-content: center; }
   :root[data-design][data-side="auto"] .top:not(:hover) .design-switch { justify-content: center; padding: 8px 0; }
   :root[data-design] .tab .tl { white-space: nowrap; }
 }
+.swatch.classic-dark { background: linear-gradient(135deg, #0F172A 50%, #14B8A6 50%); }

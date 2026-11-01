@@ -556,7 +556,13 @@ export const EXTRA = {
 "Try the new beta design": "Das neue Beta-Design ausprobieren",
 "Beta design": "Beta-Design",
 "Fold the menu (it opens when you point at it)": "Menü einklappen (öffnet sich, wenn Sie darauf zeigen)",
-"Keep the menu open": "Menü offen lassen"
+"Keep the menu open": "Menü offen lassen",
+"Classic – Light": "Klassisch – hell",
+"Classic – Dark": "Klassisch – dunkel",
+"Same layout, dark background": "Gleiches Layout, dunkler Hintergrund",
+"Design: classic light or dark, or the new beta designs": "Design: klassisch hell oder dunkel oder die neuen Beta-Designs",
+"from your income sources": "aus Ihren Einkommensquellen",
+"Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules and unlimited exports (the free version has {0}).": "Pro schaltet frei: Finanzen optimieren mit aktuellen Zinsen, Angebote vergleichen, Kontoauszug importieren, eigene Kategorien mit Symbolen, die Module und unbegrenzte Exporte (die kostenlose Version hat {0})."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1114,7 +1120,13 @@ export const EXTRA = {
 "Try the new beta design": "Essayer la nouvelle apparence bêta",
 "Beta design": "Apparence bêta",
 "Fold the menu (it opens when you point at it)": "Replier le menu (il s'ouvre au survol)",
-"Keep the menu open": "Garder le menu ouvert"
+"Keep the menu open": "Garder le menu ouvert",
+"Classic – Light": "Classique – clair",
+"Classic – Dark": "Classique – sombre",
+"Same layout, dark background": "Même disposition, fond sombre",
+"Design: classic light or dark, or the new beta designs": "Apparence : classique claire ou sombre, ou les nouvelles apparences bêta",
+"from your income sources": "de vos sources de revenus",
+"Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules and unlimited exports (the free version has {0}).": "Pro débloque : Optimiser mes finances avec les taux actuels, Comparer les offres, Importer un relevé bancaire, des catégories personnalisées avec icônes, les Modules et des exports illimités (la version gratuite en a {0})."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1672,6 +1684,12 @@ export const EXTRA = {
 "Try the new beta design": "Wypróbuj nowy wygląd (beta)",
 "Beta design": "Wygląd beta",
 "Fold the menu (it opens when you point at it)": "Zwiń menu (otworzy się po najechaniu myszką)",
-"Keep the menu open": "Zostaw menu otwarte"
+"Keep the menu open": "Zostaw menu otwarte",
+"Classic – Light": "Klasyczny – jasny",
+"Classic – Dark": "Klasyczny – ciemny",
+"Same layout, dark background": "Ten sam układ, ciemne tło",
+"Design: classic light or dark, or the new beta designs": "Wygląd: klasyczny jasny lub ciemny albo nowe wyglądy beta",
+"from your income sources": "z Twoich źródeł dochodu",
+"Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules and unlimited exports (the free version has {0}).": "Pro odblokowuje: Optymalizuj finanse z aktualnymi stawkami, Porównaj oferty, Import wyciągu bankowego, własne kategorie z ikonami, Moduły i nieograniczony eksport (wersja darmowa ma {0})."
 }
 };

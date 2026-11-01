@@ -50,11 +50,12 @@ function toggleSide() {
 }
 function setBeta(v) { try { v ? localStorage.setItem(BETA_KEY, v) : localStorage.removeItem(BETA_KEY); } catch { /* private window */ } buildShell(); }
 function betaMenu() {
-  const btn = document.querySelector('[data-act="beta"]'), r = btn.getBoundingClientRect(), now = beta();
+  const btn = document.querySelector('[data-act="beta"]'), r = btn.getBoundingClientRect();
+  const now = beta() || (State.data.Settings.Design === "dark" ? "dark" : "light");
   const shield = document.createElement("div"); shield.className = "help-shield";
   const menu = document.createElement("div"); menu.className = "tab-menu data-menu beta-menu";
   const opt = (v, sw, label, sub) => `<button data-b="${v}"${now === v ? ' class="on"' : ""}><span class="swatch ${sw}"></span><span><b>${esc(label)}</b><small>${esc(sub)}</small></span>${now === v ? "<i>✓</i>" : ""}</button>`;
-  menu.innerHTML = `<div class="menu-title">${esc(T("Design"))}</div>` + opt("", "classic", T("Classic"), T("The design you know")) + "<hr>" +
+  menu.innerHTML = `<div class="menu-title">${esc(T("Design"))}</div>` + opt("light", "classic", T("Classic – Light"), T("The design you know")) + opt("dark", "classic-dark", T("Classic – Dark"), T("Same layout, dark background")) + "<hr>" +
     opt("navy", "navy", T("Beta – Navy"), T("Side menu, dark blue with mint and magenta")) + opt("emerald", "emerald", T("Beta – Emerald"), T("Side menu, dark green with lavender"));
   document.body.append(shield, menu);
   const w = menu.offsetWidth, h = menu.offsetHeight;
@@ -62,12 +63,16 @@ function betaMenu() {
   menu.style.top = Math.max(8, Math.min(r.bottom + 6, window.innerHeight - h - 8)) + "px";
   const close = () => { shield.remove(); menu.remove(); };
   shield.onclick = close;
-  menu.querySelectorAll("[data-b]").forEach(b => b.onclick = () => { close(); setBeta(b.dataset.b); });
+  menu.querySelectorAll("[data-b]").forEach(b => b.onclick = () => {
+    close();
+    const v = b.dataset.b;
+    if (v === "light" || v === "dark") { State.data.Settings.Design = v; save(); setBeta(""); } else setBeta(v);
+  });
 }
 
 function applyTheme() {
   let design = State.data.Settings.Design || "light";
-  if (!license.isPro) design = "light";
+  if (design === "colourful") design = "light";   // the Colourful theme was replaced by the beta designs
   if (design === "system") design = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   document.documentElement.dataset.theme = design;
   const b = beta();
@@ -87,7 +92,7 @@ function buildShell() {
       <a class="brand" href="../index.html" title="MoneyCompass"><img src="../logo.svg" alt=""><span>MoneyCompass</span></a>
       <nav class="tabs" id="tabs">${list.map(t => `<button class="tab" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}"><span class="ti">${TAB_ICON[t.route] || ""}</span><span class="tl">${esc(T(t.title))}</span></button>`).join("")}</nav>
       <div class="actions">
-        <button class="design-switch${beta() ? " on" : ""}" data-act="beta" title="${esc(T("Try the new beta design"))}"><span class="sw"></span><span class="sw-l">${esc(T("Beta design"))}</span></button>
+        <button class="design-switch${beta() ? " on" : ""}" data-act="beta" title="${esc(T("Design: classic light or dark, or the new beta designs"))}"><span class="sw"></span><span class="sw-l">${esc(T("Design"))}</span></button>
         <button class="act data-btn" data-act="data" title="${esc(T("Data: import, export, backup"))}">🗂<span>${esc(T("Data"))}</span> ▾</button>
         <button class="act lang-btn" data-act="lang" title="${esc(T("Language"))}">🌐<b>${esc(lang().toUpperCase())}</b></button>
         <button class="profile-btn" data-act="profile" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}</button>
@@ -262,10 +267,12 @@ async function install() {
 }
 
 // ---------- "Welcome back" when MoneyCompass opens (same as the Windows app) ----------
-function welcome() {
+// Shown first, before What's new and reminders; next() runs when it is answered.
+function welcome(next = () => {}) {
   const d = State.data, s = d.Settings;
-  if (!s.AskOnStart) return;
-  if (d.Incomes.length + d.Expenses.length + d.Holdings.length + d.Offers.length + d.Loans.length + d.Goals.length === 0) return;
+  if (!s.AskOnStart) return next();
+  if (d.Incomes.length + d.Expenses.length + d.Received.length + d.Holdings.length + d.Offers.length + d.Loans.length + d.Goals.length === 0) return next();
+  let action = "continue";
   let details = T("Your data: {0}.", summary(d));
   if (s.LastProfileSaved) details += "\n" + T("Last saved: {0}", fmtDate(s.LastProfileSaved) + " " + String(s.LastProfileSaved).slice(11, 16));
   const p = popup(`<div class="box-head"><span class="box-icon go">👋</span><h2>${esc(T("Welcome back!"))}</h2></div>
@@ -276,12 +283,14 @@ function welcome() {
       <button class="btn danger" data-w="fresh">🗑 ${esc(T("Start fresh…"))}</button></div>
     <p class="hint">${esc(T("Choose exactly what to delete."))}</p>
     <label class="check"><input type="checkbox" name="dontask"><span>${esc(T("Don't ask again when MoneyCompass starts"))}</span></label>
-    <p class="hint">${esc(T("You can switch this question back on in Options → Backup & restore."))}</p>`, { width: 440, cls: "box" });
+    <p class="hint">${esc(T("You can switch this question back on in Options → Backup & restore."))}</p>`, { width: 440, cls: "box",
+    onClose: () => { if (action === "continue") setTimeout(next, 250); } });
   p.el.querySelectorAll("[data-w]").forEach(b => b.onclick = async () => {
     if (p.el.querySelector('[name="dontask"]').checked) { s.AskOnStart = false; save(); }
+    action = b.dataset.w;
     p.close();
-    if (b.dataset.w === "load") await loadProfileFile();
-    else if (b.dataset.w === "fresh") openDelete();
+    if (action === "load") { await loadProfileFile(); setTimeout(next, 250); }
+    else if (action === "fresh") openDelete();
   });
 }
 
@@ -425,10 +434,11 @@ async function start() {
   buildShell();
   const d0 = State.data;
   const isNew = d0.Incomes.length + d0.Expenses.length + d0.Holdings.length + d0.Offers.length === 0;
-  const afterTerms = () => {
+  // Order at start: Terms (once) → Welcome back (continue, load a profile or start fresh) → What's new → guide or promotion reminder
+  const afterTerms = () => welcome(() => {
     if (hasNews(isNew)) openNews(false, () => { if (shouldShowGuide()) openGuide(); });
-    else if (shouldShowGuide()) openGuide(); else if (!promoReminder()) welcome();
-  };
+    else if (shouldShowGuide()) openGuide(); else promoReminder();
+  });
   termsGate(afterTerms);
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
   Rates.listeners.push(() => { if (!document.querySelector(".popup-back, .dragging")) render(); });

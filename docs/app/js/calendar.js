@@ -115,6 +115,18 @@ function pastEvents(d, from, to) {
     list.push({ date: parseDate(t.Date), name: h ? h.Name : (t.Description || T("Transfer to savings")), amount: t.Amount, type: "save", note: T("Transfer to savings") + (t.Info?.Account ? " · " + T("from {0}", t.Info.Account) : ""), past: true, info: ["transfer", t] });
   }
   list.push(...pastLoans(d, from, to));
+  // Your income sources (Inflows tab) in past months too – e.g. a salary paid into a bank you don't import.
+  // A month that already has a salary from your bank imports keeps that one (not counted twice).
+  const end = new Date(Math.min(to.getTime(), addDays(today(), -1).getTime()));
+  if (end >= from) {
+    const salaryIn = (a, b) => d.Received.some(r => r.Kind === "salary" && parseDate(r.Date) >= a && parseDate(r.Date) <= b);
+    for (const p of Calc.upcoming(d, from, end)) {
+      const ms = monthStart(p.date), me = addDays(addMonths(ms, 1), -1);
+      if (salaryIn(ms, me)) continue;
+      list.push({ date: p.date, name: p.source.Name, amount: p.amount, type: "in", past: true,
+        note: T(p.source.Type) + (p.source.Frequency && p.source.Frequency !== ONE_TIME ? " · 🔁 " + freqLabel(p.source.Frequency) : "") + " · " + T("from your income sources") });
+    }
+  }
   // Regular payments added here: shown in past months too, unless the same payment is already among your expenses
   const until = new Date(Math.min(to.getTime(), addDays(today(), -1).getTime()));
   for (const r of (d.Recurring || []).filter(r => r.Active !== false && r.Amount > 0)) {

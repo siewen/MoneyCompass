@@ -31,7 +31,7 @@ export function openProfile() {
       <hr><h3>${license.isPro ? "✔" : "🔒"} ${esc(T("Activation"))}</h3>
       ${license.isPro ? hint(license.status) + hint(T("Thank you! All features are unlocked.")) + button(esc(T("Remove license from this browser")), "remove-license", "second small")
         : (l ? `<p class="bad">${esc(license.status)}</p>` : "") +
-          hint(T("Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules, unlimited exports (the free version has {0}), and the Dark, Colourful and System default themes.", 0)) +
+          hint(T("Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules and unlimited exports (the free version has {0}).", 0)) +
           field(T("License key"), `<textarea name="key" rows="3" placeholder="MC1-…" data-nofocus></textarea>`) + button(esc(T("Activate")), "activate", "main")}
       <hr><h3>${esc(T("Profiles"))}</h3>
       <div class="list">${list.map(x => `<div class="item${x.current ? " current" : " clickable"}" data-switch="${x.id}"><div><b>${esc(x.name)}</b>${x.current ? `<span class="hint">${esc(T("in use"))}</span>` : ""}</div>
@@ -118,12 +118,8 @@ export async function loadProfileFile() {
 
 export function openOptions() {
   const s = D().Settings;
-  const themes = [["light", T("Light"), T("Calm white cards on a soft grey background.")], ["dark", T("Dark"), T("Dark background, easy on the eyes in the evening.")],
-    ["colourful", T("Colourful"), T("Every tab has its own coloured background.")], ["system", T("System default"), T("Light or dark, the same as your device – it changes by itself when your device does.")]];
   const p = popup(`<h2 class="popup-title">⚙ ${esc(T("Options"))}</h2><div class="grid">
     ${card(heading(T("Language")) + hint(T("Your data stays the same; only the texts change.")) + select("language", LANGS, lang()))}
-    ${card(heading(T("Appearance")) + hint(T("Choose a theme. Your data stays the same.")) + themes.map(t => `<label class="choice"><input type="radio" name="design" value="${t[0]}"${s.Design === t[0] ? " checked" : ""}>
-      <span><b>${esc(t[1])}${t[0] !== "light" && !license.isPro ? " 🔒" : ""}</b><span class="hint">${esc(t[2])}</span></span></label>`).join(""))}
     ${card(heading(T("Layout")) + hint(T("Drag a card by its handle (⠿, top right) to move it, on any tab. Reset layout puts all cards back in their standard order.")) +
       `<div class="buttons">${button(esc(T("Reset layout")), "reset-layout", "second")}${button(esc(T("Reset help button position")), "reset-help", "second")}</div>`)}
     ${card(heading(T("Modules")) + hint(license.isPro ? T("Switch on the modules you want. Each one adds its own tab; the tabs appear when you close Options. Your entries stay saved when you switch a module off.")
@@ -145,13 +141,6 @@ export function openOptions() {
     </div><div class="popup-buttons"><button class="btn main" data-close>${esc(T("Close"))}</button></div>`, { width: 980, cls: "wide-popup", onClose: () => App.rebuild() });
   const el = p.el;
   el.querySelector('select[name="language"]').onchange = e => { s.Language = e.target.value; store.set("mc-lang", s.Language); save(); p.close(); openOptions(); };
-  el.querySelectorAll('input[name="design"]').forEach(r => r.onchange = async () => {
-    if (r.value !== "light" && !license.isPro) {
-      el.querySelector(`input[name="design"][value="${s.Design}"]`).checked = true;
-      await requirePro(T("Appearance")); return;
-    }
-    s.Design = r.value; save(); App.applyTheme();
-  });
   el.querySelectorAll('input[name^="mod-"]').forEach(c => c.onchange = () => setModule(c.name.slice(4), c.checked));
   el.querySelector('input[name="online"]').onchange = e => { s.OnlineRates = e.target.checked; save(); if (s.OnlineRates) Rates.refresh(true); };
   el.querySelector('select[name="closechoice"]').onchange = e => { s.CloseChoice = e.target.value; save(); };
@@ -222,8 +211,7 @@ export function openHelp() {
     ${card(heading("MoneyCompass Pro") + `<p>${esc(T("The free version has all the basics. A license key unlocks:"))}</p><ul>${[
       ["Optimize my finances", "Your personal plan for savings and loans, with current rates from NBP, the Ministry of Finance and bank rankings."], ["Compare offers", "See which bank offer really pays the most after tax."],
       ["Import bank statement", "The bank statement (CSV) becomes expenses, sorted into categories."], ["Own categories", "Make your own expense categories, each with an icon of your choice."],
-      ["Modules", "Savings goals, Loans & debts and Budget plan (Pro): switch them on in Options → Modules. Savings goals appear in the Savings tab; the others add their own tab."],
-      ["Appearance", "The Dark, Colourful and System default themes."]].map(x => `<li><b>${esc(T(x[0]))}</b> – ${esc(T(x[1]))}</li>`).join("")}
+      ["Modules", "Savings goals, Loans & debts and Budget plan (Pro): switch them on in Options → Modules. Savings goals appear in the Savings tab; the others add their own tab."]].map(x => `<li><b>${esc(T(x[0]))}</b> – ${esc(T(x[1]))}</li>`).join("")}
       <li><b>${esc(T("Export"))}</b> – ${esc(T("Reports as Excel, PDF or Word."))}</li><li><b>${esc(T("Profiles"))}</b> – ${esc(T("Separate data for each person or household."))}</li></ul>` +
       hint(T("To unlock: click your profile picture (top right), paste your key under Activation and press Activate.")))}
     ${card(heading(T("Your data & backup")) + `<p>${esc(T("Everything you enter is saved automatically, only in this browser on this device. Nothing is sent to the internet."))}</p>` +
