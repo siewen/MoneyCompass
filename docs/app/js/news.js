@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 12, date: "2026-11-01", items: {
+    en: ["⠿ Moving cards is easier: drag a card by its title or its handle – the page scrolls by itself when you reach the edge."],
+    pl: ["⠿ Łatwiejsze przesuwanie kart: przeciągnij kartę za tytuł lub uchwyt – strona sama się przewija przy krawędzi."],
+    de: ["⠿ Karten leichter verschieben: am Titel oder Griff ziehen – die Seite scrollt am Rand von selbst."],
+    fr: ["⠿ Déplacer les cartes est plus simple : faites glisser une carte par son titre ou sa poignée – la page défile toute seule au bord."] } },
   { build: 10, date: "2026-11-01", items: {
     en: ["🧭 A step-by-step guide for new users – open it any time with ? → Guide.", "📅 Bank import: choose the dates – for example only one month of a 3-month statement."],
     pl: ["🧭 Przewodnik krok po kroku dla nowych użytkowników – otworzysz go zawsze przez ? → Przewodnik.", "📅 Import z banku: wybierz daty – np. tylko jeden miesiąc z 3-miesięcznego wyciągu."],

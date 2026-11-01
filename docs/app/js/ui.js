@@ -156,19 +156,50 @@ function addHandle(grid, card) {
   h.className = "drag-handle"; h.textContent = "⠿"; h.title = T("Drag to move this card");
   card.prepend(h);
   h.addEventListener("click", e => e.stopPropagation());
-  h.addEventListener("pointerdown", e => {
-    e.preventDefault(); e.stopPropagation();
-    h.setPointerCapture(e.pointerId);
-    card.classList.add("dragging");
-    let target = null;
-    const move = ev => {
-      const under = document.elementFromPoint(ev.clientX, ev.clientY);
+  // Drag by the handle ⠿ or by the card's title
+  card.addEventListener("pointerdown", e => {
+    const grip = e.target.closest(".drag-handle") || (e.target.closest("h3") && card.contains(e.target.closest("h3")) ? e.target.closest("h3") : null);
+    if (!grip || e.button !== 0) return;
+    const sx = e.clientX, sy = e.clientY;
+    let started = false, target = null, ghost = null, px = sx, py = sy, raf = 0;
+    const findTarget = () => {
+      const under = document.elementFromPoint(px, py);
       const t = under && grid._orig.find(c => c !== card && c.contains(under));
       if (t !== target) { target?.classList.remove("drop-target"); target = t || null; target?.classList.add("drop-target"); }
     };
+    const tick = () => {
+      // Scroll the page when the pointer is near the top or bottom edge
+      const edge = 70;
+      if (py < edge + 60) window.scrollBy(0, -Math.ceil((edge + 60 - py) / 4));
+      else if (py > window.innerHeight - edge) window.scrollBy(0, Math.ceil((py - window.innerHeight + edge) / 4));
+      findTarget();
+      raf = requestAnimationFrame(tick);
+    };
+    const move = ev => {
+      px = ev.clientX; py = ev.clientY;
+      if (!started) {
+        if (Math.hypot(px - sx, py - sy) < 6) return;
+        started = true;
+        document.body.classList.add("is-dragging");
+        card.classList.add("dragging");
+        ghost = document.createElement("div"); ghost.className = "drag-ghost";
+        ghost.textContent = "⠿  " + (card.querySelector("h3")?.textContent || "");
+        document.body.appendChild(ghost);
+        raf = requestAnimationFrame(tick);
+      }
+      ghost.style.left = px + 14 + "px"; ghost.style.top = py + 10 + "px";
+      ev.preventDefault();
+    };
     const up = () => {
-      h.removeEventListener("pointermove", move); h.removeEventListener("pointerup", up); h.removeEventListener("pointercancel", up);
-      card.classList.remove("dragging"); target?.classList.remove("drop-target");
+      document.removeEventListener("pointermove", move); document.removeEventListener("pointerup", up); document.removeEventListener("pointercancel", up);
+      cancelAnimationFrame(raf);
+      if (!started) return;
+      // The click after a drag must not open the tab behind the card
+      const swallow = ev => { ev.stopPropagation(); ev.preventDefault(); };
+      window.addEventListener("click", swallow, { capture: true, once: true });
+      setTimeout(() => window.removeEventListener("click", swallow, { capture: true }), 50);
+      document.body.classList.remove("is-dragging");
+      card.classList.remove("dragging"); target?.classList.remove("drop-target"); ghost?.remove();
       if (!target) return;
       const movable = grid._items.filter(x => !isFull(x));
       const from = movable.indexOf(card), to = movable.indexOf(target);
@@ -181,7 +212,7 @@ function addHandle(grid, card) {
       save();
       grid._cols = 0; layoutGrid(grid);
     };
-    h.addEventListener("pointermove", move); h.addEventListener("pointerup", up); h.addEventListener("pointercancel", up);
+    document.addEventListener("pointermove", move); document.addEventListener("pointerup", up); document.addEventListener("pointercancel", up);
   });
 }
 const resize = new ResizeObserver(entries => entries.forEach(e => layoutGrid(e.target)));

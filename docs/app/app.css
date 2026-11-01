@@ -226,11 +226,14 @@ textarea { font-family: Consolas, monospace; font-size: 13px; resize: vertical; 
 
 /* Moving cards with the handle ⠿ (like the app) */
 .card, .grid .col > * { position: relative; }
-.drag-handle { position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px;
-  color: var(--muted); cursor: grab; font-size: 16px; opacity: .45; touch-action: none; user-select: none; z-index: 1; }
+.drag-handle { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px;
+  color: var(--muted); cursor: grab; font-size: 20px; opacity: .7; touch-action: none; user-select: none; z-index: 1; }
+.grid[data-key] .card > h3 { cursor: grab; }
+body.is-dragging, body.is-dragging * { cursor: grabbing !important; user-select: none !important; }
+.drag-ghost { position: fixed; z-index: 300; pointer-events: none; background: var(--card); color: var(--ink); border: 2px solid var(--accent); border-radius: 10px; padding: 8px 12px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,.3); max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .drag-handle:hover { opacity: 1; background: var(--soft); }
 .dragging { opacity: .45; }
-.drop-target { outline: 3px dashed var(--accent); outline-offset: 3px; }
+.drop-target { outline: 3px dashed var(--accent); outline-offset: 3px; background: color-mix(in srgb, var(--accent) 8%, var(--card)) !important; }
 .help-fab { touch-action: none; }
 .tab-more { color: var(--muted) !important; }
 .tab-menu { position: fixed; z-index: 31; min-width: 220px; display: flex; flex-direction: column; padding: 6px; gap: 2px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,.25); }
