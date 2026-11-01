@@ -1,6 +1,6 @@
 // "What's new": shown once after an update (only the changes since the last visit), and from ? → What's new.
 // Add a new entry at the TOP with every web build that users should know about.
-import { T, lang, store, fmtDate } from "./core.js";
+import { T, lang, store, fmtDate, State, save } from "./core.js";
 import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
@@ -39,7 +39,7 @@ export const markSeen = () => store.set(SEEN, String(WEB_BUILD));
 /** True when there is news the user hasn't seen yet. New users never get it (they get the guide). */
 export function hasNews(isNewUser) {
   const s = seen();
-  if (isNewUser) { markSeen(); return false; }
+  if (isNewUser || State.data.Settings.NewsHidden) { markSeen(); return false; }
   if (s === null) return NEWS.length > 0;      // used the app before this box existed
   return NEWS.some(n => n.build > s);
 }
@@ -48,9 +48,14 @@ export function openNews(all = false, onClose) {
   const s = seen();
   const list = all || s === null ? NEWS.slice(0, all ? NEWS.length : 3) : NEWS.filter(n => n.build > s);
   const l = lang();
-  popup(`<div class="box-head"><span class="box-icon go">✨</span><h2>${esc(T("What's new"))}</h2></div>
+  const box = popup(`<div class="box-head"><span class="box-icon go">✨</span><h2>${esc(T("What's new"))}</h2></div>
     ${list.map(n => `<div class="news"><div class="news-head"><b>${esc(T("Build {0}", n.build))}</b><span class="hint">${fmtDate(n.date)}</span></div>
       <ul>${(n.items[l] || n.items.en).map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`).join("")}
-    <div class="box-buttons"><button class="btn go" data-close>${esc(T("OK"))}</button></div>`,
-    { width: 520, cls: "box", onClose: () => { markSeen(); onClose && onClose(); } });
+    <div class="box-buttons"><button class="btn go" data-close>${esc(T("OK"))}</button></div>
+    <label class="check"><input type="checkbox" name="newsoff"${State.data.Settings.NewsHidden ? " checked" : ""}><span>${esc(T("Don't show what's new after updates"))}</span></label>
+    <p class="hint">${esc(T("You can switch it back on in Options → Backup & restore, and always find it in ? → About."))}</p>`,
+    { width: 520, cls: "box", onClose: () => {
+        const off = box.el.querySelector('[name="newsoff"]').checked;
+        if (off !== !!State.data.Settings.NewsHidden) { State.data.Settings.NewsHidden = off; save(); }
+        markSeen(); onClose && onClose(); } });
 }

@@ -63,7 +63,10 @@ export const EXTRA = {
 "All": "Alle",
 "Save your profile as a backup, and install MoneyCompass as an app on your phone or computer.": "Speichern Sie Ihr Profil als Sicherung und installieren Sie MoneyCompass als App auf Handy oder Computer.",
 "What's new": "Neuigkeiten",
-"Build {0}": "Build {0}"
+"Build {0}": "Build {0}",
+"Don't show what's new after updates": "Neuigkeiten nach Updates nicht mehr anzeigen",
+"You can switch it back on in Options → Backup & restore, and always find it in ? → About.": "Sie können es unter Optionen → Sichern & Wiederherstellen wieder einschalten und finden es immer unter ? → Über.",
+"Show what's new after an update": "Neuigkeiten nach einem Update anzeigen"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -128,7 +131,10 @@ export const EXTRA = {
 "All": "Tout",
 "Save your profile as a backup, and install MoneyCompass as an app on your phone or computer.": "Enregistrez votre profil comme sauvegarde et installez MoneyCompass comme application sur votre téléphone ou ordinateur.",
 "What's new": "Nouveautés",
-"Build {0}": "Build {0}"
+"Build {0}": "Build {0}",
+"Don't show what's new after updates": "Ne plus afficher les nouveautés après une mise à jour",
+"You can switch it back on in Options → Backup & restore, and always find it in ? → About.": "Vous pouvez le réactiver dans Options → Sauvegarde et restauration, et le retrouver toujours dans ? → À propos.",
+"Show what's new after an update": "Afficher les nouveautés après une mise à jour"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -193,6 +199,9 @@ export const EXTRA = {
 "All": "Wszystko",
 "Save your profile as a backup, and install MoneyCompass as an app on your phone or computer.": "Zapisz profil jako kopię zapasową i zainstaluj MoneyCompass jako aplikację na telefonie lub komputerze.",
 "What's new": "Co nowego",
-"Build {0}": "Kompilacja {0}"
+"Build {0}": "Kompilacja {0}",
+"Don't show what's new after updates": "Nie pokazuj nowości po aktualizacjach",
+"You can switch it back on in Options → Backup & restore, and always find it in ? → About.": "Możesz to ponownie włączyć w Opcje → Kopia zapasowa i przywracanie, a nowości zawsze znajdziesz w ? → O aplikacji.",
+"Show what's new after an update": "Pokazuj nowości po aktualizacji"
 }
 };
