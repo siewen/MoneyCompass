@@ -272,7 +272,10 @@ export const Loans = {
         <div class="two">${field(T("Borrowed at the start (zł)"), numInput("original", plain(f.Original), T("optional")))}${field(T("Still to pay back (zł)"), numInput("remaining", plain(l ? loanPlan(l).remainingNow : f.Remaining)))}</div>
         ${hint(T("With the amount at the start, MoneyCompass shows how much you have already paid back."))}
         <div class="two">${field(T("Monthly payment (zł)"), numInput("payment", plain(f.MonthlyPayment)))}${field(T("Interest rate (% per year, 0 if none)"), numInput("rate", plain(f.RatePercent), "0"))}</div>
-        <div class="two">${field(T("Next payment on"), dateInput("next", inputDate(l ? (loanPlan(l).next || loanNextPayment(l)) : parseDate(f.NextPayment))))}<span></span></div>
+        <div class="two">${field(T("Next payment on (then every month)"), dateInput("next", inputDate(l ? (loanPlan(l).next || loanNextPayment(l)) : parseDate(f.NextPayment))))}
+        ${field(T("Paid from which account (optional)"), `<input name="paidfrom" list="loan-accounts" value="${esc(f.PaidFrom || "")}" placeholder="${esc(T("e.g. {0}", "Pekao"))}">`)}</div>
+        <datalist id="loan-accounts">${[...new Set([...d.Holdings.map(h => h.Name), ...d.Expenses.concat(d.Received).map(x => x.Info?.Bank).filter(Boolean), "Pekao", "PKO BP", "mBank", "ING", "Millennium", "Santander", "Alior", "Credit Agricole"])].map(n => `<option value="${esc(n)}">`).join("")}</datalist>
+        ${hint(T("The loan payment counts every month on this day – also when it is paid from a bank you don't import. If it shows up in a bank import, it is not counted twice."))}
         <p class="loan-preview hint" id="loan-preview"></p>
         ${hint(T("MoneyCompass works out the debt-free date from what is left, the monthly payment and the interest."))}
         <div class="buttons">${button(l ? T("Save changes") : T("Add"), "save-loan", "main")}${l ? button(T("Cancel"), "cancel-loan") : ""}</div></form>`)}
@@ -294,7 +297,7 @@ export const Loans = {
       const orig = num(v.original) || 0;
       if (orig > 0 && orig < rem) { toast(T("The amount at the start can't be smaller than what is still to pay back."), "bad"); return; }
       const item = { Name: v.name.trim(), Original: orig > 0 ? orig : null, Remaining: rem, MonthlyPayment: num(v.payment) || 0, RatePercent: num(v.rate) || 0,
-        NextPayment: isoDate(parseDate(v.next || isoDate(addMonths(today(), 1)))) };
+        NextPayment: isoDate(parseDate(v.next || isoDate(addMonths(today(), 1)))), PaidFrom: (v.paidfrom || "").trim() };
       const saved = l ? Object.assign(l, item) : (d.Loans.push({ Id: uuid(), ...item }), d.Loans[d.Loans.length - 1]);
       const plan = planLoan(saved);
       editLoan = null; save(); App.refresh();
@@ -539,7 +542,7 @@ export function loanProgress(loans) {
 
 /** One line about a loan: payment, interest, next payment, payments left, debt-free date. */
 export function loanLine(l, p = loanPlan(l)) {
-  return T("{0} per month · {1} per year", pln(l.MonthlyPayment || 0), rate(l.RatePercent || 0)) + (p.next ? " · " + T("next payment {0}", fmtDate(p.next)) : "") +
+  return T("{0} per month · {1} per year", pln(l.MonthlyPayment || 0), rate(l.RatePercent || 0)) + (l.PaidFrom ? " · " + T("from {0}", l.PaidFrom) : "") + (p.next ? " · " + T("next payment {0}", fmtDate(p.next)) : "") +
     (p.never ? "" : " · " + T("{0} payments left · debt-free {1}", p.left, monthName(p.end)));
 }
 /** A loan that can never be paid back: the monthly payment doesn't cover the interest. */

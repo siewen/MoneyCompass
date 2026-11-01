@@ -279,7 +279,10 @@ export const EXTRA = {
 "next payment {0}": "nächste Rate {0}",
 "{0} payments left · debt-free {1}": "noch {0} Raten · schuldenfrei {1}",
 "{0}: the monthly payment doesn't cover the interest – check it in Loans & debts.": "{0}: Die Monatsrate deckt die Zinsen nicht – prüfen Sie es unter Kredite & Schulden.",
-"estimated today": "geschätzt heute"
+"estimated today": "geschätzt heute",
+"Next payment on (then every month)": "Nächste Rate am (dann jeden Monat)",
+"Paid from which account (optional)": "Von welchem Konto bezahlt (optional)",
+"The loan payment counts every month on this day – also when it is paid from a bank you don't import. If it shows up in a bank import, it is not counted twice.": "Die Rate zählt jeden Monat an diesem Tag – auch wenn sie von einer Bank bezahlt wird, die Sie nicht importieren. Taucht sie in einem Bankimport auf, wird sie nicht doppelt gezählt."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -560,7 +563,10 @@ export const EXTRA = {
 "next payment {0}": "prochaine mensualité {0}",
 "{0} payments left · debt-free {1}": "encore {0} mensualités · sans dette {1}",
 "{0}: the monthly payment doesn't cover the interest – check it in Loans & debts.": "{0} : la mensualité ne couvre pas les intérêts – vérifiez dans Prêts & dettes.",
-"estimated today": "estimé aujourd'hui"
+"estimated today": "estimé aujourd'hui",
+"Next payment on (then every month)": "Prochaine mensualité le (puis chaque mois)",
+"Paid from which account (optional)": "Payé depuis quel compte (facultatif)",
+"The loan payment counts every month on this day – also when it is paid from a bank you don't import. If it shows up in a bank import, it is not counted twice.": "La mensualité compte chaque mois à ce jour – même si elle est payée depuis une banque que vous n'importez pas. Si elle apparaît dans un import bancaire, elle n'est pas comptée deux fois."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -841,6 +847,9 @@ export const EXTRA = {
 "next payment {0}": "następna rata {0}",
 "{0} payments left · debt-free {1}": "zostało {0} rat · spłacone {1}",
 "{0}: the monthly payment doesn't cover the interest – check it in Loans & debts.": "{0}: rata nie pokrywa odsetek – sprawdź w Kredytach i długach.",
-"estimated today": "szacunkowo dziś"
+"estimated today": "szacunkowo dziś",
+"Next payment on (then every month)": "Następna rata (potem co miesiąc)",
+"Paid from which account (optional)": "Z jakiego konta płacone (opcjonalnie)",
+"The loan payment counts every month on this day – also when it is paid from a bank you don't import. If it shows up in a bank import, it is not counted twice.": "Rata liczy się co miesiąc w tym dniu – także gdy płacisz ją z banku, którego nie importujesz. Jeśli pojawi się w imporcie z banku, nie zostanie policzona dwa razy."
 }
 };

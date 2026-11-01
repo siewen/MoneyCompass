@@ -2,7 +2,7 @@
 // loan payments – in a month calendar and as a preview for 1, 3, 6 or 12 months.
 import {
   T, State, save, Calc, pln, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addDays, addMonths, monthStart, monthName,
-  uuid, categories, categoryLabel, moduleOn, FREQUENCIES, ONE_TIME, locale, monthsCount, repeatingExpenses, setRepeat, freqLabel, repeatingReceived, setReceivedRepeat, seriesKey,
+  uuid, categories, categoryLabel, moduleOn, FREQUENCIES, ONE_TIME, locale, monthsCount, repeatingExpenses, setRepeat, freqLabel, repeatingReceived, setReceivedRepeat, seriesKey, LOAN_CATEGORY,
 } from "./core.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, button, values, confirmBox, toast } from "./ui.js";
 import { App } from "./app.js";
@@ -66,13 +66,31 @@ export function events(d, from, to) {
       const end = parseDate(l.EndDate);
       let next = Calc.nextPayment({ Date: l.EndDate, Frequency: "Monthly" }, from), guard = 0;
       while (next && next <= to && next <= end && guard++ < 400) {
-        list.push({ date: next, name: l.Name, amount: l.MonthlyPayment, type: "out", note: T("Loan payments") + " · 🔁 " + freqLabel("Monthly") });
+        list.push({ date: next, name: l.Name, amount: l.MonthlyPayment, type: "out", note: loanNote(l) });
         next = Calc.nextPayment({ Date: l.EndDate, Frequency: "Monthly" }, addDays(next, 1));
       }
     }
   return list.sort((a, b) => a.date - b.date || (a.type === "in" ? -1 : 1));
 }
 
+const loanNote = l => T("Loan payments") + " · 🔁 " + freqLabel("Monthly") + (l.PaidFrom ? " · " + T("from {0}", l.PaidFrom) : "");
+/** Loan payments before today, from the loan's own payment day – also when they are paid from another bank
+ *  that is not in your imports. A payment that is in your imports (category "Loan payments") is not shown twice. */
+function pastLoans(d, from, to) {
+  if (!moduleOn("loans")) return [];
+  const list = [], end = new Date(Math.min(to.getTime(), addDays(today(), -1).getTime()));
+  for (const l of d.Loans.filter(l => l.MonthlyPayment > 0 && l.EndDate)) {
+    const rule = { Date: l.NextPayment || l.EndDate, Frequency: "Monthly" };
+    let next = Calc.nextPayment(rule, from), guard = 0;
+    while (next && next <= end && guard++ < 400) {
+      const n = next;
+      const imported = d.Expenses.some(e => e.Category === LOAN_CATEGORY && Math.abs(parseDate(e.Date) - n) <= 5 * 86400000 && Math.abs(e.Amount - l.MonthlyPayment) <= l.MonthlyPayment * 0.05);
+      if (!imported) list.push({ date: n, name: l.Name, amount: l.MonthlyPayment, type: "out", note: loanNote(l), past: true });
+      next = Calc.nextPayment(rule, addDays(next, 1));
+    }
+  }
+  return list;
+}
 /** What really happened before today: your expenses, money received and transfers to savings (typed in or imported). */
 function pastEvents(d, from, to) {
   const list = [], inRange = x => { const t = parseDate(x.Date); return t >= from && t <= to && t < today(); };
@@ -88,6 +106,7 @@ function pastEvents(d, from, to) {
     const h = d.Holdings.find(x => x.Id === t.HoldingId);
     list.push({ date: parseDate(t.Date), name: h ? h.Name : (t.Description || T("Transfer to savings")), amount: t.Amount, type: "save", note: T("Transfer to savings") + (t.Info?.Account ? " · " + T("from {0}", t.Info.Account) : ""), past: true, info: ["transfer", t] });
   }
+  list.push(...pastLoans(d, from, to));
   return list;
 }
 /** The first month with any of your data – the calendar can go back to it. */
