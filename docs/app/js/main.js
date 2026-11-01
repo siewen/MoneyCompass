@@ -61,14 +61,12 @@ function buildShell() {
 // ---------- One "Data ▾" menu instead of four buttons: import, export, backup, install, delete ----------
 function dataMenu() {
   const btn = document.querySelector('[data-act="data"]'), r = btn.getBoundingClientRect();
+  // Data in, data out, and deleting. Profiles (load/save) are in the profile panel, installing in the ? menu.
   const items = [
-    ["csv", "🏦", T("Import bank statement (CSV)…") + (license.isPro ? "" : " 🔒"), "#1D4ED8"],
-    ["load", "📂", T("Load a profile…"), "#1D4ED8"],
-    ["export", "⬇", T("Export report (Excel, PDF, Word)") + (license.isPro ? "" : " 🔒"), "#15803D"],
-    ["save", "💾", T("Save profile (backup)"), "#15803D"],
-    ...(installed() ? [] : [["install", "📲", T("Install app"), "#0F766E"]]),
+    ["csv", "🏦", T("Import bank statement (CSV)…") + (license.isPro ? "" : " 🔒")],
+    ["export", "⬇", T("Export report (Excel, PDF, Word)") + (license.isPro ? "" : " 🔒")],
     ["-"],
-    ["delete", "🗑", T("Delete data…"), "#B91C1C"],
+    ["delete", "🗑", T("Delete data…")],
   ];
   const shield = document.createElement("div"); shield.className = "help-shield";
   const menu = document.createElement("div"); menu.className = "tab-menu data-menu";
