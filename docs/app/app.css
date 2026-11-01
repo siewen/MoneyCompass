@@ -468,3 +468,4 @@ svg.donut text { pointer-events: none; }
 .flow-values .in { color: #2E9E5B; border-left: 3px solid #2E9E5B; } .flow-values .out { color: #C81E26; text-align: right; border-right: 3px solid #B3131B; }
 :root[data-theme="dark"] .flow-values .in { color: #4ADE80; } :root[data-theme="dark"] .flow-values .out { color: #F87171; }
 .flow-values small { font-weight: 500; opacity: .85; font-size: 13px; }
+.amount-range { display: inline-flex; align-items: center; gap: 4px; } .amount-range input { width: 110px; }

@@ -420,7 +420,14 @@ export const EXTRA = {
 "Outflows": "Ausgänge",
 "Salary {0} + extra income {1}": "Gehalt {0} + Zusatzeinkommen {1}",
 "From your income sources": "Aus Ihren Einkommensquellen",
-"Essential {0} + not essential {1}": "Notwendig {0} + nicht notwendig {1}"
+"Essential {0} + not essential {1}": "Notwendig {0} + nicht notwendig {1}",
+"Financial analysis: inflows and outflows by month": "Finanzanalyse: Ein- und Ausgänge pro Monat",
+"Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered.": "Eingänge wie erhalten (Gehalt und Zusatzeinkommen) – wo nichts importiert wurde, wie aus Ihren Einkommensquellen geplant. Ausgänge wie eingetragen.",
+"Whole period": "Gesamter Zeitraum",
+"Last {0} days": "Letzte {0} Tage",
+"Amount from": "Betrag von",
+"Amount to": "Betrag bis",
+"Expense history": "Ausgabenverlauf"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -842,7 +849,14 @@ export const EXTRA = {
 "Outflows": "Sorties",
 "Salary {0} + extra income {1}": "Salaire {0} + revenus supplémentaires {1}",
 "From your income sources": "D'après vos sources de revenus",
-"Essential {0} + not essential {1}": "Essentiel {0} + non essentiel {1}"
+"Essential {0} + not essential {1}": "Essentiel {0} + non essentiel {1}",
+"Financial analysis: inflows and outflows by month": "Analyse financière : entrées et sorties par mois",
+"Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered.": "Entrées telles que reçues (salaire et revenus supplémentaires) – sans import, telles que prévues par vos sources de revenus. Sorties telles que saisies.",
+"Whole period": "Toute la période",
+"Last {0} days": "{0} derniers jours",
+"Amount from": "Montant de",
+"Amount to": "Montant à",
+"Expense history": "Historique des dépenses"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1264,6 +1278,13 @@ export const EXTRA = {
 "Outflows": "Wydatki",
 "Salary {0} + extra income {1}": "Wynagrodzenie {0} + dodatkowy dochód {1}",
 "From your income sources": "Z Twoich źródeł dochodu",
-"Essential {0} + not essential {1}": "Niezbędne {0} + inne {1}"
+"Essential {0} + not essential {1}": "Niezbędne {0} + inne {1}",
+"Financial analysis: inflows and outflows by month": "Analiza finansowa: wpływy i wydatki w miesiącach",
+"Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered.": "Wpływy tak, jak wpłynęły (wynagrodzenie i dodatkowy dochód) – gdzie nic nie zaimportowano, według źródeł dochodu. Wydatki tak, jak wpisane.",
+"Whole period": "Cały okres",
+"Last {0} days": "Ostatnie {0} dni",
+"Amount from": "Kwota od",
+"Amount to": "Kwota do",
+"Expense history": "Historia wydatków"
 }
 };

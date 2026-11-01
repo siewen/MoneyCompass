@@ -108,10 +108,10 @@ export const Overview = {
         <b class="out" data-tip="${esc(T("Essential {0} + not essential {1}", pln(avg.essential), pln(avg.nonEssential)))}">${pln(outflow)} <small>${100 - pIn}%</small></b>
       </div>` : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"income"));
     const cur = months.find(m => m.current);
-    parts.push(card(heading(T("Income and expenses by month")) + hint(T("Income as received (salary and extra income) – where nothing was imported, as planned from your income sources. Expenses as entered.")) +
-      (showTrend ? monthBars(months, axis, pln, [T("Income"), T("Expenses")]) + legend([
-        { color: COLORS.income, label: T("Income"), text: pln(months.reduce((s, m) => s + m.income, 0) / Math.max(1, months.length)) + " " + T("avg.") },
-        { color: COLORS.expenses, label: T("Expenses"), text: pln(months.reduce((s, m) => s + m.expenses, 0) / Math.max(1, months.length)) + " " + T("avg.") },
+    parts.push(card(heading(T("Financial analysis: inflows and outflows by month")) + hint(T("Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered.")) +
+      (showTrend ? monthBars(months, axis, pln, [T("Inflows"), T("Outflows")]) + legend([
+        { color: "#2E9E5B", label: T("Inflows"), text: pln(months.reduce((s, m) => s + m.income, 0) / Math.max(1, months.length)) + " " + T("avg.") },
+        { color: "#C81E26", label: T("Outflows"), text: pln(months.reduce((s, m) => s + m.expenses, 0) / Math.max(1, months.length)) + " " + T("avg.") },
       ]) + (cur ? `<p class="hint planned-note"><span class="planned-swatch"></span>${esc(T("{0} is not finished: income as planned from your income sources, expenses entered so far.", monthName(cur.start)))}</p>` : "")
       : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"expenses"));
     parts.push(card(heading(T("Your expenses")) + hint(basisText(d)) +
@@ -347,7 +347,7 @@ export async function offerSalary(r) {
 // ================================================================= Expenses
 
 let showAllMonths = false;
-const flt = { cat: "", text: "", ess: "", rep: false };   // filter of "Your expenses"
+const flt = { cat: "", text: "", ess: "", rep: false, min: "", max: "", days: "" };   // filter of "Your expenses"
 export const Expenses = {
   route: "expenses", title: "Expenses",
   render(el) {
@@ -356,9 +356,10 @@ export const Expenses = {
     const cats = ChartData.categories(d);
     const cat0 = categories()[0];
     const months = [];
-    const filtering = !!(flt.cat || flt.text.trim() || flt.ess || flt.rep);
+    const filtering = !!(flt.cat || flt.text.trim() || flt.ess || flt.rep || flt.min || flt.max || flt.days);
+    const minA = num(flt.min), maxA = num(flt.max), since = flt.days ? addDays(today(), -(+flt.days)) : null;
     const words = flt.text.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    const shown = d.Expenses.filter(e => (!flt.cat || e.Category === flt.cat) && (!flt.ess || (flt.ess === "yes") === !!e.Essential) && (!flt.rep || !!repeatOn(e)) &&
+    const shown = d.Expenses.filter(e => (!flt.cat || e.Category === flt.cat) && (!(minA > 0) || e.Amount >= minA) && (!(maxA > 0) || e.Amount <= maxA) && (!since || parseDate(e.Date) >= since) && (!flt.ess || (flt.ess === "yes") === !!e.Essential) && (!flt.rep || !!repeatOn(e)) &&
       words.every(w => `${e.Description || ""} ${T(e.Category)} ${plain(e.Amount)} ${e.Info ? Object.values(e.Info).join(" ") : ""}`.toLowerCase().includes(w)));
     const sorted = shown.sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
     for (const e of sorted) {
@@ -371,6 +372,8 @@ export const Expenses = {
       <input type="search" name="f-text" value="${esc(flt.text)}" placeholder="🔍 ${esc(T("Search: shop, amount…"))}">
       <select name="f-cat"><option value="">${esc(T("All categories"))}</option>${usedCats.map(c => `<option value="${esc(c)}"${c === flt.cat ? " selected" : ""}>${esc(categoryLabel(c))}</option>`).join("")}</select>
       <select name="f-ess"><option value="">${esc(T("All"))}</option><option value="yes"${flt.ess === "yes" ? " selected" : ""}>${esc(T("Essential"))}</option><option value="no"${flt.ess === "no" ? " selected" : ""}>${esc(T("Not essential"))}</option></select>
+      <select name="f-days"><option value="">${esc(T("Whole period"))}</option>${[30, 90, 180, 365].map(n => `<option value="${n}"${String(n) === flt.days ? " selected" : ""}>${esc(T("Last {0} days", n))}</option>`).join("")}</select>
+      <span class="amount-range"><input name="f-min" inputmode="decimal" value="${esc(flt.min)}" placeholder="${esc(T("Amount from"))} zł" data-tip="${esc(T("Amount from"))} (zł)"><span>–</span><input name="f-max" inputmode="decimal" value="${esc(flt.max)}" placeholder="${esc(T("Amount to"))} zł" data-tip="${esc(T("Amount to"))} (zł)"></span>
       <label class="check"><input type="checkbox" name="f-rep"${flt.rep ? " checked" : ""}><span>🔁 ${esc(T("Repeating only"))}</span></label>
       ${filtering ? `<button class="btn second small" data-action="f-clear">✕ ${esc(T("Clear filter"))}</button>` : ""}</div>` +
       (filtering ? `<p class="filter-result">${esc(T("Expenses found: {0} · together {1}", shown.length, pln(shown.reduce((s, e) => s + e.Amount, 0))))}</p>` : "") : "";
@@ -394,7 +397,7 @@ export const Expenses = {
         ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.all.map((c, n) => ({
             key: c.category, color: n < 6 ? COLORS.series[n] : COLORS.other, label: categoryLabel(c.category), text: pln(c.perMonth), share: ChartData.share(c.perMonth, cats.total) })))}</div>` + hint(T("Click to see these expenses"))
         : hint(T("Add expenses to see where your money goes."))))}
-      ${card(heading(T("Your expenses")) + hint(T("Click an expense to switch it between essential and not essential. The pen changes date, category, amount and more.")) + filterBar +
+      ${card(heading(T("Expense history")) + hint(T("Click an expense to switch it between essential and not essential. The pen changes date, category, amount and more.")) + filterBar +
         (months.length ? visible.map(m => {
           const total = m.items.reduce((s, e) => s + e.Amount, 0), ess = m.items.filter(e => e.Essential).reduce((s, e) => s + e.Amount, 0);
           return `<div class="month-head">${esc(T("{0}  ·  total {1}  ·  essential {2}", monthName(m.start), pln(total), pln(ess)))}</div><div class="list">${m.items.map(expenseRow).join("")}</div>`;
@@ -425,7 +428,9 @@ export const Expenses = {
       el.querySelector('[name="f-cat"]').onchange = e => { flt.cat = e.target.value; App.refresh(); };
       el.querySelector('[name="f-ess"]').onchange = e => { flt.ess = e.target.value; App.refresh(); };
       el.querySelector('[name="f-rep"]').onchange = e => { flt.rep = e.target.checked; App.refresh(); };
-      const clr = el.querySelector('[data-action="f-clear"]'); if (clr) clr.onclick = () => { Object.assign(flt, { cat: "", text: "", ess: "", rep: false }); App.refresh(); };
+      el.querySelector('[name="f-days"]').onchange = e => { flt.days = e.target.value; App.refresh(); };
+      ["min", "max"].forEach(k => { el.querySelector(`[name="f-${k}"]`).onchange = e => { flt[k] = e.target.value.trim(); App.refresh(); }; });
+      const clr = el.querySelector('[data-action="f-clear"]'); if (clr) clr.onclick = () => { Object.assign(flt, { cat: "", text: "", ess: "", rep: false, min: "", max: "", days: "" }); App.refresh(); };
     }
     el.querySelectorAll(".legend-row[data-cat]").forEach(r => r.onclick = () => showCategory(r.dataset.cat));
     bindExpenseRows(el);
