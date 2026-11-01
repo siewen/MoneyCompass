@@ -278,7 +278,7 @@ export const Loans = {
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("Car loan, credit card, mortgage"))))}
         ${field(T("Type of loan"), select("kind", LOAN_KINDS.map(([k, n]) => [k, T(n)]), f.Kind || "other"))}
         <div class="two">${field(T("Loan amount at the start (zł)"), numInput("original", plain(f.Original), T("optional")))}${field(T("Remaining principal amount to be repaid (zł)"), numInput("remaining", plain(l ? loanPlan(l).remainingNow : f.Remaining)))}</div>
-        ${field(T("Interest repaid so far (zł, optional)"), numInput("interestpaid", l ? plain(Math.round(loanPlan(l).interestRepaid * 100) / 100) : "", T("from your bank, e.g. {0}", "85 171,18")))}
+        ${field(T("Interest repaid so far (zł, optional)"), numInput("interestpaid", l ? plain(Math.round(loanPlan(l).interestRepaid * 100) / 100) : "", T("from your bank, e.g. {0}", "12 450,00")))}
         ${hint(T("Your bank shows these in the loan details: principal amount repaid, interest repaid and remaining principal amount to be repaid. With the amount at the start, MoneyCompass shows how much principal you have already repaid."))}
         <div class="two">${field(T("Loan payment per month (zł)"), numInput("payment", plain(f.MonthlyPayment)))}${field(T("Interest rate (% per year, 0 if none)"), numInput("rate", plain(f.RatePercent), "0"))}</div>
         <div class="two">${field(T("Next payment on (then every month)"), dateInput("next", inputDate(l ? (loanPlan(l).next || loanNextPayment(l)) : parseDate(f.NextPayment))))}
