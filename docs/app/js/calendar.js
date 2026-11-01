@@ -56,6 +56,11 @@ export function events(d, from, to) {
       next = Calc.nextPayment(rule, addDays(next, 1));
     }
   }
+  // Savings promotions that end (after that most banks pay only about 0.5%)
+  for (const h of d.Holdings.filter(h => h.PromoEnd && h.Amount > 0)) {
+    const end = parseDate(h.PromoEnd);
+    if (end >= from && end <= to) list.push({ date: end, name: "🎁 " + h.Name, amount: 0, type: "info", note: T("Promotion ends") });
+  }
   if (moduleOn("loans"))
     for (const l of d.Loans.filter(l => l.Remaining > 0 && l.MonthlyPayment > 0)) {
       const end = parseDate(l.EndDate);
@@ -142,19 +147,28 @@ export const Calendar = {
       const date = new Date(shown.getFullYear(), shown.getMonth(), day);
       const ev = monthEvents.filter(e => e.date.getDate() === day);
       const isToday = date.getTime() === today().getTime();
-      const net = ev.reduce((s, e) => s + (e.type === "in" ? e.amount : -e.amount), 0);
+      const net = ev.reduce((s, e) => s + (e.type === "in" ? e.amount : -e.amount), 0), money = ev.some(e => e.type !== "info");
       cells += `<button class="cal-cell${isToday ? " today" : ""}${date < today() ? " past" : ""}${ev.length ? " has" : ""}${selectedDay === day ? " sel" : ""}" data-day="${day}">
         <span class="cal-day">${day}</span>${ev.slice(0, 3).map(e => `<span class="cal-dot ${e.type}" title="${esc(e.name)}: ${esc(pln(e.amount))}"></span>`).join("")}
-        ${ev.length ? `<span class="cal-net ${net >= 0 ? "good" : "bad"}">${net >= 0 ? "+" : "−"}${esc(short(Math.abs(net)))}</span>` : ""}</button>`;
+        ${money ? `<span class="cal-net ${net >= 0 ? "good" : "bad"}">${net >= 0 ? "+" : "−"}${esc(short(Math.abs(net)))}</span>` : ""}</button>`;
     }
     const dayList = selectedDay ? monthEvents.filter(e => e.date.getDate() === selectedDay) : [];
 
     // ---------- Preview per month, with the running total ----------
+    // Months before this one: what really happened (from the oldest month of your data)
+    const sumUp = ev => ({ inn: ev.filter(e => e.type === "in").reduce((s, e) => s + e.amount, 0), out: ev.filter(e => e.type === "out").reduce((s, e) => s + e.amount, 0),
+      sav: ev.filter(e => e.type === "save").reduce((s, e) => s + e.amount, 0) });
+    const pastMonths = [];
+    for (let ms = first; ms < start; ms = addMonths(ms, 1)) {
+      const ev = pastEvents(d, ms, addDays(addMonths(ms, 1), -1)).sort((a, b) => a.date - b.date);
+      pastMonths.push({ ms, ev, ...sumUp(ev) });
+    }
     let running = 0;
     const months = [];
     for (let i = 0; i < range; i++) {
       const ms = addMonths(start, i), me = addDays(addMonths(ms, 1), -1);
-      const ev = all.filter(e => e.date >= ms && e.date <= me);
+      // This month: what already happened before today + what is planned from today
+      const ev = [...(i === 0 ? pastEvents(d, ms, me) : []), ...all.filter(e => e.date >= ms && e.date <= me)].sort((a, b) => a.date - b.date);
       const inn = ev.filter(e => e.type === "in").reduce((s, e) => s + e.amount, 0);
       const out = ev.filter(e => e.type === "out").reduce((s, e) => s + e.amount, 0);
       const sav = ev.filter(e => e.type === "save").reduce((s, e) => s + e.amount, 0);
@@ -168,7 +182,7 @@ export const Calendar = {
     const reps = repeatingExpenses(d), recs = repeatingReceived(d);
     const deps = d.Holdings.filter(h => h.Deposit > 0 && h.DepositDate);
     const evRow = e => `<div class="item"><span class="cal-dot ${e.type}"></span><div><b>${esc(e.name)}</b><span class="hint">${fmtDate(e.date)} · ${esc(e.note)}${e.past ? "" : " · " + esc(T("planned"))}</span></div>
-      <b class="${e.type === "in" ? "good" : e.type === "save" ? "primary" : "bad"}">${e.type === "in" ? "+" : "−"}${pln(e.amount)}</b>${e.info ? infoBtn(...e.info) : ""}</div>`;
+      ${e.type === "info" ? "" : `<b class="${e.type === "in" ? "good" : e.type === "save" ? "primary" : "bad"}">${e.type === "in" ? "+" : "−"}${pln(e.amount)}</b>`}${e.info ? infoBtn(...e.info) : ""}</div>`;
 
     el.innerHTML = `<div class="grid">
       ${card(heading(T("Next {0}", monthsLabel(range)), "📅") +
@@ -207,7 +221,9 @@ export const Calendar = {
         (sugg.length ? `<hr><h3>💡 ${esc(T("Found in your expenses"))}</h3>${hint(T("These come back every month. Add them with one click."))}<div class="list">${sugg.map((x, i) => `
           <div class="item"><div><b>${esc(x.name)}</b><span class="hint">${esc(categoryLabel(x.category))} · ${esc(T("in {0} months", x.months))}</span></div><b>${pln(x.amount)}</b>
           <button class="btn second small" data-sugg="${i}">＋ ${esc(T("Add"))}</button></div>`).join("")}</div>` : ""))}
-      ${card(heading(T("Month by month")) + months.map(m => `<div class="cal-month"><div class="cal-month-head"><b>${esc(monthName(m.ms))}</b>
+      ${card(heading(T("Month by month")) + pastMonths.map(m => `<details class="cal-month past"><summary class="cal-month-head"><b>${esc(monthName(m.ms))} <small class="hint">· ${esc(T("what really happened"))}</small></b>
+        <span><span class="good">+${pln(m.inn)}</span> · <span class="bad">−${pln(m.out)}</span>${m.sav ? ` · <span class="primary">${pln(m.sav)}</span>` : ""} · <b class="${m.inn - m.out - m.sav >= 0 ? "good" : "bad"}">${pln(m.inn - m.out - m.sav)}</b></span></summary>
+        <div class="list">${m.ev.map(evRow).join("") || hint(T("Nothing in this month."))}</div></details>`).join("") + months.map(m => `<div class="cal-month"><div class="cal-month-head"><b>${esc(monthName(m.ms))}</b>
         <span><span class="good">+${pln(m.inn)}</span> · <span class="bad">−${pln(m.out)}</span>${m.sav ? ` · <span class="primary">${pln(m.sav)}</span>` : ""} · <b class="${m.inn - m.out - m.sav >= 0 ? "good" : "bad"}">${pln(m.inn - m.out - m.sav)}</b></span></div>
         ${range <= 3 ? `<div class="list">${m.ev.map(evRow).join("") || hint(T("No payments expected in this period."))}</div>` : ""}</div>`).join("") +
         (range > 3 ? hint(T("Choose 1 or 3 months to see every payment.")) : "") +

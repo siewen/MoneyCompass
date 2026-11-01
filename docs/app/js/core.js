@@ -490,7 +490,7 @@ export const Calc = {
       if (this.rateMissing(h.Currency, d.Settings)) missing = true;
       const v = this.toPln(h.Amount, h.Currency, d.Settings);
       total += v; if (h.Safe) safe += v; else risky += v;
-      yearly += v * (h.RatePercent || 0) / 100;
+      yearly += v * currentRate(h) / 100;
     }
     return { total, safe, risky, yearly, missing };
   },
@@ -742,4 +742,26 @@ export function binLabel(entry) {
   const name = x.Name || x.Description || (x.Category ? T(x.Category) : "") || "–";
   const value = x.Amount ?? x.Remaining ?? x.Target ?? x.MonthlyLimit;
   return { name, value };
+}
+
+// ---------------------------------------------------------------- savings promotions (end date, rate afterwards)
+
+/** A savings promotion: when it ends, how many days are left, the rate that is paid now. */
+export function promo(h) {
+  if (!h || !h.PromoEnd) return null;
+  const end = parseDate(h.PromoEnd);
+  if (!end || isNaN(end)) return null;
+  const daysLeft = Math.round((end - today()) / 86400000);
+  return { end, daysLeft, ended: daysLeft < 0, rateAfter: h.RateAfter ?? null };
+}
+/** The rate a savings entry pays today: after a promotion has ended, the rate afterwards. */
+export function currentRate(h) {
+  const p = promo(h);
+  if (p && p.ended && p.rateAfter !== null && p.rateAfter !== "") return +p.rateAfter || 0;
+  return +h.RatePercent || 0;
+}
+/** Promotions that end within 14 days, or ended in the last 60 days (and were not dealt with). */
+export function duePromos(d) {
+  return d.Holdings.map(h => ({ h, p: promo(h) })).filter(x => x.p && x.p.daysLeft <= 14 && x.p.daysLeft >= -60 && x.h.Amount > 0)
+    .sort((a, b) => a.p.daysLeft - b.p.daysLeft);
 }

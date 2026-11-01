@@ -9,6 +9,7 @@ import { hasNews, openNews } from "./news.js";
 import { Overview, Income, Expenses, Emergency, Portfolio, bindBin } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
 import { Calendar } from "./calendar.js";
+import { promoReminder } from "./advice.js";
 import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile, openLanguage } from "./dialogs.js";
 
 const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", savings: "#7E22CE" };
@@ -320,7 +321,7 @@ async function start() {
   const d0 = State.data;
   const isNew = d0.Incomes.length + d0.Expenses.length + d0.Holdings.length + d0.Offers.length === 0;
   if (hasNews(isNew)) openNews(false, () => { if (shouldShowGuide()) openGuide(); });
-  else if (shouldShowGuide()) openGuide(); else welcome();
+  else if (shouldShowGuide()) openGuide(); else if (!promoReminder()) welcome();
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
   Rates.listeners.push(() => { if (!document.querySelector(".popup-back, .dragging")) render(); });
   Rates.refresh();

@@ -385,3 +385,15 @@ details.bin summary h3 { padding-right: 40px; }
 .info-acc { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .info-arrow { align-self: center; font-size: 22px; color: var(--muted); }
 @media (max-width: 520px) { .info-flow { grid-template-columns: 1fr; } .info-arrow { transform: rotate(90deg); justify-self: center; } }
+.cal-dot.info { background: #D97706; }
+.tip.warn-tip { border-color: #D97706; background: rgba(217,119,6,.12); }
+.promo-alert { margin: 4px 0 8px; }
+.advice-card .item.move .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.box-icon.warn { background: #D97706; }
+.advice-card .item.move { flex-wrap: wrap; }
+@media (max-width: 640px) { .advice-card .item.move .row-actions { width: 100%; justify-content: flex-end; } }
+.hint.warn { color: var(--warn); font-weight: 600; } .hint.bad { color: var(--bad); font-weight: 600; } .hint.primary { color: var(--primary); }
+details.cal-month.past > summary { cursor: pointer; list-style: none; }
+details.cal-month.past > summary::-webkit-details-marker { display: none; }
+details.cal-month.past > summary b::before { content: "▸ "; color: var(--muted); }
+details.cal-month.past[open] > summary b::before { content: "▾ "; }
