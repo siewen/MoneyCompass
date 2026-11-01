@@ -215,3 +215,11 @@ textarea { font-family: Consolas, monospace; font-size: 13px; resize: vertical; 
 .help-menu button:hover { background: #D1D5DB; }
 :root[data-theme="dark"] .help-menu button { background: #4B5563; color: #F3F4F6; border-color: #6B7280; }
 .help-shield { position: fixed; inset: 0; z-index: 30; }
+
+/* The profile opens under the picture at the top right, like Office */
+.popup-back.anchor-top-right { place-items: start end; padding: 58px 12px 12px; }
+.popup-back.anchor-top-right.open { background: rgba(0,0,0,.18); }
+.anchor-top-right .popup { transform-origin: top right; transform: translateY(-8px) scale(.96); max-height: calc(100vh - 70px); background: var(--card); box-shadow: 0 16px 40px rgba(0,0,0,.35); }
+.profile-panel .profile-head { flex-direction: column; text-align: center; gap: 8px; }
+.profile-panel .profile-head h2 { font-size: 20px; }
+.profile-panel .buttons .btn { flex: 1 1 auto; }

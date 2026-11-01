@@ -21,7 +21,7 @@ export function avatar(size = 36) {
 // ================================================================= Profile (name, picture, license, profiles)
 
 export function openProfile() {
-  const p = popup("", { width: 520 });
+  const p = popup("", { width: 420, anchor: "top-right", cls: "profile-panel" });
   const draw = () => {
     const l = license.current;
     const list = profiles();

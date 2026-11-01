@@ -35,9 +35,9 @@ export function values(root) {
 // ---------------------------------------------------------------- pop-up windows (same pop style as the app)
 
 const stack = [];
-export function popup(html, { width = 560, onClose, cls = "" } = {}) {
+export function popup(html, { width = 560, onClose, cls = "", anchor = "" } = {}) {
   const back = document.createElement("div");
-  back.className = "popup-back";
+  back.className = "popup-back" + (anchor ? " anchor-" + anchor : "");
   back.innerHTML = `<div class="popup ${cls}" role="dialog" aria-modal="true" style="max-width:${width}px">${html}</div>`;
   document.body.appendChild(back);
   const box = back.firstElementChild;
