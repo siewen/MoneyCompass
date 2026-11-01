@@ -7,6 +7,7 @@ import {
 import { esc, card, heading, hint, row, field, textInput, select, check, button, values, popup, confirmBox, alertBox, promptBox, toast, pickFile, download, stamp } from "./ui.js";
 import { App, requirePro, windowsOrPro, DOWNLOAD_URL } from "./app.js";
 import { hasPin, lock, pinDialog } from "./lock.js";
+import { fileProtected, setFilePassword, removeFilePassword, profileFileText, isEncryptedFile, decryptFile } from "./crypt.js";
 import { Rates } from "./rates.js";
 import { openBankImport } from "./pages-pro.js";
 
@@ -102,18 +103,51 @@ function shrinkPicture(file) {
   });
 }
 
-export function saveProfileFile() {
+export async function saveProfileFile() {
   D().Settings.LastProfileSaved = new Date().toISOString().slice(0, 19);
   save();
-  download(`MoneyCompass-profile-${stamp()}.json`, JSON.stringify(D(), null, 2), "application/json");
+  const locked = fileProtected();
+  download(`MoneyCompass-profile-${stamp()}${locked ? "-protected" : ""}.json`, await profileFileText(D()), "application/json");
   markFileBase();
-  toast(T("Profile saved"));
+  toast(locked ? "🔒 " + T("Profile saved, protected with your password") : T("Profile saved"));
+}
+/** Ask for a password in a box with hidden letters: the text, or null when cancelled. */
+function passwordBox(title, text, twice = false) {
+  return new Promise(resolve => {
+    let result = null;
+    const p = popup(`<div class="box-head"><span class="box-icon">🔒</span><h2>${esc(title)}</h2></div><p class="hint">${esc(text)}</p>
+      <form class="pin-form"><label class="field"><span>${esc(T("Password"))}</span><input type="password" name="pw" autocomplete="new-password"></label>
+      ${twice ? `<label class="field"><span>${esc(T("Repeat the password"))}</span><input type="password" name="pw2" autocomplete="new-password"></label>` : ""}</form>
+      <div class="box-buttons"><button class="btn main" data-ok>${esc(T("OK"))}</button><button class="btn second" data-close>${esc(T("Cancel"))}</button></div>`,
+      { width: 440, cls: "box", onClose: () => resolve(result) });
+    const f = p.el.querySelector("form"), ok = () => {
+      const a = f.elements.pw.value;
+      if (twice) {
+        if (a.length < 8) { toast(T("Use at least 8 characters."), "bad"); return; }
+        if (a !== f.elements.pw2.value) { toast(T("The two passwords are not the same."), "bad"); return; }
+      } else if (!a) return;
+      result = a; p.close();
+    };
+    f.onsubmit = e => { e.preventDefault(); ok(); };
+    p.el.querySelector("[data-ok]").onclick = ok;
+    setTimeout(() => f.elements.pw.focus(), 50);
+  });
+}
+async function openProtected(x) {
+  for (;;) {
+    const pw = await passwordBox(T("Protected profile file"), T("This profile file is protected. Enter its password to open it."));
+    if (pw === null) return null;
+    const data = await decryptFile(x, pw);
+    if (data) return data;
+    toast(T("Wrong password – the file could not be opened."), "bad");
+  }
 }
 export async function loadProfileFile() {
   const f = await pickFile(".json,application/json");
   if (!f) return false;
   let data;
   try { data = JSON.parse(await f.text()); } catch { data = null; }
+  if (isEncryptedFile(data)) { data = await openProtected(data); if (!data) return false; }
   if (!looksLikeProfile(data)) { await alertBox(T("Profile not loaded"), T("This file is not a MoneyCompass profile.")); return false; }
   const n = normalise(data);
   if (!(await confirmBox(T("Load this profile?"), T("It contains: {0}.\n\nThis replaces everything you have entered now. Tip: save your current profile first.", summary(n)), T("Load"), T("Cancel")))) return false;
@@ -144,7 +178,13 @@ export function openOptions() {
       check("showguide", T("Show the step-by-step guide when MoneyCompass starts"), !s.GuideHidden) +
       check("shownews", T("Show what's new after an update"), !s.NewsHidden) +
       field(T("When I close MoneyCompass"), select("closechoice", [["", T("Ask every time")], ["with", T("Save profile and close")], ["without", T("Close without saving")]], s.CloseChoice === "none" ? "without" : s.CloseChoice || "")) +
-      `<div class="buttons">${button(esc(T("Save profile now")), "save-file", "second")}${button(esc(T("Load a profile…")), "load-file", "second")}</div>`)}
+      `<div class="buttons">${button(esc(T("Save profile now")), "save-file", "second")}${button(esc(T("Load a profile…")), "load-file", "second")}</div>` +
+      `<hr><h3>🔒 ${esc(T("Password for profile files"))}</h3>` +
+      hint(fileProtected() ? T("On: profile files you save are encrypted (AES-256). They can only be opened with the password, in the web app.")
+        : T("Off: profile files are plain text – anyone who opens the file can read your figures.")) +
+      hint(T("The password is never saved and can't be recovered – if you forget it, protected files can't be opened. The Windows app can't open protected files.")) +
+      `<div class="buttons">${fileProtected() ? button(esc(T("Change password…")), "file-pw", "second") + button(esc(T("Turn off")), "file-pw-off", "second")
+        : button(esc(T("Protect with a password…")), "file-pw", "main")}</div>`)}
     ${card(heading(T("Reset")) + hint(T("Delete all or only some of your entries: income, expenses, savings, saved offers, emergency fund settings or exchange rates. Your language and other options stay.")) +
       button(esc(T("Choose what to delete…")), "delete", "danger"))}
     </div><div class="popup-buttons"><button class="btn main" data-close>${esc(T("Close"))}</button></div>`, { width: 980, cls: "wide-popup", onClose: () => App.rebuild() });
@@ -155,6 +195,15 @@ export function openOptions() {
   el.querySelector('select[name="closechoice"]').onchange = e => { s.CloseChoice = e.target.value; save(); };
   el.querySelector('input[name="shownews"]').onchange = e => { s.NewsHidden = !e.target.checked; save(); };
   el.querySelector('input[name="showguide"]').onchange = e => { s.GuideHidden = !e.target.checked; save(); };
+  el.querySelector('[data-action="file-pw"]').onclick = async () => {
+    const pw = await passwordBox(T("Password for profile files"), T("At least 8 characters. Every profile file you save from now on is encrypted with it."), true);
+    if (!pw) return;
+    await setFilePassword(pw); toast("🔒 " + T("Profile files are now protected."), "good"); p.close(); openOptions();
+  };
+  el.querySelector('[data-action="file-pw-off"]')?.addEventListener("click", async () => {
+    if (!(await confirmBox(T("Turn off the password?"), T("New profile files will be plain text again. Files you saved before stay protected with the old password."), T("Turn off"), T("Cancel")))) return;
+    removeFilePassword(); p.close(); openOptions();
+  });
   el.querySelector('select[name="autolock"]').onchange = e => { s.AutoLockMinutes = +e.target.value; save(); };
   el.querySelector('input[name="askstart"]').onchange = e => { s.AskOnStart = e.target.checked; save(); };
   el.querySelector('[data-action="save-file"]').onclick = saveProfileFile;
