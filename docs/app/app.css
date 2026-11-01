@@ -419,4 +419,9 @@ details.cal-month.past[open] > summary b::before { content: "▾ "; }
 :root[data-theme="dark"] .alert.bad b { color: #F87171; }
 .alert-link { display: inline-block; margin-top: 8px; font-weight: 700; color: var(--primary); }
 .alert.warn { background: rgba(217,119,6,.10); border-color: rgba(217,119,6,.5); font-size: 13.5px; }
-.loan-warn { flex-basis: 100%; order: 5; }
+.loan-item { align-items: flex-start; }
+.loan-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.loan-main .loan-progress { max-width: 360px; }
+.loan-main .alert { margin-top: 4px; }
+.loan-preview { font-weight: 600; margin: 4px 0; }
+.past-chips { margin: 0 0 6px; }

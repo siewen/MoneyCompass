@@ -63,6 +63,8 @@ export function normalise(d) {
     if (!Array.isArray(out[k])) out[k] = [];
   out.Settings = Object.assign(newSettings(), out.Settings || {});
   if (!Array.isArray(out.Settings.Modules)) out.Settings.Modules = [];
+  // Older loans had a "Last payment" typed in by hand: now it is worked out from the amount, payment and interest
+  for (const l of out.Loans) if (!l.Planned && l.Remaining > 0) planLoan(l);
   return out;
 }
 export const looksLikeProfile = d => d && typeof d === "object" && d.Settings && typeof d.Settings === "object"
@@ -777,14 +779,33 @@ export function loanMonthsNeeded(l) {
   if (P <= A * r) return Infinity;            // the payment doesn't even cover the interest
   return Math.ceil(-Math.log(1 - r * A / P) / Math.log(1 + r));
 }
-/** A loan whose last payment date, monthly payment and amount left don't fit together (more than 10% off). */
-export function loanCheck(l) {
-  if (!(l.Remaining > 0) || !l.EndDate) return null;
-  const end = parseDate(l.EndDate), now = today();
-  const monthsLeft = Math.max(0, (end.getFullYear() - now.getFullYear()) * 12 + end.getMonth() - now.getMonth() + 1);
+/** The next payment date of a loan: the one entered, or the same day of the month as before, from today on. */
+export function loanNextPayment(l) {
+  const base = parseDate(l.NextPayment || l.EndDate || isoDate(addMonths(today(), 1)));
+  if (!base || isNaN(base)) return addMonths(today(), 1);
+  return Calc.nextPayment({ Date: isoDate(base), Frequency: "Monthly" }, today()) || base;
+}
+/** Worked out from what was left on the day you entered it, the monthly payment and the interest:
+ *  the debt-free date, the payments still to go and about how much is left today. */
+export function loanPlan(l) {
   const needed = loanMonthsNeeded(l);
-  const paidByEnd = (+l.MonthlyPayment || 0) * monthsLeft;
-  if (needed !== Infinity && Math.abs(needed - monthsLeft) <= Math.max(1, monthsLeft * 0.1)) return null;
-  const neededEnd = needed === Infinity ? null : addMonths(monthStart(now), Math.max(0, needed - 1));
-  return { monthsLeft, needed, paidByEnd, neededEnd, payNeeded: monthsLeft > 0 ? (+l.Remaining) / monthsLeft : 0 };
+  const first = parseDate(l.NextPayment || "") || loanNextPayment(l);
+  const end = needed === Infinity || needed <= 0 ? null : addMonths(first, needed - 1);
+  // Payments that have already been made since then (on the payment day, every month)
+  let done = 0;
+  if (needed !== Infinity) while (done < needed && addMonths(first, done) <= today()) done++;
+  const P = +l.MonthlyPayment || 0, r = (+l.RatePercent || 0) / 100 / 12;
+  let A = +l.Remaining || 0, interest = 0;
+  for (let i = 0; i < done; i++) { interest += A * r; A = Math.max(0, A * (1 + r) - P); }
+  let B = A, future = 0;
+  if (needed !== Infinity) for (let i = done; i < needed; i++) { future += B * r; B = Math.max(0, B * (1 + r) - P); }
+  return { needed, left: needed === Infinity ? Infinity : needed - done, done, next: done < needed ? addMonths(first, done) : null, end,
+    never: needed === Infinity, remainingNow: needed === Infinity ? +l.Remaining || 0 : Math.round(A * 100) / 100, interest: future };
+}
+export function planLoan(l) {
+  if (!l.NextPayment) l.NextPayment = isoDate(loanNextPayment(l));
+  const p = loanPlan(l);
+  l.EndDate = p.end ? isoDate(p.end) : isoDate(addMonths(parseDate(l.NextPayment), 1200));
+  l.Planned = true;
+  return p;
 }

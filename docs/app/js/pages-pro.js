@@ -9,7 +9,7 @@ import { App, requirePro } from "./app.js";
 import { Rates, BOND_CODES, BONDS_WEBSITE, SAVINGS_RANKING, DEPOSITS_RANKING } from "./rates.js";
 import { budgetBars, offerSalary, binCard, bindBin } from "./pages-main.js";
 import * as Csv from "./csv.js";
-import { toBin, loanCheck } from "./core.js";
+import { toBin, loanPlan, planLoan, loanNextPayment } from "./core.js";
 
 const D = () => State.data;
 const locked = (title, text) => `<div class="grid">${card(`<div class="locked">🔒<h3>${esc(title)}</h3><p>${esc(text)}</p>${button(esc(T("Enter license key")), "unlock", "main")}</div>`)}</div>`;
@@ -256,28 +256,35 @@ export const Loans = {
   render(el) {
     const d = D();
     const l = editLoan ? d.Loans.find(x => x.Id === editLoan) : null;
-    const f = l || { Name: "", Remaining: "", MonthlyPayment: "", RatePercent: "", EndDate: isoDate(addMonths(today(), 12)) };
+    const f = l || { Name: "", Remaining: "", MonthlyPayment: "", RatePercent: "", NextPayment: isoDate(addMonths(today(), 1)) };
     const running = d.Loans.filter(x => x.Remaining > 0);
+    const now = x => loanPlan(x).remainingNow;
     const payments = Calc.loanPayments(d), income = Calc.totalIncome(d), share = income > 0 ? payments / income : 0;
     const level = income <= 0 || !running.length ? "" : share > 0.4 ? `<p class="bad">${esc(T("Your loan payments take more than 40% of your income. This is high – try not to take new loans and pay off the most expensive one first."))}</p>`
       : share >= 0.3 ? `<p class="warn">${esc(T("Your loan payments take 30–40% of your income. Keep an eye on it before taking new loans."))}</p>`
       : `<p class="good">${esc(T("Your loan payments are at a safe level (below 30% of your income)."))}</p>`;
-    const monthsLeft = x => Math.max(0, (parseDate(x.EndDate).getFullYear() - today().getFullYear()) * 12 + parseDate(x.EndDate).getMonth() - today().getMonth() + 1);
+    const plans = new Map(running.map(x => [x.Id, loanPlan(x)]));
+    const ends = [...plans.values()];
+    const debtFree = !running.length ? "–" : ends.some(p => p.never) ? T("never – see the warning") : monthName(new Date(Math.max(...ends.map(p => p.end.getTime()))));
     el.innerHTML = `<div class="grid">
       ${card(`<form id="loan">${heading(l ? T("Edit loan") : T("Add a loan"))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("Car loan, credit card, mortgage"))))}
-        <div class="two">${field(T("Borrowed at the start (zł)"), numInput("original", plain(f.Original), T("optional")))}${field(T("Still to pay back (zł)"), numInput("remaining", plain(f.Remaining)))}</div>
+        <div class="two">${field(T("Borrowed at the start (zł)"), numInput("original", plain(f.Original), T("optional")))}${field(T("Still to pay back (zł)"), numInput("remaining", plain(l ? loanPlan(l).remainingNow : f.Remaining)))}</div>
         ${hint(T("With the amount at the start, MoneyCompass shows how much you have already paid back."))}
-        <div class="two">${field(T("Monthly payment (zł)"), numInput("payment", plain(f.MonthlyPayment)))}<span></span></div>
-        <div class="two">${field(T("Interest rate (% per year, 0 if none)"), numInput("rate", plain(f.RatePercent), "0"))}${field(T("Last payment"), dateInput("end", inputDate(parseDate(f.EndDate))))}</div>
+        <div class="two">${field(T("Monthly payment (zł)"), numInput("payment", plain(f.MonthlyPayment)))}${field(T("Interest rate (% per year, 0 if none)"), numInput("rate", plain(f.RatePercent), "0"))}</div>
+        <div class="two">${field(T("Next payment on"), dateInput("next", inputDate(l ? (loanPlan(l).next || loanNextPayment(l)) : parseDate(f.NextPayment))))}<span></span></div>
+        <p class="loan-preview hint" id="loan-preview"></p>
+        ${hint(T("MoneyCompass works out the debt-free date from what is left, the monthly payment and the interest."))}
         <div class="buttons">${button(l ? T("Save changes") : T("Add"), "save-loan", "main")}${l ? button(T("Cancel"), "cancel-loan") : ""}</div></form>`)}
-      ${card(heading(T("Your debts")) + loanProgress(running) + row(T("Still to pay back"), pln(running.reduce((s, x) => s + x.Remaining, 0))) + row(T("Payments per month"), pln(payments)) +
-        row(T("Share of your income"), income > 0 ? Math.round(share * 100) + "%" : "–") + row(T("Debt-free"), running.length ? monthName(new Date(Math.max(...running.map(x => parseDate(x.EndDate).getTime())))) : "–") +
+      ${card(heading(T("Your debts")) + loanProgress(running.map(x => ({ ...x, Remaining: now(x) }))) + row(T("Still to pay back"), pln(running.reduce((s, x) => s + now(x), 0))) + row(T("Payments per month"), pln(payments)) +
+        row(T("Share of your income"), income > 0 ? Math.round(share * 100) + "%" : "–") + row(T("Debt-free"), debtFree) +
         level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Expenses tab.")))}
       ${card(heading(T("Loans")) + hint(T("Tap a loan to edit it, for example to update what is left.")) + (d.Loans.length ? `<div class="list">${d.Loans.map(x => `
-        <div class="item clickable" data-edit-loan="${x.Id}"><div><b>${esc(x.Name)}</b><span class="hint">${esc(T("{0} per month · {1} per year · last payment {2} ({3} months left)", pln(x.MonthlyPayment), rate(x.RatePercent || 0), fmtDate(x.EndDate), monthsLeft(x)))}</span></div>
-        ${loanWarning(x)}${x.Original > 0 ? `<div class="loan-progress">${progress(1 - x.Remaining / x.Original, "#1BAF7A")}<span class="hint">${esc(T("Paid back {0} of {1} ({2}%)", pln(x.Original - x.Remaining), pln(x.Original), Math.round((1 - x.Remaining / x.Original) * 100)))}</span></div>` : ""}
-        <b>${pln(x.Remaining)}</b><button class="icon-btn danger" data-del-loan="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No loans – great! Add one above if you have any."))), "wide")}
+        <div class="item clickable loan-item" data-edit-loan="${x.Id}"><div class="loan-main"><b>${esc(x.Name)}</b>
+          <span class="hint">${esc(loanLine(x, plans.get(x.Id) || loanPlan(x)))}</span>
+          ${x.Original > 0 ? `<div class="loan-progress">${progress(1 - now(x) / x.Original, "#1BAF7A")}<span class="hint">${esc(T("Paid back {0} of {1} ({2}%)", pln(x.Original - now(x)), pln(x.Original), Math.round((1 - now(x) / x.Original) * 100)))}</span></div>` : ""}
+          ${loanWarning(x)}</div>
+        <div class="right"><b>${pln((plans.get(x.Id) || loanPlan(x)).remainingNow)}</b>${(plans.get(x.Id) || loanPlan(x)).done ? `<span class="hint">${esc(T("estimated today"))}</span>` : ""}</div><button class="icon-btn danger" data-del-loan="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No loans – great! Add one above if you have any."))), "wide")}
       ${binCard(["loan"])}
     </div>`;
     const fm = el.querySelector("#loan");
@@ -286,12 +293,25 @@ export const Loans = {
       if (!v.name.trim() || !(rem > 0)) { toast(T("Please enter a name and the amount still to pay back."), "bad"); return; }
       const orig = num(v.original) || 0;
       if (orig > 0 && orig < rem) { toast(T("The amount at the start can't be smaller than what is still to pay back."), "bad"); return; }
-      const item = { Name: v.name.trim(), Original: orig > 0 ? orig : null, Remaining: rem, MonthlyPayment: num(v.payment) || 0, RatePercent: num(v.rate) || 0, EndDate: isoDate(parseDate(v.end)) };
-      if (l) Object.assign(l, item); else d.Loans.push({ Id: uuid(), ...item });
+      const item = { Name: v.name.trim(), Original: orig > 0 ? orig : null, Remaining: rem, MonthlyPayment: num(v.payment) || 0, RatePercent: num(v.rate) || 0,
+        NextPayment: isoDate(parseDate(v.next || isoDate(addMonths(today(), 1)))) };
+      const saved = l ? Object.assign(l, item) : (d.Loans.push({ Id: uuid(), ...item }), d.Loans[d.Loans.length - 1]);
+      const plan = planLoan(saved);
       editLoan = null; save(); App.refresh();
-      const saved = l || d.Loans[d.Loans.length - 1];
-      if (loanCheck(saved)) toast(T("Saved – but the numbers don't add up, see the warning."), "bad"); else toast(T("Saved."));
+      if (plan.never) toast(T("Saved – but the monthly payment doesn't cover the interest, see the warning."), "bad");
+      else toast(T("Saved. Debt-free in {0} ({1} payments).", monthName(plan.end), plan.needed));
     };
+    // Live preview while typing: payments left and the debt-free date
+    const preview = () => {
+      const v = values(fm), x = { Remaining: num(v.remaining) || 0, MonthlyPayment: num(v.payment) || 0, RatePercent: num(v.rate) || 0, NextPayment: v.next };
+      const out = el.querySelector("#loan-preview");
+      if (!(x.Remaining > 0) || !(x.MonthlyPayment > 0)) { out.textContent = ""; return; }
+      const p = loanPlan(x);
+      out.className = "loan-preview " + (p.never ? "bad" : "good");
+      out.textContent = p.never ? "⚠ " + T("{0} a month doesn't even cover the interest – the loan would never be paid back.", pln(x.MonthlyPayment))
+        : "✔ " + T("{0} payments left – debt-free in {1}.", p.needed, monthName(p.end)) + (p.interest > 0.5 ? " " + T("About {0} of interest still to pay.", pln(p.interest)) : "");
+    };
+    fm.querySelectorAll("input").forEach(i => i.addEventListener("input", preview)); preview();
     const c = el.querySelector('[data-action="cancel-loan"]'); if (c) c.onclick = () => { editLoan = null; App.refresh(); };
     el.querySelectorAll("[data-edit-loan]").forEach(x => x.onclick = ev => { if (ev.target.closest("[data-del-loan]")) return; editLoan = x.dataset.editLoan; App.refresh(); window.scrollTo({ top: 0, behavior: "smooth" }); });
     el.querySelectorAll("[data-del-loan]").forEach(b => b.onclick = async () => {
@@ -517,14 +537,15 @@ export function loanProgress(loans) {
   return progress(f, "#1BAF7A") + `<p class="good"><b>${esc(T("Paid back {0} of {1} ({2}%)", pln(orig - rem), pln(orig), Math.round(f * 100)))}</b></p>`;
 }
 
-/** "This doesn't add up": the monthly payment until the last payment date is far from what is left. */
+/** One line about a loan: payment, interest, next payment, payments left, debt-free date. */
+export function loanLine(l, p = loanPlan(l)) {
+  return T("{0} per month · {1} per year", pln(l.MonthlyPayment || 0), rate(l.RatePercent || 0)) + (p.next ? " · " + T("next payment {0}", fmtDate(p.next)) : "") +
+    (p.never ? "" : " · " + T("{0} payments left · debt-free {1}", p.left, monthName(p.end)));
+}
+/** A loan that can never be paid back: the monthly payment doesn't cover the interest. */
 export function loanWarning(l, short = false) {
-  const c = loanCheck(l);
-  if (!c) return "";
-  const text = c.needed === Infinity
-    ? T("{0} a month doesn't even cover the interest – the loan would never be paid back. Check the monthly payment.", pln(l.MonthlyPayment || 0))
-    : T("This doesn't add up: {0} × {1} months until {2} = {3}, but {4} is still to pay back. At {0} a month it takes about {5} months (until {6}). To finish by {2} you would pay about {7} a month. Check the last payment date or the monthly payment.",
-        pln(l.MonthlyPayment || 0), c.monthsLeft, fmtDate(l.EndDate), pln(c.paidByEnd), pln(l.Remaining), c.needed, monthName(c.neededEnd), pln(c.payNeeded));
-  return short ? `<p class="hint warn">⚠ ${esc(T("{0}: the monthly payment, the last payment date and what is left don't fit together – check it in Loans & debts.", l.Name))}</p>`
-    : `<div class="alert warn loan-warn">⚠ ${esc(text)}</div>`;
+  const p = loanPlan(l);
+  if (!p.never) return "";
+  return short ? `<p class="hint warn">⚠ ${esc(T("{0}: the monthly payment doesn't cover the interest – check it in Loans & debts.", l.Name))}</p>`
+    : `<div class="alert warn loan-warn">⚠ ${esc(T("{0} a month doesn't even cover the interest – the loan would never be paid back. Check the monthly payment.", pln(l.MonthlyPayment || 0)))}</div>`;
 }

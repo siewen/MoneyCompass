@@ -2,7 +2,7 @@
 // loan payments – in a month calendar and as a preview for 1, 3, 6 or 12 months.
 import {
   T, State, save, Calc, pln, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addDays, addMonths, monthStart, monthName,
-  uuid, categories, categoryLabel, moduleOn, FREQUENCIES, ONE_TIME, locale, monthsCount, repeatingExpenses, setRepeat, freqLabel, repeatingReceived, setReceivedRepeat,
+  uuid, categories, categoryLabel, moduleOn, FREQUENCIES, ONE_TIME, locale, monthsCount, repeatingExpenses, setRepeat, freqLabel, repeatingReceived, setReceivedRepeat, seriesKey,
 } from "./core.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, button, values, confirmBox, toast } from "./ui.js";
 import { App } from "./app.js";
@@ -12,7 +12,7 @@ import { toBin } from "./core.js";
 const D = () => State.data;
 const KINDS = [["expense", "Payment"], ["saving", "Transfer to savings"]];
 const RANGES = [1, 3, 6, 12];
-let range = 3, shown = null, editId = null, selectedDay = null;
+let range = 3, shown = null, editId = null, selectedDay = null, allPast = false;
 
 /** All payments between two dates: income, recurring payments, savings transfers and loans. */
 export function events(d, from, to) {
@@ -76,9 +76,13 @@ export function events(d, from, to) {
 /** What really happened before today: your expenses, money received and transfers to savings (typed in or imported). */
 function pastEvents(d, from, to) {
   const list = [], inRange = x => { const t = parseDate(x.Date); return t >= from && t <= to && t < today(); };
-  for (const e of d.Expenses.filter(inRange))
+  // By default only what comes back: repeating expenses, salary and repeating income, transfers to savings.
+  // "All transactions" shows every single payment too.
+  const repKeys = new Set(d.Expenses.filter(e => e.Repeat).map(seriesKey)), recKeys = new Set(d.Received.filter(r => r.Repeat).map(seriesKey));
+  const regularExp = e => allPast || repKeys.has(seriesKey(e)), regularRec = r => allPast || r.Kind === "salary" || recKeys.has(seriesKey(r));
+  for (const e of d.Expenses.filter(e => inRange(e) && regularExp(e)))
     list.push({ date: parseDate(e.Date), name: e.Description || T(e.Category), amount: e.Amount, type: "out", note: T(e.Category), past: true, info: ["expense", e] });
-  for (const r of d.Received.filter(r => r.Kind !== "none" && inRange(r)))
+  for (const r of d.Received.filter(r => r.Kind !== "none" && inRange(r) && regularRec(r)))
     list.push({ date: parseDate(r.Date), name: r.Description || T("Money received"), amount: r.Amount, type: "in", note: T(r.Kind === "salary" ? "Salary" : "Extra income"), past: true, info: ["received", r] });
   for (const t of d.Transfers.filter(t => t.Saved && inRange(t))) {
     const h = d.Holdings.find(x => x.Id === t.HoldingId);
@@ -221,7 +225,8 @@ export const Calendar = {
         (sugg.length ? `<hr><h3>💡 ${esc(T("Found in your expenses"))}</h3>${hint(T("These come back every month. Add them with one click."))}<div class="list">${sugg.map((x, i) => `
           <div class="item"><div><b>${esc(x.name)}</b><span class="hint">${esc(categoryLabel(x.category))} · ${esc(T("in {0} months", x.months))}</span></div><b>${pln(x.amount)}</b>
           <button class="btn second small" data-sugg="${i}">＋ ${esc(T("Add"))}</button></div>`).join("")}</div>` : ""))}
-      ${card(heading(T("Month by month")) + pastMonths.map(m => `<details class="cal-month past"><summary class="cal-month-head"><b>${esc(monthName(m.ms))} <small class="hint">· ${esc(T("what really happened"))}</small></b>
+      ${card(heading(T("Month by month")) + `<div class="chips past-chips"><button class="chip${allPast ? "" : " on"}" data-past="0">🔁 ${esc(T("Only regular payments"))}</button><button class="chip${allPast ? " on" : ""}" data-past="1">${esc(T("All transactions"))}</button></div>` +
+        hint(allPast ? T("Past months show every payment from your bank imports and entries.") : T("Past months show only what comes back: repeating expenses (🔁), salary, repeating income and transfers to savings. Mark an expense with 🔁 in the Expenses tab to see it here.")) + pastMonths.map(m => `<details class="cal-month past"><summary class="cal-month-head"><b>${esc(monthName(m.ms))} <small class="hint">· ${esc(T("what really happened"))}</small></b>
         <span><span class="good">+${pln(m.inn)}</span> · <span class="bad">−${pln(m.out)}</span>${m.sav ? ` · <span class="primary">${pln(m.sav)}</span>` : ""} · <b class="${m.inn - m.out - m.sav >= 0 ? "good" : "bad"}">${pln(m.inn - m.out - m.sav)}</b></span></summary>
         <div class="list">${m.ev.map(evRow).join("") || hint(T("Nothing in this month."))}</div></details>`).join("") + months.map(m => `<div class="cal-month"><div class="cal-month-head"><b>${esc(monthName(m.ms))}</b>
         <span><span class="good">+${pln(m.inn)}</span> · <span class="bad">−${pln(m.out)}</span>${m.sav ? ` · <span class="primary">${pln(m.sav)}</span>` : ""} · <b class="${m.inn - m.out - m.sav >= 0 ? "good" : "bad"}">${pln(m.inn - m.out - m.sav)}</b></span></div>
@@ -231,6 +236,7 @@ export const Calendar = {
       ${binCard(["recurring"])}
     </div>`;
 
+    el.querySelectorAll("[data-past]").forEach(b => b.onclick = () => { allPast = b.dataset.past === "1"; App.refresh(); });
     el.querySelectorAll("[data-range]").forEach(b => b.onclick = () => { range = +b.dataset.range; App.refresh(); });
     el.querySelectorAll("[data-month]").forEach(b => b.onclick = () => { shown = b.dataset.month === "now" ? start : addMonths(shown, +b.dataset.month); selectedDay = null; App.refresh(); });
     el.querySelectorAll("[data-day]").forEach(b => b.onclick = () => { selectedDay = +b.dataset.day === selectedDay ? null : +b.dataset.day; App.refresh(); });

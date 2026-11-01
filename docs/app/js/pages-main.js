@@ -2,7 +2,7 @@
 import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
-  addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
+  addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
 } from "./core.js";
 import { hbars, donut, legend, monthBars, progress } from "./charts.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON } from "./ui.js";
@@ -109,7 +109,8 @@ export const Overview = {
       <hr><div class="link" data-go="emergency">${heading(T("Emergency fund"))}${emergency}</div>`, "savings-card status-" + (state || "none") + " em-" + emState));
 
     if (moduleOn("loans")) {
-      const loans = d.Loans.filter(l => l.Remaining > 0).sort((a, b) => b.Remaining - a.Remaining);
+      // What is left today: worked out from the monthly payments made since you entered the loan
+      const loans = d.Loans.filter(l => l.Remaining > 0).map(l => ({ ...l, Remaining: loanPlan(l).remainingNow })).filter(l => l.Remaining > 0).sort((a, b) => b.Remaining - a.Remaining);
       const total = loans.reduce((s, l) => s + l.Remaining, 0);
       const items = loans.map((l, i) => ({ label: l.Name, value: l.Remaining, color: COLORS.series[i % 6], text: pln(l.Remaining) }));
       // Paid back so far (green) – for loans where the amount at the start is known
