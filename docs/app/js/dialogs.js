@@ -26,7 +26,7 @@ export function openProfile() {
     const l = license.current;
     const list = profiles();
     p.el.innerHTML = `<div class="profile-head">${avatar(72)}<div><h2>${esc(currentName())}</h2>
-        ${l?.email ? `<div class="hint">${esc(l.email)}</div>` : ""}<div class="${license.isPro ? "good" : "hint"}"><b>${esc(license.isPro ? "Pro" : T("Free version"))}</b></div>
+        ${l?.email ? `<div class="hint">${esc(l.email)}</div>` : ""}<div class="${license.isPro ? "good" : "hint"}"><b>${esc(license.isPro ? T("MoneyCompass Pro") : T("Free version"))}</b></div>
         <div class="links"><a href="#" data-a="rename">${esc(T("Change name"))}</a> · <a href="#" data-a="pic">${esc(T("Change picture"))}</a>${picture() ? ` · <a href="#" data-a="nopic">${esc(T("Remove picture"))}</a>` : ""}</div></div></div>
       <hr><h3>${license.isPro ? "✔" : "🔒"} ${esc(T("Activation"))}</h3>
       ${license.isPro ? hint(license.status) + hint(T("Thank you! All features are unlocked.")) + button(esc(T("Remove license from this browser")), "remove-license", "second small")
