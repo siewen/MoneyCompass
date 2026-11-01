@@ -207,15 +207,15 @@ export function openImport() {
 // ================================================================= Help & About
 
 export function openHelp() {
-  const tabs = [["Overview", "Your money at a glance: income, expenses, balance and savings rate, with diagrams. The green \"Optimize my savings\" button shows your best next steps and the main ways to save."],
-    ["Income", "Add every source of income: salary, side jobs, bonuses – each with its own amount, frequency, currency and payday, and gross → net for a salary. Money received from bank imports is listed here too."],
-    ["Expenses", "Enter what you spend or import a bank statement. Mark expenses essential or not, set repeats (🔁), filter and search. With whole months of data you see reliable averages."],
+  const tabs = [["Overview", "Your money at a glance: inflows, outflows, balance and savings rate, with diagrams. The green \"Optimize my savings\" button shows your best next steps and the main ways to save."],
+    ["Inflows", "Add every source of income: salary, side jobs, bonuses – each with its own amount, frequency, currency and payday, and gross → net for a salary. Money received from bank imports is listed here too."],
+    ["Outflows", "Enter what you spend or import a bank statement. Mark expenses essential or not, set repeats (🔁), filter and search. With whole months of data you see reliable averages."],
     ["Emergency fund", "Shows how much you should keep aside for bad times (3–6 months of essential costs)."],
     ["My savings", "All your savings in one place (bank, crypto, cash), safe vs risky, and how much interest they earn."],
     ...MODULES.map(m => [m.name, m.description]),
     ["Compare offers", "Compare bank offers: promo rate, promo limit and length, the rate afterwards and the 19% Belka tax."]];
   popup(`<h2 class="popup-title">? ${esc(T("Help"))}</h2><div class="grid">
-    ${card(heading(T("Getting started")) + `<ol>${["Income: add your salary and any other money that comes in, with its payday.", "Expenses: write down what you spend, or enter your usual monthly bills once.",
+    ${card(heading(T("Getting started")) + `<ol>${["Inflows: add your salary and any other money that comes in, with its payday.", "Outflows: write down what you spend, or enter your usual monthly bills once.",
       "Emergency fund: enter your essential monthly costs to see how much to keep aside.", "My savings: add your bank accounts, cash and other savings with their interest rate.",
       "Overview: see everything together, then press \"Optimize my savings\" for your personal plan."].map(x => `<li>${esc(T(x))}</li>`).join("")}</ol>` + hint(T("Numbers can be typed with a dot or a comma: 1234.50 or 1234,50.")))}
     ${card(heading(T("The tabs")) + tabs.map(t => `<p><b>${esc(T(t[0]))}</b><br><span class="hint">${esc(T(t[1]))}</span></p>`).join("") + hint(T("Savings goals, Loans & debts and Budget plan are modules: switch them on in Options → Modules.")))}
@@ -263,19 +263,19 @@ function reportParts() {
   const summaryRows = [
     [T("Regular income per month"), pln(inc.monthlyTotal)], [T("Extra income received this month (bank import)"), pln(Calc.receivedIn(d, new Date()))],
     [T("One-time income in {0}", new Date().getFullYear()), pln(inc.oneTimeThisYear)],
-    [T("Average expenses per month (Expenses tab)"), avg.monthsUsed ? pln(spending) : T("no data yet")],
+    [T("Average expenses per month (Outflows tab)"), avg.monthsUsed ? pln(spending) : T("no data yet")],
     [T("Balance per month"), avg.monthsUsed ? pln(left) : "–"], [T("Savings rate"), avg.monthsUsed && inc.monthlyTotal > 0 ? Math.round(left / inc.monthlyTotal * 100) + "%" : "–"],
     [T("Safe money (bank, cash)"), pln(p.safe)], [T("Risky money (crypto platforms, investments)"), pln(p.risky)], [T("Total"), pln(p.total)],
     [T("Interest per year"), pln(p.yearly)], [T("Emergency fund target"), pln(em.target)], [T("Emergency fund covered"), em.target > 0 ? Math.round(Math.min(1, p.safe / em.target) * 100) + "%" : "–"]];
   const income = [[T("Name"), T("Type"), T("How often"), T("Per month (zł)"), T("Active")], ...d.Incomes.map(i => [i.Name, T(i.Type), T(i.Frequency), i.Frequency === ONE_TIME ? T("one-time") : round(Calc.monthlyPln(i, d.Settings)), i.Active ? T("Yes") : T("No")])];
-  const months = [[T("Month"), T("Income"), T("Expenses"), T("Balance")], ...ChartData.trend(d).map(m => [monthName(m.start), round(m.income), round(m.expenses), round(m.income - m.expenses)])];
+  const months = [[T("Month"), T("Inflows"), T("Outflows"), T("Balance")], ...ChartData.trend(d).map(m => [monthName(m.start), round(m.income), round(m.expenses), round(m.income - m.expenses)])];
   const cats = ChartData.categories(d);
   const byCat = [[T("Category"), T("Per month"), T("Share")], ...cats.all.map(c => [T(c.category), round(c.perMonth), ChartData.share(c.perMonth, cats.total)])];
   const expenses = [[T("Date"), T("Category"), T("Description"), T("Amount (zł)"), T("Essential")], ...[...d.Expenses].sort((a, b) => parseDate(b.Date) - parseDate(a.Date)).map(e => [fmtDate(e.Date), T(e.Category), e.Description, e.Amount, e.Essential ? T("Yes") : T("No")])];
   const holdings = [[T("Name"), T("Where"), T("In złoty"), T("Interest rate"), T("Safe")], ...d.Holdings.map(h => [h.Name, T(h.Place), round(Calc.toPln(h.Amount, h.Currency, d.Settings)), (h.RatePercent || 0) + "%", h.Safe ? T("Yes") : T("No")])];
   const offers = [[T("Name"), T("Promo rate"), T("Promo days"), T("Rate after"), T("You keep"), T("Real yearly rate after tax")], ...d.Offers.map(o => ({ o, r: Calc.savings(o) })).sort((a, b) => b.r.net - a.r.net).map(x => [x.o.Name, x.o.PromoRate + "%", x.o.PromoDays, x.o.StandardRate + "%", round(x.r.net), rate(x.r.effective)])];
   const plan = [[T("Step"), T("Details"), T("Worth per year")], ...Advisor.analyse(d).map(a => [a.title, a.text, a.benefit > 0 ? round(a.benefit) : ""])];
-  return { summaryRows, sections: [[T("Income"), income], [T("Monthly totals"), months], [T("Your expenses"), byCat], [T("Expenses"), expenses], [T("My savings"), holdings], [T("Comparison"), offers], [T("Your personal plan"), plan]] };
+  return { summaryRows, sections: [[T("Income"), income], [T("Monthly totals"), months], [T("Outflows by category"), byCat], [T("Outflows"), expenses], [T("My savings"), holdings], [T("Comparison"), offers], [T("Your personal plan"), plan]] };
 }
 const round = v => Math.round(v * 100) / 100;
 

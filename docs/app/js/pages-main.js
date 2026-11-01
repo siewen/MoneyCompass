@@ -36,8 +36,8 @@ export const Overview = {
     recordSavings(d, p.total);
     // Hover details for the four tiles
     const pinc = Calc.periodIncome(d);
-    const tipIncome = pinc.months ? T("Salary {0} + extra income {1} per month, from the same months as your expenses. Click for the Income tab.", pln(pinc.salary), pln(pinc.extra)) : T("From your income sources. Click for the Income tab.");
-    const tipSpending = avg.monthsUsed ? T("Essential {0} + not essential {1} per month, including loan instalments and regular payments. Click for the Expenses tab.", pln(avg.essential), pln(avg.nonEssential)) : "";
+    const tipIncome = pinc.months ? T("Salary {0} + extra income {1} per month, from the same months as your outflows. Click for the Inflows tab.", pln(pinc.salary), pln(pinc.extra)) : T("From your income sources. Click for the Inflows tab.");
+    const tipSpending = avg.monthsUsed ? T("Essential {0} + not essential {1} per month, including loan instalments and regular payments. Click for the Outflows tab.", pln(avg.essential), pln(avg.nonEssential)) : "";
     // Emergency fund: how many months of essential costs your safe money covers
     const essentialMonth = Calc.emergency(d.Settings).monthly || avg.essential || 0;
     const covered = essentialMonth > 0 ? p.safe / essentialMonth : 0;
@@ -67,7 +67,7 @@ export const Overview = {
       : `<p class="savings-headline ${state}">${state === "bad" ? "📉" : state === "warn" ? "➖" : "📈"} <b>${esc(lastLeft < 0
           ? T("In {0} you spent {1} more than you earned.", monthName(last.start), pln(-lastLeft))
           : T("In {0} you kept {1} – {2}% of your income.", monthName(last.start), pln(lastLeft), Math.round(lastRate * 100)))}</b></p>` +
-        hint(state === "bad" ? T("Your savings shrink when this happens. Look at your biggest categories in Expenses – and set a Budget plan.")
+        hint(state === "bad" ? T("Your savings shrink when this happens. Look at your biggest categories in Outflows – and set a Budget plan.")
           : state === "warn" ? T("You are saving, but little. A good aim is at least 10–20% of your income every month.")
           : T("Great – you are building up money. Keep it in safe savings until your emergency fund is full, then make it work (Compare offers)."));
     const bars = done.length ? `<div class="mini-bars">${(() => {
@@ -79,9 +79,9 @@ export const Overview = {
 
     const parts = [];
     parts.push(`<div class="tiles">
-      ${tile(T("Income per month"), pln(income), "income", ["#1E5FB0", "#60A5FA", "#EAF2FC", "#2A78D6"], "", tipIncome)}
-      ${tile(T("Expenses per month"), avg.monthsUsed ? pln(spending) : "–", "expenses", ["#C2410C", "#FB923C", "#FDF0E9", "#EB6834"], "", tipSpending)}
-      ${tile(T("Balance per month"), both ? pln(left) : "–", "income", ["#0E7C55", "#34D399", "#E7F7F0", "#1BAF7A"], both && left < 0 ? "bad" : "", T("Income minus expenses: what you can save each month."))}
+      ${tile(T("Inflows per month"), pln(income), "income", ["#1E5FB0", "#60A5FA", "#EAF2FC", "#2A78D6"], "", tipIncome)}
+      ${tile(T("Outflows per month"), avg.monthsUsed ? pln(spending) : "–", "expenses", ["#C2410C", "#FB923C", "#FDF0E9", "#EB6834"], "", tipSpending)}
+      ${tile(T("Balance per month"), both ? pln(left) : "–", "income", ["#0E7C55", "#34D399", "#E7F7F0", "#1BAF7A"], both && left < 0 ? "bad" : "", T("Inflows minus outflows: what you can save each month."))}
       ${tile(T("Savings rate"), both ? Math.round(left / income * 100) + "%" : "–", "portfolio", ["#7E22CE", "#C084FC", "#F5EDFD", "#A855F7"], "", T("The part of your income you keep. A good aim is 10–20% or more."))}
     </div>`);
     const sw = shortDataWarning(d);
@@ -100,24 +100,24 @@ export const Overview = {
     const pIn = sum > 0 ? Math.round(inflow / sum * 100) : 0;
     const cov = Calc.coverage(d);
     const period = cov.from ? fmtDate(cov.from) + " – " + fmtDate(cov.to) + " (" + T("{0} days", cov.days) + ")" : "";
-    parts.push(card(heading(T("Income and expenses (per month)")) + (ChartData.hasInOut(d) ? `
-      <div class="flow-balance"><span>${esc(T("Balance of income and expenses"))}</span><b class="${bal < 0 ? "bad" : "good"}">${bal < 0 ? "−" : ""}${pln(Math.abs(bal))}</b>
+    parts.push(card(heading(T("Inflows and outflows (per month)")) + (ChartData.hasInOut(d) ? `
+      <div class="flow-balance"><span>${esc(T("Balance of inflows and outflows"))}</span><b class="${bal < 0 ? "bad" : "good"}">${bal < 0 ? "−" : ""}${pln(Math.abs(bal))}</b>
         ${period ? `<small class="hint">${esc(T("Details for the period: {0}", period))}${cov.partial ? " · " + esc(T("converted to one month")) : basisMonths.length > 1 ? " · " + esc(T("average per month")) : ""}</small>` : ""}</div>
       <div class="flow-bar">
-        <div class="in" style="flex:${Math.max(pIn, 28)}"><span>⬇ ${esc(T("Income"))}</span></div>
-        <div class="out" style="flex:${Math.max(100 - pIn, 28)}"><span>⬆ ${esc(T("Expenses"))}</span></div></div>
+        <div class="in" style="flex:${Math.max(pIn, 28)}"><span>⬇ ${esc(T("Inflows"))}</span></div>
+        <div class="out" style="flex:${Math.max(100 - pIn, 28)}"><span>⬆ ${esc(T("Outflows"))}</span></div></div>
       <div class="flow-values">
         <b class="in" data-tip="${esc(pin.months ? T("Salary {0} + extra income {1}", pln(pin.salary), pln(pin.extra)) : T("From your income sources"))}">${pln(inflow)} <small>${pIn}%</small></b>
         <b class="out" data-tip="${esc(T("Essential {0} + not essential {1}", pln(avg.essential), pln(avg.nonEssential)))}">${pln(outflow)} <small>${100 - pIn}%</small></b>
       </div>` : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"income"));
     const cur = months.find(m => m.current);
-    parts.push(card(heading(T("Financial analysis: income and expenses by month")) + hint(T("Income as received (salary and extra income) – where nothing was imported, as planned from your income sources. Expenses as entered or imported.")) +
-      (showTrend ? monthBars(months, axis, pln, [T("Income"), T("Expenses")]) + legend([
-        { color: "#2E9E5B", label: T("Income"), text: pln(months.reduce((s, m) => s + m.income, 0) / Math.max(1, months.length)) + " " + T("avg.") },
-        { color: "#C81E26", label: T("Expenses"), text: pln(months.reduce((s, m) => s + m.expenses, 0) / Math.max(1, months.length)) + " " + T("avg.") },
+    parts.push(card(heading(T("Financial analysis: inflows and outflows by month")) + hint(T("Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered or imported.")) +
+      (showTrend ? monthBars(months, axis, pln, [T("Inflows"), T("Outflows")]) + legend([
+        { color: "#2E9E5B", label: T("Inflows"), text: pln(months.reduce((s, m) => s + m.income, 0) / Math.max(1, months.length)) + " " + T("avg.") },
+        { color: "#C81E26", label: T("Outflows"), text: pln(months.reduce((s, m) => s + m.expenses, 0) / Math.max(1, months.length)) + " " + T("avg.") },
       ]) + (Calc.coverage(d).partial ? hint(T("Months with only part of the data show what was entered, not a whole month.")) : "") + (cur ? `<p class="hint planned-note"><span class="planned-swatch"></span>${esc(T("{0} is not finished: income as planned from your income sources, expenses entered so far.", monthName(cur.start)))}</p>` : "")
       : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"expenses"));
-    parts.push(card(heading(T("Expenses by category")) + hint(basisText(d)) +
+    parts.push(card(heading(T("Outflows by category")) + hint(basisText(d)) +
       (cats.slices.length ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.slices.map(s => ({ color: s.color, label: (s.icon ? s.icon + " " : "") + s.label, text: s.text, share: ChartData.share(s.value, cats.total) })))}</div>`
         : hint(T("Add expenses to see where your money goes."))), "link\" data-go=\"expenses"));
     parts.push(card(`<div class="link" data-go="portfolio">${heading(T("Your savings"))}${state ? `<span class="status-chip ${state}">${esc(state === "good" ? T("Growing") : state === "warn" ? T("Slow") : T("Shrinking"))}</span>` : ""}
@@ -208,7 +208,7 @@ const KINDS = [[RECEIVED.income, "Extra income (this month)"], [RECEIVED.salary,
 let editIncome = null;
 
 export const Income = {
-  route: "income", title: "Income",
+  route: "income", title: "Inflows",
   render(el) {
     const d = D(), s = d.Settings;
     const inc = Calc.income(d), avg = Calc.spending(d);
@@ -216,8 +216,8 @@ export const Income = {
     const extra = Calc.receivedIn(d, today());
     let message;
     if (!inc.monthlyTotal) message = T("Add your income below to see how much is left each month.");
-    else if (!avg.monthsUsed) message = T("Add expenses in the Expenses tab to see how much is left each month.");
-    else if (left < 0) message = T("You spend more than you earn on average. Check the not-essential costs in the Expenses tab.");
+    else if (!avg.monthsUsed) message = T("Add expenses in the Outflows tab to see how much is left each month.");
+    else if (left < 0) message = T("You spend more than you earn on average. Check the not-essential costs in the Outflows tab.");
     else {
       const target = Calc.emergency(s).target, safe = Calc.portfolio(d).safe;
       message = target <= 0 ? T("Set your emergency fund target in the Emergency fund tab to see how long it takes to reach it.")
@@ -235,7 +235,7 @@ export const Income = {
         row(T("Regular income per year"), pln(inc.monthlyTotal * 12)) +
         row(T("One-time income in {0}", today().getFullYear()), pln(inc.oneTimeThisYear)) +
         (extra > 0 ? row(T("Extra income received this month (bank import)"), pln(extra)) : "") +
-        row(T("Average expenses per month (Expenses tab)"), avg.monthsUsed ? pln(spending) : esc(T("no data yet"))) +
+        row(T("Average outflows per month (Outflows tab)"), avg.monthsUsed ? pln(spending) : esc(T("no data yet"))) +
         row(T("Balance per month"), avg.monthsUsed ? pln(left) : "–", avg.monthsUsed && left < 0 ? "bad" : "good") +
         row(T("Savings rate"), avg.monthsUsed && inc.monthlyTotal > 0 ? Math.round(left / inc.monthlyTotal * 100) + "%" : "–") +
         hint(message) + (inc.missing ? hint(T("Some income is in USD or EUR but the exchange rate is empty, so it counts as 0 zł. Enter the rates in the My savings tab."), "bad") : ""))}
@@ -358,7 +358,7 @@ export async function offerSalary(r) {
 let showAllMonths = false;
 const flt = { cat: "", text: "", ess: "", rep: false, min: "", max: "", days: "" };   // filter of "Your expenses"
 export const Expenses = {
-  route: "expenses", title: "Expenses",
+  route: "expenses", title: "Outflows",
   render(el) {
     const d = D();
     const avg = Calc.spending(d);
@@ -385,7 +385,7 @@ export const Expenses = {
       <span class="amount-range"><input name="f-min" inputmode="decimal" value="${esc(flt.min)}" placeholder="${esc(T("Amount from"))} zł" data-tip="${esc(T("Amount from"))} (zł)"><span>–</span><input name="f-max" inputmode="decimal" value="${esc(flt.max)}" placeholder="${esc(T("Amount to"))} zł" data-tip="${esc(T("Amount to"))} (zł)"></span>
       <label class="check"><input type="checkbox" name="f-rep"${flt.rep ? " checked" : ""}><span>🔁 ${esc(T("Repeating only"))}</span></label>
       ${filtering ? `<button class="btn second small" data-action="f-clear">✕ ${esc(T("Clear filter"))}</button>` : ""}</div>` +
-      (filtering ? `<p class="filter-result">${esc(T("Expenses found: {0} · together {1}", shown.length, pln(shown.reduce((s, e) => s + e.Amount, 0))))}</p>` : "") : "";
+      (filtering ? `<p class="filter-result">${esc(T("Outflows found: {0} · together {1}", shown.length, pln(shown.reduce((s, e) => s + e.Amount, 0))))}</p>` : "") : "";
     const older = months.slice(3).reduce((s, m) => s + m.items.length, 0);
     const loans = Calc.loanPayments(d);
 
@@ -402,11 +402,11 @@ export const Expenses = {
           hint(basisText(d)) +
           (loans > 0 ? hint(T("Includes {0} per month of loan payments from the Loans & debts tab. Expenses in the \"Loan payments\" category are not counted, so nothing is counted twice.", pln(loans))) : "")
         : hint(T("Add expenses to see your averages."))))}
-      ${card(heading(T("Expenses by category")) + hint(basisText(d)) + (cats.all.length
+      ${card(heading(T("Outflows by category")) + hint(basisText(d)) + (cats.all.length
         ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.all.map((c, n) => ({
             key: c.category, color: n < 6 ? COLORS.series[n] : COLORS.other, label: categoryLabel(c.category), text: pln(c.perMonth), share: ChartData.share(c.perMonth, cats.total) })))}</div>` + hint(T("Click to see these expenses"))
         : hint(T("Add expenses to see where your money goes."))))}
-      ${card(heading(T("Expense history")) + hint(T("Click an expense to switch it between essential and not essential. The pen changes date, category, amount and more.")) + filterBar +
+      ${card(heading(T("Outflow history")) + hint(T("Click an expense to switch it between essential and not essential. The pen changes date, category, amount and more.")) + filterBar +
         (months.length ? visible.map(m => {
           const total = m.items.reduce((s, e) => s + e.Amount, 0), ess = m.items.filter(e => e.Essential).reduce((s, e) => s + e.Amount, 0);
           return `<div class="month-head">${esc(T("{0}  ·  total {1}  ·  essential {2}", monthName(m.start), pln(total), pln(ess)))}</div><div class="list">${m.items.map(expenseRow).join("")}</div>`;
@@ -590,7 +590,7 @@ export const Emergency = {
     el.innerHTML = `<div class="grid">
       ${card(`<form id="em">${heading(T("Your monthly costs"))}${hint(T("Only costs you must pay even in a crisis: rent, bills, food, transport, insurance, loan payments."))}
         ${field(T("Essential costs per month (zł)"), numInput("monthly", plain(s.MonthlyEssentials), T("e.g. {0}", "4500")))}
-        ${button(T("Use my average from the Expenses tab"), "use-avg", "second small")}<p class="hint" id="avg-note"></p>
+        ${button(T("Use my average from the Outflows tab"), "use-avg", "second small")}<p class="hint" id="avg-note"></p>
         ${field(T("Yearly costs (zł per year) - car insurance, car service, home insurance, yearly subscriptions"), numInput("yearly", plain(s.YearlyCosts), T("e.g. {0}", "3000")))}
         <h3>${esc(T("Settings"))}</h3>
         <div class="two">${field(T("Months to cover (3 if your job is stable, 6 if less certain)"), select("months", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], s.EmergencyMonths))}
@@ -609,7 +609,7 @@ export const Emergency = {
     form.querySelectorAll("input,select").forEach(i => i.addEventListener("change", apply));
     el.querySelector('[data-action="use-avg"]').onclick = () => {
       const a = Calc.spending(d);
-      if (!a.monthsUsed) { el.querySelector("#avg-note").textContent = T("No expenses yet. Add them in the Expenses tab first."); return; }
+      if (!a.monthsUsed) { el.querySelector("#avg-note").textContent = T("No expenses yet. Add them in the Outflows tab first."); return; }
       s.MonthlyEssentials = Math.round(a.essential * 100) / 100; save(); App.refresh();
       toast(T("Average of your essential costs in {0}.", a.label));
     };

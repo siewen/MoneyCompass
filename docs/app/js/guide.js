@@ -6,9 +6,9 @@ import { App } from "./app.js";
 import { languageChips, setLanguage } from "./dialogs.js";
 
 const STEPS = [
-  { route: "income", color: "#1D4ED8", title: "Income", text: "Income: add your salary and any other money that comes in, with its payday.",
+  { route: "income", color: "#1D4ED8", title: "Inflows", text: "Inflows: add your salary and any other money that comes in, with its payday.",
     done: d => d.Incomes.length > 0 || d.Received.length > 0, import: true },
-  { route: "expenses", color: "#C2410C", title: "Expenses", text: "Expenses: write down what you spend, or enter your usual monthly bills once.",
+  { route: "expenses", color: "#C2410C", title: "Outflows", text: "Outflows: write down what you spend, or enter your usual monthly bills once.",
     done: d => d.Expenses.length > 0, import: true },
   { route: "emergency", color: "#B45309", title: "Emergency fund", text: "Emergency fund: enter your essential monthly costs to see how much to keep aside.",
     done: d => d.Settings.MonthlyEssentials > 0 },

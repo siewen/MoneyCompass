@@ -572,8 +572,8 @@ export const ChartData = {
   inOut(d) {
     const income = Calc.totalIncome(d), avg = Calc.spending(d), spending = avg.essential + avg.nonEssential, left = income - spending;
     return [
-      { label: T("Income"), value: income, color: COLORS.income, text: pln(income) },
-      { label: T("Expenses"), value: spending, color: COLORS.expenses, text: pln(spending) },
+      { label: T("Inflows"), value: income, color: COLORS.income, text: pln(income) },
+      { label: T("Outflows"), value: spending, color: COLORS.expenses, text: pln(spending) },
       { label: T("Balance"), value: Math.max(0, left), color: COLORS.leftOver, text: pln(left) },
     ];
   },
@@ -630,7 +630,7 @@ export const Advisor = {
     const add = (kind, title, text, benefit, route, action) => list.push({ kind, title, text, benefit, route, action });
 
     if (income <= 0 || avg.monthsUsed === 0)
-      add("tip", T("Enter your income and expenses first"), T("The more you enter in the Income and Expenses tabs, the better MoneyCompass can suggest how to save. One month of expenses is enough to start."), 0, "income");
+      add("tip", T("Enter your income and expenses first"), T("The more you enter in the Inflows and Outflows tabs, the better MoneyCompass can suggest how to save. One month of expenses is enough to start."), 0, "income");
     if (income > 0 && avg.monthsUsed > 0 && left < 0)
       add("warning", T("You spend more than you earn"), T("On average you are {0} short every month. Look at the not-essential costs first, before saving or investing.", pln(-left)), -left * 12, "expenses");
     if (target <= 0)

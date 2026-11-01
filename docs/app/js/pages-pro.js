@@ -124,7 +124,7 @@ export const Savings = {
 
 const IKE = 28260, IKZE = 11304, IKZE_SELF = 16956, LIMITS_YEAR = 2026;
 const BOND_NAMES = { OTS: "3 months · fixed", ROR: "1 year · variable", DOR: "2 years · variable", TOS: "3 years · fixed", COI: "4 years · inflation-linked", EDO: "10 years · inflation-linked", ROS: "6 years · family bond (800+)", ROD: "12 years · family bond (800+)" };
-const TAB_NAMES = { income: "Income", expenses: "Expenses", emergency: "Emergency fund", portfolio: "My savings", savings: "Compare offers" };
+const TAB_NAMES = { income: "Inflows", expenses: "Outflows", emergency: "Emergency fund", portfolio: "My savings", savings: "Compare offers" };
 
 export async function openOptimize() {
   if (!(await requirePro(T("Optimize my savings")))) return;
@@ -290,7 +290,7 @@ export const Loans = {
         row(T("Interest still to be repaid (estimate)"), pln(running.reduce((s, x) => s + (loanPlan(x).never ? 0 : loanPlan(x).interest), 0))) +
         row(T("Loan payments per month"), pln(payments)) +
         row(T("Share of your income"), income > 0 ? Math.round(share * 100) + "%" : "–") + row(T("Debt-free"), debtFree) +
-        level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Expenses tab.")))}
+        level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Outflows tab.")))}
       ${running.length ? card(`<form id="extra">${heading(T("Partial early repayment (overpayment)"), "💰")}
         ${hint(T("An overpayment goes straight to the principal (the capital you still owe), so you pay less interest. Banks call it a partial early repayment. Enter it here – or just try an amount to see what it would bring."))}
         ${field(T("Loan"), select("loan", running.map(x => [x.Id, x.Name]), running[0].Id))}
@@ -387,7 +387,7 @@ export const Budget = {
         ${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], categories()[0].Name))}
         ${field(T("Limit per month (zł)"), numInput("limit", "", T("e.g. {0}", "800")))}
         ${button(T("Save limit"), "save-limit", "main")}</form>`)}
-      ${card(heading(T("Limits this month")) + hint(T("From your entries in the Expenses tab. Green: on track, amber: almost used, red: over the limit.")) +
+      ${card(heading(T("Limits this month")) + hint(T("From your entries in the Outflows tab. Green: on track, amber: almost used, red: over the limit.")) +
         (limits.length ? budgetBars() : hint(T("No limits yet. Set your first one above."))), "wide")}
       ${binCard(["budget"])}
     </div>`;
@@ -560,8 +560,8 @@ export async function openBankImport() {
     }
     for (const t of transfers) d.Transfers.push({ Id: uuid(), Date: isoDate(t.row.date), Amount: t.pln, Description: t.row.description, Saved: t.toSavings, HoldingId: t.toSavings ? target?.Id ?? null : null, ...withInfo(t.row) });
     save();
-    let msg = !received.length ? T("{0} expenses were added. You find them in the Expenses tab.", items.length)
-      : T("{0} expenses were added (Expenses tab) and {1} payments received (Income tab).", items.length, received.length);
+    let msg = !received.length ? T("{0} expenses were added. You find them in the Outflows tab.", items.length)
+      : T("{0} expenses were added (Outflows tab) and {1} payments received (Inflows tab).", items.length, received.length);
     if (target) msg += "\n" + T("{0} went into savings: added to \"{1}\" (My savings tab).", pln(saved.reduce((a, t) => a + t.pln, 0)), target.Name);
     p.close();
     await alertBox(T("Import finished"), msg);
