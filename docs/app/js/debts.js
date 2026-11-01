@@ -111,5 +111,5 @@ export function debtAdvice(d) {
 
   const total = loans.reduce((s, x) => s + (x.p.never ? 0 : x.p.interest), 0);
   return card(heading(T("Your loans & debts"), "💳") +
-    `<p>${esc(T("Still to pay back: {0} · interest still to come: about {1}", pln(loans.reduce((s, x) => s + x.p.remainingNow, 0)), pln(total)))}</p>` + tips.join(""), "wide");
+    `<p>${esc(T("Still to pay back: {0} · interest still to come: about {1}", pln(loans.reduce((s, x) => s + x.p.remainingNow, 0)), pln(total)))}</p>` + tips.join(""));
 }
