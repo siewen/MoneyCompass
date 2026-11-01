@@ -228,7 +228,6 @@ async function closeApp() {
 function finishClose(fileSaved) {
   save();
   try { window.close(); } catch { /* not allowed */ }
-  try { window.open("", "_self")?.close(); } catch { /* not allowed */ }
   // The browser may not allow a page to close its own window or tab: then say so honestly
   setTimeout(() => {
     if (window.closed) return;
