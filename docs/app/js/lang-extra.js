@@ -61,7 +61,9 @@ export const EXTRA = {
 "Next step": "Nächster Schritt",
 "Show the step-by-step guide when MoneyCompass starts": "Schritt-für-Schritt-Anleitung beim Start anzeigen",
 "All": "Alle",
-"Save your profile as a backup, and install MoneyCompass as an app on your phone or computer.": "Speichern Sie Ihr Profil als Sicherung und installieren Sie MoneyCompass als App auf Handy oder Computer."
+"Save your profile as a backup, and install MoneyCompass as an app on your phone or computer.": "Speichern Sie Ihr Profil als Sicherung und installieren Sie MoneyCompass als App auf Handy oder Computer.",
+"What's new": "Neuigkeiten",
+"Build {0}": "Build {0}"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -124,7 +126,9 @@ export const EXTRA = {
 "Next step": "Étape suivante",
 "Show the step-by-step guide when MoneyCompass starts": "Afficher le guide pas à pas au démarrage",
 "All": "Tout",
-"Save your profile as a backup, and install MoneyCompass as an app on your phone or computer.": "Enregistrez votre profil comme sauvegarde et installez MoneyCompass comme application sur votre téléphone ou ordinateur."
+"Save your profile as a backup, and install MoneyCompass as an app on your phone or computer.": "Enregistrez votre profil comme sauvegarde et installez MoneyCompass comme application sur votre téléphone ou ordinateur.",
+"What's new": "Nouveautés",
+"Build {0}": "Build {0}"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -187,6 +191,8 @@ export const EXTRA = {
 "Next step": "Następny krok",
 "Show the step-by-step guide when MoneyCompass starts": "Pokazuj przewodnik krok po kroku przy uruchomieniu",
 "All": "Wszystko",
-"Save your profile as a backup, and install MoneyCompass as an app on your phone or computer.": "Zapisz profil jako kopię zapasową i zainstaluj MoneyCompass jako aplikację na telefonie lub komputerze."
+"Save your profile as a backup, and install MoneyCompass as an app on your phone or computer.": "Zapisz profil jako kopię zapasową i zainstaluj MoneyCompass jako aplikację na telefonie lub komputerze.",
+"What's new": "Co nowego",
+"Build {0}": "Kompilacja {0}"
 }
 };

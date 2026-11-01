@@ -273,3 +273,8 @@ textarea { font-family: Consolas, monospace; font-size: 13px; resize: vertical; 
 .guide-bar .dot { width: 34px; height: 34px; border-radius: 50%; background: var(--c); color: #fff; font-weight: 800; display: grid; place-items: center; flex: none; }
 .guide-bar .btn.main { background: var(--c); white-space: nowrap; }
 .guide-detail .btn.main { background: var(--c); }
+
+.news { border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px; }
+.news-head { display: flex; justify-content: space-between; align-items: baseline; }
+.news ul { margin: 6px 0 0; padding-left: 4px; list-style: none; }
+.news li { margin: 6px 0; }
