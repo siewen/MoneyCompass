@@ -43,7 +43,8 @@ export const EXTRA = {
 "Ask every time": "Jedes Mal fragen",
 "Everything is saved. You can close this tab now.": "Alles ist gespeichert. Sie können diesen Tab jetzt schließen.",
 "Save profile and close": "Profil speichern und schließen",
-"Your entries are always kept in this browser. The profile is an extra copy, for example as a backup.": "Ihre Einträge bleiben immer in diesem Browser. Das Profil ist eine zusätzliche Kopie, zum Beispiel als Sicherung."
+"Your entries are always kept in this browser. The profile is an extra copy, for example as a backup.": "Ihre Einträge bleiben immer in diesem Browser. Das Profil ist eine zusätzliche Kopie, zum Beispiel als Sicherung.",
+"Last update: {0}": "Letzte Aktualisierung: {0}"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -88,7 +89,8 @@ export const EXTRA = {
 "Ask every time": "Demander à chaque fois",
 "Everything is saved. You can close this tab now.": "Tout est enregistré. Vous pouvez fermer cet onglet.",
 "Save profile and close": "Enregistrer le profil et fermer",
-"Your entries are always kept in this browser. The profile is an extra copy, for example as a backup.": "Vos saisies restent toujours dans ce navigateur. Le profil est une copie supplémentaire, par exemple comme sauvegarde."
+"Your entries are always kept in this browser. The profile is an extra copy, for example as a backup.": "Vos saisies restent toujours dans ce navigateur. Le profil est une copie supplémentaire, par exemple comme sauvegarde.",
+"Last update: {0}": "Dernière mise à jour : {0}"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -133,6 +135,7 @@ export const EXTRA = {
 "Ask every time": "Pytaj za każdym razem",
 "Everything is saved. You can close this tab now.": "Wszystko zapisane. Możesz teraz zamknąć tę kartę.",
 "Save profile and close": "Zapisz profil i zamknij",
-"Your entries are always kept in this browser. The profile is an extra copy, for example as a backup.": "Twoje wpisy zawsze zostają w tej przeglądarce. Profil to dodatkowa kopia, na przykład jako kopia zapasowa."
+"Your entries are always kept in this browser. The profile is an extra copy, for example as a backup.": "Twoje wpisy zawsze zostają w tej przeglądarce. Profil to dodatkowa kopia, na przykład jako kopia zapasowa.",
+"Last update: {0}": "Ostatnia aktualizacja: {0}"
 }
 };

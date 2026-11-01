@@ -3,6 +3,7 @@ import { T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, s
 import { esc, popup, toast } from "./ui.js";
 import { App, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
+import { WEB_VERSION, WEB_BUILD, WEB_DATE } from "./version.js";
 import { Overview, Income, Expenses, Emergency, Portfolio } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
 import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile } from "./dialogs.js";
@@ -161,7 +162,10 @@ function finishClose() {
 
 function about() {
   popup(`<div class="about"><img src="../logo.svg" alt="" width="72"><h2>MoneyCompass</h2><p>${esc(T("Your personal money overview"))}</p>
-    <p class="hint">${esc(T("Web version"))} · ${esc(license.status)}</p>
+    <p><b>${esc(T("Version {0} (build {1})", WEB_VERSION, WEB_BUILD))}</b> · ${esc(T("Web version"))}</p>
+    <p class="hint">${esc(T("Last update: {0}", fmtDate(WEB_DATE) + " " + WEB_DATE.slice(11, 16)))}</p>
+    <p class="hint">${esc(Rates.data.Updated ? T("Current rates from NBP and the Ministry of Finance, updated {0}.", fmtDate(Rates.data.Updated) + " " + new Date(Rates.data.Updated).toTimeString().slice(0, 5)) : T("Current rates have not been downloaded yet."))}</p>
+    <p class="hint">${esc(license.status)}</p>
     <p class="hint">${esc(T("© {0} MoneyCompass. All rights reserved.", new Date().getFullYear()))}</p>
     <a class="btn go" href="${DOWNLOAD_URL}" target="_blank" rel="noopener">⬇ ${esc(T("Download for Windows"))}</a></div>
     <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`, { width: 420 });
