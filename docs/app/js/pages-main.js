@@ -375,7 +375,7 @@ export const Expenses = {
         ${field(T("Description (optional)"), textInput("description", "", T("e.g. {0}", "Biedronka")))}
         <div class="two">${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), ""))}<div class="hint">${esc(T("Repeating expenses appear automatically in the Payment calendar, also in the next months."))}</div></div>
         ${check("essential", T("Essential (must pay even in a crisis)"), cat0.Essential)}
-        <div class="buttons">${button(T("Add expense"), "add-expense", "main")}${button("⬆ " + esc(T("Import from your bank (CSV)…")), "import", "second")}</div></form>`)}
+        <div class="buttons">${button(T("Add expense"), "add-expense", "main")}${button("⬆ " + esc(T("Import bank statement (CSV)…")), "import", "second")}</div></form>`)}
       ${card(heading(T("Monthly average")) + (avg.monthsUsed ? row(T("Essential"), pln(avg.essential)) + row(T("Not essential"), pln(avg.nonEssential)) + row(T("Total per month"), pln(avg.essential + avg.nonEssential)) +
           hint(T("Based on the last {0} month(s) with expenses: {1}. For accurate numbers, enter whole months. The current month is counted even if it's not finished.", Calc.averages(Calc.countedExpenses(d)).monthsUsed, Calc.averages(Calc.countedExpenses(d)).label)) +
           (loans > 0 ? hint(T("Includes {0} per month of loan payments from the Loans & debts tab. Expenses in the \"Loan payments\" category are not counted, so nothing is counted twice.", pln(loans))) : "")
@@ -693,7 +693,7 @@ const hasInfo = (kind, x) => kind === "holding"
   : !!(x.Info && Object.keys(x.Info).length);
 /** The ⓘ button – only for entries that have details from the bank import. */
 export function infoBtn(kind, x) {
-  return hasInfo(kind, x) ? `<button class="icon-btn c-info" data-info="${kind}:${x.Id}" title="${esc(T("Details from your bank"))}">ⓘ</button>` : "";
+  return hasInfo(kind, x) ? `<button class="icon-btn c-info" data-info="${kind}:${x.Id}" title="${esc(T("Details from the bank statement"))}">ⓘ</button>` : "";
 }
 function infoRows(info, incoming = false) {
   // Card payments, BLIK and cash: the bank file has no account of the shop – say so instead of leaving it out
@@ -715,13 +715,13 @@ export function showInfo(kind, id) {
     if (x.Deposit > 0) body += `<h3>🔁 ${esc(T("Regular deposit"))}</h3>` + row(T("Amount"), pln(x.Deposit)) + row(T("How often"), esc(freqLabel(x.DepositFrequency || "Monthly"))) +
       (x.DepositFrom ? row(T("From which account"), esc(x.DepositFrom)) : "") + (x.DepositInfo ? infoRows(x.DepositInfo) : "");
     const tr = d.Transfers.filter(t => t.HoldingId === x.Id).sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
-    if (tr.length) body += `<h3>⬆ ${esc(T("Transfers from your bank imports"))}</h3><div class="list">${tr.slice(0, 50).map(t => `<div class="item"><div><b>${esc(t.Description || "–")}</b>
+    if (tr.length) body += `<h3>⬆ ${esc(T("Transfers from bank imports"))}</h3><div class="list">${tr.slice(0, 50).map(t => `<div class="item"><div><b>${esc(t.Description || "–")}</b>
       <span class="hint">${fmtDate(t.Date)}${t.Info?.Account ? " · " + esc(T("from {0}", t.Info.Account)) : ""}${t.Info?.OtherAccount ? " → " + esc(t.Info.OtherAccount) : ""}</span></div><b class="primary">${pln(t.Amount)}</b></div>`).join("")}</div>`;
   } else {
     body = row(T("Date"), fmtDate(x.Date)) + row(T("Amount"), pln(x.Amount)) + infoRows(x.Info || {}, kind === "received");
   }
   const p = popup(`<div class="box-head"><span class="box-icon">ⓘ</span><h2>${esc(x.Description || x.Name || "–")}</h2></div>${body}
-    ${hint(T("From your bank file. It stays only in this browser."))}
+    ${hint(T("From the imported bank file. It stays only in this browser."))}
     <div class="box-buttons"><button class="btn main" data-close>${esc(T("OK"))}</button></div>`, { width: 520, cls: "box" });
   return p;
 }

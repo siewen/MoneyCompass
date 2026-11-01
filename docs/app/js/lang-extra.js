@@ -405,7 +405,13 @@ export const EXTRA = {
 "Principal repaid": "Getilgtes Kapital",
 "Remaining principal": "Restkapital",
 "Remaining principal amount to be repaid: {0} · interest still to be repaid: about {1}": "Verbleibendes Kapital: {0} · noch zu zahlende Zinsen: etwa {1}",
-"Remaining principal amount to be repaid (zł)": "Verbleibendes Kapital (zł)"
+"Remaining principal amount to be repaid (zł)": "Verbleibendes Kapital (zł)",
+"Import bank statement (CSV)…": "Kontoauszug importieren (CSV)…",
+"Import bank statement": "Kontoauszug importieren",
+"Details from the bank statement": "Details aus dem Kontoauszug",
+"From the imported bank file. It stays only in this browser.": "Aus der importierten Bankdatei. Bleibt nur in diesem Browser.",
+"Transfers from bank imports": "Überweisungen aus Bankimporten",
+"The bank statement (CSV) – yours or one you manage for someone – becomes expenses, sorted into categories.": "Der Kontoauszug (CSV) – Ihrer oder einer, den Sie für jemanden verwalten – wird zu Ausgaben, nach Kategorien sortiert."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -812,7 +818,13 @@ export const EXTRA = {
 "Principal repaid": "Capital remboursé",
 "Remaining principal": "Capital restant",
 "Remaining principal amount to be repaid: {0} · interest still to be repaid: about {1}": "Capital restant à rembourser : {0} · intérêts restant à payer : environ {1}",
-"Remaining principal amount to be repaid (zł)": "Capital restant à rembourser (zł)"
+"Remaining principal amount to be repaid (zł)": "Capital restant à rembourser (zł)",
+"Import bank statement (CSV)…": "Importer un relevé bancaire (CSV)…",
+"Import bank statement": "Importer un relevé bancaire",
+"Details from the bank statement": "Détails du relevé bancaire",
+"From the imported bank file. It stays only in this browser.": "Issu du fichier bancaire importé. Reste uniquement dans ce navigateur.",
+"Transfers from bank imports": "Virements des imports bancaires",
+"The bank statement (CSV) – yours or one you manage for someone – becomes expenses, sorted into categories.": "Le relevé bancaire (CSV) – le vôtre ou celui d'une personne que vous aidez – devient des dépenses, triées par catégorie."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1219,6 +1231,12 @@ export const EXTRA = {
 "Principal repaid": "Spłacony kapitał",
 "Remaining principal": "Pozostały kapitał",
 "Remaining principal amount to be repaid: {0} · interest still to be repaid: about {1}": "Pozostały kapitał do spłaty: {0} · odsetki do spłaty: ok. {1}",
-"Remaining principal amount to be repaid (zł)": "Pozostały kapitał do spłaty (zł)"
+"Remaining principal amount to be repaid (zł)": "Pozostały kapitał do spłaty (zł)",
+"Import bank statement (CSV)…": "Importuj wyciąg bankowy (CSV)…",
+"Import bank statement": "Import wyciągu bankowego",
+"Details from the bank statement": "Szczegóły z wyciągu bankowego",
+"From the imported bank file. It stays only in this browser.": "Z zaimportowanego pliku bankowego. Zostaje tylko w tej przeglądarce.",
+"Transfers from bank imports": "Przelewy z importów bankowych",
+"The bank statement (CSV) – yours or one you manage for someone – becomes expenses, sorted into categories.": "Wyciąg bankowy (CSV) – Twój albo osoby, której pomagasz – zamienia się w wydatki posortowane według kategorii."
 }
 };

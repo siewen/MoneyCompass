@@ -46,7 +46,7 @@ export function openGuide(step) {
           <p>${esc(T(s.text))}</p>
           <div class="buttons">
             ${s.route ? `<button class="btn main" data-g="go">${esc(T("Go to {0} →", T(s.title)))}</button>` : ""}
-            ${s.import ? `<button class="btn second" data-g="import">⬆ ${esc(T("Import from your bank (CSV)…"))}${license.isPro ? "" : " 🔒"}</button>` : ""}
+            ${s.import ? `<button class="btn second" data-g="import">⬆ ${esc(T("Import bank statement (CSV)…"))}${license.isPro ? "" : " 🔒"}</button>` : ""}
             ${s.optimize ? `<button class="btn go" data-g="optimize">⚡ ${esc(T("Optimize my savings"))}</button>` : ""}
             ${s.backup ? `<button class="btn main" data-g="save">💾 ${esc(T("Save profile"))}</button><button class="btn second" data-g="install">📲 ${esc(T("Install app"))}</button>` : ""}
           </div></div></div>

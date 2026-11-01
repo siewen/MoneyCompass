@@ -197,7 +197,7 @@ export function openDelete() {
 
 export function openImport() {
   const p = popup(`<h2 class="popup-title">⬆ ${esc(T("Import"))}</h2><div class="buttons col">
-    <button class="btn main" data-csv>🏦 ${esc(T("Import from your bank (CSV)…"))}${license.isPro ? "" : " 🔒"}</button>
+    <button class="btn main" data-csv>🏦 ${esc(T("Import bank statement (CSV)…"))}${license.isPro ? "" : " 🔒"}</button>
     <button class="btn second" data-profile>👤 ${esc(T("Load a profile…"))}</button></div>
     <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`, { width: 460 });
   p.el.querySelector("[data-csv]").onclick = () => { p.close(); openBankImport(); };

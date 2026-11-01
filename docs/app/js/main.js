@@ -62,7 +62,7 @@ function buildShell() {
 function dataMenu() {
   const btn = document.querySelector('[data-act="data"]'), r = btn.getBoundingClientRect();
   const items = [
-    ["csv", "🏦", T("Import from your bank (CSV)…") + (license.isPro ? "" : " 🔒"), "#1D4ED8"],
+    ["csv", "🏦", T("Import bank statement (CSV)…") + (license.isPro ? "" : " 🔒"), "#1D4ED8"],
     ["load", "📂", T("Load a profile…"), "#1D4ED8"],
     ["export", "⬇", T("Export report (Excel, PDF, Word)") + (license.isPro ? "" : " 🔒"), "#15803D"],
     ["save", "💾", T("Save profile (backup)"), "#15803D"],

@@ -412,13 +412,13 @@ export const Budget = {
 // ================================================================= Bank import (pop-up)
 
 export async function openBankImport() {
-  if (!(await requirePro(T("Import from your bank")))) return;
+  if (!(await requirePro(T("Import bank statement")))) return;
   const fileObj = await pickFile(".csv,.txt,text/csv");
   if (!fileObj) return;
   let file;
   try { file = Csv.parse(Csv.decode(await fileObj.arrayBuffer())); }
-  catch (e) { await alertBox(T("Import from your bank"), T("The file could not be read: {0}", e.message)); return; }
-  if (!file.rows.length) { await alertBox(T("Import from your bank"), T("No transactions found in this file. Please choose the CSV export of your account history.")); return; }
+  catch (e) { await alertBox(T("Import bank statement"), T("The file could not be read: {0}", e.message)); return; }
+  if (!file.rows.length) { await alertBox(T("Import bank statement"), T("No transactions found in this file. Please choose the CSV export of your account history.")); return; }
 
   const d = D(), s = d.Settings;
   let showColumns = false;
@@ -491,8 +491,8 @@ export async function openBankImport() {
         `<button class="chip${isMonth(m) ? " on" : ""}" data-range="${i}">${esc(monthName(m))}</button>`).join("")}</div>` +
       `<div class="two">${field(T("From"), dateInput("from", inputDate(from || first)))}${field(T("To"), dateInput("to", inputDate(to || last)))}</div>` +
       (state.skippedByDate ? hint(T("{0} transactions outside these dates are not imported.", state.skippedByDate)) : ""));
-    p.el.innerHTML = `<h2 class="popup-title">⬆ ${esc(T("Import from your bank"))}</h2>
-      ${hint(T("Your bank statement (CSV) becomes expenses, sorted into categories."))}
+    p.el.innerHTML = `<h2 class="popup-title">⬆ ${esc(T("Import bank statement"))}</h2>
+      ${hint(T("The bank statement (CSV) – yours or one you manage for someone – becomes expenses, sorted into categories."))}
       <div class="grid">
       ${card(`<b>${esc(fileObj.name)}</b>` + hint(T("{0} – {1}, {2} rows.", file.bank || T("bank recognised from the columns"), "CSV", file.rows.length)) +
         hint(file.bank ? T("Found automatically for {0}. Change them only if the preview looks wrong.", file.bank) : T("Found from the content of the file. Check that date, amount and description are right.")) +
