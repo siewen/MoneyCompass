@@ -74,14 +74,14 @@ export const Overview = {
         const max = Math.max(1, ...done.map(m => Math.abs(m.income - m.expenses)));
         return done.map(m => { const v = m.income - m.expenses, h = Math.max(4, Math.abs(v) / max * 44);
           return `<div class="mb" title="${esc(monthName(m.start))}: ${esc(pln(v))}"><span class="${v >= 0 ? "pos" : "neg"}" style="height:${h}px"></span><small>${esc(monthName(m.start).slice(0, 3))}</small></div>`; }).join("");
-      })()}<span class="mb-label">${esc(T("Left over per month"))}</span></div>` : "";
+      })()}<span class="mb-label">${esc(T("Balance per month"))}</span></div>` : "";
     const growthLine = growth !== null && hist.length >= 2 ? `<p class="${growth >= 0 ? "good" : "bad"}">${growth >= 0 ? "▲" : "▼"} ${esc(T("Your savings since {0}: {1}{2}", fmtMonthKey(hist[0][0]), growth >= 0 ? "+" : "−", pln(Math.abs(growth))))}</p>` : "";
 
     const parts = [];
     parts.push(`<div class="tiles">
       ${tile(T("Income per month"), pln(income), "income", ["#1E5FB0", "#60A5FA", "#EAF2FC", "#2A78D6"], "", tipIncome)}
-      ${tile(T("Spending per month"), avg.monthsUsed ? pln(spending) : "–", "expenses", ["#C2410C", "#FB923C", "#FDF0E9", "#EB6834"], "", tipSpending)}
-      ${tile(T("Left over per month"), both ? pln(left) : "–", "income", ["#0E7C55", "#34D399", "#E7F7F0", "#1BAF7A"], both && left < 0 ? "bad" : "", T("Income minus spending: what you can save each month."))}
+      ${tile(T("Expenses per month"), avg.monthsUsed ? pln(spending) : "–", "expenses", ["#C2410C", "#FB923C", "#FDF0E9", "#EB6834"], "", tipSpending)}
+      ${tile(T("Balance per month"), both ? pln(left) : "–", "income", ["#0E7C55", "#34D399", "#E7F7F0", "#1BAF7A"], both && left < 0 ? "bad" : "", T("Income minus expenses: what you can save each month."))}
       ${tile(T("Savings rate"), both ? Math.round(left / income * 100) + "%" : "–", "portfolio", ["#7E22CE", "#C084FC", "#F5EDFD", "#A855F7"], "", T("The part of your income you keep. A good aim is 10–20% or more."))}
     </div>`);
     const sw = shortDataWarning(d);
@@ -100,24 +100,24 @@ export const Overview = {
     const pIn = sum > 0 ? Math.round(inflow / sum * 100) : 0;
     const cov = Calc.coverage(d);
     const period = cov.from ? fmtDate(cov.from) + " – " + fmtDate(cov.to) + " (" + T("{0} days", cov.days) + ")" : "";
-    parts.push(card(heading(T("Inflows and outflows (per month)")) + (ChartData.hasInOut(d) ? `
-      <div class="flow-balance"><span>${esc(T("Balance of inflows and outflows"))}</span><b class="${bal < 0 ? "bad" : "good"}">${bal < 0 ? "−" : ""}${pln(Math.abs(bal))}</b>
+    parts.push(card(heading(T("Income and expenses (per month)")) + (ChartData.hasInOut(d) ? `
+      <div class="flow-balance"><span>${esc(T("Balance of income and expenses"))}</span><b class="${bal < 0 ? "bad" : "good"}">${bal < 0 ? "−" : ""}${pln(Math.abs(bal))}</b>
         ${period ? `<small class="hint">${esc(T("Details for the period: {0}", period))}${cov.partial ? " · " + esc(T("converted to one month")) : basisMonths.length > 1 ? " · " + esc(T("average per month")) : ""}</small>` : ""}</div>
       <div class="flow-bar">
-        <div class="in" style="flex:${Math.max(pIn, 28)}"><span>⬇ ${esc(T("Inflows"))}</span></div>
-        <div class="out" style="flex:${Math.max(100 - pIn, 28)}"><span>⬆ ${esc(T("Outflows"))}</span></div></div>
+        <div class="in" style="flex:${Math.max(pIn, 28)}"><span>⬇ ${esc(T("Income"))}</span></div>
+        <div class="out" style="flex:${Math.max(100 - pIn, 28)}"><span>⬆ ${esc(T("Expenses"))}</span></div></div>
       <div class="flow-values">
         <b class="in" data-tip="${esc(pin.months ? T("Salary {0} + extra income {1}", pln(pin.salary), pln(pin.extra)) : T("From your income sources"))}">${pln(inflow)} <small>${pIn}%</small></b>
         <b class="out" data-tip="${esc(T("Essential {0} + not essential {1}", pln(avg.essential), pln(avg.nonEssential)))}">${pln(outflow)} <small>${100 - pIn}%</small></b>
       </div>` : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"income"));
     const cur = months.find(m => m.current);
-    parts.push(card(heading(T("Financial analysis: inflows and outflows by month")) + hint(T("Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered.")) +
-      (showTrend ? monthBars(months, axis, pln, [T("Inflows"), T("Outflows")]) + legend([
-        { color: "#2E9E5B", label: T("Inflows"), text: pln(months.reduce((s, m) => s + m.income, 0) / Math.max(1, months.length)) + " " + T("avg.") },
-        { color: "#C81E26", label: T("Outflows"), text: pln(months.reduce((s, m) => s + m.expenses, 0) / Math.max(1, months.length)) + " " + T("avg.") },
+    parts.push(card(heading(T("Financial analysis: income and expenses by month")) + hint(T("Income as received (salary and extra income) – where nothing was imported, as planned from your income sources. Expenses as entered or imported.")) +
+      (showTrend ? monthBars(months, axis, pln, [T("Income"), T("Expenses")]) + legend([
+        { color: "#2E9E5B", label: T("Income"), text: pln(months.reduce((s, m) => s + m.income, 0) / Math.max(1, months.length)) + " " + T("avg.") },
+        { color: "#C81E26", label: T("Expenses"), text: pln(months.reduce((s, m) => s + m.expenses, 0) / Math.max(1, months.length)) + " " + T("avg.") },
       ]) + (Calc.coverage(d).partial ? hint(T("Months with only part of the data show what was entered, not a whole month.")) : "") + (cur ? `<p class="hint planned-note"><span class="planned-swatch"></span>${esc(T("{0} is not finished: income as planned from your income sources, expenses entered so far.", monthName(cur.start)))}</p>` : "")
       : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"expenses"));
-    parts.push(card(heading(T("Your expenses")) + hint(basisText(d)) +
+    parts.push(card(heading(T("Expenses by category")) + hint(basisText(d)) +
       (cats.slices.length ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.slices.map(s => ({ color: s.color, label: (s.icon ? s.icon + " " : "") + s.label, text: s.text, share: ChartData.share(s.value, cats.total) })))}</div>`
         : hint(T("Add expenses to see where your money goes."))), "link\" data-go=\"expenses"));
     parts.push(card(`<div class="link" data-go="portfolio">${heading(T("Your savings"))}${state ? `<span class="status-chip ${state}">${esc(state === "good" ? T("Growing") : state === "warn" ? T("Slow") : T("Shrinking"))}</span>` : ""}
@@ -235,8 +235,8 @@ export const Income = {
         row(T("Regular income per year"), pln(inc.monthlyTotal * 12)) +
         row(T("One-time income in {0}", today().getFullYear()), pln(inc.oneTimeThisYear)) +
         (extra > 0 ? row(T("Extra income received this month (bank import)"), pln(extra)) : "") +
-        row(T("Average spending per month (Expenses tab)"), avg.monthsUsed ? pln(spending) : esc(T("no data yet"))) +
-        row(T("Left over per month"), avg.monthsUsed ? pln(left) : "–", avg.monthsUsed && left < 0 ? "bad" : "good") +
+        row(T("Average expenses per month (Expenses tab)"), avg.monthsUsed ? pln(spending) : esc(T("no data yet"))) +
+        row(T("Balance per month"), avg.monthsUsed ? pln(left) : "–", avg.monthsUsed && left < 0 ? "bad" : "good") +
         row(T("Savings rate"), avg.monthsUsed && inc.monthlyTotal > 0 ? Math.round(left / inc.monthlyTotal * 100) + "%" : "–") +
         hint(message) + (inc.missing ? hint(T("Some income is in USD or EUR but the exchange rate is empty, so it counts as 0 zł. Enter the rates in the My savings tab."), "bad") : ""))}
       ${card(`<form id="income-form">${heading(e ? T("Edit: {0}", e.Name) : T("Add income"))}
@@ -402,7 +402,7 @@ export const Expenses = {
           hint(basisText(d)) +
           (loans > 0 ? hint(T("Includes {0} per month of loan payments from the Loans & debts tab. Expenses in the \"Loan payments\" category are not counted, so nothing is counted twice.", pln(loans))) : "")
         : hint(T("Add expenses to see your averages."))))}
-      ${card(heading(T("By category")) + hint(basisText(d)) + (cats.all.length
+      ${card(heading(T("Expenses by category")) + hint(basisText(d)) + (cats.all.length
         ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.all.map((c, n) => ({
             key: c.category, color: n < 6 ? COLORS.series[n] : COLORS.other, label: categoryLabel(c.category), text: pln(c.perMonth), share: ChartData.share(c.perMonth, cats.total) })))}</div>` + hint(T("Click to see these expenses"))
         : hint(T("Add expenses to see where your money goes."))))}

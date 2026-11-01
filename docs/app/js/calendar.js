@@ -232,16 +232,16 @@ export const Calendar = {
     el.innerHTML = `<div class="grid">
       ${card(heading((range === 1 ? T("Forecast for the coming month") : T("Forecast for the next {0} months", range)), "📅") +
         `<div class="chips">${RANGES.map(n => `<button class="chip${n === range ? " on" : ""}" data-range="${n}">${esc(monthsLabel(n))}</button>`).join("")}</div>` +
-        row(T("Expected income"), `<span class="good">+${pln(inSum)}</span>`) + row(T("Expected payments"), `<span class="bad">−${pln(outSum)}</span>`) +
+        row(T("Expected income"), `<span class="good">+${pln(inSum)}</span>`) + row(T("Expected expenses"), `<span class="bad">−${pln(outSum)}</span>`) +
         row(T("Transfers to savings"), `<span class="primary">${pln(saveSum)}</span>`) + row(T("Expected balance"), pln(inSum - outSum - saveSum), "big" + (inSum - outSum - saveSum < 0 ? " bad" : " good")) +
         hint(T("From today to {0}. Includes your income sources, recurring payments and loan instalments.", fmtDate(end))))}
       ${card(`<div class="cal-head"><button class="icon-btn" data-month="-1"${shown <= first ? ` disabled title="${esc(T("This is the first month of your data."))}"` : ""}>◀</button><h3>${esc(monthName(shown))}</h3>${shown.getTime() !== start.getTime() ? `<button class="chip" data-month="now">${esc(T("Today"))}</button>` : ""}<button class="icon-btn" data-month="1">▶</button></div>
         <div class="cal-grid">${dayNames.map(n => `<div class="cal-dow">${esc(n)}</div>`).join("")}${cells}</div>
-        <div class="cal-legend"><span><i class="cal-dot in"></i>${esc(T("Income"))}</span><span><i class="cal-dot out"></i>${esc(T("Payments"))}</span><span><i class="cal-dot save"></i>${esc(T("Savings"))}</span><span><i class="cal-dot info"></i>${esc(T("Promotion ends"))}</span></div>` +
+        <div class="cal-legend"><span><i class="cal-dot in"></i>${esc(T("Income"))}</span><span><i class="cal-dot out"></i>${esc(T("Expenses"))}</span><span><i class="cal-dot save"></i>${esc(T("Savings"))}</span><span><i class="cal-dot info"></i>${esc(T("Promotion ends"))}</span></div>` +
         hint(T("Before today: actual transactions (your entries and bank imports). From today: scheduled payments.")) +
         (selectedDay ? `<h3>${esc(fmtDate(new Date(shown.getFullYear(), shown.getMonth(), selectedDay)))}</h3>` + (dayList.length ? `<div class="list">${dayList.map(evRow).join("")}</div>` : hint(T("Nothing on this day."))) : hint(T("Click a day to see its payments."))))}
       ${card(`<form id="rec">${heading(r ? T("Edit: {0}", r.Name) : T("Add a regular payment"))}
-        ${hint(T("Rent, bills, subscriptions, insurance or a standing order to savings – anything that recurs. Payments added here are included in your spending, budget and forecasts, unless the same payment is already in your expenses. Income is managed in the Income tab."))}
+        ${hint(T("Rent, bills, subscriptions, insurance or a standing order to savings – anything that recurs. Payments added here are included in your expenses, budget and forecasts, unless the same payment is already in your expenses. Income is managed in the Income tab."))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", "Netflix, czynsz, PZU")))}
         <div class="two">${field(T("Type"), select("kind", KINDS.map(k => [k[0], T(k[1])]), f.Kind))}${field(T("Amount (zł)"), numInput("amount", plain(f.Amount)))}</div>
         <div class="two">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], f.Category))}${field(T("How often"), select("frequency", FREQUENCIES.map(x => [x[0], T(x[0])]), f.Frequency))}</div>

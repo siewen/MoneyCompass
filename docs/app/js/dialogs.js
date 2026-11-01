@@ -207,9 +207,9 @@ export function openImport() {
 // ================================================================= Help & About
 
 export function openHelp() {
-  const tabs = [["Overview", "Your money at a glance: key numbers and diagrams of your income, your expenses and your savings. The green \"Optimize my savings\" button shows your best next steps and the main ways to save."],
-    ["Income", "Add every source of money: salary, side jobs, bonuses. Each one can have its own amount, frequency, currency and payday."],
-    ["Expenses", "Write down what you spend and mark it essential or not. After a few months you see real averages."],
+  const tabs = [["Overview", "Your money at a glance: income, expenses, balance and savings rate, with diagrams. The green \"Optimize my savings\" button shows your best next steps and the main ways to save."],
+    ["Income", "Add every source of income: salary, side jobs, bonuses – each with its own amount, frequency, currency and payday, and gross → net for a salary. Money received from bank imports is listed here too."],
+    ["Expenses", "Enter what you spend or import a bank statement. Mark expenses essential or not, set repeats (🔁), filter and search. With whole months of data you see reliable averages."],
     ["Emergency fund", "Shows how much you should keep aside for bad times (3–6 months of essential costs)."],
     ["My savings", "All your savings in one place (bank, crypto, cash), safe vs risky, and how much interest they earn."],
     ...MODULES.map(m => [m.name, m.description]),
@@ -221,7 +221,7 @@ export function openHelp() {
     ${card(heading(T("The tabs")) + tabs.map(t => `<p><b>${esc(T(t[0]))}</b><br><span class="hint">${esc(T(t[1]))}</span></p>`).join("") + hint(T("Savings goals, Loans & debts and Budget plan are modules: switch them on in Options → Modules.")))}
     ${card(heading("MoneyCompass Pro") + `<p>${esc(T("The free version has all the basics. A license key unlocks:"))}</p><ul>${[
       ["Optimize my savings", "Your personal plan, with current rates from NBP and the Ministry of Finance."], ["Compare offers", "See which bank offer really pays the most after tax."],
-      ["Import from your bank", "Your bank statement (CSV) becomes expenses, sorted into categories."], ["Own categories", "Make your own expense categories, each with an icon of your choice."],
+      ["Import bank statement", "The bank statement (CSV) becomes expenses, sorted into categories."], ["Own categories", "Make your own expense categories, each with an icon of your choice."],
       ["Modules", "Savings goals, Loans & debts and Budget plan: switch them on in Options → Modules, and each one adds its own tab."],
       ["Appearance", "The Dark, Colourful and System default themes."]].map(x => `<li><b>${esc(T(x[0]))}</b> – ${esc(T(x[1]))}</li>`).join("")}
       <li><b>${esc(T("Export"))}</b> – ${esc(T("Reports as Excel, PDF or Word."))}</li><li><b>${esc(T("Profiles"))}</b> – ${esc(T("Separate data for each person or household."))}</li></ul>` +
@@ -240,7 +240,7 @@ export function openHelp() {
 export async function openExport() {
   if (!(await windowsOrPro(T("Export report")))) return;
   const p = popup(`<h2 class="popup-title">⬇ ${esc(T("Export report"))}</h2>${hint(T("Save a copy of your numbers to keep a record over time."))}
-    ${card(heading(T("What's in the report")) + hint(T("Summary, diagrams (optional), income sources, monthly totals, spending by category, all expenses, your savings, saved offers and your personal savings plan.")) +
+    ${card(heading(T("What's in the report")) + hint(T("Summary, diagrams (optional), income sources, monthly totals, expenses by category, all expenses, your savings, saved offers and your personal savings plan.")) +
       hint(T("Each export is a new file with date and time, so older reports are kept.")))}
     <div class="buttons col">
       <button class="btn second" data-f="xlsx"><b>${esc(T("Excel (.xlsx)"))}</b><br><span class="hint">${esc(T("Every part on its own sheet, with real numbers you can calculate with."))}</span></button>
@@ -263,12 +263,12 @@ function reportParts() {
   const summaryRows = [
     [T("Regular income per month"), pln(inc.monthlyTotal)], [T("Extra income received this month (bank import)"), pln(Calc.receivedIn(d, new Date()))],
     [T("One-time income in {0}", new Date().getFullYear()), pln(inc.oneTimeThisYear)],
-    [T("Average spending per month (Expenses tab)"), avg.monthsUsed ? pln(spending) : T("no data yet")],
-    [T("Left over per month"), avg.monthsUsed ? pln(left) : "–"], [T("Savings rate"), avg.monthsUsed && inc.monthlyTotal > 0 ? Math.round(left / inc.monthlyTotal * 100) + "%" : "–"],
+    [T("Average expenses per month (Expenses tab)"), avg.monthsUsed ? pln(spending) : T("no data yet")],
+    [T("Balance per month"), avg.monthsUsed ? pln(left) : "–"], [T("Savings rate"), avg.monthsUsed && inc.monthlyTotal > 0 ? Math.round(left / inc.monthlyTotal * 100) + "%" : "–"],
     [T("Safe money (bank, cash)"), pln(p.safe)], [T("Risky money (crypto platforms, investments)"), pln(p.risky)], [T("Total"), pln(p.total)],
     [T("Interest per year"), pln(p.yearly)], [T("Emergency fund target"), pln(em.target)], [T("Emergency fund covered"), em.target > 0 ? Math.round(Math.min(1, p.safe / em.target) * 100) + "%" : "–"]];
   const income = [[T("Name"), T("Type"), T("How often"), T("Per month (zł)"), T("Active")], ...d.Incomes.map(i => [i.Name, T(i.Type), T(i.Frequency), i.Frequency === ONE_TIME ? T("one-time") : round(Calc.monthlyPln(i, d.Settings)), i.Active ? T("Yes") : T("No")])];
-  const months = [[T("Month"), T("Income"), T("Expenses"), T("Left over")], ...ChartData.trend(d).map(m => [monthName(m.start), round(m.income), round(m.expenses), round(m.income - m.expenses)])];
+  const months = [[T("Month"), T("Income"), T("Expenses"), T("Balance")], ...ChartData.trend(d).map(m => [monthName(m.start), round(m.income), round(m.expenses), round(m.income - m.expenses)])];
   const cats = ChartData.categories(d);
   const byCat = [[T("Category"), T("Per month"), T("Share")], ...cats.all.map(c => [T(c.category), round(c.perMonth), ChartData.share(c.perMonth, cats.total)])];
   const expenses = [[T("Date"), T("Category"), T("Description"), T("Amount (zł)"), T("Essential")], ...[...d.Expenses].sort((a, b) => parseDate(b.Date) - parseDate(a.Date)).map(e => [fmtDate(e.Date), T(e.Category), e.Description, e.Amount, e.Essential ? T("Yes") : T("No")])];

@@ -574,7 +574,7 @@ export const ChartData = {
     return [
       { label: T("Income"), value: income, color: COLORS.income, text: pln(income) },
       { label: T("Expenses"), value: spending, color: COLORS.expenses, text: pln(spending) },
-      { label: T("Left over"), value: Math.max(0, left), color: COLORS.leftOver, text: pln(left) },
+      { label: T("Balance"), value: Math.max(0, left), color: COLORS.leftOver, text: pln(left) },
     ];
   },
   hasInOut(d) { return Calc.totalIncome(d) > 0 || Calc.spending(d).monthsUsed > 0; },
