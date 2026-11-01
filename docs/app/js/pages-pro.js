@@ -273,9 +273,10 @@ export const Loans = {
     el.innerHTML = `<div class="grid">
       ${card(`<form id="loan">${heading(l ? T("Edit loan") : T("Add a loan"))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("Car loan, credit card, mortgage"))))}
-        <div class="two">${field(T("Loan amount at the start (zł)"), numInput("original", plain(f.Original), T("optional")))}${field(T("Principal still owed (zł)"), numInput("remaining", plain(l ? loanPlan(l).remainingNow : f.Remaining)))}</div>
-        ${hint(T("With the amount at the start, MoneyCompass shows how much you have already paid back."))}
-        <div class="two">${field(T("Monthly payment (zł)"), numInput("payment", plain(f.MonthlyPayment)))}${field(T("Interest rate (% per year, 0 if none)"), numInput("rate", plain(f.RatePercent), "0"))}</div>
+        <div class="two">${field(T("Loan amount at the start (zł)"), numInput("original", plain(f.Original), T("optional")))}${field(T("Remaining principal amount to be repaid (zł)"), numInput("remaining", plain(l ? loanPlan(l).remainingNow : f.Remaining)))}</div>
+        ${field(T("Interest repaid so far (zł, optional)"), numInput("interestpaid", l ? plain(Math.round(loanPlan(l).interestRepaid * 100) / 100) : "", T("from your bank, e.g. {0}", "85 171,18")))}
+        ${hint(T("Your bank shows these in the loan details: principal amount repaid, interest repaid and remaining principal amount to be repaid. With the amount at the start, MoneyCompass shows how much principal you have already repaid."))}
+        <div class="two">${field(T("Loan payment per month (zł)"), numInput("payment", plain(f.MonthlyPayment)))}${field(T("Interest rate (% per year, 0 if none)"), numInput("rate", plain(f.RatePercent), "0"))}</div>
         <div class="two">${field(T("Next payment on (then every month)"), dateInput("next", inputDate(l ? (loanPlan(l).next || loanNextPayment(l)) : parseDate(f.NextPayment))))}
         ${field(T("Paid from which account (optional)"), `<input name="paidfrom" list="loan-accounts" value="${esc(f.PaidFrom || "")}" placeholder="${esc(T("e.g. {0}", "Pekao"))}">`)}</div>
         <datalist id="loan-accounts">${[...new Set([...d.Holdings.map(h => h.Name), ...d.Expenses.concat(d.Received).map(x => x.Info?.Bank).filter(Boolean), "Pekao", "PKO BP", "mBank", "ING", "Millennium", "Santander", "Alior", "Credit Agricole"])].map(n => `<option value="${esc(n)}">`).join("")}</datalist>
@@ -283,7 +284,11 @@ export const Loans = {
         <p class="loan-preview hint" id="loan-preview"></p>
         ${hint(T("MoneyCompass works out the debt-free date from what is left, the monthly payment and the interest."))}
         <div class="buttons">${button(l ? T("Save changes") : T("Add"), "save-loan", "main")}${l ? button(T("Cancel"), "cancel-loan") : ""}</div></form>`)}
-      ${card(heading(T("Your debts")) + loanProgress(running.map(x => ({ ...x, Remaining: now(x) }))) + row(T("Still to pay back"), pln(running.reduce((s, x) => s + now(x), 0))) + row(T("Payments per month"), pln(payments)) +
+      ${card(heading(T("Your debts")) + loanProgress(running.map(x => ({ ...x, Remaining: now(x) }))) +
+        (running.some(x => loanPlan(x).interestRepaid > 0) ? row(T("Interest repaid"), pln(running.reduce((s, x) => s + loanPlan(x).interestRepaid, 0))) : "") +
+        row(T("Remaining principal amount to be repaid"), pln(running.reduce((s, x) => s + now(x), 0))) +
+        row(T("Interest still to be repaid (estimate)"), pln(running.reduce((s, x) => s + (loanPlan(x).never ? 0 : loanPlan(x).interest), 0))) +
+        row(T("Loan payments per month"), pln(payments)) +
         row(T("Share of your income"), income > 0 ? Math.round(share * 100) + "%" : "–") + row(T("Debt-free"), debtFree) +
         level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Expenses tab.")))}
       ${running.length ? card(`<form id="extra">${heading(T("Partial early repayment (overpayment)"), "💰")}
@@ -297,7 +302,8 @@ export const Loans = {
       ${card(heading(T("Loans")) + hint(T("Tap a loan to edit it, for example to update what is left.")) + (d.Loans.length ? `<div class="list">${d.Loans.map(x => `
         <div class="item clickable loan-item" data-edit-loan="${x.Id}"><div class="loan-main"><b>${esc(x.Name)}</b>
           <span class="hint">${esc(loanLine(x, plans.get(x.Id) || loanPlan(x)))}</span>
-          ${x.Original > 0 ? `<div class="loan-progress">${progress(1 - now(x) / x.Original, "#1BAF7A")}<span class="hint">${esc(T("Paid back {0} of {1} ({2}%)", pln(x.Original - now(x)), pln(x.Original), Math.round((1 - now(x) / x.Original) * 100)))}</span></div>` : ""}
+          ${x.Original > 0 ? `<div class="loan-progress">${progress(1 - now(x) / x.Original, "#1BAF7A")}<span class="hint">${esc(T("Principal amount repaid: {0} of {1} ({2}%)", pln(x.Original - now(x)), pln(x.Original), Math.round((1 - now(x) / x.Original) * 100)))}</span></div>` : ""}
+          ${(x.RateChanges || []).length ? `<span class="hint">${esc(x.RateChanges.slice(-3).map(c => T("Rate change {0}: {1} (previously {2})", fmtDate(c.Date), rate(c.To), rate(c.From))).join(" · "))}</span>` : ""}
           ${(x.Extra || []).length ? `<span class="hint good">💰 ${esc(T("Overpayments: {0}", x.Extra.map(e => `${pln(e.Amount)} (${fmtDate(e.Date)})`).join(", ")))}</span>` : ""}
           ${loanWarning(x)}</div>
         <div class="right"><b>${pln((plans.get(x.Id) || loanPlan(x)).remainingNow)}</b>${(plans.get(x.Id) || loanPlan(x)).done ? `<span class="hint">${esc(T("estimated today"))}</span>` : ""}</div><button class="icon-btn danger" data-del-loan="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No loans – great! Add one above if you have any."))), "wide")}
@@ -309,7 +315,12 @@ export const Loans = {
       if (!v.name.trim() || !(rem > 0)) { toast(T("Please enter a name and the amount still to pay back."), "bad"); return; }
       const orig = num(v.original) || 0;
       if (orig > 0 && orig < rem) { toast(T("The amount at the start can't be smaller than what is still to pay back."), "bad"); return; }
+      // Rate change: kept in the loan's history, like on the bank's statement
+      const newRate = num(v.rate) || 0;
+      if (l && (+l.RatePercent || 0) !== newRate) (l.RateChanges ||= []).push({ Date: isoDate(today()), From: +l.RatePercent || 0, To: newRate });
+      const ip = num(v.interestpaid);
       const item = { Name: v.name.trim(), Original: orig > 0 ? orig : null, Remaining: rem, MonthlyPayment: num(v.payment) || 0, RatePercent: num(v.rate) || 0,
+        InterestPaid: ip > 0 ? ip : null,
         NextPayment: isoDate(parseDate(v.next || isoDate(addMonths(today(), 1)))), PaidFrom: (v.paidfrom || "").trim() };
       const saved = l ? Object.assign(l, item) : (d.Loans.push({ Id: uuid(), ...item }), d.Loans[d.Loans.length - 1]);
       const plan = planLoan(saved);
@@ -574,7 +585,7 @@ export function loanProgress(loans) {
   const known = loans.filter(l => l.Original > 0);
   if (!known.length) return "";
   const orig = known.reduce((s, l) => s + l.Original, 0), rem = known.reduce((s, l) => s + l.Remaining, 0), f = orig > 0 ? 1 - rem / orig : 0;
-  return progress(f, "#1BAF7A") + `<p class="good"><b>${esc(T("Paid back {0} of {1} ({2}%)", pln(orig - rem), pln(orig), Math.round(f * 100)))}</b></p>`;
+  return progress(f, "#1BAF7A") + `<p class="good"><b>${esc(T("Principal amount repaid: {0} of {1} ({2}%)", pln(orig - rem), pln(orig), Math.round(f * 100)))}</b></p>`;
 }
 
 /** One line about a loan: payment, interest, next payment, payments left, debt-free date. */

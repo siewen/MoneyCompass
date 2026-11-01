@@ -120,12 +120,12 @@ export const Overview = {
       const items = loans.map((l, i) => ({ label: l.Name, value: l.Remaining, color: COLORS.series[i % 6], text: pln(l.Remaining) }));
       // Paid back so far (green) – for loans where the amount at the start is known
       const paid = loans.reduce((s, l) => s + (l.Original > l.Remaining ? l.Original - l.Remaining : 0), 0);
-      const ring = paid > 0 ? [...items, { label: T("Paid back"), value: paid, color: COLORS.leftOver, text: pln(paid) }] : items;
+      const ring = paid > 0 ? [...items, { label: T("Principal repaid"), value: paid, color: COLORS.leftOver, text: pln(paid) }] : items;
       const borrowed = total + paid;
       parts.push(card(heading(T("Loans & debts")) + (loans.length
-        ? `<div class="chart-row">${donut(ring, pln(total), T("Still to pay back"))}${legend(ring.map(s => ({ ...s, share: ChartData.share(s.value, paid > 0 ? borrowed : total) })))}</div>` +
-          (paid > 0 ? `<p class="good"><b>${esc(T("Paid back {0} of {1} ({2}%)", pln(paid), pln(borrowed), Math.round(paid / borrowed * 100)))}</b></p>` : hint(T("Tip: enter how much you borrowed at the start (Loans & debts tab) to see how much is already paid back."))) +
-          loans.map(l => loanWarning(l, true)).join("") + row(T("Payments per month"), pln(Calc.loanPayments(d))) + row(T("Debt-free"), monthName(new Date(Math.max(...loans.map(l => parseDate(l.EndDate).getTime())))))
+        ? `<div class="chart-row">${donut(ring, pln(total), T("Remaining principal"))}${legend(ring.map(s => ({ ...s, share: ChartData.share(s.value, paid > 0 ? borrowed : total) })))}</div>` +
+          (paid > 0 ? `<p class="good"><b>${esc(T("Principal amount repaid: {0} of {1} ({2}%)", pln(paid), pln(borrowed), Math.round(paid / borrowed * 100)))}</b></p>` : hint(T("Tip: enter how much you borrowed at the start (Loans & debts tab) to see how much is already paid back."))) +
+          loans.map(l => loanWarning(l, true)).join("") + row(T("Loan payments per month"), pln(Calc.loanPayments(d))) + row(T("Debt-free"), monthName(new Date(Math.max(...loans.map(l => parseDate(l.EndDate).getTime())))))
         : hint(T("No loans – great!"))), "link\" data-go=\"loans"));
     }
     if (moduleOn("goals")) {

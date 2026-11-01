@@ -844,7 +844,9 @@ export function loanPlan(l) {
   let B = A, future = 0;
   if (needed !== Infinity) for (let i = done; i < needed; i++) { future += B * r; B = Math.max(0, B * (1 + r) - P); }
   return { needed, left: needed === Infinity ? Infinity : needed - done, done, next: done < needed ? addMonths(first, done) : null, end,
-    never: needed === Infinity, remainingNow: needed === Infinity ? +l.Remaining || 0 : Math.round(A * 100) / 100, interest: future };
+    never: needed === Infinity, remainingNow: needed === Infinity ? +l.Remaining || 0 : Math.round(A * 100) / 100, interest: future,
+    // Interest repaid: what you entered from your bank, plus the interest in the payments made since then
+    interestRepaid: (+l.InterestPaid || 0) + interest };
 }
 export function planLoan(l) {
   if (!l.NextPayment) l.NextPayment = isoDate(loanNextPayment(l));
