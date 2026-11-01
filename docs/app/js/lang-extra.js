@@ -135,7 +135,11 @@ export const EXTRA = {
 "Repeats": "Wiederholung",
 "Regular deposit (standing order) – optional": "Regelmäßige Einzahlung (Dauerauftrag) – optional",
 "Shown as \"To savings\" in the Payment calendar. The amount above is not changed by itself – update it when you check your account.": "Erscheint als „Zum Sparen“ im Zahlungskalender. Der Betrag oben ändert sich nicht von selbst – aktualisieren Sie ihn, wenn Sie Ihr Konto prüfen.",
-"From My savings": "Aus Meine Ersparnisse"
+"From My savings": "Aus Meine Ersparnisse",
+"Income and expenses by month": "Einnahmen und Ausgaben pro Monat",
+"{0} is not finished: income as planned from your income sources, expenses entered so far.": "{0} ist noch nicht vorbei: Einnahmen wie geplant aus Ihren Einkommensquellen, Ausgaben bisher eingetragen.",
+"Your expenses from {0} to {1} (1 month).": "Ihre Ausgaben vom {0} bis {1} (1 Monat).",
+"Average per month of your expenses from {0} to {1} ({2} months).": "Durchschnitt pro Monat Ihrer Ausgaben vom {0} bis {1} ({2} Monate)."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -272,7 +276,11 @@ export const EXTRA = {
 "Repeats": "Répétition",
 "Regular deposit (standing order) – optional": "Versement régulier (virement permanent) – facultatif",
 "Shown as \"To savings\" in the Payment calendar. The amount above is not changed by itself – update it when you check your account.": "Affiché comme « Vers l'épargne » dans le calendrier des paiements. Le montant ci-dessus ne change pas tout seul – mettez-le à jour quand vous consultez votre compte.",
-"From My savings": "De Mon épargne"
+"From My savings": "De Mon épargne",
+"Income and expenses by month": "Revenus et dépenses par mois",
+"{0} is not finished: income as planned from your income sources, expenses entered so far.": "{0} n'est pas terminé : revenus prévus d'après vos sources de revenus, dépenses saisies jusqu'ici.",
+"Your expenses from {0} to {1} (1 month).": "Vos dépenses du {0} au {1} (1 mois).",
+"Average per month of your expenses from {0} to {1} ({2} months).": "Moyenne par mois de vos dépenses du {0} au {1} ({2} mois)."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -409,6 +417,10 @@ export const EXTRA = {
 "Repeats": "Powtarzanie",
 "Regular deposit (standing order) – optional": "Regularna wpłata (zlecenie stałe) – opcjonalnie",
 "Shown as \"To savings\" in the Payment calendar. The amount above is not changed by itself – update it when you check your account.": "Widoczne jako „Na oszczędności” w kalendarzu płatności. Kwota powyżej nie zmienia się sama – zaktualizuj ją, gdy sprawdzisz konto.",
-"From My savings": "Z Moich oszczędności"
+"From My savings": "Z Moich oszczędności",
+"Income and expenses by month": "Dochody i wydatki w miesiącach",
+"{0} is not finished: income as planned from your income sources, expenses entered so far.": "{0} jeszcze trwa: dochody zaplanowane ze źródeł dochodu, wydatki wpisane do tej pory.",
+"Your expenses from {0} to {1} (1 month).": "Twoje wydatki od {0} do {1} (1 miesiąc).",
+"Average per month of your expenses from {0} to {1} ({2} months).": "Średnio miesięcznie z Twoich wydatków od {0} do {1} ({2} mies.)."
 }
 };

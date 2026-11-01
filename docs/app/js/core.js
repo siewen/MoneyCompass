@@ -481,7 +481,7 @@ export const ChartData = {
         + d.Received.filter(r => r.Kind === RECEIVED.income && parseDate(r.Date) >= start && parseDate(r.Date) <= end).reduce((s, r) => s + r.Amount, 0);
       const expenses = Calc.countedExpenses(d).filter(e => parseDate(e.Date) >= start && parseDate(e.Date) <= end).reduce((s, e) => s + e.Amount, 0)
         + Calc.loanPayments(d, start);
-      out.push({ month: monthShort(start), start, income, expenses });
+      out.push({ month: monthShort(start), start, income, expenses, current: start.getTime() === thisMonth.getTime() });
     }
     return out;
   },

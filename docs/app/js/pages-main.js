@@ -50,12 +50,14 @@ export const Overview = {
 
     parts.push(card(heading(T("Money in and out (per month)")) +
       (ChartData.hasInOut(d) ? hbars(ChartData.inOut(d)) : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"income"));
-    parts.push(card(heading(T("Last {0}", monthsCount(months.length))) + hint(T("Income from your current income sources, expenses as entered.")) +
+    const cur = months.find(m => m.current);
+    parts.push(card(heading(T("Income and expenses by month")) + hint(T("Income from your current income sources, expenses as entered.")) +
       (showTrend ? monthBars(months, axis, pln, [T("Income"), T("Expenses")]) + legend([
         { color: COLORS.income, label: T("Income"), text: pln(months.reduce((s, m) => s + m.income, 0) / Math.max(1, months.length)) + " " + T("avg.") },
         { color: COLORS.expenses, label: T("Expenses"), text: pln(months.reduce((s, m) => s + m.expenses, 0) / Math.max(1, months.length)) + " " + T("avg.") },
-      ]) : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"expenses"));
-    parts.push(card(heading(T("Your expenses")) + hint(T("Average per month, last 3 months with expenses.")) +
+      ]) + (cur ? `<p class="hint planned-note"><span class="planned-swatch"></span>${esc(T("{0} is not finished: income as planned from your income sources, expenses entered so far.", monthName(cur.start)))}</p>` : "")
+      : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"expenses"));
+    parts.push(card(heading(T("Your expenses")) + hint(basisText(d)) +
       (cats.slices.length ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.slices.map(s => ({ color: s.color, label: (s.icon ? s.icon + " " : "") + s.label, text: s.text, share: ChartData.share(s.value, cats.total) })))}</div>`
         : hint(T("Add expenses to see where your money goes."))), "link\" data-go=\"expenses"));
     parts.push(card(`<div class="link" data-go="portfolio">${heading(T("Your savings"))}${p.total > 0
@@ -92,6 +94,15 @@ export const Overview = {
     el.innerHTML = `<div class="grid">${parts.join("")}</div>`;
   },
 };
+/** What the expense averages are based on: the months that really have expenses (imported or entered). */
+export function basisText(d) {
+  const months = Calc.groupMonths(Calc.countedExpenses(d)).slice(0, 3);
+  if (!months.length) return "";
+  const dates = months.flatMap(m => m.items.map(e => parseDate(e.Date).getTime()));
+  const from = fmtDate(new Date(Math.min(...dates))), to = fmtDate(new Date(Math.max(...dates)));
+  return months.length === 1 ? T("Your expenses from {0} to {1} (1 month).", from, to)
+    : T("Average per month of your expenses from {0} to {1} ({2} months).", from, to, months.length);
+}
 const axis = v => v >= 1000 ? (Math.round(v / 100) / 10).toString().replace(".", ",") + "k" : String(Math.round(v));
 
 export function budgetBars() {
@@ -285,7 +296,7 @@ export const Expenses = {
           hint(T("Based on the last {0} month(s) with expenses: {1}. For accurate numbers, enter whole months. The current month is counted even if it's not finished.", Calc.averages(Calc.countedExpenses(d)).monthsUsed, Calc.averages(Calc.countedExpenses(d)).label)) +
           (loans > 0 ? hint(T("Includes {0} per month of loan payments from the Loans & debts tab. Expenses in the \"Loan payments\" category are not counted, so nothing is counted twice.", pln(loans))) : "")
         : hint(T("Add expenses to see your averages."))))}
-      ${card(heading(T("By category")) + hint(T("Average per month, last 3 months with expenses.")) + (cats.all.length
+      ${card(heading(T("By category")) + hint(basisText(d)) + (cats.all.length
         ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.all.map((c, n) => ({
             key: c.category, color: n < 6 ? COLORS.series[n] : COLORS.other, label: categoryLabel(c.category), text: pln(c.perMonth), share: ChartData.share(c.perMonth, cats.total) })))}</div>` + hint(T("Click to see these expenses"))
         : hint(T("Add expenses to see where your money goes."))))}

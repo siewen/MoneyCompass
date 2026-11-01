@@ -52,9 +52,11 @@ export function monthBars(months, fmtAxis, fmtValue, names) {
   const bars = months.map((m, i) => {
     const x = left + group * i + group / 2;
     const hi = m.income / nice * plotH, he = m.expenses / nice * plotH;
-    return `<rect x="${x - bw - 1}" y="${top + plotH - hi}" width="${bw}" height="${hi}" rx="3" fill="#2a78d6"><title>${esc(m.month)} · ${esc(names[0])}: ${esc(fmtValue(m.income))}</title></rect>
-      <rect x="${x + 1}" y="${top + plotH - he}" width="${bw}" height="${he}" rx="3" fill="#eb6834"><title>${esc(m.month)} · ${esc(names[1])}: ${esc(fmtValue(m.expenses))}</title></rect>
-      <text x="${x}" y="${h - 8}" text-anchor="middle" class="axis">${esc(m.month)}</text>`;
+    // The current month is not finished: lighter bars with a dashed outline
+    const cur = m.current ? ` fill-opacity="0.4" stroke-dasharray="4 3" stroke-width="1.5"` : "";
+    return `<rect x="${x - bw - 1}" y="${top + plotH - hi}" width="${bw}" height="${hi}" rx="3" fill="#2a78d6" stroke="#2a78d6"${cur}><title>${esc(m.month)} · ${esc(names[0])}: ${esc(fmtValue(m.income))}</title></rect>
+      <rect x="${x + 1}" y="${top + plotH - he}" width="${bw}" height="${he}" rx="3" fill="#eb6834" stroke="#eb6834"${cur}><title>${esc(m.month)} · ${esc(names[1])}: ${esc(fmtValue(m.expenses))}</title></rect>
+      <text x="${x}" y="${h - 8}" text-anchor="middle" class="axis">${esc(m.month)}${m.current ? " *" : ""}</text>`;
   }).join("");
   return `<svg class="months" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" role="img">${grid}${bars}</svg>`;
 }

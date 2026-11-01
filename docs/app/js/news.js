@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 22, date: "2026-11-01", items: {
+    en: ["📊 Clearer charts: \"Your expenses\" shows from which date to which date it counts, and the current month is marked as not finished (planned income, expenses so far)."],
+    pl: ["📊 Czytelniejsze wykresy: „Twoje wydatki” pokazują, od której do której daty są liczone, a bieżący miesiąc jest oznaczony jako niezakończony (dochody zaplanowane, wydatki do tej pory)."],
+    de: ["📊 Klarere Diagramme: „Ihre Ausgaben“ zeigt, von welchem bis zu welchem Datum gerechnet wird, und der laufende Monat ist als nicht abgeschlossen markiert (geplante Einnahmen, bisherige Ausgaben)."],
+    fr: ["📊 Graphiques plus clairs : « Vos dépenses » indique de quelle date à quelle date elles sont comptées, et le mois en cours est marqué comme non terminé (revenus prévus, dépenses jusqu'ici)."] } },
   { build: 20, date: "2026-11-01", items: {
     en: ["🔁 Expenses can repeat: choose \"Repeats\" when adding an expense, or click 🔁 next to it – it then appears every month in the Payment calendar.", "🏦 My savings: add a regular deposit (standing order) to a savings entry – it appears automatically as \"To savings\" in the Payment calendar."],
     pl: ["🔁 Wydatki mogą się powtarzać: wybierz „Powtarzanie” przy dodawaniu wydatku albo kliknij 🔁 obok niego – pojawi się co miesiąc w kalendarzu płatności.", "🏦 Moje oszczędności: dodaj regularną wpłatę (zlecenie stałe) – pojawi się automatycznie jako „Na oszczędności” w kalendarzu płatności."],
