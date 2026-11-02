@@ -552,7 +552,7 @@ svg.donut text { pointer-events: none; }
 .list.scroll.sort-other { max-height: 60vh; overflow: auto; }
 
 /* ---------- Lock screen (PIN / automatic lock) ---------- */
-body.is-locked #app { filter: blur(18px); pointer-events: none; user-select: none; }
+body.is-locked #app { visibility: hidden; pointer-events: none; user-select: none; }   /* hidden, not blurred: more private, and blur over the whole app crashes some old phones */
 body.is-locked #page { visibility: hidden; }
 .lock-screen { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, var(--page) 82%, transparent); backdrop-filter: blur(6px); }
 .lock-box { width: min(360px, 100%); background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px 24px; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,.35); display: flex; flex-direction: column; gap: 12px; align-items: stretch; }
@@ -832,3 +832,11 @@ body.drop-on::after { content: "⬆"; position: fixed; inset: 12px; z-index: 200
 
 .laying .cols { align-items: start !important; }
 .laying .cols > .col > .card:last-child { flex: 0 0 auto !important; }
+
+/* ---------- Light mode (old or weak phones, ?lite=1): no blur, no fixed background, light shadows ---------- */
+html.lite *, html.lite *::before, html.lite *::after { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; filter: none !important; }
+html.lite body, html.lite[data-design] body { background-attachment: scroll !important; }
+html.lite[data-design="emerald"] body { background: var(--page) !important; }
+html.lite .card, html.lite[data-design] .card, html.lite .tile, html.lite .popup, html.lite .box { box-shadow: none !important; }
+html.lite .lock-screen { background: var(--page) !important; }
+html.lite[data-design] .tabs, html.lite .top { background: var(--side, #1A2120) !important; }

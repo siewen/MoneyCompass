@@ -13,6 +13,19 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="MoneyCompass">
+<script>
+// Light mode for older or weaker phones: no blur, no fixed background, lighter shadows. Heavy graphics effects can make
+// Chrome close by itself on old Android phones (e.g. Android 8). Force it with ?lite=1, switch it off with ?lite=0.
+(function () {
+  try {
+    var q = location.search.match(/[?&]lite=([01])/), v = q ? q[1] : localStorage.getItem("mc-lite");
+    if (q) localStorage.setItem("mc-lite", q[1]);
+    var m = navigator.userAgent.match(/Android (\d+)/), old = m && +m[1] <= 9;
+    var weak = (navigator.deviceMemory && navigator.deviceMemory <= 2) || (m && navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4 && navigator.deviceMemory && navigator.deviceMemory <= 3);
+    if (v === "1" || (v !== "0" && (old || weak))) document.documentElement.classList.add("lite");
+  } catch (e) { document.documentElement.classList.add("lite"); }
+})();
+</script>
 <link rel="stylesheet" href="app.css">
 </head>
 <body>

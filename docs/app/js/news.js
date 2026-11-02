@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 71, date: "2026-11-02", items: {
+    en: ["📱 Lighter on older phones and tablets (Android 9 or older, or little memory): no blur effects and lighter graphics, so Chrome doesn't close. The lock screen now hides your finances completely instead of blurring them."],
+    pl: ["📱 Lżej na starszych telefonach i tabletach (Android 9 lub starszy albo mało pamięci): bez efektów rozmycia i z lżejszą grafiką, aby Chrome się nie zamykał. Ekran blokady całkowicie ukrywa teraz Twoje finanse zamiast je rozmywać."],
+    de: ["📱 Leichter auf älteren Handys und Tablets (Android 9 oder älter, oder wenig Speicher): keine Unschärfe-Effekte und leichtere Grafik, damit Chrome nicht schließt. Der Sperrbildschirm verbirgt Ihre Finanzen jetzt vollständig, statt sie unscharf zu zeigen."],
+    fr: ["📱 Plus léger sur les téléphones et tablettes anciens (Android 9 ou plus ancien, ou peu de mémoire) : pas d'effets de flou et des graphismes plus légers, pour que Chrome ne se ferme pas. L'écran de verrouillage masque désormais complètement vos finances au lieu de les flouter."] } },
   { build: 70, date: "2026-11-02", items: {
     en: ["📐 Better use of space: cards are spread evenly over the columns (a measuring bug put too many in one column), no more big empty cards, and imported inflows are much shorter – the bank's long text on two lines, the choice below it."],
     pl: ["📐 Lepsze wykorzystanie miejsca: karty są równo rozłożone w kolumnach (błąd pomiaru wkładał zbyt wiele do jednej), koniec z dużymi pustymi kartami, a zaimportowane wpływy są dużo krótsze – długi opis banku w dwóch liniach, wybór pod nim."],
