@@ -713,7 +713,14 @@ export const EXTRA = {
 "Your account checks": "Ihre Kontoprüfungen",
 "The real rate of your savings accounts, from the statements you checked. Click a check for the months.": "Der echte Zinssatz Ihrer Sparkonten aus den geprüften Auszügen. Klicken Sie auf eine Prüfung für die Monate.",
 "after tax": "nach Steuern",
-"Delete this check?": "Diese Prüfung löschen?"
+"Delete this check?": "Diese Prüfung löschen?",
+"Unlock with fingerprint or face": "Mit Fingerabdruck oder Gesicht entsperren",
+"Not recognised. Try again or enter your PIN.": "Nicht erkannt. Versuchen Sie es erneut oder geben Sie Ihre PIN ein.",
+"Unlock with fingerprint or face on this device": "Auf diesem Gerät mit Fingerabdruck oder Gesicht entsperren",
+"Set a PIN to also unlock with fingerprint or face.": "Legen Sie eine PIN fest, um auch mit Fingerabdruck oder Gesicht zu entsperren.",
+"Fingerprint or face unlock turned off.": "Entsperren mit Fingerabdruck oder Gesicht ausgeschaltet.",
+"Fingerprint or face unlock is on for this device.": "Entsperren mit Fingerabdruck oder Gesicht ist auf diesem Gerät eingeschaltet.",
+"Fingerprint or face could not be set up on this device.": "Fingerabdruck oder Gesicht konnte auf diesem Gerät nicht eingerichtet werden."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1428,7 +1435,14 @@ export const EXTRA = {
 "Your account checks": "Vos vérifications de comptes",
 "The real rate of your savings accounts, from the statements you checked. Click a check for the months.": "Le taux réel de vos comptes d'épargne d'après les relevés vérifiés. Cliquez sur une vérification pour voir les mois.",
 "after tax": "après impôt",
-"Delete this check?": "Supprimer cette vérification ?"
+"Delete this check?": "Supprimer cette vérification ?",
+"Unlock with fingerprint or face": "Déverrouiller par empreinte ou visage",
+"Not recognised. Try again or enter your PIN.": "Non reconnu. Réessayez ou saisissez votre PIN.",
+"Unlock with fingerprint or face on this device": "Déverrouiller par empreinte ou visage sur cet appareil",
+"Set a PIN to also unlock with fingerprint or face.": "Définissez un PIN pour aussi déverrouiller par empreinte ou visage.",
+"Fingerprint or face unlock turned off.": "Déverrouillage par empreinte ou visage désactivé.",
+"Fingerprint or face unlock is on for this device.": "Le déverrouillage par empreinte ou visage est activé sur cet appareil.",
+"Fingerprint or face could not be set up on this device.": "L'empreinte ou le visage n'a pas pu être configuré sur cet appareil."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -2143,6 +2157,13 @@ export const EXTRA = {
 "Your account checks": "Twoje sprawdzenia kont",
 "The real rate of your savings accounts, from the statements you checked. Click a check for the months.": "Rzeczywiste oprocentowanie Twoich kont oszczędnościowych z sprawdzonych wyciągów. Kliknij, aby zobaczyć miesiące.",
 "after tax": "po podatku",
-"Delete this check?": "Usunąć to sprawdzenie?"
+"Delete this check?": "Usunąć to sprawdzenie?",
+"Unlock with fingerprint or face": "Odblokuj odciskiem palca lub twarzą",
+"Not recognised. Try again or enter your PIN.": "Nie rozpoznano. Spróbuj ponownie lub wpisz PIN.",
+"Unlock with fingerprint or face on this device": "Odblokowuj odciskiem palca lub twarzą na tym urządzeniu",
+"Set a PIN to also unlock with fingerprint or face.": "Ustaw PIN, aby odblokowywać też odciskiem palca lub twarzą.",
+"Fingerprint or face unlock turned off.": "Odblokowanie odciskiem palca lub twarzą wyłączone.",
+"Fingerprint or face unlock is on for this device.": "Odblokowanie odciskiem palca lub twarzą jest włączone na tym urządzeniu.",
+"Fingerprint or face could not be set up on this device.": "Nie udało się skonfigurować odcisku palca ani twarzy na tym urządzeniu."
 }
 };

@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 33, date: "2026-11-02", items: {
+    en: ["👆 Unlock with fingerprint or face: with a PIN set, turn it on in your profile (top right). Works with Windows Hello, Android fingerprint, Touch ID and Face ID – only on that device, and the PIN still works."],
+    pl: ["👆 Odblokowanie odciskiem palca lub twarzą: gdy masz PIN, włącz je w profilu (w prawym górnym rogu). Działa z Windows Hello, odciskiem palca w Androidzie, Touch ID i Face ID – tylko na tym urządzeniu, a PIN nadal działa."],
+    de: ["👆 Entsperren mit Fingerabdruck oder Gesicht: Mit gesetzter PIN in Ihrem Profil (oben rechts) einschalten. Funktioniert mit Windows Hello, Android-Fingerabdruck, Touch ID und Face ID – nur auf diesem Gerät, die PIN funktioniert weiterhin."],
+    fr: ["👆 Déverrouillage par empreinte ou visage : avec un PIN, activez-le dans votre profil (en haut à droite). Fonctionne avec Windows Hello, l'empreinte Android, Touch ID et Face ID – uniquement sur cet appareil, et le PIN reste valable."] } },
   { build: 32, date: "2026-11-02", items: {
     en: ["🧩 Tidier pages: on every tab the summary comes first, then your list, then the form to add something – and cards fill the columns evenly without big gaps.", "📐 More compact: tighter spacing on every page, so you scroll less."],
     pl: ["🧩 Uporządkowane strony: na każdej zakładce najpierw podsumowanie, potem Twoja lista, a na końcu formularz dodawania – karty równo wypełniają kolumny, bez dużych przerw.", "📐 Bardziej zwarty układ: mniejsze odstępy na każdej stronie, mniej przewijania."],

@@ -1,6 +1,6 @@
 // Lock screen: a PIN for each profile (saved in the profile) and an automatic lock after some minutes without use.
 // Note: the PIN keeps other people on this device out of the app. It does not encrypt the data in the browser.
-import { T, State, save, profiles, switchTo, deleteProfile, currentName } from "./core.js";
+import { T, State, save, store, profiles, switchTo, deleteProfile, currentName } from "./core.js";
 import { esc, popup, toast, confirmBox } from "./ui.js";
 
 const enc = new TextEncoder();
@@ -21,8 +21,46 @@ export async function setPin(pin) {
   const salt = [...crypto.getRandomValues(new Uint8Array(12))].map(x => x.toString(16).padStart(2, "0")).join("");
   S().PinSalt = salt; S().PinHash = await hash(pin, salt); save();
 }
-export function removePin() { delete S().PinHash; delete S().PinSalt; save(); }
+export function removePin() { delete S().PinHash; delete S().PinSalt; save(); removeBio(); }
 export async function checkPin(pin) { return hasPin() && await hash(pin, S().PinSalt) === S().PinHash; }
+
+// ---------- fingerprint or face (WebAuthn, this device only) ----------
+// Windows Hello, Android fingerprint, Touch ID or Face ID through the browser. The fingerprint or face never leaves the device:
+// the device only confirms "the owner is here". The credential id is kept in this browser (not in the profile file),
+// because it works only on the device where it was set up. It needs a PIN, which stays the fallback.
+const bioKey = () => "mc-bio:" + State.id;
+const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const unb64u = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+let bioAvail = false;
+(async () => { try { bioAvail = !!(window.PublicKeyCredential && window.isSecureContext && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()); } catch { bioAvail = false; } })();
+/** Can this device unlock with fingerprint or face? */
+export const bioAvailable = () => bioAvail;
+export const bioOn = () => hasPin() && !!window.PublicKeyCredential && !!store.get(bioKey());
+export function removeBio() { store.remove(bioKey()); }
+/** Set up fingerprint or face for this profile on this device. True when it worked. */
+export async function enableBio() {
+  try {
+    const cred = await navigator.credentials.create({ publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      rp: { name: "MoneyCompass" },
+      user: { id: crypto.getRandomValues(new Uint8Array(16)), name: currentName() || "MoneyCompass", displayName: currentName() || "MoneyCompass" },
+      pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+      authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "discouraged" },
+      attestation: "none", timeout: 60000 } });
+    if (!cred) return false;
+    store.set(bioKey(), b64u(cred.rawId)); return true;
+  } catch { return false; }
+}
+/** Ask the device for the fingerprint or face. True only when the device confirmed the owner. */
+async function bioCheck() {
+  try {
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const a = await navigator.credentials.get({ publicKey: { challenge, allowCredentials: [{ type: "public-key", id: unb64u(store.get(bioKey())) }], userVerification: "required", timeout: 60000 } });
+    const cd = JSON.parse(new TextDecoder().decode(a.response.clientDataJSON));
+    const flags = new Uint8Array(a.response.authenticatorData)[32];
+    return cd.type === "webauthn.get" && cd.challenge === b64u(challenge) && cd.origin === location.origin && !!(flags & 4);
+  } catch { return false; }
+}
 
 // ---------- the lock screen ----------
 let locked = false, last = Date.now(), fails = 0, waitUntil = 0, after = null, rebuild = () => {};
@@ -43,6 +81,7 @@ export function lock(next = null) {
     ${hasPin() ? `<input class="pin-input" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="• • • •" aria-label="${esc(T("PIN"))}">
       <p class="lock-error bad" hidden></p>` : ""}
     <button class="btn main lock-open">🔓 ${esc(T("Open"))}</button>
+    ${bioOn() ? `<button class="btn second lock-bio">👆 ${esc(T("Unlock with fingerprint or face"))}</button>` : ""}
     ${others.length ? `<label class="lock-switch"><span>${esc(T("Other profile"))}</span><select><option value="">–</option>${others.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("")}</select></label>` : ""}
     ${hasPin() ? `<a href="#" class="lock-forgot">${esc(T("Forgot your PIN?"))}</a>` : ""}
   </div>`;
@@ -62,6 +101,12 @@ export function lock(next = null) {
     fails = 0; unlock();
   };
   el.querySelector(".lock-open").onclick = open;
+  const bio = async () => {
+    if (await bioCheck()) { if (el.isConnected) { fails = 0; unlock(); } }
+    else if (el.isConnected) { err.hidden = false; err.textContent = T("Not recognised. Try again or enter your PIN."); }
+  };
+  const bioBtn = el.querySelector(".lock-bio");
+  if (bioBtn) { bioBtn.onclick = bio; setTimeout(() => { if (el.isConnected && !document.hidden) bioCheck().then(ok => { if (ok && el.isConnected) { fails = 0; unlock(); } }); }, 300); }
   input?.addEventListener("keydown", e => { if (e.key === "Enter") open(); });
   el.querySelector(".lock-switch select")?.addEventListener("change", e => {
     if (!e.target.value) return;

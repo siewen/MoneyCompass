@@ -6,7 +6,7 @@ import {
   markFileBase } from "./core.js";
 import { esc, card, heading, hint, row, field, textInput, select, check, button, values, popup, confirmBox, alertBox, promptBox, toast, pickFile, download, stamp } from "./ui.js";
 import { App, requirePro, windowsOrPro, DOWNLOAD_URL } from "./app.js";
-import { hasPin, lock, pinDialog } from "./lock.js";
+import { hasPin, lock, pinDialog, bioAvailable, bioOn, enableBio, removeBio } from "./lock.js";
 import { fileProtected, setFilePassword, removeFilePassword, profileFileText, isEncryptedFile, decryptFile } from "./crypt.js";
 import { Rates } from "./rates.js";
 import { openBankImport } from "./pages-pro.js";
@@ -38,6 +38,9 @@ export function openProfile() {
       <hr><h3>🔒 ${esc(T("PIN"))}</h3>
       ${hint(hasPin() ? T("This profile is protected with a PIN.") : T("No PIN: anyone using this device can open this profile."))}
       <div class="buttons">${button(esc(hasPin() ? T("Change or remove PIN…") : T("Set a PIN…")), "pin", "second small")}</div>
+      ${bioAvailable() ? (hasPin()
+        ? `<label class="check"><input type="checkbox" data-bio${bioOn() ? " checked" : ""}><span>👆 ${esc(T("Unlock with fingerprint or face on this device"))}</span></label>`
+        : hint("👆 " + T("Set a PIN to also unlock with fingerprint or face."))) : ""}
       <hr><h3>${esc(T("Profiles"))}</h3>
       <div class="list">${list.map(x => `<div class="item${x.current ? " current" : " clickable"}" data-switch="${x.id}"><div><b>${esc(x.name)}</b>${x.current ? `<span class="hint">${esc(T("in use"))}</span>` : ""}</div>
         ${x.current ? "" : `<button class="icon-btn danger" data-del-profile="${x.id}">🗑</button>`}</div>`).join("")}</div>
@@ -58,6 +61,14 @@ export function openProfile() {
     });
     on('[data-a="nopic"]', () => { setPicture(null); draw(); App.rebuild(); });
     on('[data-action="pin"]', () => pinDialog(draw));
+    const bx = p.el.querySelector("[data-bio]");
+    if (bx) bx.onchange = async () => {
+      if (!bx.checked) { removeBio(); toast(T("Fingerprint or face unlock turned off."), "good"); return; }
+      bx.disabled = true;
+      const ok = await enableBio(); bx.disabled = false;
+      if (ok) toast(T("Fingerprint or face unlock is on for this device."), "good");
+      else { bx.checked = false; toast(T("Fingerprint or face could not be set up on this device."), "bad"); }
+    };
     on('[data-action="activate"]', async () => {
       const err = await license.activate(p.el.querySelector("textarea").value);
       if (err) { toast(err, "bad"); return; }

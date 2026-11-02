@@ -128,7 +128,7 @@ export function createProfile(name, data) {
 export function deleteProfile(id) {
   const idx = readIndex();
   idx.ids = idx.ids.filter(x => x !== id);
-  store.remove("mc-p:" + id); store.remove("mc-pic:" + id); store.remove("mc-filekey:" + id);
+  store.remove("mc-p:" + id); store.remove("mc-pic:" + id); store.remove("mc-filekey:" + id); store.remove("mc-bio:" + id);
   if (idx.current === id) idx.current = idx.ids[0] || "";
   writeIndex(idx); loadCurrent();
 }
