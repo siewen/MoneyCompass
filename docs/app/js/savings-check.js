@@ -215,7 +215,7 @@ const MAX_AHEAD = 6;   // forecast: off by default, up to 6 months (chosen by th
 export function savingsData(d, AHEAD = 0) {
   const s = d.Settings, now = monthStart(today()).getTime();
   const acc = new Map(), flows = new Map(), used = new Set();
-  let netTotal = 0;   // net interest of the analyses, as in each analysis (all of it, when no newer analysis covers the same months)
+  let netTotal = 0, grossTotal = 0;   // net interest of the analyses, as in each analysis (all of it, when no newer analysis covers the same months)
   const get = (k, label) => { if (!acc.has(k)) acc.set(k, { label, pts: new Map() }); return acc.get(k); };
   const linkedId = c => d.Holdings.some(h => h.Id === c.HoldingId) ? c.HoldingId : "check:" + c.Name;
   for (const c of d.SavingsChecks || []) {          // newest check first: it wins for months two checks both cover
@@ -224,17 +224,18 @@ export function savingsData(d, AHEAD = 0) {
     // (net = gross − tax); when it credits after tax, the credited interest is already net.
     const credited = (c.Types || []).reduce((s2, t) => s2 + (t.Interest || 0), 0);
     const toNet = credited > 0 ? Math.min(1, (c.Interest - c.Tax) / credited) : 1 - BELKA;
+    const toGross = credited > 0 ? c.Interest / credited : 1;
     let mine = 0, all = 0, part = 0;
     for (const m of c.Months || []) {
       const t = monthStart(parseDate(m.Month)).getTime(), u = k + "|" + t;
       all++; if (used.has(u)) continue; used.add(u); mine++;
       a.pts.set(t, m.End ?? m.Average);
       const f = flows.get(t) || { cr: 0, db: 0, int: 0, fee: 0 };
-      f.cr += m.Credits || 0; f.db += m.Debits || 0; f.int += (m.Interest || 0) * toNet; f.fee += m.Fees || 0; flows.set(t, f);
+      f.cr += m.Credits || 0; f.db += m.Debits || 0; f.int += (m.Interest || 0) * toNet; f.gross = (f.gross || 0) + (m.Interest || 0) * toGross; f.fee += m.Fees || 0; flows.set(t, f);
       part += (m.Interest || 0) * toNet;
     }
-    if (mine === all) netTotal += (c.Interest || 0) - (c.Tax || 0);
-    else netTotal += part;   // partly covered by a newer analysis: only its own months
+    if (mine === all) { netTotal += (c.Interest || 0) - (c.Tax || 0); grossTotal += c.Interest || 0; }
+    else { netTotal += part; grossTotal += part / (toNet || 1) * toGross; }   // partly covered by a newer analysis: only its own months
   }
   for (const h of d.Holdings) {
     const toPln = v => Calc.toPln(v, h.Currency, s);
@@ -262,7 +263,7 @@ export function savingsData(d, AHEAD = 0) {
   const fut = []; let b = total[total.length - 1];
   for (let k = 1; k <= AHEAD; k++) { b = b * (1 + r / 12 * (1 - BELKA)) + dep; fut.push(b); }
   const flowAt = (k) => months.map(m => (flows.get(m.getTime()) || {})[k] || 0).concat(Array(AHEAD).fill(null));
-  return { months, accounts, total, fut, dep, r, netTotal,
+  return { months, accounts, total, fut, dep, r, netTotal, grossTotal, gross: flowAt("gross"),
     credits: flowAt("cr"), debits: flowAt("db"), interest: flowAt("int"), fees: flowAt("fee") };
 }
 export function savingsChartCard(d) {
@@ -276,7 +277,8 @@ export function savingsChartCard(d) {
   if (AHEAD) lines.push({ key: "forecast", label: T("Forecast"), color: "var(--primary)", dashed: true, values: [...Array(n - 1).fill(null), x.total[n - 1], ...x.fut] });
   const bars = [
     { key: "cr", label: T("Credits (deposits)"), color: "#3B82F6", values: x.credits },
-    { key: "int", label: T("Net interest (after tax)"), color: "#84CC16", values: x.interest },
+    { key: "int", label: T("Net interest (after tax)"), color: "#84CC16", values: x.interest,
+      tips: x.interest.map((v, i) => v === null ? "" : "\n" + T("Gross interest") + ": " + pln(x.gross[i] || 0) + "\n" + T("Withholding tax (Belka, 19%)") + ": −" + pln(Math.max(0, (x.gross[i] || 0) - v)) + "\n" + T("Net interest (after tax)") + ": " + pln(v)) },
     { key: "db", label: T("Debits (withdrawals)"), color: "#F59E0B", values: x.debits },
     { key: "fee", label: T("Fees & charges"), color: "#E5484D", values: x.fees },
   ];
@@ -289,7 +291,7 @@ export function savingsChartCard(d) {
   const keys = [...lines, ...bars].map(sr => `<button class="wave-key${hid.has(sr.key) ? " off" : ""}" data-sav="${sr.key}" style="--c:${sr.color}"><i${sr.dashed ? ' class="dash"' : ""}></i>${esc(sr.label)}</button>`).join("");
   return card(heading(T("Savings balance"), "📈") +
     `<div class="sav-figures">${fig(T("Total balance"), pln(end))}${n > 1 ? fig(T("Net change since {0}", monthName(x.months[0])), (end - start >= 0 ? "+" : "−") + pln(Math.abs(end - start)), end >= start ? "good" : "bad") : ""}
-      ${sum(x.interest) ? fig(T("Net interest (after tax)"), "+" + pln(x.netTotal || sum(x.interest)), "good") : ""}${sum(x.fees) ? fig(T("Fees & charges"), "−" + pln(sum(x.fees)), "bad") : ""}
+      ${sum(x.interest) ? `<div data-tip="${esc(T("Gross interest") + ": " + pln(x.grossTotal) + "\n" + T("Withholding tax (Belka, 19%)") + ": −" + pln(x.grossTotal - x.netTotal) + "\n" + T("Net interest (after tax)") + ": " + pln(x.netTotal))}"><span>${esc(T("Net interest (after tax)"))} ⓘ</span><b class="good">+${esc(pln(x.netTotal || sum(x.interest)))}</b></div>` : ""}${sum(x.fees) ? fig(T("Fees & charges"), "−" + pln(sum(x.fees)), "bad") : ""}
       ${AHEAD ? fig(T("Forecast in {0} months", AHEAD), pln(x.fut[AHEAD - 1])) : ""}
       <label class="sav-ahead"><span>${esc(T("Forecast"))}</span><select data-sav-ahead>${[[0, T("Off")], [1, T("1 month")], [3, T("{0} months", 3)], [6, T("{0} months", 6)]].map(([v, l]) => `<option value="${v}"${v === AHEAD ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label></div>` +
     `<div class="wave-legend">${keys}</div>` + savingsChart(labels, lines, bars, axis, fmtV, hid, n) +

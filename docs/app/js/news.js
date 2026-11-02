@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 38, date: "2026-11-02", items: {
+    en: ["ℹ️ Savings chart: point at an interest dot (or the interest total) to see gross interest, the 19% tax and net interest."],
+    pl: ["ℹ️ Wykres oszczędności: najedź na punkt odsetek (lub ich sumę), aby zobaczyć odsetki brutto, 19% podatek i odsetki netto."],
+    de: ["ℹ️ Spardiagramm: Zeigen Sie auf einen Zinspunkt (oder die Zinssumme), um Bruttozinsen, 19 % Steuer und Nettozinsen zu sehen."],
+    fr: ["ℹ️ Graphique de l'épargne : survolez un point d'intérêts (ou leur total) pour voir les intérêts bruts, l'impôt de 19 % et les intérêts nets."] } },
   { build: 37, date: "2026-11-02", items: {
     en: ["🧮 Savings chart: interest is now shown after the 19% tax (net), exactly as in your statement analysis."],
     pl: ["🧮 Wykres oszczędności: odsetki są teraz pokazane po 19% podatku (netto), dokładnie jak w analizie wyciągu."],
