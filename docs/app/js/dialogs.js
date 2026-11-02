@@ -3,7 +3,7 @@ import {
   T, State, save, license, LANGS, lang, currentName, initials, picture, setPicture, profiles, switchTo, createProfile, deleteProfile,
   replaceData, normalise, looksLikeProfile, summary, reset, MODULES, setModule, moduleOn, Calc, Advisor, ChartData, pln, rate, fmtDate,
   parseDate, categoryLabel, monthName, ONE_TIME, store,
-  markFileBase } from "./core.js";
+  markFileBase, savingsRateText } from "./core.js";
 import { esc, card, heading, hint, row, field, textInput, select, check, button, values, popup, confirmBox, alertBox, promptBox, toast, pickFile, download, stamp } from "./ui.js";
 import { App, requirePro, windowsOrPro, DOWNLOAD_URL } from "./app.js";
 import { hasPin, lock, pinDialog, bioAvailable, bioOn, enableBio, removeBio } from "./lock.js";
@@ -339,7 +339,7 @@ function reportParts() {
     [T("Regular income per month"), pln(inc.monthlyTotal)], [T("Extra income received this month (bank import)"), pln(Calc.receivedIn(d, new Date()))],
     [T("One-time income in {0}", new Date().getFullYear()), pln(inc.oneTimeThisYear)],
     [T("Average expenses per month (Outflows tab)"), avg.monthsUsed ? pln(spending) : T("no data yet")],
-    [T("Balance per month"), avg.monthsUsed ? pln(left) : "–"], [T("Savings rate"), avg.monthsUsed && inc.monthlyTotal > 0 ? Math.round(left / inc.monthlyTotal * 100) + "%" : "–"],
+    [T("Balance per month"), avg.monthsUsed ? pln(left) : "–"], [T("Savings rate"), avg.monthsUsed && inc.monthlyTotal > 0 ? savingsRateText(left, inc.monthlyTotal) : "–"],
     [T("Secure savings (bank, cash)"), pln(p.safe)], [T("Investments at risk (crypto, securities)"), pln(p.risky)], [T("Total"), pln(p.total)],
     [T("Interest p.a. (gross)"), pln(p.yearly)], [T("Emergency fund target"), pln(em.target)], [T("Emergency fund covered"), em.target > 0 ? Math.round(Math.min(1, p.safe / em.target) * 100) + "%" : "–"]];
   const income = [[T("Name"), T("Type"), T("How often"), T("Per month (zł)"), T("Active")], ...d.Incomes.map(i => [i.Name, T(i.Type), T(i.Frequency), i.Frequency === ONE_TIME ? T("one-time") : round(Calc.monthlyPln(i, d.Settings)), i.Active ? T("Yes") : T("No")])];

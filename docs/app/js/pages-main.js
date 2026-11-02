@@ -3,8 +3,7 @@ import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, addMonths, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
   addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
-  matchKey, learnCategory, similarExpenses, setCategory, goalSaved,
-} from "./core.js";
+  matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText } from "./core.js";
 import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
 import { NEW_CAT } from "./ui.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON } from "./ui.js";
@@ -84,7 +83,7 @@ export const Overview = {
       ${tile(T("Inflows per month"), pln(income), "income", ["#1E5FB0", "#60A5FA", "#EAF2FC", "#2A78D6"], "", tipIncome)}
       ${tile(T("Outflows per month"), avg.monthsUsed ? pln(spending) : "–", "expenses", ["#C2410C", "#FB923C", "#FDF0E9", "#EB6834"], "", tipSpending)}
       ${tile(T("Balance per month"), both ? pln(left) : "–", "income", ["#0E7C55", "#34D399", "#E7F7F0", "#1BAF7A"], both && left < 0 ? "bad" : "", T("Inflows minus outflows: what you can save each month."))}
-      ${tile(T("Savings rate"), both ? Math.round(left / income * 100) + "%" : "–", "portfolio", ["#7E22CE", "#C084FC", "#F5EDFD", "#A855F7"], "", T("The part of your income you keep. A good aim is 10–20% or more."))}
+      ${tile(T("Savings rate"), both ? savingsRateText(left, income) : "–", "portfolio", ["#7E22CE", "#C084FC", "#F5EDFD", "#A855F7"], both && left < 0 ? "bad" : "", T("The part of your income you keep. A good aim is 10–20% or more."))}
     </div>`);
     const sw = shortDataWarning(d);
     if (sw) parts.push(`<div class="tip warn-tip short-data">${sw.replace(/<\/?p[^>]*>/g, "")} ${esc(T("Import or enter at least one whole month."))}</div>`);
@@ -262,7 +261,7 @@ export const Income = {
         (extra > 0 ? row(T("Extra income received this month (bank import)"), pln(extra)) : "") +
         row(T("Average outflows per month (Outflows tab)"), avg.monthsUsed ? pln(spending) : esc(T("no data yet"))) +
         row(T("Balance per month"), avg.monthsUsed ? pln(left) : "–", avg.monthsUsed && left < 0 ? "bad" : "good") +
-        row(T("Savings rate"), avg.monthsUsed && inc.monthlyTotal > 0 ? Math.round(left / inc.monthlyTotal * 100) + "%" : "–") +
+        row(T("Savings rate"), avg.monthsUsed && inc.monthlyTotal > 0 ? savingsRateText(left, inc.monthlyTotal) : "–", avg.monthsUsed && left < 0 ? "bad" : "") +
         hint(message) + (inc.missing ? hint(T("Some income is in USD or EUR but the exchange rate is empty, so it counts as 0 zł. Enter the rates in the Savings tab."), "bad") : ""))}
       ${card(heading(T("Your income sources")) + hint(T("Tap a source to edit it. Switch off 'Active' for income that has stopped but you want to keep in the list.")) +
         (d.Incomes.length ? `<div class="list">${d.Incomes.map(i => {

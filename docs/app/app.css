@@ -462,7 +462,7 @@ svg.donut text { pointer-events: none; }
 .ti, .page-head { display: none; }
 :root[data-design="emerald"] {
   --page: #121615; --card: #1F2826; --border: rgba(255,255,255,.07); --ink: #EEF3F1; --muted: #9AA9A4; --grid: rgba(255,255,255,.08);
-  --primary: #4FC59B; --good: #4FC59B; --warn: #E9D16A; --bad: #9D8CFF; --goals: #8B7CF6; --field: #171D1C; --soft: #1A2220;
+  --primary: #4FC59B; --good: #4FC59B; --warn: #E9D16A; --bad: #F2777A; --goals: #8B7CF6; --field: #171D1C; --soft: #1A2220;
   --side: #1A2120; --hi: #4FC59B; --hi2: #8B7CF6; --chip: rgba(255,255,255,.05); --radius: 26px;
 }
 :root[data-design="emerald"] body { background: radial-gradient(1200px 700px at 85% 0%, #1E4A3C 0%, transparent 60%), radial-gradient(900px 600px at 0% 100%, #1B3A31 0%, transparent 55%), var(--page); background-attachment: fixed; }

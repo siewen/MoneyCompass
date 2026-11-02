@@ -308,6 +308,8 @@ export function goalSaved(g, d = State.data) {
   const h = g.HoldingId && d.Holdings.find(x => x.Id === g.HoldingId);
   return h ? Calc.toPln(h.Amount, h.Currency, d.Settings) : (g.Saved || 0);
 }
+/** Savings rate as text: below −100% the number means nothing (you spend many times what comes in), so it says so. */
+export const savingsRateText = (left, income) => { const r = Math.round(left / income * 100); return r < -100 ? "< −100%" : r + "%"; };
 export const moduleOn = code => license.isPro && State.data.Settings.Modules.includes(code);
 export function setModule(code, on) {
   const list = State.data.Settings.Modules.filter(m => m !== code);

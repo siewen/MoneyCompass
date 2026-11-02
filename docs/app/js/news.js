@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 42, date: "2026-11-02", items: {
+    en: ["🔴 Negative amounts and warnings are now red (were purple), and a savings rate below −100% shows as \"< −100%\"."],
+    pl: ["🔴 Kwoty ujemne i ostrzeżenia są teraz czerwone (były fioletowe), a stopa oszczędności poniżej −100% jest pokazana jako „< −100%”."],
+    de: ["🔴 Negative Beträge und Warnungen sind jetzt rot (vorher lila), und eine Sparquote unter −100 % wird als „< −100 %“ angezeigt."],
+    fr: ["🔴 Les montants négatifs et les avertissements sont désormais en rouge (au lieu de violet), et un taux d'épargne inférieur à −100 % s'affiche « < −100 % »."] } },
   { build: 41, date: "2026-11-02", items: {
     en: ["🛠️ Bank import: money transferred back from a savings account is now taken off its balance (before, only what went in was counted). You can also enter the savings account's balance today right in the import.", "🛠️ Transfers called \"internal transfer\" (e.g. Millennium) to another person are no longer taken for your own account.", "💶 Money from your own accounts (e.g. your salary account in another bank) now shows in Imported inflows as \"Not income\" – switch it to Salary when that bank's statement isn't imported. After an import, only the newest salary is offered as your monthly income."],
     pl: ["🛠️ Import wyciągu: pieniądze przelane z powrotem z rachunku oszczędnościowego są teraz odejmowane od jego salda (wcześniej liczono tylko wpłaty). Możesz też od razu w imporcie wpisać dzisiejsze saldo rachunku oszczędnościowego.", "🛠️ Przelewy opisane jako „internal transfer” (np. Millennium) do innej osoby nie są już traktowane jako przelewy na własny rachunek.", "💶 Wpływy z Twoich własnych rachunków (np. rachunku z pensją w innym banku) są teraz widoczne w importowanych wpływach jako „Nie dochód” – zmień na Wynagrodzenie, jeśli nie importujesz wyciągu z tego banku. Po imporcie proponowana jest tylko najnowsza pensja jako miesięczny dochód."],
