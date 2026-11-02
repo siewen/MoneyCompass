@@ -148,7 +148,9 @@ function layoutGrid(grid) {
     grid._orig = grid._items.filter(x => !isFull(x));
     const key = grid.dataset.key;
     const saved = key && State.data.Settings.CardOrder?.[key];
-    if (Array.isArray(saved) && saved.length) {
+    // A moved order is kept by card position: only use it while the tab has the same cards. When a card appears or disappears
+    // (e.g. "Your account checks" after the first saved check) the positions no longer match, so the standard order is used.
+    if (Array.isArray(saved) && saved.length === grid._orig.length) {
       const ordered = [...new Set(saved)].filter(i => i >= 0 && i < grid._orig.length).map(i => grid._orig[i]);
       grid._orig.forEach(c => { if (!ordered.includes(c)) ordered.push(c); });
       let k = 0;
@@ -254,7 +256,11 @@ function addHandle(grid, card) {
 }
 const resize = new ResizeObserver(entries => entries.forEach(e => layoutGrid(e.target)));
 new MutationObserver(() => {
-  document.querySelectorAll(".grid:not([data-laid])").forEach(g => { g.dataset.laid = "1"; layoutGrid(g); resize.observe(g); });
+  document.querySelectorAll(".grid:not([data-laid])").forEach(g => {
+    g.dataset.laid = "1"; layoutGrid(g); resize.observe(g);
+    // A section opened or closed in a card changes its height: spread the cards over the columns again (no big gaps)
+    g.addEventListener("toggle", e => { if (e.target.closest(".grid") === g && e.target.closest(".popup") === g.closest(".popup")) { g._cols = 0; layoutGrid(g); } }, true);
+  });
 }).observe(document.documentElement, { childList: true, subtree: true });
 
 // ---------------------------------------------------------------- small line icons (they take the button's colour)

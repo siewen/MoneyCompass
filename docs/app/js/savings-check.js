@@ -1,7 +1,7 @@
 // "What does my savings account really pay?" – reads the CSV statement of a savings account and works out
 // the rate the bank really paid: interest, Belka tax and fees against the money that was on the account, day by day.
 import { T, State, save, pln, rate, fmtDate, monthName, monthStart, addMonths, addDays, isoDate, parseDate, BELKA } from "./core.js";
-import { esc, card, heading, hint, row, popup, alertBox, pickFile, toast, numInput, field, button } from "./ui.js";
+import { esc, card, heading, hint, row, popup, alertBox, pickFile, toast, numInput, field, button, check } from "./ui.js";
 import { Rates } from "./rates.js";
 import * as Csv from "./csv.js";
 import { App, requirePro } from "./app.js";
@@ -62,7 +62,8 @@ export function analyse(rows, opening) {
     if (!inM.length) continue;
     const mAvg = inM.reduce((s, x) => s + x.b, 0) / inM.length;
     const forM = counted.filter(x => belongs(x).getTime() === m.getTime()).reduce((s, x) => s + x.amount, 0);
-    months.push({ m, avg: mAvg, interest: forM, days: inM.length, rate: yearly(forM, mAvg, inM.length) });
+    const feeM = rows.filter(x => kind(x) === "fee" && x.date >= m && x.date < addMonths(m, 1)).reduce((s, x) => s - x.amount, 0);
+    months.push({ m, avg: mAvg, interest: forM, fees: feeM, end: inM[inM.length - 1].b, days: inM.length, rate: yearly(forM, mAvg, inM.length) });
   }
   // Interest lines with different titles (e.g. promotional and standard interest) – shown separately
   const groups = new Map();
@@ -120,7 +121,7 @@ export async function openSavingsCheck() {
           row(T("Interest (before tax)"), "+" + pln(r.grossAll), "good") +
           (r.earlier > 0.005 ? hint(T("{0} of it was credited on {1} for the month before the statement – not counted in the rate.", pln(r.grossAll * r.earlierShare), fmtDate(r.from))) : "") +
           row(T("Belka tax 19%"), "−" + pln(r.taxAll)) + (r.taxInFile ? "" : hint(T("Your bank credits the interest already after the 19% tax ({0} credited) – the interest before tax is worked out from it.", pln(r.interest)))) +
-          row(T("Fees"), "−" + pln(r.fees), r.fees > 0 ? "bad" : "") +
+          row(T("Fees"), "−" + pln(r.fees), r.fees > 0 ? "bad" : "") + row(T("Fees per month (average)"), "−" + pln(r.fees / (r.days / 30.44)), r.fees > 0 ? "bad" : "") +
           row(T("Your real gain"), pln(r.netAll - r.fees), "big") +
           (r.groups.length > 1 ? `<h3 class="sub-h">${esc(T("Interest by type"))}</h3>` + r.groups.map(([k, v]) => row(k, "+" + pln(v))).join("") +
             hint(T("Your bank credits these separately – e.g. promotional interest on new money and standard interest on the rest.")) : ""))}
@@ -129,29 +130,36 @@ export async function openSavingsCheck() {
           <div class="buttons" style="align-self:end">${button(esc(T("Update")), "use-check", "main")}</div></div>` +
           `<hr>${hint(T("Keep this check in the Savings tab, to compare it with later statements. Nothing is kept unless you save it."))}
           <div class="two"><label class="field"><span>${esc(T("Name of the check"))}</span><input name="checkname" value="${esc(defaultName)}"></label>
-          <div class="buttons" style="align-self:end">${button("💾 " + esc(T("Save result")), "save-check", "second")}</div></div>`)}
+          <div class="buttons" style="align-self:end">${button("💾 " + esc(T("Save result")), "save-check", "second")}</div></div>
+          ${check("alsohold", T("Also put the balance and rate into the savings entry above"), true)}`)}
         ${card(heading(T("Month by month"), "📅") + hint(T("Interest credited in the first days of a month counts for the month before.")) +
-          `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Average balance"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Rate per year"))}</th></tr></thead><tbody>` +
-          r.months.map(m => `<tr><td>${esc(monthName(m.m))}</td><td>${pln(m.avg)}</td><td>${m.interest ? "+" + pln(m.interest) : "–"}</td><td class="${m.interest && m.rate < 2 ? "bad" : ""}">${m.interest ? rate(m.rate) : "–"}</td></tr>`).join("") +
+          `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Balance at the end"))}</th><th>${esc(T("Average balance"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Fees"))}</th><th>${esc(T("Rate per year"))}</th></tr></thead><tbody>` +
+          r.months.map(m => `<tr><td>${esc(monthName(m.m))}</td><td>${pln(m.end)}</td><td>${pln(m.avg)}</td><td>${m.interest ? "+" + pln(m.interest) : "–"}</td><td class="${m.fees > 0 ? "bad" : ""}">${m.fees > 0 ? "−" + pln(m.fees) : "–"}</td><td class="${m.interest && m.rate < 2 ? "bad" : ""}">${m.interest ? rate(m.rate) : "–"}</td></tr>`).join("") +
           `</tbody></table>`, "wide")}
       </div>
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
     p.el.querySelector('[name="opening"]')?.addEventListener("change", e => { opening = Csv.parseAmount(e.target.value) || 0; draw(); });
-    p.el.querySelector('[data-action="save-check"]').onclick = () => {
-      const name = p.el.querySelector('[name="checkname"]').value.trim() || defaultName;
-      d.SavingsChecks.unshift({ Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: name, Saved: new Date().toISOString().slice(0, 19),
-        From: isoDate(r.from), To: isoDate(r.to), Days: r.days, Opening: r2(r.opening), Closing: r2(r.closing), Average: r2(r.avg),
-        Deposits: r2(r.deposits), Withdrawals: r2(r.withdrawals), Interest: r2(r.grossAll), Tax: r2(r.taxAll), Fees: r2(r.fees),
-        Gross: r2(r.gross), Net: r2(r.netAfterBelka), Months: r.months.map(m => ({ Month: isoDate(m.m), Average: r2(m.avg), Interest: r2(m.interest), Rate: r2(m.rate) })),
-        Types: r.groups.map(([k, v]) => ({ Name: k, Interest: r2(v) })) });
-      save(); p.close(); App.refresh();
-      toast(T("Saved in Savings: {0}.", name), "good");
-    };
-    p.el.querySelector('[data-action="use-check"]').onclick = () => {
+    // Puts the balance at the end and the real rate (before tax) into the chosen savings entry, or a new one
+    const toHolding = name => {
       const idx = +p.el.querySelector('[name="hold"]').value;
       let h = d.Holdings[idx];
-      if (!h) { h = { Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: T("Savings account"), Place: "Bank", Currency: "PLN", Safe: true }; d.Holdings.push(h); }
-      h.Amount = Math.round(r.closing * 100) / 100; h.RatePercent = Math.round(r.gross * 100) / 100;
+      if (!h) { h = { Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: name || T("Savings account"), Place: "Bank", Currency: "PLN", Safe: true }; d.Holdings.push(h); }
+      h.Amount = r2(r.closing); h.RatePercent = r2(r.gross);
+      return h;
+    };
+    p.el.querySelector('[data-action="save-check"]').onclick = () => {
+      const name = p.el.querySelector('[name="checkname"]').value.trim() || defaultName;
+      const h = p.el.querySelector('[name="alsohold"]').checked ? toHolding(name) : null;
+      d.SavingsChecks.unshift({ HoldingId: h?.Id || "", Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: name, Saved: new Date().toISOString().slice(0, 19),
+        From: isoDate(r.from), To: isoDate(r.to), Days: r.days, Opening: r2(r.opening), Closing: r2(r.closing), Average: r2(r.avg),
+        Deposits: r2(r.deposits), Withdrawals: r2(r.withdrawals), Interest: r2(r.grossAll), Tax: r2(r.taxAll), Fees: r2(r.fees),
+        Gross: r2(r.gross), Net: r2(r.netAfterBelka), Months: r.months.map(m => ({ Month: isoDate(m.m), End: r2(m.end), Average: r2(m.avg), Interest: r2(m.interest), Fees: r2(m.fees), Rate: r2(m.rate) })),
+        Types: r.groups.map(([k, v]) => ({ Name: k, Interest: r2(v) })) });
+      save(); p.close(); App.refresh();
+      toast(T("Saved in Savings: {0}.", name) + (h ? " " + T("{0}: {1} at {2}.", h.Name, pln(h.Amount), rate(h.RatePercent)) : ""), "good");
+    };
+    p.el.querySelector('[data-action="use-check"]').onclick = () => {
+      const h = toHolding(T("Savings account"));
       save(); p.close(); App.refresh();
       toast(T("{0}: {1} at {2}.", h.Name, pln(h.Amount), rate(h.RatePercent)), "good");
     };
@@ -163,17 +171,32 @@ export async function openSavingsCheck() {
 export function savedChecksCard(d) {
   if (!d.SavingsChecks?.length) return "";
   return card(heading(T("Your account checks"), "📑") + hint(T("The real rate of your savings accounts, from the statements you checked. Click a check for the months.")) +
-    d.SavingsChecks.map(c => `<details class="rec-month check-item"><summary><b>${esc(c.Name)}</b>
-      <span class="hint">${fmtDate(c.From)} – ${fmtDate(c.To)} · <b class="${c.Net < 2 ? "bad" : "good"}">${rate(c.Net)}</b> ${esc(T("after tax"))}</span>
-      <button class="icon-btn danger" data-del-check="${esc(c.Id)}" title="${esc(T("Delete"))}">🗑</button></summary>
-      ${row(T("Before tax"), rate(c.Gross))}${row(T("After tax and fees"), rate(c.Net))}${row(T("Average balance"), pln(c.Average))}
-      ${row(T("Interest (before tax)"), "+" + pln(c.Interest))}${row(T("Belka tax 19%"), "−" + pln(c.Tax))}${row(T("Fees"), "−" + pln(c.Fees))}
-      ${(c.Types || []).length > 1 ? c.Types.map(t => row(t.Name, "+" + pln(t.Interest))).join("") : ""}
-      ${(c.Months || []).length ? `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Average balance"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Rate per year"))}</th></tr></thead><tbody>` +
-        c.Months.map(m => `<tr><td>${esc(monthName(parseDate(m.Month)))}</td><td>${pln(m.Average)}</td><td>${m.Interest ? "+" + pln(m.Interest) : "–"}</td><td>${m.Interest ? rate(m.Rate) : "–"}</td></tr>`).join("") + "</tbody></table>" : ""}
-    </details>`).join(""));
+    d.SavingsChecks.map(c => {
+      const linked = d.Holdings.find(h => h.Id === c.HoldingId), perMonth = c.Days ? c.Fees / (c.Days / 30.44) : 0;
+      return `<details class="rec-month check-item"><summary><div class="check-head"><b>${esc(c.Name)}</b>
+        <span class="hint">${fmtDate(c.From)} – ${fmtDate(c.To)}</span></div>
+        <div class="right"><b>${pln(c.Closing)}</b><span class="hint"><b class="${c.Net < 2 ? "bad" : "good"}">${rate(c.Net)}</b> ${esc(T("after tax"))}</span></div>
+        <button class="icon-btn danger" data-del-check="${esc(c.Id)}" title="${esc(T("Delete"))}">🗑</button></summary>
+        ${row(T("Balance on {0}", fmtDate(c.To)), pln(c.Closing), "big")}
+        ${row(T("At the start"), pln(c.Opening))}${row(T("New money paid in"), "+" + pln(c.Deposits))}${row(T("Taken out"), "−" + pln(c.Withdrawals))}${row(T("Average balance"), pln(c.Average))}
+        ${row(T("Before tax"), rate(c.Gross))}${row(T("After tax and fees"), rate(c.Net))}
+        ${row(T("Interest (before tax)"), "+" + pln(c.Interest), "good")}${row(T("Belka tax 19%"), "−" + pln(c.Tax))}
+        ${row(T("Fees"), "−" + pln(c.Fees), c.Fees > 0 ? "bad" : "")}${row(T("Fees per month (average)"), "−" + pln(perMonth), c.Fees > 0 ? "bad" : "")}
+        ${(c.Types || []).length > 1 ? c.Types.map(t => row(t.Name, "+" + pln(t.Interest))).join("") : ""}
+        ${(c.Months || []).length ? `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Balance at the end"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Fees"))}</th><th>${esc(T("Rate per year"))}</th></tr></thead><tbody>` +
+          c.Months.map(m => `<tr><td>${esc(monthName(parseDate(m.Month)))}</td><td>${m.End !== undefined ? pln(m.End) : pln(m.Average)}</td><td>${m.Interest ? "+" + pln(m.Interest) : "–"}</td><td class="${m.Fees > 0 ? "bad" : ""}">${m.Fees > 0 ? "−" + pln(m.Fees) : "–"}</td><td>${m.Interest ? rate(m.Rate) : "–"}</td></tr>`).join("") + "</tbody></table>" : ""}
+        ${linked ? hint("✔ " + T("In Your savings as \"{0}\".", linked.Name))
+          : `<div class="buttons">${button("＋ " + esc(T("Add to Your savings")), "check-hold", "second small", `data-check="${esc(c.Id)}"`)}</div>`}
+      </details>`; }).join(""));
 }
 export function bindSavedChecks(el, d) {
+  // A saved check without a savings entry: create one with the balance at the end and the rate before tax
+  el.querySelectorAll('[data-action="check-hold"]').forEach(b => b.onclick = () => {
+    const c = d.SavingsChecks.find(x => x.Id === b.dataset.check); if (!c) return;
+    const h = { Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: c.Name, Place: "Bank", Currency: "PLN", Safe: true, Amount: c.Closing, RatePercent: c.Gross };
+    d.Holdings.push(h); c.HoldingId = h.Id; save(); App.refresh();
+    toast(T("{0}: {1} at {2}.", h.Name, pln(h.Amount), rate(h.RatePercent)), "good");
+  });
   el.querySelectorAll("[data-del-check]").forEach(b => b.onclick = async ev => {
     ev.preventDefault(); ev.stopPropagation();
     const { confirmBox } = await import("./ui.js");

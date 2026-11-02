@@ -97,6 +97,7 @@ let saveFailed = false;
 export function save() {
   const ok = store.set("mc-p:" + State.id, JSON.stringify(State.data));
   saveFailed = !ok;
+  try { window.dispatchEvent(new Event("mc-saved")); } catch { /* not in a browser */ }
 }
 export const lastSaveFailed = () => saveFailed;
 
@@ -128,7 +129,7 @@ export function createProfile(name, data) {
 export function deleteProfile(id) {
   const idx = readIndex();
   idx.ids = idx.ids.filter(x => x !== id);
-  store.remove("mc-p:" + id); store.remove("mc-pic:" + id); store.remove("mc-filekey:" + id); store.remove("mc-bio:" + id);
+  store.remove("mc-p:" + id); store.remove("mc-pic:" + id); store.remove("mc-filekey:" + id); store.remove("mc-bio:" + id); store.remove("mc-backup:" + id); store.remove("mc-backup-later:" + id);
   if (idx.current === id) idx.current = idx.ids[0] || "";
   writeIndex(idx); loadCurrent();
 }

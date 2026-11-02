@@ -654,5 +654,17 @@ body.is-locked .lock-screen ~ .popup-back { visibility: visible; z-index: 1100; 
   :root[data-design] .card { padding: 14px; }
 }
 :root[data-design] .popup { padding: 18px; }
+/* the button bar reaches the popup edges: its negative margins must match the popup padding, or both scrollbars appear */
+:root[data-design] .popup-buttons { bottom: -18px; margin: 14px -18px -18px; padding: 10px 18px; }
 :root[data-design] .item { padding: 7px 4px; }
 :root[data-design] .advice { padding: 10px 12px; margin: 8px 0; }
+/* Automatic backup: reminder bar under the header, and the status line in Options */
+.backup-bar { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px 12px; font-size: 13px; padding: 7px 14px; margin: 8px 16px 0; border-radius: 12px; background: color-mix(in srgb, var(--primary) 14%, var(--card)); border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent); color: var(--ink); }
+.backup-bar[hidden] { display: none; }
+.backup-bar .btn.small { padding: 4px 12px; }
+.backup-line { font-size: 13px; font-weight: 600; margin: 4px 0; overflow-wrap: anywhere; }
+.small-note { font-size: 13px; margin: 4px 0; }
+.check-item > summary .check-head { display: flex; flex-direction: column; margin-right: auto; min-width: 0; }
+.check-item > summary .check-head b { margin: 0; overflow-wrap: anywhere; }
+.check-item > summary .right { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+.check-item .rate-table td, .check-item .rate-table th { padding: 5px 4px; font-size: 13px; }

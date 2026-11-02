@@ -7,8 +7,9 @@ import {
 import { esc, card, heading, hint, row, field, textInput, select, check, button, values, popup, confirmBox, alertBox, promptBox, toast, pickFile, download, stamp } from "./ui.js";
 import { App, requirePro, windowsOrPro, DOWNLOAD_URL } from "./app.js";
 import { hasPin, lock, pinDialog, bioAvailable, bioOn, enableBio, removeBio } from "./lock.js";
-import { fileProtected, setFilePassword, removeFilePassword, profileFileText, isEncryptedFile, decryptFile } from "./crypt.js";
+import { fileProtected, setFilePassword, removeFilePassword, profileFileText, isEncryptedFile, decryptFile, isBuiltinFile, openBuiltin } from "./crypt.js";
 import { Rates } from "./rates.js";
+import { autoSupported, backupInfo, backupLine, chooseBackupFile, stopBackup, drawBackupBar } from "./backup.js";
 import { openBankImport } from "./pages-pro.js";
 
 const D = () => State.data;
@@ -45,6 +46,7 @@ export function openProfile() {
       <div class="list">${list.map(x => `<div class="item${x.current ? " current" : " clickable"}" data-switch="${x.id}"><div><b>${esc(x.name)}</b>${x.current ? `<span class="hint">${esc(T("in use"))}</span>` : ""}</div>
         ${x.current ? "" : `<button class="icon-btn danger" data-del-profile="${x.id}">🗑</button>`}</div>`).join("")}</div>
       <div class="buttons">${button("＋ " + esc(T("New profile")), "new-profile", "second")}${button(esc(T("Save profile")), "save-file", "second")}${button(esc(T("Load a profile…")), "load-file", "second")}</div>
+      ${hint("🛡️ " + backupLine())}
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
     bind();
   };
@@ -115,11 +117,11 @@ function shrinkPicture(file) {
 }
 
 export async function saveProfileFile() {
-  D().Settings.LastProfileSaved = new Date().toISOString().slice(0, 19);
+  const now = new Date(); D().Settings.LastProfileSaved = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 19);  // local time
   save();
   const locked = fileProtected();
   download(`MoneyCompass-profile-${stamp()}${locked ? "-protected" : ""}.json`, await profileFileText(D()), "application/json");
-  markFileBase();
+  markFileBase(); drawBackupBar(saveProfileFile);
   toast(locked ? "🔒 " + T("Profile saved, protected with your password") : T("Profile saved"));
 }
 /** Ask for a password in a box with hidden letters: the text, or null when cancelled. */
@@ -154,11 +156,12 @@ async function openProtected(x) {
   }
 }
 export async function loadProfileFile() {
-  const f = await pickFile(".json,application/json");
+  const f = await pickFile(".json,.mcbak,application/json");
   if (!f) return false;
   let data;
   try { data = JSON.parse(await f.text()); } catch { data = null; }
-  if (isEncryptedFile(data)) { data = await openProtected(data); if (!data) return false; }
+  if (isBuiltinFile(data)) data = await openBuiltin(data);
+  else if (isEncryptedFile(data)) { data = await openProtected(data); if (!data) return false; }
   if (!looksLikeProfile(data)) { await alertBox(T("Profile not loaded"), T("This file is not a MoneyCompass profile.")); return false; }
   const n = normalise(data);
   if (!(await confirmBox(T("Load this profile?"), T("It contains: {0}.\n\nThis replaces everything you have entered now. Tip: save your current profile first.", summary(n)), T("Load"), T("Cancel")))) return false;
@@ -190,6 +193,13 @@ export function openOptions() {
       check("shownews", T("Show what's new after an update"), !s.NewsHidden) +
       field(T("When I close MoneyCompass"), select("closechoice", [["", T("Ask every time")], ["with", T("Save profile and close")], ["without", T("Close without saving")]], s.CloseChoice === "none" ? "without" : s.CloseChoice || "")) +
       `<div class="buttons">${button(esc(T("Save profile now")), "save-file", "second")}${button(esc(T("Load a profile…")), "load-file", "second")}</div>` +
+      `<hr><h3>🛡️ ${esc(T("Automatic backup"))}</h3>` +
+      hint(T("MoneyCompass keeps a copy of your profile in a file on this computer and updates it by itself after every change. If the browser data is ever deleted, open the file with \"Load a profile…\". Choose a folder like Documents or OneDrive.")) +
+      `<p class="backup-line">${esc(backupLine())}</p>` +
+      hint("🔒 " + (fileProtected() ? T("The backup is encrypted with your file password.")
+        : T("The backup is encrypted, so it can't be read in Notepad. For full protection, also set a password for profile files below."))) +
+      (autoSupported() ? `<div class="buttons">${backupInfo().status === "off" ? button(esc(T("Choose where to keep it…")), "bk-on", "main")
+        : button(esc(T("Choose another file…")), "bk-on", "second") + button(esc(T("Turn off")), "bk-off", "second")}</div>` : "") +
       `<hr><h3>🔒 ${esc(T("Password for profile files"))}</h3>` +
       hint(fileProtected() ? T("On: profile files you save are encrypted (AES-256). They can only be opened with the password, in the web app.")
         : T("Off: profile files are plain text – anyone who opens the file can read your figures.")) +
@@ -214,6 +224,13 @@ export function openOptions() {
   el.querySelector('[data-action="file-pw-off"]')?.addEventListener("click", async () => {
     if (!(await confirmBox(T("Turn off the password?"), T("New profile files will be plain text again. Files you saved before stay protected with the old password."), T("Turn off"), T("Cancel")))) return;
     removeFilePassword(); p.close(); openOptions();
+  });
+  el.querySelector('[data-action="bk-on"]')?.addEventListener("click", async () => {
+    if (await chooseBackupFile()) { toast(T("Automatic backup is on: {0}", backupInfo().file), "good"); p.close(); openOptions(); }
+  });
+  el.querySelector('[data-action="bk-off"]')?.addEventListener("click", async () => {
+    if (!(await confirmBox(T("Turn off the automatic backup?"), T("The backup file stays where it is, but it is no longer updated."), T("Turn off"), T("Cancel")))) return;
+    await stopBackup(); p.close(); openOptions();
   });
   el.querySelector('select[name="autolock"]').onchange = e => { s.AutoLockMinutes = +e.target.value; save(); };
   el.querySelector('input[name="askstart"]').onchange = e => { s.AskOnStart = e.target.checked; save(); };

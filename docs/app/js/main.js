@@ -2,6 +2,7 @@
 import { store, T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed, summary, fmtDate, changedSinceFile } from "./core.js";
 import { esc, popup, toast } from "./ui.js";
 import { startLock, lock, hasPin } from "./lock.js";
+import { startBackup, drawBackupBar, backupProfileChanged } from "./backup.js";
 import { App, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
 import { WEB_VERSION, WEB_BUILD, WEB_DATE } from "./version.js";
@@ -58,6 +59,7 @@ function applyTheme() {
   document.documentElement.dataset.side = side();
 }
 
+let shellProfile = "";
 function buildShell() {
   applyTheme();
   document.documentElement.lang = lang();
@@ -77,6 +79,7 @@ function buildShell() {
       </div>
     </header>
     ${license.isPro ? "" : `<div class="free-bar">${esc(T("Free web version."))} <a href="${DOWNLOAD_URL}" target="_blank" rel="noopener">${esc(T("Download the Windows app"))}</a> · <a href="#" data-act="profile">${esc(T("Enter license key"))}</a></div>`}
+    <div id="backup-bar" class="backup-bar" hidden></div>
     <div class="page-head"><h1 id="page-title"></h1></div>
     <main id="page"></main>
     <button class="help-fab" data-act="help-menu" title="${esc(T("Help & About"))}">?</button>`;
@@ -84,6 +87,8 @@ function buildShell() {
   const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide };
   document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
   setupHelpButton();
+  // Another profile now? Read its backup state; otherwise only draw the bar again
+  if (shellProfile !== State.id) { shellProfile = State.id; backupProfileChanged(); } else drawBackupBar(saveProfileFile);
   render();
   fitTabs();
   // Folded side menu: opens while the mouse is on it. On touch screens (phones, the open Z Fold) it opens with the arrow instead,
@@ -424,6 +429,7 @@ async function start() {
     else if (shouldShowGuide()) openGuide(); else promoReminder();
   });
   startLock(buildShell);
+  startBackup(() => drawBackupBar(saveProfileFile));
   // With a PIN the lock screen comes first
   if (hasPin()) lock(() => termsGate(afterTerms)); else termsGate(afterTerms);
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
