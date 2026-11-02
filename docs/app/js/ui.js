@@ -3,7 +3,14 @@ import { T, State, save } from "./core.js";
 
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-export const card = (inner, cls = "") => `<section class="card ${cls}">${inner}</section>`;
+/** A card. A long explanation right under the card title becomes a small ⓘ next to the title (hover or tap to read it):
+ *  the cards stay short, and the numbers come first. Short lines (dates, periods) stay visible. */
+const INTRO = /^(\s*(?:<form[^>]*>\s*)?<h3>[\s\S]{0,400}?)<\/h3>\s*<p class="hint\s*">([^<]{110,})<\/p>/;
+export const card = (inner, cls = "") => {
+  const m = INTRO.exec(inner);
+  if (m && !m[1].includes("i-tip")) inner = inner.replace(INTRO, (all, head, text) => `${head} <span class="i-tip" data-tip="${text}" tabindex="0" role="button" aria-label="${text}">ⓘ</span></h3>`);
+  return `<section class="card ${cls}">${inner}</section>`;
+};
 // Card headings are plain text (calm, like banking apps): emoji icons are no longer drawn; an SVG icon still is.
 export const heading = (text, icon = "") => `<h3>${icon && icon.startsWith("<svg") ? `<span class="h-icon">${icon}</span>` : ""}${esc(text)}</h3>`;
 /** Heading with a small ⓘ: the explanation shows on hover (computer) or on tap (phone) instead of a paragraph in the card. */
@@ -248,6 +255,7 @@ function cardId(card) {
 }
 function layoutGrid(grid) {
   if (!grid._items) {
+    foldHints(grid);
     grid._items = [...grid.children];
     grid._orig = grid._items.filter(x => !isFull(x));
     const key = grid.dataset.key;
@@ -305,6 +313,14 @@ function layoutGrid(grid) {
   }
   grid.classList.remove("laying");
   fitCols(grid);
+}
+/** Long help texts (more than about two lines) are cut to 2 lines with "…"; a click shows all of it. */
+function foldHints(grid) {
+  grid.querySelectorAll(".card p.hint").forEach(p => {
+    if (p.classList.contains("fold") || p.children.length || (p.textContent || "").length < 140) return;
+    p.classList.add("fold"); p.title = T("Click to read more");
+    p.addEventListener("click", () => { p.classList.toggle("unfold"); p.title = p.classList.contains("unfold") ? "" : T("Click to read more"); grid._cols = 0; layoutGrid(grid); });
+  });
 }
 /** Columns end level only where it looks right: the last card of a shorter column is stretched to the bottom
  *  when the gap is small. With a big gap (one very long card next to short ones) the card keeps its own height –

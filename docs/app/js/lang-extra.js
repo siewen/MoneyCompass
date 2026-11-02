@@ -984,7 +984,16 @@ export const EXTRA = {
 "Put the tabs in your own order.": "Ordnen Sie die Tabs in Ihrer eigenen Reihenfolge.",
 "To unlock: click your name → Profile & license, paste your key under Activation and press Activate.": "Zum Freischalten: auf Ihren Namen klicken → Profil & Lizenz, Schlüssel unter Aktivierung einfügen und Aktivieren drücken.",
 "Clearing your browser data deletes your entries. With Pro, turn on the automatic encrypted backup (Options) or save your profile (click your name → Profile). Loading a profile is free. The Windows app opens these files from version 2.1.": "Das Löschen der Browserdaten löscht Ihre Einträge. Mit Pro schalten Sie die automatische verschlüsselte Sicherung ein (Optionen) oder speichern Ihr Profil (auf Ihren Namen klicken → Profil). Laden ist kostenlos. Die Windows-App öffnet diese Dateien ab Version 2.1.",
-"The free Windows app has more than the free web version: reports and several profiles. From version 2.1 it also opens the encrypted profile files of the web app.": "Die kostenlose Windows-App bietet mehr als die kostenlose Webversion: Berichte und mehrere Profile. Ab Version 2.1 öffnet sie auch die verschlüsselten Profildateien der Web-App."
+"The free Windows app has more than the free web version: reports and several profiles. From version 2.1 it also opens the encrypted profile files of the web app.": "Die kostenlose Windows-App bietet mehr als die kostenlose Webversion: Berichte und mehrere Profile. Ab Version 2.1 öffnet sie auch die verschlüsselten Profildateien der Web-App.",
+"1 payment": "1 Zahlung",
+"Click to read more": "Klicken, um mehr zu lesen",
+"{0} expenses": "{0} Ausgaben",
+"essential {0}": "notwendig {0}",
+"Savings balance at month end": "Sparsaldo zum Monatsende",
+"Change since {0}": "Veränderung seit {0}",
+"Average change per month": "Durchschnittliche Veränderung pro Monat",
+"Net interest earned (after tax)": "Erhaltene Nettozinsen (nach Steuern)",
+"Import the statement of your savings account (Savings tab) to see your balance month by month.": "Importieren Sie den Auszug Ihres Sparkontos (Tab Ersparnisse), um Ihren Saldo Monat für Monat zu sehen."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1970,7 +1979,16 @@ export const EXTRA = {
 "Put the tabs in your own order.": "Placez les onglets dans votre propre ordre.",
 "To unlock: click your name → Profile & license, paste your key under Activation and press Activate.": "Pour débloquer : cliquez sur votre nom → Profil et licence, collez votre clé sous Activation et appuyez sur Activer.",
 "Clearing your browser data deletes your entries. With Pro, turn on the automatic encrypted backup (Options) or save your profile (click your name → Profile). Loading a profile is free. The Windows app opens these files from version 2.1.": "Effacer les données du navigateur supprime vos saisies. Avec Pro, activez la sauvegarde automatique chiffrée (Options) ou enregistrez votre profil (cliquez sur votre nom → Profil). Le chargement est gratuit. L'application Windows ouvre ces fichiers à partir de la version 2.1.",
-"The free Windows app has more than the free web version: reports and several profiles. From version 2.1 it also opens the encrypted profile files of the web app.": "L'application Windows gratuite offre plus que la version web gratuite : rapports et plusieurs profils. À partir de la version 2.1, elle ouvre aussi les fichiers de profil chiffrés de l'application web."
+"The free Windows app has more than the free web version: reports and several profiles. From version 2.1 it also opens the encrypted profile files of the web app.": "L'application Windows gratuite offre plus que la version web gratuite : rapports et plusieurs profils. À partir de la version 2.1, elle ouvre aussi les fichiers de profil chiffrés de l'application web.",
+"1 payment": "1 paiement",
+"Click to read more": "Cliquez pour en lire plus",
+"{0} expenses": "{0} dépenses",
+"essential {0}": "essentiel {0}",
+"Savings balance at month end": "Solde d'épargne en fin de mois",
+"Change since {0}": "Évolution depuis {0}",
+"Average change per month": "Évolution moyenne par mois",
+"Net interest earned (after tax)": "Intérêts nets perçus (après impôt)",
+"Import the statement of your savings account (Savings tab) to see your balance month by month.": "Importez le relevé de votre compte d'épargne (onglet Épargne) pour voir votre solde mois par mois."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -2956,6 +2974,15 @@ export const EXTRA = {
 "Put the tabs in your own order.": "Ustaw zakładki we własnej kolejności.",
 "To unlock: click your name → Profile & license, paste your key under Activation and press Activate.": "Aby odblokować: kliknij swoje imię → Profil i licencja, wklej klucz w polu Aktywacja i naciśnij Aktywuj.",
 "Clearing your browser data deletes your entries. With Pro, turn on the automatic encrypted backup (Options) or save your profile (click your name → Profile). Loading a profile is free. The Windows app opens these files from version 2.1.": "Wyczyszczenie danych przeglądarki usuwa Twoje wpisy. Z Pro włącz automatyczną zaszyfrowaną kopię (Opcje) lub zapisz profil (kliknij swoje imię → Profil). Wczytanie profilu jest bezpłatne. Aplikacja Windows otwiera te pliki od wersji 2.1.",
-"The free Windows app has more than the free web version: reports and several profiles. From version 2.1 it also opens the encrypted profile files of the web app.": "Bezpłatna aplikacja Windows ma więcej niż bezpłatna wersja webowa: raporty i kilka profili. Od wersji 2.1 otwiera też zaszyfrowane pliki profilu z aplikacji webowej."
+"The free Windows app has more than the free web version: reports and several profiles. From version 2.1 it also opens the encrypted profile files of the web app.": "Bezpłatna aplikacja Windows ma więcej niż bezpłatna wersja webowa: raporty i kilka profili. Od wersji 2.1 otwiera też zaszyfrowane pliki profilu z aplikacji webowej.",
+"1 payment": "1 płatność",
+"Click to read more": "Kliknij, aby przeczytać więcej",
+"{0} expenses": "wydatki: {0}",
+"essential {0}": "niezbędne {0}",
+"Savings balance at month end": "Saldo oszczędności na koniec miesiąca",
+"Change since {0}": "Zmiana od: {0}",
+"Average change per month": "Średnia zmiana miesięczna",
+"Net interest earned (after tax)": "Odsetki netto (po podatku)",
+"Import the statement of your savings account (Savings tab) to see your balance month by month.": "Zaimportuj wyciąg z konta oszczędnościowego (zakładka Oszczędności), aby zobaczyć saldo miesiąc po miesiącu."
 }
 };

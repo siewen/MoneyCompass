@@ -143,9 +143,7 @@ export const Overview = {
       (cats.slices.length ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.slices.map(s => ({ color: s.color, label: (s.icon ? s.icon + " " : "") + s.label, text: s.text, share: ChartData.share(s.value, cats.total) })))}</div>`
         : hint(T("Add expenses to see where your money goes."))), "link\" data-go=\"expenses"));
     parts.push(card(`<div class="link" data-go="portfolio">${headingTip(T("Your savings"), headTip)}${state ? `<span class="status-chip ${state}">${esc(state === "good" ? T("Growing") : state === "warn" ? T("Slow") : T("Shrinking"))}</span>` : ""}
-      ${headline}${bars}${growthLine}${p.total > 0
-        ? `<div class="chart-row">${donut(ChartData.money(p), pln(p.total), T("in total"))}${legend([...ChartData.money(p).map(s => ({ color: s.color, label: s.label, text: s.text, share: ChartData.share(s.value, p.total) })), { label: T("Interest p.a. (gross)"), text: pln(p.yearly) }])}</div>`
-        : hint(T("Add your savings in the Savings tab to see this chart."))}</div>
+      ${headline}${bars}${growthLine}${p.total > 0 ? savingsFacts(d, p) : hint(T("Add your savings in the Savings tab to see this chart."))}</div>
       <hr><div class="link" data-go="emergency">${heading(T("Emergency fund"))}${emergency}</div>`, "savings-card status-" + (state || "none") + " em-" + emState));
 
     if (moduleOn("loans")) {
@@ -189,6 +187,29 @@ export const Overview = {
     });
   },
 };
+/** "Your savings" on the Overview: the balance at each month end (from your statements) and the key figures, like a bank shows them. */
+function savingsFacts(d, p) {
+  const sv = savingsData(d);
+  const pts = sv ? sv.months.map((m, i) => ({ m, v: sv.total[i] })).filter(x => x.v > 0) : [];
+  let out = "";
+  if (pts.length >= 2) {
+    const shown = pts.slice(-6), max = Math.max(...shown.map(x => x.v));
+    out += `<div class="mini-bars sav-bars">${shown.map(x => `<div class="mb" title="${esc(monthName(x.m))}: ${esc(pln(x.v))}"><span class="sav" style="height:${Math.max(4, x.v / max * 44)}px"></span><small>${esc(monthName(x.m).slice(0, 3))}</small></div>`).join("")}<span class="mb-label">${esc(T("Savings balance at month end"))}</span></div>`;
+    const first = pts[0], cur = pts[pts.length - 1], ch = cur.v - first.v, months = Math.max(1, pts.length - 1);
+    const sign = v => (v >= 0 ? "+" : "−") + pln(Math.abs(v));
+    out += row(T("Savings balance"), pln(p.total), "strong") +
+      row(T("Change since {0}", monthName(first.m)), sign(ch), ch >= 0 ? "in" : "out") +
+      row(T("Average change per month"), sign(ch / months), ch >= 0 ? "in" : "out") +
+      (sv.netTotal > 0 ? row(T("Net interest earned (after tax)"), "+" + pln(sv.netTotal), "in") : "");
+  } else {
+    out += row(T("Savings balance"), pln(p.total), "strong") + hint(T("Import the statement of your savings account (Savings tab) to see your balance month by month."));
+  }
+  const share = v => Math.round(v / p.total * 100) + "%";
+  out += row(T("Secure savings (bank, cash)"), p.risky > 0 ? `${pln(p.safe)} <small class="hint">${share(p.safe)}</small>` : pln(p.safe)) +
+    (p.risky > 0 ? row(T("Investments at risk (crypto, securities)"), `${pln(p.risky)} <small class="hint">${share(p.risky)}</small>`, "out") : "") +
+    row(T("Interest p.a. (gross)"), pln(p.yearly));
+  return out;
+}
 /** What the expense averages are based on: the months that really have expenses (imported or entered). */
 export function basisText(d) {
   const c = Calc.coverage(d);
@@ -366,6 +387,8 @@ export const Income = {
 /** Imported inflows, month by month: the newest month open, older ones folded – so a long import stays short.
  *  A filter shows only salary, extra income or "not income". */
 let recFilter = "", recOpen = new Map();
+const histOpen = new Map();
+document.addEventListener("toggle", e => { const h = e.target.closest?.(".hist-month"); if (h) histOpen.set(+h.dataset.hm, h.open); }, true);
 function importedList(d) {
   const rows = [...d.Received].filter(r => !recFilter || r.Kind === recFilter).sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
   const months = new Map();
@@ -474,9 +497,12 @@ export const Expenses = {
         ${check("essential", T("Essential (must pay even in a crisis)"), cat0.Essential)}
         <div class="buttons">${button(T("Add expense"), "add-expense", "main")}</div></form>`)}
       ${card(heading(T("Outflow history")) + hint(T("Click an expense to switch it between essential and not essential. The pen changes date, category, amount and more.")) + filterBar +
-        (months.length ? visible.map(m => {
+        (months.length ? visible.map((m, i) => {
+          // Folded by month: the newest month open, older ones closed (all open while you search or filter)
           const total = m.items.reduce((s, e) => s + e.Amount, 0), ess = m.items.filter(e => e.Essential).reduce((s, e) => s + e.Amount, 0);
-          return `<div class="month-head">${esc(T("{0}  ·  total {1}  ·  essential {2}", monthName(m.start), pln(total), pln(ess)))}</div><div class="list">${m.items.map(expenseRow).join("")}</div>`;
+          const k = m.start.getTime(), open = filtering || (histOpen.has(k) ? histOpen.get(k) : i === 0);
+          return `<details class="rec-month hist-month" data-hm="${k}"${open ? " open" : ""}><summary><b>${esc(monthName(m.start))}</b>
+            <span class="hint">${esc(T("{0} expenses", m.items.length))} · <b>${pln(total)}</b> · ${esc(T("essential {0}", pln(ess)))}</span></summary><div class="list">${m.items.map(expenseRow).join("")}</div></details>`;
         }).join("") + (!showAllMonths && older ? button(T("Show older expenses ({0})", older), "older", "second") : "")
           : hint(filtering ? T("No expenses match this filter.") : T("No expenses yet."))), "wide")}
       ${movedCard(d)}

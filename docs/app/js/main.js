@@ -135,11 +135,11 @@ function meMenu() {
   const menu = document.createElement("div"); menu.className = "tab-menu data-menu me-menu";
   menu.innerHTML = `<button data-m="profile"><span class="mi">👤</span>${esc(T("Profile & license"))}</button>
     <button data-m="options"><span class="mi">⚙</span>${esc(T("Options"))}</button>
-    <div class="me-lang"><span class="mi">🌐</span>${LANGS.map(([c]) => `<button class="chip${c === lang() ? " on" : ""}" data-lang="${c}">${c.toUpperCase()}</button>`).join("")}</div>
     <hr><button data-m="help"><span class="mi">❓</span>${esc(T("Help"))}</button>
     <button data-m="guide"><span class="mi">🧭</span>${esc(T("Guide"))}</button>
     <button data-m="about"><span class="mi">ℹ</span>${esc(T("About"))}</button>
     ${installed() ? "" : `<button data-m="install"><span class="mi">📲</span>${esc(T("Install app"))}</button>`}
+    <div class="me-lang"><span class="mi">🌐</span>${LANGS.map(([c]) => `<button class="chip${c === lang() ? " on" : ""}" data-lang="${c}">${c.toUpperCase()}</button>`).join("")}</div>
     ${installed() ? `<hr><button data-m="exit" class="danger-item"><span class="mi">⏻</span>${esc(T("Close MoneyCompass"))}</button>` : ""}`;
   document.body.append(shield, menu);
   const w = menu.offsetWidth, h = menu.offsetHeight, below = r.top < window.innerHeight / 2;

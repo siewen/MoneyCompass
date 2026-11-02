@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 72, date: "2026-11-02", items: {
+    en: ["📐 More compact everywhere: regular payments folded by category, outflow history folded by month, long explanations behind ⓘ or cut to two lines (click to read), no scrollbars. \"Your savings\" on the Overview now shows your balance at each month end, the change and the net interest earned. Languages moved to the bottom of the menu."],
+    pl: ["📐 Wszędzie bardziej zwięźle: płatności cykliczne zwinięte według kategorii, historia wydatków według miesięcy, długie wyjaśnienia pod ⓘ lub skrócone do dwóch linii (kliknij, aby przeczytać), bez pasków przewijania. „Twoje oszczędności” w Przeglądzie pokazują saldo na koniec każdego miesiąca, zmianę i odsetki netto. Języki przeniesione na dół menu."],
+    de: ["📐 Überall kompakter: regelmäßige Zahlungen nach Kategorie, Ausgabenverlauf nach Monat zusammengeklappt, lange Erklärungen hinter ⓘ oder auf zwei Zeilen gekürzt (zum Lesen klicken), keine Scrollleisten. „Ihre Ersparnisse“ in der Übersicht zeigt jetzt den Saldo zu jedem Monatsende, die Veränderung und die erhaltenen Nettozinsen. Sprachen ans Ende des Menüs verschoben."],
+    fr: ["📐 Plus compact partout : paiements réguliers repliés par catégorie, historique des sorties replié par mois, longues explications derrière ⓘ ou réduites à deux lignes (cliquez pour lire), plus de barres de défilement. « Votre épargne » dans la vue d'ensemble montre maintenant le solde à chaque fin de mois, l'évolution et les intérêts nets perçus. Langues déplacées en bas du menu."] } },
   { build: 71, date: "2026-11-02", items: {
     en: ["📱 Lighter on older phones and tablets (Android 9 or older, or little memory): no blur effects and lighter graphics, so Chrome doesn't close. The lock screen now hides your finances completely instead of blurring them."],
     pl: ["📱 Lżej na starszych telefonach i tabletach (Android 9 lub starszy albo mało pamięci): bez efektów rozmycia i z lżejszą grafiką, aby Chrome się nie zamykał. Ekran blokady całkowicie ukrywa teraz Twoje finanse zamiast je rozmywać."],

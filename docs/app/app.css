@@ -669,8 +669,9 @@ body.is-locked .lock-screen ~ .popup-back { visibility: visible; z-index: 1100; 
 .check-item > summary .right { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
 .check-item .rate-table td, .check-item .rate-table th { padding: 5px 4px; font-size: 13px; }
 /* Scrollbars: invisible until the mouse is over the window, then a thin quiet line (scrolling works the same) */
-* { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-*:hover { scrollbar-color: color-mix(in srgb, var(--muted) 40%, transparent) transparent; }
+/* No scrollbars anywhere (scrolling with wheel, touchpad, finger and keys still works) */
+html, body, * { scrollbar-width: none !important; -ms-overflow-style: none; }
+*::-webkit-scrollbar, html::-webkit-scrollbar, body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
 /* Savings chart: fixed at the top of the Savings tab */
 .savings-chart { width: 100%; height: auto; display: block; margin-top: 4px; }
 .sav-figures { display: flex; flex-wrap: wrap; gap: 6px 26px; margin: 2px 0 8px; }
@@ -840,3 +841,10 @@ html.lite[data-design="emerald"] body { background: var(--page) !important; }
 html.lite .card, html.lite[data-design] .card, html.lite .tile, html.lite .popup, html.lite .box { box-shadow: none !important; }
 html.lite .lock-screen { background: var(--page) !important; }
 html.lite[data-design] .tabs, html.lite .top { background: var(--side, #1A2120) !important; }
+
+/* Long help texts: 2 lines with "…", click for all of it */
+.hint.fold:not(.unfold) { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
+.hint.fold { cursor: pointer; }
+.hint.fold:not(.unfold):hover { color: var(--ink); }
+
+.sav-bars .mb .sav { background: var(--w-save, #E9D16A); opacity: .9; }
