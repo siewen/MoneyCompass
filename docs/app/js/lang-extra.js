@@ -655,7 +655,17 @@ export const EXTRA = {
 "since {0}": "seit {0}",
 "until {0}": "bis {0}",
 "The last payment can't be before the first one.": "Die letzte Zahlung kann nicht vor der ersten liegen.",
-"Modules: goals, loans, budget, calendar": "Module: Sparziele, Kredite, Budget, Kalender"
+"Modules: goals, loans, budget, calendar": "Module: Sparziele, Kredite, Budget, Kalender",
+"Payment date": "Zahlungsdatum",
+"Any payment date – the last or the next one. MoneyCompass repeats it.": "Ein beliebiges Zahlungsdatum – das letzte oder nächste. MoneyCompass wiederholt es.",
+"Start date (optional)": "Startdatum (optional)",
+"End date": "Enddatum",
+"No end date": "Kein Enddatum",
+"Start date: the first payment – nothing is counted before it, e.g. for a new job. Leave it empty for income you have had for a long time. Without an end date the income continues in all forecasts.": "Startdatum: die erste Zahlung – davor wird nichts gezählt, z. B. bei einer neuen Stelle. Leer lassen für Einkommen, das Sie schon lange haben. Ohne Enddatum läuft das Einkommen in allen Prognosen weiter.",
+"Enter the end date, or tick \"No end date\".": "Geben Sie das Enddatum ein oder wählen Sie „Kein Enddatum“.",
+"Imported inflows": "Importierte Eingänge",
+"{0} payments": "{0} Zahlungen",
+"Nothing here with this filter.": "Nichts mit diesem Filter."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1312,7 +1322,17 @@ export const EXTRA = {
 "since {0}": "depuis le {0}",
 "until {0}": "jusqu'au {0}",
 "The last payment can't be before the first one.": "Le dernier versement ne peut pas être avant le premier.",
-"Modules: goals, loans, budget, calendar": "Modules : objectifs, prêts, budget, calendrier"
+"Modules: goals, loans, budget, calendar": "Modules : objectifs, prêts, budget, calendrier",
+"Payment date": "Date de paiement",
+"Any payment date – the last or the next one. MoneyCompass repeats it.": "N'importe quelle date de paiement – la dernière ou la prochaine. MoneyCompass la répète.",
+"Start date (optional)": "Date de début (facultatif)",
+"End date": "Date de fin",
+"No end date": "Sans date de fin",
+"Start date: the first payment – nothing is counted before it, e.g. for a new job. Leave it empty for income you have had for a long time. Without an end date the income continues in all forecasts.": "Date de début : le premier versement – rien n'est compté avant, p. ex. pour un nouvel emploi. Laissez vide pour un revenu que vous avez depuis longtemps. Sans date de fin, le revenu continue dans toutes les prévisions.",
+"Enter the end date, or tick \"No end date\".": "Saisissez la date de fin ou cochez « Sans date de fin ».",
+"Imported inflows": "Entrées importées",
+"{0} payments": "{0} paiements",
+"Nothing here with this filter.": "Rien avec ce filtre."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1969,6 +1989,16 @@ export const EXTRA = {
 "since {0}": "od {0}",
 "until {0}": "do {0}",
 "The last payment can't be before the first one.": "Ostatnia wypłata nie może być przed pierwszą.",
-"Modules: goals, loans, budget, calendar": "Moduły: cele, kredyty, budżet, kalendarz"
+"Modules: goals, loans, budget, calendar": "Moduły: cele, kredyty, budżet, kalendarz",
+"Payment date": "Data wypłaty",
+"Any payment date – the last or the next one. MoneyCompass repeats it.": "Dowolna data wypłaty – ostatnia lub następna. MoneyCompass ją powtarza.",
+"Start date (optional)": "Data rozpoczęcia (opcjonalnie)",
+"End date": "Data zakończenia",
+"No end date": "Bez daty zakończenia",
+"Start date: the first payment – nothing is counted before it, e.g. for a new job. Leave it empty for income you have had for a long time. Without an end date the income continues in all forecasts.": "Data rozpoczęcia: pierwsza wypłata – nic nie jest liczone wcześniej, np. przy nowej pracy. Zostaw puste dla dochodu, który masz od dawna. Bez daty zakończenia dochód jest uwzględniany we wszystkich prognozach.",
+"Enter the end date, or tick \"No end date\".": "Wpisz datę zakończenia albo zaznacz „Bez daty zakończenia”.",
+"Imported inflows": "Zaimportowane wpływy",
+"{0} payments": "Płatności: {0}",
+"Nothing here with this filter.": "Brak pozycji dla tego filtra."
 }
 };

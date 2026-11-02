@@ -654,3 +654,12 @@ body.is-locked .lock-screen ~ .popup-back { visibility: visible; z-index: 1100; 
   :root[data-design] .actions { margin-left: auto; }
   :root[data-design] .tabs { justify-content: safe center; }
 }
+.rec-filter { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 10px; }
+.rec-month { border-top: 1px solid var(--border); }
+.rec-month > summary { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 2px; cursor: pointer; list-style: none; }
+.rec-month > summary::-webkit-details-marker { display: none; }
+.rec-month > summary::before { content: "▸"; color: var(--muted); margin-right: 6px; transition: transform .15s; }
+.rec-month[open] > summary::before { transform: rotate(90deg); }
+.rec-month > summary b:first-of-type { margin-right: auto; }
+.check.small { font-size: 13px; margin-top: 6px; }
+.income-span .two { align-items: start; }

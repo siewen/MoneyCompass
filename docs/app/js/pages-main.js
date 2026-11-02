@@ -274,11 +274,13 @@ export const Income = {
         </div>
         ${field(T("Amount you receive each time (net, after tax)"), numInput("amount", plain(f.Amount), T("e.g. 8500 (what you actually receive, after tax)")))}
         <div class="two">${field(T("How often"), select("frequency", FREQUENCIES.map(x => [x[0], T(x[0])]), f.Frequency))}
-        ${field(f.Frequency === ONE_TIME ? T("Date the money arrives") : T("Payday - date of any payment (last or next one); the app repeats it"), dateInput("date", inputDate(parseDate(f.Date))))}</div>
+        ${field(f.Frequency === ONE_TIME ? T("Date the money arrives") : T("Payment date"), dateInput("date", inputDate(parseDate(f.Date))))}</div>
+        <p class="hint date-hint"${f.Frequency === ONE_TIME ? " hidden" : ""}>${esc(T("Any payment date – the last or the next one. MoneyCompass repeats it."))}</p>
         <div class="income-span"${f.Frequency === ONE_TIME ? " hidden" : ""}>
-          <div class="two">${field(T("First payment (optional)"), dateInput("start", f.StartDate ? inputDate(parseDate(f.StartDate)) : ""))}
-          ${field(T("Last payment (optional)"), dateInput("end", f.EndDate ? inputDate(parseDate(f.EndDate)) : ""))}</div>
-          ${hint(T("For example a new job: enter the first payday and nothing is counted before it. A job or contract that ends: enter the last one. Leave both empty for income you have had for a long time."))}
+          <div class="two">${field(T("Start date (optional)"), dateInput("start", f.StartDate ? inputDate(parseDate(f.StartDate)) : ""))}
+          <div class="field"><span>${esc(T("End date"))}</span>${dateInput("end", f.EndDate ? inputDate(parseDate(f.EndDate)) : "").replace("<input", `<input${f.EndDate ? "" : " disabled"}`)}
+          <label class="check small"><input type="checkbox" name="noend"${f.EndDate ? "" : " checked"}><span>${esc(T("No end date"))}</span></label></div></div>
+          ${hint(T("Start date: the first payment – nothing is counted before it, e.g. for a new job. Leave it empty for income you have had for a long time. Without an end date the income continues in all forecasts."))}
         </div>
         ${check("active", T("Active (count it in the totals)"), f.Active)}
         <div class="buttons">${button(e ? T("Save changes") : T("Add income"), "save-income", "main")}${e ? button(T("Cancel editing"), "cancel-income") : ""}</div></form>`)}
@@ -294,21 +296,19 @@ export const Income = {
             <label class="switch" title="${esc(T("Active (count it in the totals)"))}"><input type="checkbox" data-active-income="${i.Id}"${i.Active ? " checked" : ""}><span></span></label>
             <button class="icon-btn danger" data-del-income="${i.Id}" title="${esc(T("Delete"))}">🗑</button></div>`;
         }).join("")}</div>` : hint(T("No income added yet."))))}
-      ${card(heading(T("Received (bank import)")) + hint(T("Money that came into your account, from your bank imports. Choose for each payment how it counts: Extra income – only in that month. Salary – your regular pay, counted every month through Your income sources. Not income – ignored.")) +
-        (d.Received.length ? `<div class="list">${[...d.Received].sort((a, b) => parseDate(b.Date) - parseDate(a.Date)).slice(0, 150).map(r => `
-          <div class="item"><div><b>${esc(r.Description || "–")}</b><span class="hint">${fmtDate(r.Date)} · +${pln(r.Amount)}${r.Kind === RECEIVED.income ? (rr => ` · <button class="rep-tag${rr ? " on" : ""}" data-repeat-rec="${r.Id}" title="${esc(T("How often does it repeat?"))}">🔁 ${esc(rr ? freqLabel(rr) : T("Does not repeat"))}</button>`)(receivedRepeatOn(d, r)) : ""}</span></div>
-          ${select("kind-" + r.Id, KINDS.map(k => [k[0], T(k[1])]), r.Kind)}${infoBtn("received", r)}
-          <button class="icon-btn danger" data-del-received="${r.Id}" title="${esc(T("Delete"))}">🗑</button></div>`).join("")}</div>`
-          : hint(T("Nothing imported yet."))))}
+      ${card(heading(T("Imported inflows")) + hint(T("Money that came into your account, from your bank imports. Choose for each payment how it counts: Extra income – only in that month. Salary – your regular pay, counted every month through Your income sources. Not income – ignored.")) +
+        (d.Received.length ? importedList(d)           : hint(T("Nothing imported yet."))))}
       ${binCard(["income", "received"])}
     </div>`;
 
     const form = el.querySelector("#income-form");
     form.frequency.onchange = () => {
       const lbl = form.date.closest(".field").querySelector("span");
-      lbl.textContent = form.frequency.value === ONE_TIME ? T("Date the money arrives") : T("Payday - date of any payment (last or next one); the app repeats it");
+      lbl.textContent = form.frequency.value === ONE_TIME ? T("Date the money arrives") : T("Payment date");
       el.querySelector(".income-span").hidden = form.frequency.value === ONE_TIME;
+      el.querySelector(".date-hint").hidden = form.frequency.value === ONE_TIME;
     };
+    form.noend.onchange = () => { form.end.disabled = form.noend.checked; if (form.noend.checked) form.end.value = ""; else form.end.focus(); };
     const grossBox = el.querySelector(".gross-box");
     const toggleGross = () => { grossBox.hidden = !(form.type.value === "Salary" && form.currency.value === "PLN"); };
     form.type.addEventListener("change", toggleGross); form.currency.addEventListener("change", toggleGross);
@@ -342,6 +342,8 @@ export const Income = {
       if (r.Kind === RECEIVED.salary) await offerSalary(r);
       App.refresh();
     });
+    el.querySelectorAll("[data-rec-filter]").forEach(b => b.onclick = () => { recFilter = b.dataset.recFilter; App.refresh(); });
+    el.querySelectorAll("details.rec-month").forEach(x => x.addEventListener("toggle", () => recOpen.set(+x.dataset.month, x.open)));
     el.querySelectorAll("[data-repeat-rec]").forEach(b => b.onclick = () => {
       const r = d.Received.find(x => x.Id === b.dataset.repeatRec);
       pickRepeat(receivedRepeatOn(d, r), freq => {
@@ -357,6 +359,29 @@ export const Income = {
     });
   },
 };
+/** Imported inflows, month by month: the newest month open, older ones folded – so a long import stays short.
+ *  A filter shows only salary, extra income or "not income". */
+let recFilter = "", recOpen = new Map();
+function importedList(d) {
+  const rows = [...d.Received].filter(r => !recFilter || r.Kind === recFilter).sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
+  const months = new Map();
+  for (const r of rows) { const m = monthStart(parseDate(r.Date)), k = m.getTime(); if (!months.has(k)) months.set(k, { m, list: [] }); months.get(k).list.push(r); }
+  const count = k => d.Received.filter(r => r.Kind === k).length;
+  const chips = [["", T("All") + " (" + d.Received.length + ")"], ...KINDS.map(([k, n]) => [k, T(n).replace(/ \(.*\)$/, "") + " (" + count(k) + ")"])];
+  const item = r => `
+          <div class="item"><div><b>${esc(r.Description || "–")}</b><span class="hint">${fmtDate(r.Date)} · +${pln(r.Amount)}${r.Kind === RECEIVED.income ? (rr => ` · <button class="rep-tag${rr ? " on" : ""}" data-repeat-rec="${r.Id}" title="${esc(T("How often does it repeat?"))}">🔁 ${esc(rr ? freqLabel(rr) : T("Does not repeat"))}</button>`)(receivedRepeatOn(d, r)) : ""}</span></div>
+          ${select("kind-" + r.Id, KINDS.map(k => [k[0], T(k[1])]), r.Kind)}${infoBtn("received", r)}
+          <button class="icon-btn danger" data-del-received="${r.Id}" title="${esc(T("Delete"))}">🗑</button></div>`;
+  let first = true;
+  const groups = [...months.values()].map(({ m, list }) => {
+    const k = m.getTime(), open = recOpen.has(k) ? recOpen.get(k) : first; first = false;
+    const sum = list.filter(r => r.Kind !== RECEIVED.none).reduce((a, r) => a + r.Amount, 0);
+    return `<details class="rec-month" data-month="${k}"${open ? " open" : ""}><summary><b>${esc(monthName(m))}</b>
+      <span class="hint">${esc(T("{0} payments", list.length))} · <b class="good">+${pln(sum)}</b></span></summary><div class="list">${list.map(item).join("")}</div></details>`;
+  }).join("");
+  return `<div class="chips rec-filter">${chips.map(([k, l]) => `<button class="chip${recFilter === k ? " on" : ""}" data-rec-filter="${k}">${esc(l)}</button>`).join("")}</div>` +
+    (groups || hint(T("Nothing here with this filter.")));
+}
 function saveIncome(form) {
   const v = values(form), d = D();
   const amt = num(v.amount);
@@ -364,7 +389,8 @@ function saveIncome(form) {
   const date = v.date ? isoDate(parseDate(v.date)) : isoDate(today());
   const name = v.name.trim() || T(v.type);
   const once = v.frequency === ONE_TIME;
-  const startD = !once && v.start ? parseDate(v.start) : null, endD = !once && v.end ? parseDate(v.end) : null;
+  const startD = !once && v.start ? parseDate(v.start) : null, endD = !once && !v.noend && v.end ? parseDate(v.end) : null;
+  if (!once && !v.noend && !v.end) { toast(T("Enter the end date, or tick \"No end date\"."), "bad"); return; }
   if (startD && endD && endD < startD) { toast(T("The last payment can't be before the first one."), "bad"); return; }
   const span = { StartDate: startD ? isoDate(startD) : null, EndDate: endD ? isoDate(endD) : null };
   if (editIncome) {
@@ -787,7 +813,7 @@ export const Portfolio = {
 
 // ---------------------------------------------------------------- "Deleted items" card at the bottom of a tab
 
-const BIN_NAMES = { expense: "Expenses", income: "Income", received: "Received (bank import)", holding: "Savings", offer: "Compare offers", goal: "Savings goals", loan: "Loans & debts", budget: "Budget plan", recurring: "Regular payments" };
+const BIN_NAMES = { expense: "Expenses", income: "Income", received: "Imported inflows", holding: "Savings", offer: "Compare offers", goal: "Savings goals", loan: "Loans & debts", budget: "Budget plan", recurring: "Regular payments" };
 export function binCard(kinds) {
   const items = (State.data.Deleted || []).filter(x => kinds.includes(x.Kind));
   if (!items.length) return "";
