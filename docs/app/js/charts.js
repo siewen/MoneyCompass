@@ -76,7 +76,7 @@ export function progress(fraction, color, title = "") {
 export function waveChart(labels, series, fmtAxis, fmtValue, hidden = new Set()) {
   const w = 600, h = 240, left = 46, right = 10, top = 14, bottom = 28;
   const shown = series.filter(s => !hidden.has(s.key));
-  const all = shown.flatMap(s => s.values);
+  const all = shown.flatMap(s => s.values).filter(v => v !== null && v !== undefined);   // null = no data that month
   const maxV = Math.max(1, ...all), minV = Math.min(0, ...all);
   const top0 = niceMax(maxV), bot0 = minV < 0 ? -niceMax(-minV) : 0, span = top0 - bot0 || 1;
   const plotW = w - left - right, plotH = h - top - bottom, n = labels.length;
@@ -99,9 +99,10 @@ export function waveChart(labels, series, fmtAxis, fmtValue, hidden = new Set())
   const base = Y(Math.max(bot0, 0));
   const defs = shown.map(s => `<linearGradient id="wg-${s.key}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".28"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`).join("");
   const lines = shown.map(s => {
-    const pts = s.values.map((v, i) => [X(i), Y(v)]), d = path(pts);
+    const idx = s.values.map((v, i) => v === null || v === undefined ? -1 : i).filter(i => i >= 0);
+    const pts = idx.map(i => [X(i), Y(s.values[i])]), d = path(pts);
     const area = d ? `<path d="${d} L${pts[pts.length - 1][0]},${base} L${pts[0][0]},${base} Z" fill="url(#wg-${s.key})" class="wave-area"/>` : "";
-    const dots = pts.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="${n > 18 ? 2.5 : 3.5}" fill="var(--card)" stroke="${s.color}" stroke-width="2" class="wave-dot"><title>${esc(labels[i])} · ${esc(s.label)}: ${esc(fmtValue(s.values[i]))}</title></circle>`).join("");
+    const dots = pts.map((p, k) => `<circle cx="${p[0]}" cy="${p[1]}" r="${n > 18 ? 2.5 : 3.5}" fill="var(--card)" stroke="${s.color}" stroke-width="2" class="wave-dot"><title>${esc(labels[idx[k]])} · ${esc(s.label)}: ${esc(fmtValue(s.values[idx[k]]))}</title></circle>`).join("");
     return `${area}<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.6" stroke-linecap="round" class="wave-line"/>${dots}`;
   }).join("");
   return `<svg class="wave-chart" viewBox="0 0 ${w} ${h}" role="img"><defs>${defs}</defs>${grid}${lines}${xl}</svg>`;

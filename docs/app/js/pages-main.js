@@ -11,7 +11,7 @@ import { App, requirePro } from "./app.js";
 import { Rates } from "./rates.js";
 import { adviceCard, bindAdvice, promoBadge, moves } from "./advice.js";
 import { loanWarning } from "./pages-pro.js";
-import { openSavingsCheck, savedChecksCard, bindSavedChecks, savingsChartCard, bindSavingsChart } from "./savings-check.js";
+import { openSavingsCheck, savedChecksCard, bindSavedChecks, savingsChartCard, bindSavingsChart, savingsData } from "./savings-check.js";
 
 const D = () => State.data;
 const tile = (label, value, route, colors, cls = "", tip = "") =>
@@ -127,12 +127,19 @@ export const Overview = {
       const ser = [
         { key: "in", label: T("Inflows"), color: "var(--w-in)", values: months.map(m => m.income) },
         { key: "out", label: T("Outflows"), color: "var(--w-out)", values: months.map(m => m.expenses) },
-        { key: "save", label: T("Saved"), color: "var(--w-save)", values: months.map(m => m.income - m.expenses) },
       ];
+      // Yellow line: your real savings balance at the end of each month (statement analyses and the amounts you entered);
+      // without any savings data yet: saved = inflows minus outflows
+      const sv = savingsData(d);
+      const balAt = sv ? months.map(m => { const k = sv.months.findIndex(x => x.getTime() === m.start.getTime()); return k >= 0 ? sv.total[k] : null; }) : [];
+      const realSavings = balAt.filter(v => v !== null).length >= 2;
+      ser.push(realSavings ? { key: "save", label: T("Savings balance"), color: "var(--w-save)", values: balAt, balance: true }
+        : { key: "save", label: T("Saved"), color: "var(--w-save)", values: months.map(m => m.income - m.expenses) });
       if (moduleOn("loans") && d.Loans.some(l => l.MonthlyPayment > 0)) ser.push({ key: "loan", label: T("Loan payments"), color: "var(--w-loan)", values: months.map(m => Calc.loanPayments(d, m.start)) });
-      const avgOf = s => s.values.reduce((a, b) => a + b, 0) / s.values.length;
+      const avgOf = s => { const v = s.values.filter(x => x !== null && x !== undefined); return v.reduce((a, b) => a + b, 0) / Math.max(1, v.length); };
+      const lastOf = s => s.values.filter(x => x !== null && x !== undefined).pop() || 0;
       // No title: the lines and their names speak for themselves (the explanation is in the tooltip)
-      parts.push(card(`<div class="wave-legend" data-tip="${esc(T("Saved = inflows minus outflows in that month. Click a name to show or hide its line."))}">${ser.map(s => `<button class="wave-key${hid.has(s.key) ? " off" : ""}" data-wave="${s.key}" style="--c:${s.color}"><i></i>${esc(s.label)}<small>${esc(T("avg. {0}", pln(avgOf(s))))}</small></button>`).join("")}</div>` +
+      parts.push(card(`<div class="wave-legend" data-tip="${esc(realSavings ? T("Savings balance = what was on your savings accounts at the end of each month. Click a name to show or hide its line.") : T("Saved = inflows minus outflows in that month. Click a name to show or hide its line."))}">${ser.map(s => `<button class="wave-key${hid.has(s.key) ? " off" : ""}" data-wave="${s.key}" style="--c:${s.color}"><i></i>${esc(s.label)}<small>${esc(s.balance ? T("now {0}", pln(lastOf(s))) : T("avg. {0}", pln(avgOf(s))))}</small></button>`).join("")}</div>` +
         waveChart(months.map(m => m.month + (m.current ? " *" : "")), ser, axis, pln, hid)));
     }
     parts.push(card(heading(T("Outflows by category")) + hint(basisText(d)) +

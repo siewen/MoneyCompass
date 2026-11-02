@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 58, date: "2026-11-02", items: {
+    en: ["〰️ Overview: the yellow line now shows your real savings balance at the end of each month (from your statement analyses and the amounts you entered). Without savings data it still shows what you saved (inflows minus outflows)."],
+    pl: ["〰️ Przegląd: żółta linia pokazuje teraz rzeczywiste saldo oszczędności na koniec każdego miesiąca (z analiz wyciągów i wpisanych kwot). Bez danych o oszczędnościach nadal pokazuje, ile zaoszczędzono (wpływy minus wydatki)."],
+    de: ["〰️ Überblick: Die gelbe Linie zeigt jetzt Ihren echten Sparsaldo am Ende jedes Monats (aus Auszugsanalysen und eingegebenen Beträgen). Ohne Spardaten zeigt sie weiterhin das Gesparte (Eingänge minus Ausgaben)."],
+    fr: ["〰️ Vue d'ensemble : la ligne jaune montre désormais le solde réel de votre épargne à la fin de chaque mois (analyses de relevés et montants saisis). Sans données d'épargne, elle montre toujours ce que vous avez épargné (entrées moins sorties)."] } },
   { build: 57, date: "2026-11-02", items: {
     en: ["🛠️ Reports: each diagram now belongs to its part and appears right under it – choose only Loans and you get only Loans. Table headers and legend colours now print in PDF too."],
     pl: ["🛠️ Raporty: każdy wykres należy teraz do swojej części i jest tuż pod nią – wybierz tylko Kredyty, a dostaniesz tylko Kredyty. Nagłówki tabel i kolory legendy są teraz drukowane także w PDF."],
