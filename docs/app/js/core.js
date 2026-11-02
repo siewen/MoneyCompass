@@ -53,13 +53,13 @@ export function newSettings() {
 }
 export function newData() {
   return { Incomes: [], Expenses: [], Holdings: [], Offers: [], Loans: [], Goals: [], Received: [],
-           Transfers: [], Categories: [], Budgets: [], Recurring: [], Deleted: [], SavingsChecks: [], Settings: newSettings() };
+           Transfers: [], Categories: [], Budgets: [], Recurring: [], Deleted: [], SavingsChecks: [], Investments: [], Settings: newSettings() };
 }
 /** Fills in anything missing (older files, files from the Windows app). */
 export function normalise(d) {
   const base = newData();
   const out = Object.assign(base, d || {});
-  for (const k of ["Incomes", "Expenses", "Holdings", "Offers", "Loans", "Goals", "Received", "Transfers", "Categories", "Budgets", "Recurring", "Deleted", "SavingsChecks"])
+  for (const k of ["Incomes", "Expenses", "Holdings", "Offers", "Loans", "Goals", "Received", "Transfers", "Categories", "Budgets", "Recurring", "Deleted", "SavingsChecks", "Investments"])
     if (!Array.isArray(out[k])) out[k] = [];
   out.Settings = Object.assign(newSettings(), out.Settings || {});
   if (!Array.isArray(out.Settings.Modules)) out.Settings.Modules = [];
@@ -302,6 +302,7 @@ export const MODULES = [
   { code: "loans", name: "Loans & debts", description: "Credits and loans: what is left to pay, monthly payments and when you are debt-free." },
   { code: "budget", name: "Budget plan", description: "Monthly limits per expense category and your savings goals: how much to set aside each month." },
   { code: "calendar", name: "Calendar", description: "Everything that comes back every month – salary, bills, subscriptions, savings – in a calendar, with a preview of the next 1 to 12 months." },
+  { code: "investments", name: "Investments", beta: true, description: "Crypto platforms and brokers: what they offer, your position and your return in %. In development – information only, no advice." },
 ];
 /** What is saved for a goal: the balance of its linked savings account, or the amount typed in. */
 export function goalSaved(g, d = State.data) {
@@ -923,7 +924,7 @@ export function reset(parts) {
   if (parts.offers) d.Offers = [];
   if (parts.emergency) Object.assign(d.Settings, { MonthlyEssentials: 0, YearlyCosts: 0, EmergencyMonths: 3, BufferPercent: 10 });
   if (parts.rates) Object.assign(d.Settings, { UsdToPln: 0, EurToPln: 0 });
-  if (parts.modules) { d.Goals = []; d.Loans = []; d.Budgets = []; d.Recurring = []; }
+  if (parts.modules) { d.Goals = []; d.Loans = []; d.Budgets = []; d.Recurring = []; d.Investments = []; }
   if (parts.bin) d.Deleted = [];
   if (parts.categories) {
     const own = new Set(d.Categories.map(c => c.Name));

@@ -14,11 +14,12 @@ import { hasNews, openNews } from "./news.js";
 import { Overview, Income, Expenses, Emergency, Portfolio, bindBin } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
 import { Calendar } from "./calendar.js";
+import { Investments } from "./investments.js";
 import { promoReminder } from "./advice.js";
 import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile, openLanguage, setLanguage } from "./dialogs.js";
 
-const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", reports: "#0E7490", savings: "#7E22CE" };
-const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget, calendar: Calendar };
+const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", investments: "#CA8A04", reports: "#0E7490", savings: "#7E22CE" };
+const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget, calendar: Calendar, investments: Investments };
 let current = "overview";
 
 function tabs() {
@@ -54,6 +55,7 @@ const TAB_ICON = {
   loans: I('<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h4"/>'),
   budget: I('<path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/>'),
   calendar: I('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
+  investments: I('<path d="M3 17l5-5 4 3 8-8"/><path d="M15 7h5v5"/><path d="M3 21h18"/>'),
   savings: I('<path d="M4 7h16M4 12h16M4 17h10"/><path d="M18 15l2 2-2 2"/>'),
   reports: I('<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 17v-3M12 17v-6M15 17v-4"/>'),
 };
@@ -89,7 +91,7 @@ function buildShell() {
       <button class="side-toggle" data-act="side" title="${esc(T(side() === "pinned" ? "Fold the menu (it opens when you point at it)" : "Keep the menu open"))}">${side() === "pinned" ? "‹" : "›"}</button>
       <a class="brand" href="../index.html" title="MoneyCompass"><img src="../logo.svg" alt=""><span>MoneyCompass</span></a>
       <button class="import-btn" data-act="import" title="${esc(T("Import a bank statement (CSV) – current or savings account. You can also drop the file onto the app."))}"><span class="ii">⬆</span><span class="il">${esc(T("Import"))}${license.isPro ? "" : " 🔒"}</span></button>
-      <nav class="tabs" id="tabs">${list.map(t => `<button class="tab" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}"><span class="ti">${TAB_ICON[t.route] || ""}</span><span class="tl">${esc(T(t.title))}</span></button>`).join("")}</nav>
+      <nav class="tabs" id="tabs">${list.map(t => `<button class="tab" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}"><span class="ti">${TAB_ICON[t.route] || ""}</span><span class="tl">${esc(T(t.title))}${t.route === "investments" ? ` <span class="beta-tag">${esc(T("Beta"))}</span>` : ""}</span></button>`).join("")}</nav>
       <div class="actions">
         <button class="me-row profile-btn" data-act="me" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}
           <span class="me-text"><b>${esc(currentName())}</b><small class="me-badge ${license.isPro ? "pro" : "demo"}">${esc(license.isPro ? "Pro" : T("Demo"))}</small></span>
@@ -434,7 +436,8 @@ function render() {
   if (hi) {
     const lock = license.isPro ? "" : " 🔒";
     const what = { expenses: ["⬆ " + T("Import bank statement") + lock, () => smartImport()], income: ["⬆ " + T("Import bank statement") + lock, () => smartImport()],
-      portfolio: ["⬆ " + T("Import savings account statement") + lock, () => openSavingsCheck()] }[page.route];
+      portfolio: ["⬆ " + T("Import savings account statement") + lock, () => openSavingsCheck()],
+      investments: ["⬆ " + T("Import CSV") + " · " + T("In preparation"), () => toast(T("Importing crypto and trading accounts is in preparation and comes in a later version."))] }[page.route];
     hi.hidden = !what; if (what) { hi.textContent = what[0]; hi.onclick = what[1]; }
   }
   const el = document.getElementById("page");

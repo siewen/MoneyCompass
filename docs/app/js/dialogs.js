@@ -189,7 +189,7 @@ export function openOptions() {
       `<div class="buttons">${button(esc(T("Reset layout")), "reset-layout", "second")}</div>`)}
     ${card(heading(T("Modules")) + hint(license.isPro ? T("Switch on the modules you want. Each one adds its own tab; the tabs appear when you close Options. Your entries stay saved when you switch a module off.")
         : T("Modules are part of MoneyCompass Pro. Enter your license key in your profile (click your name) to use them.")) +
-      MODULES.map(m => `<label class="check"><input type="checkbox" name="mod-${m.code}"${s.Modules.includes(m.code) ? " checked" : ""}${license.isPro ? "" : " disabled"}><span><b>${esc(T(m.name))}</b><br><span class="hint">${esc(T(m.description))}</span></span></label>`).join(""))}
+      MODULES.map(m => `<label class="check"><input type="checkbox" name="mod-${m.code}"${s.Modules.includes(m.code) ? " checked" : ""}${license.isPro ? "" : " disabled"}><span><b>${esc(T(m.name))}</b>${m.beta ? ` <span class="beta-tag">${esc(T("In development"))}</span>` : ""}<br><span class="hint">${esc(T(m.description))}</span></span></label>`).join(""))}
     ${card(heading(T("Current rates")) + check("online", T("Download current rates from the internet"), s.OnlineRates) +
       hint(T("Exchange rates and the reference rate from NBP (Narodowy Bank Polski), treasury bond rates from the Ministry of Finance. Only public numbers are downloaded – your own data never leaves this device.")))}
     ${card(heading("🔒 " + T("Automatic lock")) + hint(T("After this time without using MoneyCompass the screen locks, so nobody else sees your finances. With a PIN (set it in your profile: click your name) the PIN is needed to open it again.")) +
@@ -271,7 +271,7 @@ export function openDelete() {
   const d = D();
   const parts = [["incomes", T("Income sources"), d.Incomes.length], ["expenses", T("Expenses, money received and transfers (bank imports)"), d.Expenses.length + d.Received.length + d.Transfers.length], ["holdings", T("Savings"), d.Holdings.length],
     ["offers", T("Saved savings offers"), d.Offers.length], ["emergency", T("Emergency fund settings"), T("monthly costs, yearly costs, months, buffer")],
-    ["rates", T("Exchange rates"), ""], ["modules", T("Modules: loans, budget and goals, calendar"), d.Goals.length + d.Loans.length + d.Budgets.length + (d.Recurring || []).length],
+    ["rates", T("Exchange rates"), ""], ["modules", T("Modules: loans, budget and goals, calendar, investments"), d.Goals.length + d.Loans.length + d.Budgets.length + (d.Recurring || []).length + (d.Investments || []).length],
     ["categories", T("Your own expense categories"), d.Categories.length || T("none")], ["bin", T("Deleted items"), (d.Deleted || []).length]];
   const p = popup(`<h2 class="popup-title bad">🗑 ${esc(T("Delete data"))}</h2>${hint(T("Choose exactly what to delete."))}
     <label class="check select-all"><input type="checkbox" data-all><span><b>${esc(T("Select all"))}</b></span></label><hr>

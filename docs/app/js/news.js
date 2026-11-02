@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 73, date: "2026-11-02", items: {
+    en: ["📈 New module (Pro, in development): Investments – one card per crypto platform or broker, starting with Nexo: what it offers, the key facts and a link, plus your own position with your return in % (▲ rising / ▼ falling). Switch it on in Options → Modules. Importing crypto and trading accounts is in preparation."],
+    pl: ["📈 Nowy moduł (Pro, w budowie): Inwestycje – jedna karta na platformę krypto lub brokera, na początek Nexo: co oferuje, najważniejsze informacje i link oraz Twoja pozycja ze stopą zwrotu w % (▲ rośnie / ▼ spada). Włącz go w Opcje → Moduły. Import kont krypto i tradingowych jest w przygotowaniu."],
+    de: ["📈 Neues Modul (Pro, in Entwicklung): Investments – eine Karte pro Krypto-Plattform oder Broker, zuerst Nexo: was es bietet, die wichtigsten Fakten und ein Link, dazu Ihre eigene Position mit Ihrer Rendite in % (▲ steigend / ▼ fallend). Einschalten unter Optionen → Module. Der Import von Krypto- und Trading-Konten ist in Vorbereitung."],
+    fr: ["📈 Nouveau module (Pro, en développement) : Investissements – une carte par plateforme crypto ou courtier, en commençant par Nexo : ce qu'il propose, les informations clés et un lien, plus votre propre position avec votre rendement en % (▲ en hausse / ▼ en baisse). Activez-le dans Options → Modules. L'import des comptes crypto et de trading est en préparation."] } },
   { build: 72, date: "2026-11-02", items: {
     en: ["📐 More compact everywhere: regular payments folded by category, outflow history folded by month, long explanations behind ⓘ or cut to two lines (click to read), no scrollbars. \"Your savings\" on the Overview now shows your balance at each month end, the change and the net interest earned. Languages moved to the bottom of the menu."],
     pl: ["📐 Wszędzie bardziej zwięźle: płatności cykliczne zwinięte według kategorii, historia wydatków według miesięcy, długie wyjaśnienia pod ⓘ lub skrócone do dwóch linii (kliknij, aby przeczytać), bez pasków przewijania. „Twoje oszczędności” w Przeglądzie pokazują saldo na koniec każdego miesiąca, zmianę i odsetki netto. Języki przeniesione na dół menu."],
