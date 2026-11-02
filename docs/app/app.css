@@ -765,3 +765,10 @@ body.drop-on::after { content: "⬆"; position: fixed; inset: 12px; z-index: 200
 :root[data-design="emerald"] .tab.active { background: color-mix(in srgb, var(--hi) 15%, transparent) !important; color: var(--ink) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hi) 30%, transparent); }
 :root[data-design="emerald"] .tab.active .ti { color: var(--hi) !important; }
 @media (min-width: 700px) { :root[data-design="emerald"] .tab.active { border-radius: 12px; } }
+/* Savings chart: flatter, text stays readable */
+.savings-chart .axis { font-size: 15px; }
+@media (max-width: 699px) { .savings-chart .axis { font-size: 13px; } }
+/* Columns end level: the last card of each column stretches to the bottom of the tallest one (no empty holes) */
+.cols { align-items: stretch; }
+.cols > .col { display: flex; flex-direction: column; }
+.cols > .col > .card:last-child { flex: 1 1 auto; }

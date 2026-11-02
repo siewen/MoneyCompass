@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 59, date: "2026-11-02", items: {
+    en: ["🧩 Tidier pages: cards fill the columns evenly and the columns end level – no more empty holes, no need to drag cards around. Full-width cards come after the columns.", "📈 The savings chart is flatter, so it takes less space."],
+    pl: ["🧩 Uporządkowane strony: karty równo wypełniają kolumny, a kolumny kończą się na tej samej wysokości – bez pustych dziur i bez przeciągania kart. Karty na całą szerokość są pod kolumnami.", "📈 Wykres oszczędności jest niższy i zajmuje mniej miejsca."],
+    de: ["🧩 Aufgeräumte Seiten: Karten füllen die Spalten gleichmäßig und die Spalten enden auf gleicher Höhe – keine leeren Lücken, kein Verschieben nötig. Karten über die volle Breite kommen nach den Spalten.", "📈 Das Spardiagramm ist flacher und braucht weniger Platz."],
+    fr: ["🧩 Pages plus nettes : les cartes remplissent les colonnes de façon égale et les colonnes se terminent au même niveau – plus de trous, plus besoin de déplacer les cartes. Les cartes pleine largeur viennent après les colonnes.", "📈 Le graphique de l'épargne est plus plat et prend moins de place."] } },
   { build: 58, date: "2026-11-02", items: {
     en: ["〰️ Overview: the yellow line now shows your real savings balance at the end of each month (from your statement analyses and the amounts you entered). Without savings data it still shows what you saved (inflows minus outflows)."],
     pl: ["〰️ Przegląd: żółta linia pokazuje teraz rzeczywiste saldo oszczędności na koniec każdego miesiąca (z analiz wyciągów i wpisanych kwot). Bez danych o oszczędnościach nadal pokazuje, ile zaoszczędzono (wpływy minus wydatki)."],

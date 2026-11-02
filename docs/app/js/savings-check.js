@@ -308,7 +308,7 @@ export function savingsChartCard(d) {
       ${sum(x.interest) ? `<div data-tip="${esc(T("Gross interest") + ": " + pln(x.grossTotal) + "\n" + T("Withholding tax (Belka, 19%)") + ": −" + pln(x.grossTotal - x.netTotal) + "\n" + T("Net interest (after tax)") + ": " + pln(x.netTotal))}"><span>${esc(T("Net interest (after tax)"))} ⓘ</span><b class="good">+${esc(pln(x.netTotal || sum(x.interest)))}</b></div>` : ""}${sum(x.fees) ? fig(T("Fees & charges"), "−" + pln(sum(x.fees)), "bad") : ""}
       ${AHEAD ? fig(T("Forecast in {0} months", AHEAD), pln(x.fut[AHEAD - 1])) : ""}
       <label class="sav-ahead"><span>${esc(T("Forecast"))}</span><select data-sav-ahead>${[[0, T("Off")], [1, T("1 month")], [3, T("{0} months", 3)], [6, T("{0} months", 6)]].map(([v, l]) => `<option value="${v}"${v === AHEAD ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label></div>` +
-    `<div class="wave-legend">${keys}</div>` + savingsChart(labels, lines, bars, axis, fmtV, hid, n) +
+    `<div class="wave-legend">${keys}</div>` + savingsChart(labels, lines, bars, axis, fmtV, hid, n, ...(window.innerWidth < 700 ? [760, 230] : [1500, 190])) +
     (n === 1 ? `<p class="hint">💡 ${esc(T("Only today's balance is known so far. Import the statement of your savings account (below) to see how the balance developed month by month."))}</p>` : "") +
     hint(T("Closing balance of each month, from your statement analyses and the amounts you entered. Credits and debits per month (left scale), interest and fees per month (right scale) come from imported statements. Forecast (optional): today's rates after tax, plus your standing orders. Click a name to show or hide it.")), "wide fixed sav-chart-card");
 }

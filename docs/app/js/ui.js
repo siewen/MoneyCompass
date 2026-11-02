@@ -251,9 +251,17 @@ function layoutGrid(grid) {
   const n = width >= 1100 ? 3 : width >= 720 ? 2 : 1;
   if (grid._cols === n) return;
   grid._cols = n;
+  // Full-width cards go below the column cards (cards at the very top, like the tiles, stay there):
+  // a wide card in the middle would cut the columns into blocks, each ending with an empty gap
+  const lead = [], body = [], tail = []; let seen = false;
+  for (const item of grid._items) {
+    if (!spans(item)) { seen = true; body.push(item); }
+    else if (!seen || isFull(item)) (seen ? body : lead).push(item);
+    else tail.push(item);
+  }
   const parts = [];
   let group = null;
-  for (const item of grid._items) {
+  for (const item of [...lead, ...body, ...tail]) {
     if (spans(item)) { parts.push(item); group = null; continue; }
     if (!group) {
       group = document.createElement("div"); group.className = "cols";

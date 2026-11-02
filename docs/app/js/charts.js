@@ -112,10 +112,10 @@ export function waveChart(labels, series, fmtAxis, fmtValue, hidden = new Set())
  *  Balance lines (lines: [{ key, label, color, values: [number|null], dashed, main }]) use the left scale.
  *  Monthly movements (flows: same shape, amounts ≥ 0) use their own scale on the right, so small fees stay visible next to a big balance.
  *  hidden: Set of keys to leave out. future: index of the first forecast month (or labels.length). */
-export function savingsChart(labels, lines, flows, fmtAxis, fmtValue, hidden = new Set(), future = labels.length) {
+export function savingsChart(labels, lines, flows, fmtAxis, fmtValue, hidden = new Set(), future = labels.length, w = 1000, h1 = 250) {
   // Series marked left: true (big amounts like credits and debits) share the balance scale; the rest (interest, fees) use the right scale
   const L = [...lines, ...flows.filter(s => s.left)].filter(s => !hidden.has(s.key)), F = flows.filter(s => !s.left && !hidden.has(s.key));
-  const w = 1000, left = 52, right = F.length ? 52 : 34, top = 14, h1 = 250, bottom = 30, h = top + h1 + bottom;
+  const left = 52, right = F.length ? 52 : 34, top = 14, bottom = 30, h = top + h1 + bottom;
   const n = labels.length, plotW = w - left - right, X = i => left + (n === 1 ? plotW / 2 : plotW * i / (n - 1));
   const vals = a => a.flatMap(s => s.values.filter(v => v !== null && v !== undefined));
   const lMax = niceMax(Math.max(1, ...vals(L)) / 4) * 4, Y1 = v => top + h1 - v / lMax * h1;
