@@ -97,6 +97,64 @@ document.addEventListener("change", async e => {
 }, true);
 document.addEventListener("focusin", e => { if (e.target instanceof HTMLSelectElement && e.target.value !== "__new__") e.target.dataset.prev = e.target.value; });
 
+// ---------- Category lists with a search box ----------
+// Every category list (it has "＋ New category…") opens a small picker instead of the plain list: type to filter, ↑↓ and Enter to choose.
+const isCatSelect = el => el instanceof HTMLSelectElement && !el.disabled && !!el.querySelector('option[value="__new__"]');
+function openCatPicker(sel) {
+  document.querySelector(".cat-pop")?.remove();
+  sel.dataset.prev = sel.value;
+  const r = sel.getBoundingClientRect(), opts = [...sel.options];
+  const pop = document.createElement("div"); pop.className = "cat-pop";
+  const w = Math.max(r.width, 260), below = window.innerHeight - r.bottom > 300 || r.top < 300;
+  Object.assign(pop.style, { left: Math.min(r.left, window.innerWidth - w - 8) + "px", width: w + "px",
+    ...(below ? { top: r.bottom + 4 + "px" } : { bottom: window.innerHeight - r.top + 4 + "px" }) });
+  pop.innerHTML = `<input type="search" class="cat-search" placeholder="${esc(T("Search…"))}" autocomplete="off"><div class="cat-list"></div>`;
+  document.body.appendChild(pop);
+  const input = pop.querySelector("input"), list = pop.querySelector(".cat-list");
+  let shown = [], active = 0;
+  const plain = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const draw = () => {
+    const q = plain(input.value.trim());
+    shown = opts.filter(o => o.value === "__new__" || !q || plain(o.textContent).includes(q));
+    active = Math.max(0, Math.min(active, shown.length - 1));
+    list.innerHTML = shown.map((o, i) => `<button type="button" class="cat-opt${o.value === sel.value ? " cur" : ""}${i === active ? " act" : ""}${o.value === "__new__" ? " new" : ""}" data-i="${i}">${esc(o.textContent)}</button>`).join("");
+    list.querySelector(".act")?.scrollIntoView({ block: "nearest" });
+  };
+  const close = () => { pop.remove(); document.removeEventListener("pointerdown", outside, true); sel.focus({ preventScroll: true }); };
+  const pick = o => {
+    close(); if (!o) return;
+    if (o.value === "__new__") { sel.value = "__new__"; sel.dispatchEvent(new Event("change", { bubbles: true })); return; }
+    if (sel.value !== o.value) { sel.value = o.value; sel.dataset.prev = o.value; sel.dispatchEvent(new Event("change", { bubbles: true })); sel.dispatchEvent(new Event("input", { bubbles: true })); }
+  };
+  const outside = e => { if (!pop.contains(e.target) && e.target !== sel) close(); };
+  list.onclick = e => { const b = e.target.closest("[data-i]"); if (b) pick(shown[+b.dataset.i]); };
+  input.oninput = () => { active = 0; draw(); };
+  input.onkeydown = e => {
+    if (e.key === "ArrowDown") { active = Math.min(shown.length - 1, active + 1); draw(); e.preventDefault(); }
+    else if (e.key === "ArrowUp") { active = Math.max(0, active - 1); draw(); e.preventDefault(); }
+    else if (e.key === "Enter") { pick(shown[active]); e.preventDefault(); }
+    else if (e.key === "Escape" || e.key === "Tab") { close(); e.preventDefault(); e.stopPropagation(); }
+  };
+  active = Math.max(0, opts.findIndex(o => o.value === sel.value));
+  draw();
+  setTimeout(() => { document.addEventListener("pointerdown", outside, true); input.focus(); }, 0);
+}
+document.addEventListener("mousedown", e => { if (isCatSelect(e.target) && e.button === 0) { e.preventDefault(); openCatPicker(e.target); } }, true);
+// Phones and tablets: a tap (not a scroll that starts on the list) opens the picker instead of the phone's own list
+let touchAt = null;
+document.addEventListener("touchstart", e => { touchAt = isCatSelect(e.target) ? [e.touches[0].clientX, e.touches[0].clientY] : null; }, { passive: true, capture: true });
+document.addEventListener("touchend", e => {
+  if (!touchAt || !isCatSelect(e.target)) return;
+  const t = e.changedTouches[0], moved = Math.hypot(t.clientX - touchAt[0], t.clientY - touchAt[1]); touchAt = null;
+  if (moved < 10) { e.preventDefault(); openCatPicker(e.target); }
+}, { passive: false, capture: true });
+document.addEventListener("keydown", e => {
+  if (isCatSelect(e.target) && (e.key === " " || e.key === "Enter" || (e.altKey && e.key === "ArrowDown") || (e.key.length === 1 && /\p{L}/u.test(e.key)))) {
+    e.preventDefault(); openCatPicker(e.target);
+    if (e.key.length === 1 && e.key !== " ") { const i = document.querySelector(".cat-pop input"); if (i) { i.value = e.key; i.dispatchEvent(new Event("input")); } }
+  }
+}, true);
+
 /** New category from a category list: name, icon and essential. Resolves to { name, icon, essential } or null. */
 function categoryBox(icons) {
   return new Promise(resolve => {

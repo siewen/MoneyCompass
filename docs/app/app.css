@@ -686,3 +686,11 @@ body.is-locked .lock-screen ~ .popup-back { visibility: visible; z-index: 1100; 
 .icon-pick { font-size: 20px; height: 38px; border-radius: 10px; border: 1px solid transparent; background: var(--soft); cursor: pointer; padding: 0; }
 .icon-pick:hover { border-color: var(--border); }
 .icon-pick.on { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 22%, var(--soft)); }
+/* Category picker with search */
+.cat-pop { position: fixed; z-index: 400; background: var(--card); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 16px 40px rgba(0,0,0,.35); padding: 8px; display: flex; flex-direction: column; gap: 6px; max-height: min(360px, 60vh); }
+.cat-pop .cat-search { width: 100%; padding: 8px 10px; border-radius: 10px; }
+.cat-list { overflow: auto; display: flex; flex-direction: column; }
+.cat-opt { text-align: left; background: none; border: 0; color: var(--ink); font: inherit; padding: 7px 10px; border-radius: 8px; cursor: pointer; }
+.cat-opt:hover, .cat-opt.act { background: var(--soft); }
+.cat-opt.cur { color: var(--primary); font-weight: 600; }
+.cat-opt.new { color: var(--primary); border-top: 1px solid var(--border); border-radius: 0 0 8px 8px; margin-top: 2px; }

@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 45, date: "2026-11-02", items: {
+    en: ["🔎 Category lists now have a search box: click (or start typing) and only matching categories are shown – choose with ↑↓ and Enter.", "🏷️ More icons: son, daughter, investments (📈 💹 🪙), banking (💳 🏧) and cash."],
+    pl: ["🔎 Listy kategorii mają teraz pole wyszukiwania: kliknij (lub zacznij pisać), a pokażą się tylko pasujące kategorie – wybierz strzałkami ↑↓ i Enter.", "🏷️ Więcej ikon: syn, córka, inwestycje (📈 💹 🪙), bankowość (💳 🏧) i gotówka."],
+    de: ["🔎 Kategorielisten haben jetzt ein Suchfeld: Klicken (oder lostippen), und nur passende Kategorien werden angezeigt – mit ↑↓ und Enter wählen.", "🏷️ Mehr Symbole: Sohn, Tochter, Geldanlagen (📈 💹 🪙), Bank (💳 🏧) und Bargeld."],
+    fr: ["🔎 Les listes de catégories ont désormais un champ de recherche : cliquez (ou commencez à taper) et seules les catégories correspondantes s'affichent – choisissez avec ↑↓ et Entrée.", "🏷️ Plus d'icônes : fils, fille, placements (📈 💹 🪙), banque (💳 🏧) et espèces."] } },
   { build: 44, date: "2026-11-02", items: {
     en: ["👪 More category icons: family, children, toys, wedding, birthday, grandparents, home, and pets (paw, fish, bird, horse, rabbit, parrot)."],
     pl: ["👪 Więcej ikon kategorii: rodzina, dzieci, zabawki, ślub, urodziny, dziadkowie, dom oraz zwierzęta (łapa, ryba, ptak, koń, królik, papuga)."],
