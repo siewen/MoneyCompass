@@ -271,8 +271,9 @@ function markOwnAccounts(rows) {
   }
 }
 
-export const isOwnTransfer = r => r.ownAccount || /przelew własny|przelew wlasny|na rachunek własny|między rachunkami|miedzy rachunkami|własne konto|wlasne konto|lokat[aęy]|konto oszczędnościowe|rachunek oszczędnościowy|zasilenie|spłata karty kredytowej|przelew środków własnych|own transfer|internal transfer/i.test(r.allText + " " + r.bankCategory);
-export const isSavingsTransfer = r => /own transfer|internal transfer|przelew własny|przelew wlasny|oszczędn|oszczedn|lokat[aęy]|saving|deposit/i.test(r.allText + " " + r.bankCategory);
+export const isOwnTransfer = r => r.ownAccount || /przelew własny|przelew wlasny|na rachunek własny|między rachunkami|miedzy rachunkami|własne konto|wlasne konto|lokat[aęy]|konto oszczędnościowe|rachunek oszczędnościowy|zasilenie|spłata karty kredytowej|przelew środków własnych|own transfer/i.test(r.allText + " " + r.bankCategory);
+// "Internal transfer" (e.g. Millennium) only means: to another account in the same bank – also someone else's. Not a sign of your own account.
+export const isSavingsTransfer = r => /own transfer|przelew własny|przelew wlasny|oszczędn|oszczedn|lokat[aęy]|saving|deposit/i.test(r.allText + " " + r.bankCategory);
 
 const RULES = [
   // Bank fees first: "opłata za kartę", "prowizja"… (before "kredyt" or "przelew" catch them)
