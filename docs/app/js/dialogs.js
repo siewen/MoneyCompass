@@ -188,11 +188,11 @@ export function openOptions() {
     ${card(heading(T("Layout")) + hint(T("Drag a card by its handle (⠿, top right) to move it, on any tab. Reset layout puts all cards back in their standard order.")) +
       `<div class="buttons">${button(esc(T("Reset layout")), "reset-layout", "second")}</div>`)}
     ${card(heading(T("Modules")) + hint(license.isPro ? T("Switch on the modules you want. Each one adds its own tab; the tabs appear when you close Options. Your entries stay saved when you switch a module off.")
-        : T("Modules are part of MoneyCompass Pro. Enter your license key in your profile (top right) to use them.")) +
+        : T("Modules are part of MoneyCompass Pro. Enter your license key in your profile (click your name) to use them.")) +
       MODULES.map(m => `<label class="check"><input type="checkbox" name="mod-${m.code}"${s.Modules.includes(m.code) ? " checked" : ""}${license.isPro ? "" : " disabled"}><span><b>${esc(T(m.name))}</b><br><span class="hint">${esc(T(m.description))}</span></span></label>`).join(""))}
     ${card(heading(T("Current rates")) + check("online", T("Download current rates from the internet"), s.OnlineRates) +
       hint(T("Exchange rates and the reference rate from NBP (Narodowy Bank Polski), treasury bond rates from the Ministry of Finance. Only public numbers are downloaded – your own data never leaves this device.")))}
-    ${card(heading("🔒 " + T("Automatic lock")) + hint(T("After this time without using MoneyCompass the screen locks, so nobody else sees your finances. With a PIN (set it in your profile, top right) the PIN is needed to open it again.")) +
+    ${card(heading("🔒 " + T("Automatic lock")) + hint(T("After this time without using MoneyCompass the screen locks, so nobody else sees your finances. With a PIN (set it in your profile: click your name) the PIN is needed to open it again.")) +
       select("autolock", [[0, T("Off")], ...[1, 5, 10, 15, 30, 60].map(m => [m, T("After {0} minutes", m)])], +s.AutoLockMinutes || 0) +
       hint(hasPin() ? T("This profile has a PIN.") : T("This profile has no PIN yet.")))}
     ${card(heading(T("Backup & restore")) + hint(T("Everything you enter is saved automatically, only in this browser on this device. Nothing is sent to the internet.")) +
@@ -203,7 +203,7 @@ export function openOptions() {
       check("showguide", T("Show the step-by-step guide when MoneyCompass starts"), !s.GuideHidden) +
       check("shownews", T("Show what's new after an update"), !s.NewsHidden) +
       field(T("When I close MoneyCompass"), select("closechoice", [["", T("Ask every time")], ["with", T("Save profile and close")], ["without", T("Close without saving")]], s.CloseChoice === "none" ? "without" : s.CloseChoice || "")) +
-      hint("👤 " + T("Save or load your profile file: your profile, top right.")) +
+      hint("👤 " + T("Save or load your profile file: click your name → Profile.")) +
       `<hr><h3>🛡️ ${esc(T("Automatic backup"))}</h3>` +
       hint(T("MoneyCompass keeps a copy of your profile in a file on this computer and updates it by itself after every change. If the browser data is ever deleted, open the file with \"Load a profile…\". Choose a folder like Documents or OneDrive.")) +
       `<p class="backup-line">${esc(backupLine())}</p>` +
@@ -276,7 +276,7 @@ export function openDelete() {
   const p = popup(`<h2 class="popup-title bad">🗑 ${esc(T("Delete data"))}</h2>${hint(T("Choose exactly what to delete."))}
     <label class="check select-all"><input type="checkbox" data-all><span><b>${esc(T("Select all"))}</b></span></label><hr>
     ${parts.map(x => check(x[0], `${x[1]}${x[2] !== "" ? ` (${x[2]})` : ""}`, false)).join("")}
-    ${hint(T("Tip: save your profile first (your profile, top right), so you can load it again if you change your mind."))}
+    ${hint(T("Tip: save your profile first (click your name → Profile), so you can load it again if you change your mind."))}
     <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button><button class="btn danger" data-go>${esc(T("Delete"))}</button></div>`, { width: 560 });
   const boxes = parts.map(x => p.el.querySelector(`input[name="${x[0]}"]`)), all = p.el.querySelector("[data-all]");
   all.onchange = () => boxes.forEach(b => { b.checked = all.checked; });
@@ -303,27 +303,32 @@ export function openImport() {
 // ================================================================= Help & About
 
 export function openHelp() {
-  const tabs = [["Overview", "Your money at a glance: inflows, outflows, balance and savings rate, with diagrams. The green \"Optimize my finances\" button shows your best next steps and the main ways to save."],
+  const tabs = [["Overview", "Your money at a glance: inflows, outflows, balance and savings rate, with diagrams. \"Optimize my finances\" gives your financial health check and a personal plan with concrete tips."],
     ["Inflows", "Add every source of income: salary, side jobs, bonuses – each with its own amount, frequency, currency and payday, and gross → net for a salary. Money received from bank imports is listed here too."],
-    ["Outflows", "Enter what you spend or import a bank statement. Mark expenses essential or not, set repeats (🔁), filter and search. With whole months of data you see reliable averages."],
+    ["Outflows", "Enter what you spend or import a bank statement (one Import button, or drop the file). Mark expenses essential or not, set repeats (🔁), filter and search. Transfers to your own accounts are listed apart and not counted."],
     ["Emergency fund", "Shows how much you should keep aside for bad times (3–6 months of essential costs)."],
-    ["Savings", "All your savings in one place (bank, crypto, cash), safe vs risky, and how much interest they earn."],
+    ["Savings", "All your savings in one place (bank, crypto, cash) with a balance chart. Import a savings account statement to see its real rate after tax and fees."],
     ...MODULES.map(m => [m.name, m.description]),
-    ["Compare offers", "Compare bank offers: promo rate, promo limit and length, the rate afterwards and the 19% Belka tax."]];
+    ["Compare offers", "Compare bank offers: promo rate, promo limit and length, the rate afterwards and the 19% Belka tax."],
+    ["Reports", "Choose the period and what to include, and export to Excel, PDF or Word – with diagrams."]];
   popup(`<h2 class="popup-title">? ${esc(T("Help"))}</h2><div class="grid">
-    ${card(heading(T("Getting started")) + `<ol>${["Inflows: add your salary and any other money that comes in, with its payday.", "Outflows: write down what you spend, or enter your usual monthly bills once.",
-      "Emergency fund: enter your essential monthly costs to see how much to keep aside.", "Savings: add your bank accounts, cash and other savings with their interest rate.",
-      "Overview: see everything together, then press \"Optimize my finances\" for your personal plan."].map(x => `<li>${esc(T(x))}</li>`).join("")}</ol>` + hint(T("Numbers can be typed with a dot or a comma: 1234.50 or 1234,50.")))}
+    ${card(heading(T("Getting started")) + `<ol>${["Inflows: add your salary and any other money that comes in, with its payday – or import your bank statement: MoneyCompass finds the salary and other inflows by itself.",
+      "Outflows: import your current account statement (CSV) – one Import button, or drop the file on the page – or write down what you spend. Then sort what landed in \"Other\" by shop in one go.",
+      "Emergency fund: enter your essential monthly costs to see how much to keep aside.",
+      "Savings: add your bank accounts, cash and other savings with their interest rate. Import the statement of a savings account to see its real rate after tax and fees, and its balance month by month.",
+      "Overview: see everything together, then press \"Optimize my finances\" for your health check and personal plan with concrete tips. Reports (Excel, PDF, Word) are in the Reports tab.",
+      "Protect your data: set a PIN or fingerprint/face unlock in your profile, and turn on the automatic encrypted backup (Options). Install MoneyCompass as an app on your phone or computer."].map(x => `<li>${esc(T(x))}</li>`).join("")}</ol>` + hint(T("Numbers can be typed with a dot or a comma: 1234.50 or 1234,50.")))}
     ${card(heading(T("The tabs")) + tabs.map(t => `<p><b>${esc(T(t[0]))}</b><br><span class="hint">${esc(T(t[1]))}</span></p>`).join("") + hint(T("Loans & debts, Budget plan (with savings goals) and Calendar are modules: switch them on in Options → Modules.")))}
     ${card(heading("MoneyCompass Pro") + `<p>${esc(T("The free version has all the basics. A license key unlocks:"))}</p><ul>${[
       ["Optimize my finances", "Your personal plan for savings and loans, with current rates from NBP, the Ministry of Finance and bank rankings."], ["Compare offers", "See which bank offer really pays the most after tax."],
-      ["Import bank statement", "The bank statement (CSV) becomes expenses, sorted into categories."], ["Own categories", "Make your own expense categories, each with an icon of your choice."],
+      ["Smart import", "Current and savings account statements (CSV): one Import button, or drop the file – MoneyCompass recognises which account it is and sorts the payments into categories."], ["Own categories", "Make your own expense categories, each with an icon of your choice."],
+      ["Security & backups", "PIN, fingerprint/face unlock, automatic lock, an automatic encrypted backup and encrypted profile files."], ["Menu order", "Put the tabs in your own order."],
       ["Modules", "Loans & debts, Budget plan and Calendar (Pro): switch them on in Options → Modules. Each adds its own tab; savings goals are in the Budget plan."]].map(x => `<li><b>${esc(T(x[0]))}</b> – ${esc(T(x[1]))}</li>`).join("")}
-      <li><b>${esc(T("Export"))}</b> – ${esc(T("Reports as Excel, PDF or Word."))}</li><li><b>${esc(T("Profiles"))}</b> – ${esc(T("Separate data for each person or household."))}</li></ul>` +
-      hint(T("To unlock: click your profile picture (top right), paste your key under Activation and press Activate.")))}
+      <li><b>${esc(T("Reports"))}</b> – ${esc(T("Reports as Excel, PDF or Word."))}</li><li><b>${esc(T("Profiles"))}</b> – ${esc(T("Separate data for each person or household."))}</li></ul>` +
+      hint(T("To unlock: click your name → Profile & license, paste your key under Activation and press Activate.")))}
     ${card(heading(T("Your data & backup")) + `<p>${esc(T("Everything you enter is saved automatically, only in this browser on this device. Nothing is sent to the internet."))}</p>` +
-      hint(T("Clearing your browser data deletes your entries. Save your profile regularly (your profile, top right → Save profile) – the file works in the Windows app too.")))}
-    ${card(heading(T("Windows app")) + `<p>${esc(T("The free Windows app has more than the free web version: reports and several profiles. Your profile file works in both."))}</p>
+      hint(T("Clearing your browser data deletes your entries. With Pro, turn on the automatic encrypted backup (Options) or save your profile (click your name → Profile). Loading a profile is free. The Windows app opens these files from version 2.1.")))}
+    ${card(heading(T("Windows app")) + `<p>${esc(T("The free Windows app has more than the free web version: reports and several profiles. From version 2.1 it also opens the encrypted profile files of the web app."))}</p>
       <a class="btn go" href="${DOWNLOAD_URL}" target="_blank" rel="noopener">⬇ ${esc(T("Download for Windows"))}</a>`)}
     ${card(heading(T("Please note")) + hint(T("MoneyCompass helps you keep an overview. All results are estimates based on what you enter. They are not financial, investment or tax advice. Interest rates and offers change - always check the bank's own terms.")) +
       hint(T("© {0} MoneyCompass. All rights reserved.", new Date().getFullYear())) + `<a href="../privacy.html#${lang()}" target="_blank">${esc(T("Privacy policy"))}</a> · <a href="../terms.html#${lang()}" target="_blank">${esc(T("Terms of use"))}</a>`)}

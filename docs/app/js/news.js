@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 69, date: "2026-11-02", items: {
+    en: ["📘 Guide and Help updated: smart import, savings statements, the health check and personal plan, Reports, and a new step \"Protect your data\" (PIN, fingerprint/face, automatic backup)."],
+    pl: ["📘 Zaktualizowany przewodnik i pomoc: inteligentny import, wyciągi oszczędnościowe, kontrola finansowego zdrowia i osobisty plan, raporty oraz nowy krok „Chroń swoje dane” (PIN, odcisk palca/twarz, automatyczna kopia)."],
+    de: ["📘 Anleitung und Hilfe aktualisiert: intelligenter Import, Sparkontoauszüge, Gesundheitscheck und persönlicher Plan, Berichte und ein neuer Schritt „Schützen Sie Ihre Daten“ (PIN, Fingerabdruck/Gesicht, automatische Sicherung)."],
+    fr: ["📘 Guide et aide mis à jour : import intelligent, relevés d'épargne, bilan de santé et plan personnel, rapports, et une nouvelle étape « Protégez vos données » (PIN, empreinte/visage, sauvegarde automatique)."] } },
   { build: 68, date: "2026-11-02", items: {
     en: ["🧭 Optimize my finances is much smarter: a financial health check (savings rate, 50/30/20, housing, loans, emergency fund, interest), concrete tips per category – smoking, alcohol, shopping, groceries, eating out, subscriptions, fuel, energy, phone, car insurance, clothes, crypto – and alerts for rising spending, many small payments, goals, promotions, fees, IKZE tax savings and more."],
     pl: ["🧭 Optymalizuj moje finanse jest dużo mądrzejsze: kontrola finansowego zdrowia (stopa oszczędności, 50/30/20, mieszkanie, kredyty, poduszka finansowa, oprocentowanie), konkretne wskazówki dla kategorii – palenie, alkohol, zakupy, spożywcze, jedzenie na mieście, subskrypcje, paliwo, energia, telefon, ubezpieczenie auta, ubrania, krypto – oraz alerty o rosnących wydatkach, wielu drobnych płatnościach, celach, promocjach, opłatach, uldze IKZE i więcej."],
