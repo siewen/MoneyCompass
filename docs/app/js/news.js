@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 56, date: "2026-11-02", items: {
+    en: ["🟢 Calmer menu: the page you are on is shown with a soft green tint instead of a solid green bar."],
+    pl: ["🟢 Spokojniejsze menu: otwarta strona ma teraz delikatne zielone tło zamiast pełnego zielonego paska."],
+    de: ["🟢 Ruhigeres Menü: Die geöffnete Seite hat jetzt einen dezenten grünen Hintergrund statt eines kräftigen grünen Balkens."],
+    fr: ["🟢 Menu plus calme : la page ouverte a désormais une légère teinte verte au lieu d'une barre verte pleine."] } },
   { build: 55, date: "2026-11-02", items: {
     en: ["📊 Reports now include diagrams in PDF and Word: inflows and outflows per month, outflows by category and your savings balance. Word reports are real .docx files (Word, LibreOffice, Google Docs). Reports are part of Pro.", "❓ Help, Guide and About moved into the profile menu (bottom left) – no more floating ? button over the page.", "🟢 The Import button is now a soft outline, so only the page you are on is bright green."],
     pl: ["📊 Raporty zawierają teraz wykresy w PDF i Wordzie: wpływy i wydatki miesięcznie, wydatki według kategorii i saldo oszczędności. Raporty Word to prawdziwe pliki .docx (Word, LibreOffice, Google Docs). Raporty są częścią Pro.", "❓ Pomoc, Przewodnik i Informacje są teraz w menu profilu (lewy dolny róg) – bez pływającego przycisku ? nad stroną.", "🟢 Przycisk Importuj ma teraz delikatny obrys, więc tylko otwarta strona jest jaskrawozielona."],
