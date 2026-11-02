@@ -653,20 +653,28 @@ function sortOther(after) {
   });
   bind();
 }
+/** The loans behind the "Loan payments" category: each with its monthly payment (click → Loans & debts tab). */
+function loanLines(d) {
+  const start = monthStart(today()), loans = d.Loans.filter(l => l.MonthlyPayment > 0 && l.Remaining > 0 && parseDate(l.EndDate) >= start);
+  if (!loans.length) return hint(T("Monthly payments from the Loans & debts tab."));
+  return `<h3 class="sub-h">${esc(T("From the Loans & debts tab"))}</h3><div class="list">${loans.map(l => `<div class="item link" data-to-loans><div><b>${esc(l.Name)}</b>
+    <span class="hint">${esc(l.EndDate ? T("until {0}", monthName(parseDate(l.EndDate))) : "")}</span></div><b>${pln(l.MonthlyPayment)} ${esc(T("per month"))}</b></div>`).join("")}</div>`;
+}
 function showCategory(name) {
   const d = D();
   const draw = () => {
     const list = d.Expenses.filter(e => e.Category === name).sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
     const per = Advisor.spendingByCategory(d).find(c => c.category === name);
     return `<h2 class="popup-title">${esc(categoryLabel(name))}</h2>` +
-      (name === LOAN_CATEGORY && Calc.loansCounted(d) ? hint(T("Monthly payments from the Loans & debts tab.")) : "") +
+      (name === LOAN_CATEGORY && Calc.loansCounted(d) ? loanLines(d) : "") +
       (per ? hint(T("Average per month: {0}", pln(per.perMonth))) : "") +
-      hint(T("{0} expenses, together {1}.", list.length, pln(list.reduce((s, e) => s + e.Amount, 0)))) +
+      (name === LOAN_CATEGORY && Calc.loansCounted(d) && !list.length ? "" : hint(T("{0} expenses, together {1}.", list.length, pln(list.reduce((s, e) => s + e.Amount, 0))))) +
       `<div class="list scroll">${list.map(expenseRow).join("")}</div><div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
   };
   const p = popup(draw(), { width: 640, onClose: () => App.refresh() });
-  const redraw = () => { p.el.innerHTML = draw(); bindExpenseRows(p.el, redraw); };
-  bindExpenseRows(p.el, redraw);
+  const toLoans = () => p.el.querySelectorAll("[data-to-loans]").forEach(x => x.onclick = () => { p.close(); App.go("loans"); });
+  const redraw = () => { p.el.innerHTML = draw(); bindExpenseRows(p.el, redraw); toLoans(); };
+  bindExpenseRows(p.el, redraw); toLoans();
 }
 export async function manageCategories() {
   if (!(await requirePro(T("Own categories")))) return;

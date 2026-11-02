@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 65, date: "2026-11-02", items: {
+    en: ["🏦 Outflows → click \"Loan payments\": your loans and mortgages from the Loans & debts tab are now listed with their monthly payment (click one to open it)."],
+    pl: ["🏦 Wydatki → kliknij „Raty kredytów”: Twoje kredyty i hipoteki z zakładki Kredyty i długi są teraz wymienione z miesięczną ratą (kliknij, aby otworzyć)."],
+    de: ["🏦 Ausgaben → „Kreditraten“ anklicken: Ihre Kredite und Hypotheken aus dem Tab Kredite & Schulden werden jetzt mit ihrer Monatsrate aufgelistet (anklicken zum Öffnen)."],
+    fr: ["🏦 Sorties → cliquez sur « Mensualités de prêts » : vos prêts et crédits immobiliers de l'onglet Prêts et dettes sont maintenant listés avec leur mensualité (cliquez pour l'ouvrir)."] } },
   { build: 64, date: "2026-11-02", items: {
     en: ["✨ Calmer Overview: your suggestions and \"Optimize my finances\" in one card, one monthly chart instead of three, explanations behind a small ⓘ (tap it on a phone), and clean headings without emoji. Reports are in the Reports tab."],
     pl: ["✨ Spokojniejszy Przegląd: sugestie i „Optymalizuj moje finanse” w jednej karcie, jeden wykres miesięczny zamiast trzech, wyjaśnienia pod małym ⓘ (na telefonie dotknij) i czyste nagłówki bez emoji. Raporty są w zakładce Raporty."],
