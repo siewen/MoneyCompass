@@ -719,6 +719,7 @@ export const Advisor = {
       const top = this.topNonEssential(d);
       for (let i = 0; i < top.length; i++) {
         const c = top[i];
+        if (categoryRule(c.category)) continue;   // these get their own, more specific tip (moreAdvice)
         if (i > 0 && c.perMonth < top[0].perMonth * 0.6) break;
         const cut = c.perMonth * 0.2;
         add("money", T("Spend a little less on \"{0}\"", T(c.category)), i === 0
@@ -742,7 +743,8 @@ export const Advisor = {
       const gain = r > 0 ? left * 12 * r / 100 / 2 * (1 - BELKA) : 0;
       add("money", T("Put your monthly surplus to work"), T("Your emergency fund is complete and {0} is left every month. Long-term money can go to tax-friendly options like IKE/IKZE or Polish treasury bonds (see the options below).", pln(left)), gain, "portfolio");
     }
-    const order = k => k === "warning" ? 0 : k === "safety" ? 1 : 2;
+    moreAdvice(d, add, { income, avg, spending, left, p, target, missing, best });
+    const order = k => k === "warning" ? 0 : k === "safety" ? 1 : k === "insight" ? 3 : 2;
     return list.sort((a, b) => order(a.kind) - order(b.kind) || b.benefit - a.benefit);
   },
   bestOffer(d) {
@@ -772,6 +774,144 @@ export const Advisor = {
   },
 };
 const fmtPct = v => (Math.round((v || 0) * 100) / 100).toString().replace(".", ",") + "%";
+
+// ---------------------------------------------------------------- more analysis for "Your personal plan"
+
+/** Tips for single categories: what it costs per year and concrete ways to spend less. `cut` = the part you could save.
+ *  Matches the built-in names and your own categories (e.g. "Cigarettes", "Papierosy"). */
+const CATEGORY_RULES = [
+  { re: /cigar|papieros|tobac|tyto|zigarett|vape|e-?papieros|iqos|snus/i, cut: 1, min: 20, title: "Smoking costs you {0} a year",
+    text: "{0} a month goes on smoking – {1} a year. Stopping is the biggest single saving you can make, and the best for your health. Put the same amount into a savings account instead: after 5 years that is about {2}. Free help: the national quit-smoking line 801 108 108." },
+  { re: /alcohol|alkohol|beer|piwo|wine|wino|bier/i, cut: 0.5, min: 50, title: "Alcohol: {0} a year",
+    text: "About {0} a month – {1} a year. Drinking half as much saves {3} a year. Tip: alcohol-free weeks, and don't buy for stock at home." },
+  { re: /gambl|hazard|lott|lotek|zakład|zaklad|bukmach|casino|kasyno|betting|wett/i, cut: 1, min: 10, title: "Gambling: {0} a year",
+    text: "{0} a month – {1} a year – goes on betting or lotteries, and on average you get back less than you pay. Put it into savings instead: after 5 years that is about {2}. If it's hard to stop: free help at the helpline for behavioural addictions 801 889 880 (daily 17:00–22:00)." },
+  { re: /^shopping$|zakupy|einkauf/i, cut: 0.25, min: 300, title: "Shopping: {0} a month",
+    text: "Shopping is {0} a month ({1} a year). Spending a quarter less saves {3} a year. What works: wait 48 hours before buying anything over 100 zł, shop with a list, unsubscribe from shop newsletters, remove saved cards from shopping apps, and check the lowest price on Ceneo before buying." },
+  { re: /^food & groceries$|spożyw|lebensmittel/i, cut: 0.15, min: 800, title: "Groceries: {0} a month",
+    text: "Groceries are {0} a month. Saving 15% is realistic and worth {3} a year: plan meals for the week and shop with a list, buy store brands, use the Lidl Plus or Biedronka app coupons, don't shop hungry, and freeze what you won't eat in time." },
+  { re: /^restaurants & takeaway$|restaurac|jedzenie na wynos|restaurant/i, cut: 0.4, min: 150, title: "Eating out: {0} a month",
+    text: "Restaurants and takeaway cost {0} a month ({1} a year). A meal cooked at home costs about a third. Takeaway once a week instead of several times, and lunch from home for work, saves around {3} a year." },
+  { re: /^subscriptions$|subskryp|abonament|abo/i, cut: 0.3, min: 50, title: "Subscriptions: {0} a year",
+    text: "{0} a month on subscriptions – {1} a year. Go through them once: cancel what you didn't use last month, share family plans, and switch to yearly payment for what you keep (often 2 months free). Usually about {3} a year less." },
+  { re: /^transport \/ fuel$|paliwo|tank|kraftstoff/i, cut: 0.1, min: 300, title: "Transport & fuel: {0} a month",
+    text: "Transport is {0} a month. Compare fuel prices in an app (e.g. e-petrol.pl), use the fuel loyalty programmes (Orlen VITAY, BP, Shell), check tyre pressure, and for daily trips in town compare with a monthly public-transport ticket. About {3} a year." },
+  { re: /^electricity, gas, water, heating$|prąd|energia|strom/i, cut: 0.1, min: 250, title: "Energy: {0} a month",
+    text: "Energy and water cost {0} a month. One degree less heating saves about 6%; LED bulbs, switching devices fully off and, if you use a lot in the evening, the two-zone G12 tariff help too. Around {3} a year." },
+  { re: /^internet & phone$|telefon|internet/i, cut: 0.3, min: 120, title: "Internet & phone: {0} a month",
+    text: "{0} a month for phone and internet. In Poland a good mobile plan costs about 30–40 zł, and bundles with home internet are cheaper. Ask your operator for a better offer before the contract ends, or switch – about {3} a year." },
+  { re: /^car insurance & service$|ubezpiecz|versicher/i, cut: 0.2, min: 100, title: "Car insurance & service: {0} a month",
+    text: "{0} a month on car insurance and service. Compare OC/AC every year a few weeks before it renews (e.g. on rankomat.pl) – another insurer is often 20–30% cheaper. About {3} a year." },
+  { re: /^clothes|odzież|ubrania|kleidung/i, cut: 0.25, min: 200, title: "Clothes & shoes: {0} a month",
+    text: "{0} a month on clothes. Buy in the end-of-season sales, second-hand (e.g. Vinted) and with a list of what you really miss – about {3} a year less." },
+  { re: /crypto|krypto|bitcoin|btc/i, cut: 0, min: 50, info: true, title: "Crypto purchases: {0} a month",
+    text: "You put {0} a month into crypto ({1} a year). That's fine only with money you can afford to lose: first a full emergency fund in a bank account, then crypto as a small part of your savings – prices can fall by half." },
+];
+export const categoryRule = name => CATEGORY_RULES.find(r => r.re.test(name || "")) || null;
+
+/** Value after `years` of putting `perMonth` aside at `ratePct` per year (interest after the 19% tax). */
+const futureValue = (perMonth, ratePct, years) => { const r = ratePct / 100 * (1 - BELKA) / 12, n = years * 12; return r > 0 ? perMonth * ((1 + r) ** n - 1) / r : perMonth * n; };
+
+function moreAdvice(d, add, { income, avg, spending, left, p, target, missing, best }) {
+  if (!(avg.monthsUsed > 0)) return;
+  const rateForGrowth = best ? best.rate : 5;
+  const cats = Advisor.perCategory(d).sort((a, b) => b.perMonth - a.perMonth);
+  // 1. Category tips (cigarettes, shopping, groceries...): the biggest ones first, at most 6
+  let n = 0;
+  for (const c of cats) {
+    const r = categoryRule(c.category); if (!r || c.perMonth < r.min || n >= 6) continue;
+    const name = T(c.category), year = c.perMonth * 12, save = year * r.cut;
+    add(r.info ? "insight" : "money", T(r.title, pln(r.title.includes("a year") ? year : c.perMonth)),
+      T(r.text, pln(c.perMonth), pln(year), pln(futureValue(c.perMonth, rateForGrowth, 5)), pln(save)), save, "expenses");
+    n++;
+  }
+  // 2. Spending that went up: the last whole month against the months before
+  const months = Calc.groupMonths(Calc.countedExpenses(d)).filter(m => m.start < monthStart(today()));
+  if (months.length >= 3) {
+    const [lastM, ...before] = months.slice(0, 6);
+    const sumBy = m => m.items.reduce((map, e) => map.set(e.Category, (map.get(e.Category) || 0) + e.Amount), new Map());
+    const now = sumBy(lastM), prev = before.map(sumBy);
+    const ups = [...now.entries()].map(([k, v]) => ({ k, v, was: prev.reduce((s, m) => s + (m.get(k) || 0), 0) / prev.length }))
+      .filter(x => x.was > 0 && x.v - x.was >= 150 && x.v >= x.was * 1.3).sort((a, b) => (b.v - b.was) - (a.v - a.was)).slice(0, 2);
+    for (const u of ups) add("insight", T("\"{0}\" went up in {1}", T(u.k), monthName(lastM.start)),
+      T("{0} in {1}, against {2} a month on average before (+{3}%). A one-off – or a new habit worth watching?", pln(u.v), monthName(lastM.start), pln(u.was), Math.round((u.v / u.was - 1) * 100)), 0, "expenses");
+  }
+  // 3. Many small payments ("latte effect")
+  const cov = Calc.coverage(d);
+  const small = cov.months.flatMap(m => m.items).filter(e => e.Amount > 0 && e.Amount < 30 && e.Category !== LOAN_CATEGORY);
+  const smallCount = small.length / cov.units, smallSum = small.reduce((s, e) => s + e.Amount, 0) / cov.units;
+  if (smallCount >= 25 && smallSum >= 250)
+    add("money", T("Small payments add up: {0} a month", pln(smallSum)),
+      T("About {0} payments under 30 zł a month – coffee, snacks, small shopping – together {1} a month, {2} a year. Set a weekly limit for them, or take one cash amount per week. A fifth less saves {3} a year.", Math.round(smallCount), pln(smallSum), pln(smallSum * 12), pln(smallSum * 12 * 0.2)), smallSum * 12 * 0.2, "expenses");
+  // 4. Too much in "Other": the plan can't see where it goes
+  const otherShare = spending > 0 ? (cats.find(c => c.category === OTHER)?.perMonth || 0) / spending : 0;
+  if (otherShare >= 0.15)
+    add("tip", T("{0}% of your outflows are in \"Other\"", Math.round(otherShare * 100)),
+      T("Sort them by shop in one go (Outflows tab). The better your categories, the more precise the tips here – for example on shopping or eating out."), 0, "expenses");
+  if (income > 0) {
+    // 5. Loan payments compared with income
+    const loans = Calc.loanPayments(d), dti = loans / income;
+    if (dti >= 0.3)
+      add(dti >= 0.45 ? "warning" : "safety", T("Loan payments take {0}% of your income", Math.round(dti * 100)),
+        T("{0} a month goes to loans. Above 30% it gets tight, and banks see 40–50% as the limit for new credit. Pay off the most expensive loan first, avoid new instalment purchases – and see the loan tips below.", pln(loans)), 0, "loans");
+    // 6. Housing compared with income
+    const housing = cats.find(c => c.category === "Housing / rent")?.perMonth || 0;
+    if (housing / income >= 0.35)
+      add("tip", T("Housing takes {0}% of your income", Math.round(housing / income * 100)),
+        T("A common rule is at most 30–35%. Over a few years it can pay to look at a cheaper flat, a flatmate, or – with a mortgage – a refinance (see Loans vs. the market)."), 0, "expenses");
+  }
+  // 7. Savings goals: is the monthly surplus enough?
+  const open = (d.Goals || []).map(g => ({ g, saved: goalSaved(g, d) })).filter(x => x.saved < x.g.Target && x.g.TargetDate);
+  if (open.length) {
+    const monthsTo = t => Math.max(1, (t.getFullYear() - today().getFullYear()) * 12 + t.getMonth() - today().getMonth());
+    const need = open.reduce((s, x) => s + (x.g.Target - x.saved) / monthsTo(parseDate(x.g.TargetDate)), 0);
+    if (left < need)
+      add("safety", T("Your goals need {0} a month", pln(need)),
+        T("To reach your savings goals on time you need {0} a month, but only {1} is left after your outflows. Push a date back, lower a target, or find the difference in the tips above.", pln(need), pln(Math.max(0, left))), 0, "budget");
+    else add("insight", T("Your goals are on track"), T("They need {0} a month and {1} is left. Set up a standing order for {0} on payday so it happens by itself.", pln(need), pln(left)), 0, "budget");
+  }
+  // 8. A promotion ends soon
+  const due = duePromos(d)[0];
+  if (due) add("money", due.p.ended ? T("The promotion at {0} has ended", due.h.Name) : T("The promotion at {0} ends in {1} days", due.h.Name, due.p.daysLeft),
+    T("After a promotion banks pay much less. Move the money to the best offer now – see Savings."), 0, "portfolio");
+  // 9. Fees on the savings account (statement analysis)
+  const chk = (d.SavingsChecks || [])[0];
+  if (chk && chk.Fees > 0) add("money", T("Your savings account charges fees"),
+    T("{0} paid {1} in fees between {2} and {3}. A savings account should be free – ask the bank or move the money.", chk.Name, pln(chk.Fees), fmtDate(chk.From), fmtDate(chk.To)), chk.Fees * 365 / Math.max(30, chk.Days || 365), "portfolio");
+  // 10. More in the emergency fund than needed
+  if (target > 0 && p.safe > target * 1.5) {
+    const extra = p.safe - target;
+    add("money", T("{0} more than your emergency fund needs", pln(extra)),
+      T("Your safe money is well above your target. Money you won't need for years can earn more, e.g. in 4- or 10-year inflation-linked treasury bonds (COI, EDO) or an IKE without the 19% tax."), extra * 0.01, "portfolio");
+  }
+  // 11. IKZE: lower income tax
+  if (left > 300 && missing <= 0 && target > 0) {
+    const yearly = Math.min(left * 12, 11304);
+    add("money", T("IKZE could lower your tax by about {0} a year", pln(yearly * 0.12)),
+      T("Payments into an IKZE are deducted from your taxable income: putting {0} a year in returns about {1} in your tax settlement (12% tax bracket; 32% above 120 000 zł). The money is for retirement.", pln(yearly), pln(yearly * 0.12)), yearly * 0.12, "portfolio");
+  }
+}
+
+/** Key ratios for the health check: { label, value, aim, state: good|warn|bad, tip }. */
+export function healthCheck(d) {
+  const income = Calc.totalIncome(d), avg = Calc.spending(d);
+  if (!(income > 0) || !(avg.monthsUsed > 0)) return [];
+  const spending = avg.essential + avg.nonEssential, left = income - spending, p = Calc.portfolio(d), em = Calc.emergency(d.Settings);
+  const pc = v => Math.round(v * 100) + "%";
+  const rows = [];
+  const r = left / income;
+  rows.push({ label: T("Savings rate"), value: savingsRateText(left, income), aim: T("20% or more"), state: r >= 0.2 ? "good" : r >= 0.1 ? "warn" : "bad" });
+  rows.push({ label: T("Essential costs"), value: pc(avg.essential / income), aim: T("up to 50%"), state: avg.essential / income <= 0.5 ? "good" : avg.essential / income <= 0.6 ? "warn" : "bad" });
+  rows.push({ label: T("Not essential"), value: pc(avg.nonEssential / income), aim: T("up to 30%"), state: avg.nonEssential / income <= 0.3 ? "good" : avg.nonEssential / income <= 0.4 ? "warn" : "bad" });
+  const housing = Advisor.perCategory(d).find(c => c.category === "Housing / rent")?.perMonth || 0;
+  if (housing > 0) rows.push({ label: T("Housing"), value: pc(housing / income), aim: T("up to 35%"), state: housing / income <= 0.35 ? "good" : housing / income <= 0.45 ? "warn" : "bad" });
+  const loans = Calc.loanPayments(d);
+  if (loans > 0) rows.push({ label: T("Loan payments"), value: pc(loans / income), aim: T("up to 30%"), state: loans / income <= 0.3 ? "good" : loans / income <= 0.45 ? "warn" : "bad" });
+  const ess = em.monthly || avg.essential;
+  if (ess > 0) { const m = p.safe / ess; rows.push({ label: T("Emergency fund"), value: T("{0} months", (Math.round(m * 10) / 10).toString().replace(".", ",")), aim: T("3–6 months"), state: m >= 3 ? "good" : m >= 1 ? "warn" : "bad" }); }
+  if (p.safe > 0) { const yr = p.yearly / Math.max(1, p.total) * 100; rows.push({ label: T("Interest on your savings"), value: fmtPct(yr), aim: T("about the NBP rate or more"), state: yr >= 4 ? "good" : yr >= 2 ? "warn" : "bad" }); }
+  return rows;
+}
 
 // ---------------------------------------------------------------- reset (Delete data)
 

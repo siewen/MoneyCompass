@@ -5,12 +5,12 @@ import {
 import { progress, hbars } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
-import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, alertBox, toast, pickFile } from "./ui.js";
+import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, alertBox, toast, pickFile, ICONS, headingTip } from "./ui.js";
 import { App, requirePro } from "./app.js";
 import { Rates, BOND_CODES, BONDS_WEBSITE, SAVINGS_RANKING, DEPOSITS_RANKING } from "./rates.js";
 import { budgetBars, offerSalary, binCard, bindBin } from "./pages-main.js";
 import * as Csv from "./csv.js";
-import { toBin, loanPlan, planLoan, loanNextPayment, lang, ruleFor } from "./core.js";
+import { toBin, loanPlan, planLoan, loanNextPayment, lang, ruleFor, healthCheck } from "./core.js";
 
 const D = () => State.data;
 const locked = (title, text) => `<div class="grid">${card(`<div class="locked">🔒<h3>${esc(title)}</h3><p>${esc(text)}</p>${button(esc(T("Enter license key")), "unlock", "main")}</div>`)}</div>`;
@@ -172,7 +172,7 @@ function optimizeHtml() {
       <button class="btn second small" data-compare="${key}:${i}">＋ ${esc(T("Compare"))}</button></div></div>`;
   }).join("<hr>");
   const offersStatus = T("Top rates from the {0} rankings, checked {1}. Conditions apply – always check the bank's own terms.", "rankomat.pl", fmtDate(String(Rates.checked).slice(0, 10)));
-  const kind = { warning: ["⚠️", "bad"], safety: ["🛡️", "primary"], money: ["💳", "good"], tip: ["💡", "warn"] };
+  const kind = { warning: [ICONS.alert, "bad"], safety: [ICONS.shield, "primary"], money: [ICONS.coins, "good"], tip: [ICONS.bulb, "warn"], insight: [ICONS.chart, "info"] };
   const option = (icon, title, text, now, risk, access, best) => card(`<h3><span class="h-icon">${icon}</span>${esc(title)}</h3><p>${esc(text)}</p>
     <div class="facts"><span>${esc(T("Now"))}</span><div><b>${now}</b></div><span>${esc(T("Risk"))}</span><div><span class="risk ${risk[0]}">${esc(T(RISK_LABEL[risk[0]]))}</span> ${esc(risk[1].includes(" – ") ? risk[1].slice(risk[1].indexOf(" – ") + 3) : risk[1])}</div>
     <span>${esc(T("Access to money"))}</span><div>${esc(access)}</div><span>${esc(T("Best for"))}</span><div>${esc(best)}</div></div>`);
@@ -180,10 +180,16 @@ function optimizeHtml() {
 
   // No window title: the button that opens it already says "Optimize my finances", and each card has its own heading
   return `<div class="grid optimize-grid">
+    ${(() => { const hc = healthCheck(d); if (!hc.length) return "";
+      const good = hc.filter(x => x.state === "good").length;
+      return card(headingTip(T("Financial health check"), T("Your numbers compared with common rules of thumb, e.g. the 50/30/20 rule: up to 50% of income for essentials, up to 30% for the rest, at least 20% saved.")) +
+        `<p class="hint">${esc(T("{0} of {1} in the green.", good, hc.length))}</p><div class="health">` +
+        hc.map(x => `<div class="h-row"><span class="h-dot ${x.state}"></span><span class="h-label">${esc(x.label)}</span><b class="h-val ${x.state === "good" ? "" : x.state}">${esc(x.value)}</b><span class="h-aim">${esc(T("aim: {0}", x.aim))}</span></div>`).join("") + "</div>");
+    })()}
     ${card(heading(T("Your personal plan"), "🧭") + `<p class="${gain > 0 ? "good big-text" : "hint"}">${esc(gain > 0 ? T("Following these steps could be worth about {0} per year.", pln(gain)) : T("Your personal plan, based on what you entered."))}</p>` +
       hint(T("Click a step to go to the right tab.")) +
       (advice.length ? "" : `<h3 class="good">✔ ${esc(T("Well done!"))}</h3><p>${esc(T("Your emergency fund is complete, you save at least 20% and your money is in good places. Check your offers again when promotions end."))}</p>`) +
-      advice.map((a, i) => `<div class="advice ${kind[a.kind][1]}"${a.route ? ` data-route="${a.route}"` : ""}><b>${kind[a.kind][0]} ${i + 1}. ${esc(a.title)}</b><p>${esc(a.text)}</p>
+      advice.map((a, i) => `<div class="advice ${kind[a.kind][1]}"${a.route ? ` data-route="${a.route}"` : ""}><b class="adv-title"><span class="adv-ic">${kind[a.kind][0]}</span>${i + 1}. ${esc(a.title)}</b><p>${esc(a.text)}</p>
         ${a.benefit > 0 ? `<b class="${kind[a.kind][1]}">${esc(a.kind === "warning" ? T("Shortfall: about {0} per year", pln(a.benefit)) : T("Worth about {0} per year", pln(a.benefit)))}</b>` : ""}
         ${a.route ? `<span class="go-link">${esc(T("Go to {0} →", T(TAB_NAMES[a.route] || "Overview")))}</span>` : ""}</div>`).join(""))}
     ${moduleOn("loans") ? debtAdvice(d) : ""}

@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 68, date: "2026-11-02", items: {
+    en: ["🧭 Optimize my finances is much smarter: a financial health check (savings rate, 50/30/20, housing, loans, emergency fund, interest), concrete tips per category – smoking, alcohol, shopping, groceries, eating out, subscriptions, fuel, energy, phone, car insurance, clothes, crypto – and alerts for rising spending, many small payments, goals, promotions, fees, IKZE tax savings and more."],
+    pl: ["🧭 Optymalizuj moje finanse jest dużo mądrzejsze: kontrola finansowego zdrowia (stopa oszczędności, 50/30/20, mieszkanie, kredyty, poduszka finansowa, oprocentowanie), konkretne wskazówki dla kategorii – palenie, alkohol, zakupy, spożywcze, jedzenie na mieście, subskrypcje, paliwo, energia, telefon, ubezpieczenie auta, ubrania, krypto – oraz alerty o rosnących wydatkach, wielu drobnych płatnościach, celach, promocjach, opłatach, uldze IKZE i więcej."],
+    de: ["🧭 Meine Finanzen optimieren ist viel klüger: ein Finanz-Gesundheitscheck (Sparquote, 50/30/20, Wohnen, Kredite, Notgroschen, Zinsen), konkrete Tipps pro Kategorie – Rauchen, Alkohol, Einkäufe, Lebensmittel, Essen gehen, Abos, Kraftstoff, Energie, Telefon, Autoversicherung, Kleidung, Krypto – und Hinweise zu steigenden Ausgaben, vielen Kleinzahlungen, Zielen, Aktionen, Gebühren, IKZE-Steuerersparnis und mehr."],
+    fr: ["🧭 Optimiser mes finances est bien plus malin : un bilan de santé financière (taux d'épargne, 50/30/20, logement, prêts, épargne de précaution, intérêts), des conseils concrets par catégorie – tabac, alcool, achats, courses, repas à l'extérieur, abonnements, carburant, énergie, téléphone, assurance auto, vêtements, crypto – et des alertes sur les dépenses en hausse, les nombreux petits paiements, les objectifs, les promotions, les frais, l'économie d'impôt IKZE et plus."] } },
   { build: 67, date: "2026-11-02", items: {
     en: ["🎨 Overview: \"Outflows by category\" also shows every category with its own colour, like the Outflows tab."],
     pl: ["🎨 Przegląd: „Wydatki według kategorii” też pokazuje każdą kategorię w jej własnym kolorze, jak zakładka Wydatki."],

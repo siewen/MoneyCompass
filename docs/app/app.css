@@ -804,3 +804,20 @@ body.drop-on::after { content: "⬆"; position: fixed; inset: 12px; z-index: 200
 .tip-box { white-space: pre-line; }
 .wave-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 14px; flex-wrap: wrap; margin-bottom: 8px; }
 .wave-head h3 { margin: 0; }
+
+/* ---------- Personal plan: health check, line icons, insight type ---------- */
+.advice.info { color: #60A5FA; }
+:root[data-design] .advice.info { color: color-mix(in srgb, #60A5FA 75%, var(--ink)); }
+.advice .adv-title { display: flex; align-items: center; gap: 8px; }
+.advice .adv-ic { display: inline-flex; flex: none; color: inherit; }
+.advice b.adv-title { color: var(--ink); }
+.advice .adv-ic svg { color: currentColor; }
+.advice.bad .adv-ic { color: var(--bad); } .advice.primary .adv-ic { color: var(--primary); } .advice.good .adv-ic { color: var(--good); } .advice.warn .adv-ic { color: var(--warn); } .advice.info .adv-ic { color: #60A5FA; }
+.health { display: flex; flex-direction: column; }
+.h-row { display: grid; grid-template-columns: 14px 1fr auto auto; align-items: center; gap: 4px 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.h-row:last-child { border-bottom: 0; }
+.h-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
+.h-dot.good { background: var(--in, var(--good)); } .h-dot.warn { background: var(--low, var(--warn)); } .h-dot.bad { background: var(--out, var(--bad)); }
+.h-val.warn { color: var(--low, var(--warn)); } .h-val.bad { color: var(--out, var(--bad)); }
+.h-aim { color: var(--muted); font-size: 12.5px; text-align: right; white-space: nowrap; }
+@media (max-width: 640px) { .h-row { grid-template-columns: 14px 1fr auto; } .h-aim { grid-column: 2 / -1; text-align: left; min-width: 0; } }
