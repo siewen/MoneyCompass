@@ -461,8 +461,9 @@ export const Expenses = {
           (loans > 0 ? hint(T("Includes {0} per month of loan payments from the Loans & debts tab. Expenses in the \"Loan payments\" category are not counted, so nothing is counted twice.", pln(loans))) : "")
         : hint(T("Add expenses to see your averages."))))}
       ${card(heading(T("Outflows by category")) + hint(basisText(d)) + (cats.all.length
-        ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.all.map((c, n) => ({
-            key: c.category, color: n < 6 ? COLORS.series[n] : COLORS.other, label: categoryLabel(c.category), text: pln(c.perMonth), share: ChartData.share(c.perMonth, cats.total) })))}</div>` + hint(T("Click to see these expenses"))
+        ? (() => { // every category its own colour: the ring and the list show exactly the same
+            const all = cats.all.map((c, n) => ({ key: c.category, color: COLORS.cats[n % COLORS.cats.length], label: categoryLabel(c.category), value: c.perMonth, text: pln(c.perMonth), share: ChartData.share(c.perMonth, cats.total) }));
+            return `<div class="chart-row">${donut(all, pln(cats.total), T("per month"))}${legend(all)}</div>`; })() + hint(T("Click to see these expenses"))
         : hint(T("Add expenses to see where your money goes."))))}
       ${card(`<form id="expense-form">${heading(T("Add an expense"))}
         <div class="two">${field(T("Date"), dateInput("date", inputDate(today())))}${field(T("Amount (zł)"), numInput("amount", "", T("e.g. {0}", "120,50")))}</div>

@@ -619,7 +619,10 @@ export const Calc = {
 // ---------------------------------------------------------------- chart numbers (ChartData.cs)
 
 export const COLORS = { income: "#2a78d6", expenses: "#eb6834", leftOver: "#1baf7a", other: "#a3a3a0",
-  series: ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300"] };
+  series: ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300"],
+  // One colour per category on the Outflows tab (the first six are the usual ones, so the biggest categories keep their colour)
+  cats: ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#8b7cf6", "#2bb5c8", "#c2410c", "#a3b827", "#d946ef", "#5b7c99",
+    "#f2777a", "#7dd3a8", "#b08968", "#60a5fa", "#fbbf24", "#94a3b8"] };
 
 export const ChartData = {
   inOut(d) {

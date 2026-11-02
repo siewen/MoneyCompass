@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 66, date: "2026-11-02", items: {
+    en: ["🎨 Outflows by category: every category now has its own colour in the ring and in the list – no more grey \"Everything else\" slice."],
+    pl: ["🎨 Wydatki według kategorii: każda kategoria ma teraz własny kolor na wykresie i na liście – koniec z szarym kawałkiem „Wszystko inne”."],
+    de: ["🎨 Ausgaben nach Kategorie: Jede Kategorie hat jetzt ihre eigene Farbe im Ring und in der Liste – kein graues Stück „Alles andere“ mehr."],
+    fr: ["🎨 Sorties par catégorie : chaque catégorie a maintenant sa propre couleur dans l'anneau et dans la liste – plus de part grise « Tout le reste »."] } },
   { build: 65, date: "2026-11-02", items: {
     en: ["🏦 Outflows → click \"Loan payments\": your loans and mortgages from the Loans & debts tab are now listed with their monthly payment (click one to open it)."],
     pl: ["🏦 Wydatki → kliknij „Raty kredytów”: Twoje kredyty i hipoteki z zakładki Kredyty i długi są teraz wymienione z miesięczną ratą (kliknij, aby otworzyć)."],
