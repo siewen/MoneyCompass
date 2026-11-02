@@ -723,3 +723,12 @@ body.drop-on::after { content: "⬆"; position: fixed; inset: 12px; z-index: 200
 .kind-btn small { color: var(--muted); }
 .kind-btn:hover { border-color: var(--hi, #0F766E); }
 .head-import[hidden] { display: none !important; }
+/* Reports tab */
+.rep-parts { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0 14px; margin: 6px 0 8px; }
+.rep-parts .check { margin: 0; padding: 5px 0; }
+.rep-parts .check span { display: flex; justify-content: space-between; gap: 8px; width: 100%; }
+.rep-parts .check em { font-style: normal; }
+.rep-parts .check small { flex: none; }
+.rep-parts .check.off { opacity: .5; }
+.rep-export .btn { text-align: left; }
+.rep-figures b { font-size: 17px; }

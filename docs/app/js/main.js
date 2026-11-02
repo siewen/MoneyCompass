@@ -4,6 +4,7 @@ import { esc, popup, toast } from "./ui.js";
 import { startLock, lock, hasPin } from "./lock.js";
 import { startBackup, drawBackupBar, backupProfileChanged } from "./backup.js";
 import { smartImport } from "./import.js";
+import { Reports } from "./reports.js";
 import { openSavingsCheck } from "./savings-check.js";
 import { App, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
@@ -16,7 +17,7 @@ import { Calendar } from "./calendar.js";
 import { promoReminder } from "./advice.js";
 import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile, openLanguage } from "./dialogs.js";
 
-const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", savings: "#7E22CE" };
+const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", reports: "#0E7490", savings: "#7E22CE" };
 const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget, calendar: Calendar };
 let current = "overview";
 
@@ -24,7 +25,7 @@ function tabs() {
   const list = [Overview, Income, Expenses, Emergency, Portfolio];
   // Savings goals are part of the Budget plan (Pro), not a tab of their own
   for (const m of MODULES) if (moduleOn(m.code) && m.code !== "goals") list.push(MODULE_PAGES[m.code]);
-  list.push(Savings);
+  list.push(Savings, Reports);
   return list;
 }
 
@@ -40,6 +41,7 @@ const TAB_ICON = {
   budget: I('<path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/>'),
   calendar: I('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
   savings: I('<path d="M4 7h16M4 12h16M4 17h10"/><path d="M18 15l2 2-2 2"/>'),
+  reports: I('<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 17v-3M12 17v-6M15 17v-4"/>'),
 };
 /** MoneyCompass has one design: Emerald (dark green, side menu on wide screens, bottom bar on phones). */
 const beta = () => "emerald";
@@ -75,7 +77,6 @@ function buildShell() {
       <button class="import-btn" data-act="import" title="${esc(T("Import a bank statement (CSV) – current or savings account. You can also drop the file onto the app."))}"><span class="ii">⬆</span><span class="il">${esc(T("Import"))}${license.isPro ? "" : " 🔒"}</span></button>
       <nav class="tabs" id="tabs">${list.map(t => `<button class="tab" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}"><span class="ti">${TAB_ICON[t.route] || ""}</span><span class="tl">${esc(T(t.title))}</span></button>`).join("")}</nav>
       <div class="actions">
-        <button class="act data-btn" data-act="data" title="${esc(T("Data: export, delete"))}">🗂<span>${esc(T("Data"))}</span> ▾</button>
         <button class="act lang-btn" data-act="lang" title="${esc(T("Language"))}">🌐<b>${esc(lang().toUpperCase())}</b></button>
         <button class="profile-btn" data-act="profile" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}</button>
         ${installed() ? `<button class="act exit" data-act="exit" title="${esc(T("Close"))}">⏻</button>` : ""}

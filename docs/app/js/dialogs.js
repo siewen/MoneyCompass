@@ -321,79 +321,8 @@ export function openHelp() {
 
 // ================================================================= Export (Pro on the web)
 
-export async function openExport() {
-  if (!(await windowsOrPro(T("Export report")))) return;
-  const p = popup(`<h2 class="popup-title">⬇ ${esc(T("Export report"))}</h2>${hint(T("Save a copy of your numbers to keep a record over time."))}
-    ${card(heading(T("What's in the report")) + hint(T("Summary, diagrams (optional), income sources, monthly totals, expenses by category, all expenses, your savings, saved offers and your personal savings plan.")) +
-      hint(T("Each export is a new file with date and time, so older reports are kept.")))}
-    <div class="buttons col">
-      <button class="btn second" data-f="xlsx"><b>${esc(T("Excel (.xlsx)"))}</b><br><span class="hint">${esc(T("Every part on its own sheet, with real numbers you can calculate with."))}</span></button>
-      <button class="btn second" data-f="pdf"><b>${esc(T("PDF"))}</b><br><span class="hint">${esc(T("Opens the print window: choose \"Save as PDF\"."))}</span></button>
-      <button class="btn second" data-f="doc"><b>${esc(T("Word (.docx)").replace(".docx", ".doc"))}</b><br><span class="hint">${esc(T("A document you can still edit, add notes to or send."))}</span></button></div>
-    <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`, { width: 560 });
-  p.el.querySelectorAll("[data-f]").forEach(b => b.onclick = async () => {
-    try {
-      if (b.dataset.f === "xlsx") await exportExcel();
-      else if (b.dataset.f === "pdf") printReport();
-      else download(`MoneyCompass-report-${stamp()}.doc`, "﻿" + reportHtml(true), "application/msword");
-      toast(T("Report saved"));
-    } catch (e) { alertBox(T("Export report"), T("The report could not be created.") + "\n" + e.message); }
-  });
-}
-
-function reportParts() {
-  const d = D(), inc = Calc.income(d), avg = Calc.spending(d), p = Calc.portfolio(d), em = Calc.emergency(d.Settings);
-  const spending = avg.essential + avg.nonEssential, left = inc.monthlyTotal - spending;
-  const summaryRows = [
-    [T("Regular income per month"), pln(inc.monthlyTotal)], [T("Extra income received this month (bank import)"), pln(Calc.receivedIn(d, new Date()))],
-    [T("One-time income in {0}", new Date().getFullYear()), pln(inc.oneTimeThisYear)],
-    [T("Average expenses per month (Outflows tab)"), avg.monthsUsed ? pln(spending) : T("no data yet")],
-    [T("Balance per month"), avg.monthsUsed ? pln(left) : "–"], [T("Savings rate"), avg.monthsUsed && inc.monthlyTotal > 0 ? savingsRateText(left, inc.monthlyTotal) : "–"],
-    [T("Secure savings (bank, cash)"), pln(p.safe)], [T("Investments at risk (crypto, securities)"), pln(p.risky)], [T("Total"), pln(p.total)],
-    [T("Interest p.a. (gross)"), pln(p.yearly)], [T("Emergency fund target"), pln(em.target)], [T("Emergency fund covered"), em.target > 0 ? Math.round(Math.min(1, p.safe / em.target) * 100) + "%" : "–"]];
-  const income = [[T("Name"), T("Type"), T("How often"), T("Per month (zł)"), T("Active")], ...d.Incomes.map(i => [i.Name, T(i.Type), T(i.Frequency), i.Frequency === ONE_TIME ? T("one-time") : round(Calc.monthlyPln(i, d.Settings)), i.Active ? T("Yes") : T("No")])];
-  const months = [[T("Month"), T("Inflows"), T("Outflows"), T("Balance")], ...ChartData.trend(d).map(m => [monthName(m.start), round(m.income), round(m.expenses), round(m.income - m.expenses)])];
-  const cats = ChartData.categories(d);
-  const byCat = [[T("Category"), T("Per month"), T("Share")], ...cats.all.map(c => [T(c.category), round(c.perMonth), ChartData.share(c.perMonth, cats.total)])];
-  const expenses = [[T("Date"), T("Category"), T("Description"), T("Amount (zł)"), T("Essential")], ...[...d.Expenses].sort((a, b) => parseDate(b.Date) - parseDate(a.Date)).map(e => [fmtDate(e.Date), T(e.Category), e.Description, e.Amount, e.Essential ? T("Yes") : T("No")])];
-  const holdings = [[T("Name"), T("Where"), T("In złoty"), T("Interest rate"), T("Safe")], ...d.Holdings.map(h => [h.Name, T(h.Place), round(Calc.toPln(h.Amount, h.Currency, d.Settings)), (h.RatePercent || 0) + "%", h.Safe ? T("Yes") : T("No")])];
-  const offers = [[T("Name"), T("Promo rate"), T("Promo days"), T("Rate after"), T("You keep"), T("Real yearly rate after tax")], ...d.Offers.map(o => ({ o, r: Calc.savings(o) })).sort((a, b) => b.r.net - a.r.net).map(x => [x.o.Name, x.o.PromoRate + "%", x.o.PromoDays, x.o.StandardRate + "%", round(x.r.net), rate(x.r.effective)])];
-  const plan = [[T("Step"), T("Details"), T("Worth per year")], ...Advisor.analyse(d).map(a => [a.title, a.text, a.benefit > 0 ? round(a.benefit) : ""])];
-  return { summaryRows, sections: [[T("Income"), income], [T("Monthly totals"), months], [T("Outflows by category"), byCat], [T("Outflows"), expenses], [T("Savings"), holdings], [T("Comparison"), offers], [T("Your personal plan"), plan]] };
-}
-const round = v => Math.round(v * 100) / 100;
-
-function reportHtml(forWord = false) {
-  const { summaryRows, sections } = reportParts();
-  const table = rows => `<table><tr>${rows[0].map(h => `<th>${esc(h)}</th>`).join("")}</tr>${rows.slice(1).map(r => `<tr>${r.map(c => `<td>${esc(typeof c === "number" ? pln(c) : c)}</td>`).join("")}</tr>`).join("")}</table>`;
-  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(T("MoneyCompass report"))}</title><style>
-    body{font-family:Segoe UI,Arial,sans-serif;color:#111827;margin:24px}h1{color:#0F766E;margin:0}h2{color:#0F766E;margin-top:28px;font-size:18px}
-    table{border-collapse:collapse;width:100%;font-size:12px;margin-top:6px}th{background:#0F766E;color:#fff;text-align:left;padding:5px}td{border-bottom:1px solid #E5E7EB;padding:5px;vertical-align:top}
-    .muted{color:#6B7280;font-size:12px}${forWord ? "" : "@media print{h2{break-after:avoid}table{break-inside:auto}tr{break-inside:avoid}}"}</style></head><body>
-    <h1>${esc(T("MoneyCompass report"))}</h1><p class="muted">${esc(T("Created on {0}", fmtDate(new Date())))} · ${esc(currentName())}</p>
-    <h2>${esc(T("Summary"))}</h2>${table([[T("Item"), T("Value")], ...summaryRows])}
-    ${sections.map(([title, rows]) => rows.length > 1 ? `<h2>${esc(title)}</h2>${table(rows)}` : "").join("")}
-    <p class="muted">${esc(T("These suggestions are calculated from what you entered and are estimates. They are not financial, investment or tax advice."))}</p></body></html>`;
-}
-function printReport() {
-  const w = window.open("", "_blank");
-  if (!w) { alertBox(T("Export report"), T("Please allow pop-up windows for this page.")); return; }
-  w.document.write(reportHtml()); w.document.close();
-  setTimeout(() => { w.focus(); w.print(); }, 400);
-}
-async function exportExcel() {
-  if (!window.XLSX) await new Promise((res, rej) => {
-    const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
-    sc.onload = res; sc.onerror = () => rej(new Error("Excel library could not be loaded.")); document.head.appendChild(sc);
-  });
-  const X = window.XLSX, wb = X.utils.book_new();
-  const { summaryRows, sections } = reportParts();
-  const add = (name, rows) => X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(rows), name.replace(/[\\/?*[\]:]/g, "").slice(0, 31));
-  add(T("Summary"), [[T("Item"), T("Value")], ...summaryRows]);
-  const used = new Set([T("Summary")]);
-  for (const [title, rows] of sections) { let n = title.slice(0, 31); while (used.has(n)) n = n.slice(0, 29) + "2"; used.add(n); add(n, rows); }
-  X.writeFile(wb, `MoneyCompass-report-${stamp()}.xlsx`);
-}
+/** Export: the Reports tab (period, parts and format). */
+export function openExport() { App.go("reports"); }
 
 // ---------- Language: from the 🌐 button in the top bar and from the guide ----------
 export const FLAGS = { en: "🇬🇧", de: "🇩🇪", fr: "🇫🇷", pl: "🇵🇱" };

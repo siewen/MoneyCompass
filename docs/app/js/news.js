@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 52, date: "2026-11-02", items: {
+    en: ["📑 New Reports tab: choose the period (this month, last 3 months, this year, your own dates…) and what to include, see the key figures, then export to Excel, PDF or Word. The Data button is gone – Export is in Reports, Delete data in Options."],
+    pl: ["📑 Nowa zakładka Raporty: wybierz okres (ten miesiąc, ostatnie 3 miesiące, ten rok, własne daty…) i co ma się znaleźć w raporcie, zobacz najważniejsze liczby, a potem eksportuj do Excela, PDF lub Worda. Przycisk Dane zniknął – eksport jest w Raportach, usuwanie danych w Opcjach."],
+    de: ["📑 Neuer Tab Berichte: Zeitraum wählen (dieser Monat, letzte 3 Monate, dieses Jahr, eigene Daten…) und was in den Bericht kommt, die wichtigsten Zahlen sehen und nach Excel, PDF oder Word exportieren. Der Daten-Knopf ist weg – Export ist in Berichte, Daten löschen in den Optionen."],
+    fr: ["📑 Nouvel onglet Rapports : choisissez la période (ce mois-ci, les 3 derniers mois, cette année, vos dates…) et ce qu'il faut inclure, voyez les chiffres clés, puis exportez en Excel, PDF ou Word. Le bouton Données disparaît – l'export est dans Rapports, la suppression des données dans les Options."] } },
   { build: 51, date: "2026-11-02", items: {
     en: ["👤 Saving and loading your profile file is now only in your profile (top right) – not in the Data menu or Options."],
     pl: ["👤 Zapis i wczytanie pliku profilu są teraz tylko w Twoim profilu (prawy górny róg) – nie w menu Dane ani w Opcjach."],
