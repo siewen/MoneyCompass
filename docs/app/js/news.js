@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 48, date: "2026-11-02", items: {
+    en: ["📈 Savings chart from a current-account import: transfers to and from your savings account now give its month-by-month balance, credits and debits – even without a savings statement. If the balance would go below 0, MoneyCompass tells you how much was probably on the account before.", "🧩 Moved cards are now remembered by their title, so they no longer get mixed up when a card appears or disappears."],
+    pl: ["📈 Wykres oszczędności z importu konta osobistego: przelewy na rachunek oszczędnościowy i z niego dają teraz saldo miesiąc po miesiącu, uznania i obciążenia – nawet bez wyciągu z rachunku oszczędnościowego. Jeśli saldo spadłoby poniżej 0, MoneyCompass podpowiada, ile prawdopodobnie było na rachunku wcześniej.", "🧩 Przesunięte karty są teraz zapamiętywane po tytule, więc nie mieszają się, gdy jakaś karta się pojawia lub znika."],
+    de: ["📈 Spardiagramm aus einem Girokonto-Import: Überweisungen auf das Sparkonto und zurück ergeben jetzt den Saldo Monat für Monat, Gutschriften und Belastungen – auch ohne Sparkontoauszug. Würde der Saldo unter 0 fallen, zeigt MoneyCompass, wie viel vorher wahrscheinlich auf dem Konto war.", "🧩 Verschobene Karten werden jetzt nach ihrem Titel gemerkt und geraten nicht mehr durcheinander, wenn eine Karte erscheint oder verschwindet."],
+    fr: ["📈 Graphique de l'épargne à partir d'un import de compte courant : les virements vers le compte d'épargne et depuis celui-ci donnent désormais son solde mois par mois, les crédits et les débits – même sans relevé d'épargne. Si le solde passait sous 0, MoneyCompass indique combien il y avait probablement sur le compte avant.", "🧩 Les cartes déplacées sont désormais mémorisées par leur titre : elles ne se mélangent plus quand une carte apparaît ou disparaît."] } },
   { build: 47, date: "2026-11-02", items: {
     en: ["⭐ All backups are now part of MoneyCompass Pro: saving your profile as a file, the file password and the automatic backup. The free version is a demo – \"Load a profile…\" still works there."],
     pl: ["⭐ Wszystkie kopie zapasowe są teraz częścią MoneyCompass Pro: zapis profilu do pliku, hasło do plików i automatyczna kopia. Wersja darmowa to demo – „Wczytaj profil…” nadal tam działa."],

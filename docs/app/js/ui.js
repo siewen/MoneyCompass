@@ -221,17 +221,27 @@ export const stamp = () => { const d = new Date(), p = n => String(n).padStart(2
 // Fixed: tiles and big buttons stay where they are. Wide cards span the whole width but can be moved too.
 const isFull = el => el.matches(".tiles, .btn, .tip, .fixed");
 const spans = el => el.matches(".tiles, .btn, .tip, .wide, .fixed");
+/** A card's name for the saved order: its title (cards without a title: their place among the untitled ones). */
+function cardId(card) {
+  const h = card.querySelector("h2, h3, .card-title");
+  const t = (h?.textContent || "").replace(/⠿/g, "").trim();
+  if (t) return t;
+  const grid = card.closest(".grid"); const untitled = (grid?._orig || []).filter(c => !(c.querySelector("h2, h3, .card-title")?.textContent || "").trim());
+  return "#" + untitled.indexOf(card);
+}
 function layoutGrid(grid) {
   if (!grid._items) {
     grid._items = [...grid.children];
     grid._orig = grid._items.filter(x => !isFull(x));
     const key = grid.dataset.key;
     const saved = key && State.data.Settings.CardOrder?.[key];
-    // A moved order is kept by card position: only use it while the tab has the same cards. When a card appears or disappears
-    // (e.g. "Your account checks" after the first saved check) the positions no longer match, so the standard order is used.
-    if (Array.isArray(saved) && saved.length === grid._orig.length) {
-      const ordered = [...new Set(saved)].filter(i => i >= 0 && i < grid._orig.length).map(i => grid._orig[i]);
-      grid._orig.forEach(c => { if (!ordered.includes(c)) ordered.push(c); });
+    // A moved order is kept by card title, so cards that appear or disappear later don't shuffle the others.
+    // (Older saved orders by position are ignored – they mixed up the cards.)
+    if (saved && Array.isArray(saved.ids)) {
+      const ids = grid._orig.map(cardId), ordered = [];
+      for (const id of saved.ids) { const i = ids.indexOf(id); if (i >= 0 && !ordered.includes(grid._orig[i])) ordered.push(grid._orig[i]); }
+      // Cards not in the saved order (new, or a title that changes like a month name): at their usual place
+      grid._orig.forEach((c, i) => { if (!ordered.includes(c)) ordered.splice(Math.min(i, ordered.length), 0, c); });
       let k = 0;
       grid._items = grid._items.map(x => isFull(x) ? x : ordered[k++]);
     }
@@ -326,7 +336,7 @@ function addHandle(grid, card) {
       grid._items = grid._items.map(x => isFull(x) ? x : movable[k++]);
       const s = State.data.Settings;
       s.CardOrder = s.CardOrder || {};
-      s.CardOrder[grid.dataset.key] = movable.map(c => grid._orig.indexOf(c));
+      s.CardOrder[grid.dataset.key] = { ids: movable.map(cardId) };
       save();
       grid._cols = 0; layoutGrid(grid);
     };

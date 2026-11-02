@@ -226,7 +226,7 @@ const MAX_AHEAD = 6;   // forecast: off by default, up to 6 months (chosen by th
 export function savingsData(d, AHEAD = 0) {
   const s = d.Settings, now = monthStart(today()).getTime();
   const acc = new Map(), flows = new Map(), used = new Set();
-  let netTotal = 0, grossTotal = 0;   // net interest of the analyses, as in each analysis (all of it, when no newer analysis covers the same months)
+  let netTotal = 0, grossTotal = 0; const tooLow = [];   // net interest of the analyses, as in each analysis (all of it, when no newer analysis covers the same months)
   const get = (k, label) => { if (!acc.has(k)) acc.set(k, { label, pts: new Map() }); return acc.get(k); };
   const linkedId = c => d.Holdings.some(h => h.Id === c.HoldingId) ? c.HoldingId : "check:" + c.Name;
   for (const c of d.SavingsChecks || []) {          // newest check first: it wins for months two checks both cover
@@ -255,6 +255,29 @@ export function savingsData(d, AHEAD = 0) {
     const a = get(h.Id, h.Name);
     for (const x of hist) { const t = monthStart(parseDate(x.Date)).getTime(); if (!a.pts.has(t) || t === now) a.pts.set(t, toPln(x.Amount)); }
     a.pts.set(now, toPln(h.Amount));                // today's amount is what you have now
+    // Transfers from bank imports (to this account, and back from it): month-end balances worked back from today's balance,
+    // and credits/debits per month – for months no statement analysis of this account covers
+    const tr = (d.Transfers || []).filter(t => t.HoldingId === h.Id && (t.Saved || t.Back) && t.Date);
+    if (tr.length) {
+      const net = new Map();
+      for (const t of tr) {
+        const m = monthStart(parseDate(t.Date)).getTime(); if (m > now) continue;
+        net.set(m, (net.get(m) || 0) + t.Amount);
+        if (used.has(h.Id + "|" + m)) continue;
+        const f = flows.get(m) || { cr: 0, db: 0, int: 0, fee: 0 };
+        if (t.Amount > 0) f.cr += t.Amount; else f.db += -t.Amount;
+        flows.set(m, f);
+      }
+      let bal = toPln(h.Amount), lowest = 0, lowMonth = null;
+      const firstT = Math.min(...net.keys());
+      for (let m = monthStart(today()); m.getTime() >= firstT; m = addMonths(m, -1)) {
+        const t = m.getTime();
+        if (t < now && !a.pts.has(t)) { a.pts.set(t, Math.max(0, Math.round(bal * 100) / 100)); if (bal < lowest) { lowest = bal; lowMonth = new Date(t); } }
+        bal -= net.get(t) || 0;   // balance at the end of the month before
+      }
+      // Below 0 is impossible: the balance today must be higher (money that was on the account before the imported period)
+      if (lowest < -1) tooLow.push({ name: h.Name, need: -lowest, month: lowMonth });
+    }
   }
   const list = [...acc.values()].filter(a => a.pts.size);
   if (!list.length) return null;
@@ -274,7 +297,7 @@ export function savingsData(d, AHEAD = 0) {
   const fut = []; let b = total[total.length - 1];
   for (let k = 1; k <= AHEAD; k++) { b = b * (1 + r / 12 * (1 - BELKA)) + dep; fut.push(b); }
   const flowAt = (k) => months.map(m => (flows.get(m.getTime()) || {})[k] || 0).concat(Array(AHEAD).fill(null));
-  return { months, accounts, total, fut, dep, r, netTotal, grossTotal, gross: flowAt("gross"),
+  return { months, accounts, total, fut, dep, r, netTotal, grossTotal, tooLow, gross: flowAt("gross"),
     credits: flowAt("cr"), debits: flowAt("db"), interest: flowAt("int"), fees: flowAt("fee") };
 }
 export function savingsChartCard(d) {
@@ -293,6 +316,8 @@ export function savingsChartCard(d) {
     { key: "db", label: T("Debits (withdrawals)"), color: "#F59E0B", values: x.debits, left: true },
     { key: "fee", label: T("Fees & charges"), color: "#E5484D", values: x.fees },
   ];
+  // Series with no data at all (e.g. interest and fees when only a current account was imported) are left out
+  for (let i = bars.length - 1; i >= 0; i--) if (!bars[i].values.some(v => v)) bars.splice(i, 1);
   const hid = new Set(d.Settings.SavingsChartHidden || []);
   const sum = a => a.reduce((p, q) => p + q, 0), start = x.total.find(v => v > 0) || 0, end = x.total[n - 1];
   const fmtV = Object.assign(v => pln(v), { forecast: T("Forecast") });
@@ -305,6 +330,7 @@ export function savingsChartCard(d) {
       ${AHEAD ? fig(T("Forecast in {0} months", AHEAD), pln(x.fut[AHEAD - 1])) : ""}
       <label class="sav-ahead"><span>${esc(T("Forecast"))}</span><select data-sav-ahead>${[[0, T("Off")], [1, T("1 month")], [3, T("{0} months", 3)], [6, T("{0} months", 6)]].map(([v, l]) => `<option value="${v}"${v === AHEAD ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label></div>` +
     `<div class="wave-legend">${keys}</div>` + savingsChart(labels, lines, bars, axis, fmtV, hid, n) +
+    x.tooLow.map(w => `<p class="hint warn">⚠️ ${esc(T("\"{0}\": worked back from today's balance and the imported transfers, the balance would go below 0 in {1}. So today's balance is probably at least {2} higher – the money that was on the account before the imported period. Enter the real balance (click the account below) or analyse a statement of this account.", w.name, monthName(w.month), pln(w.need)))}</p>`).join("") +
     (n === 1 ? `<p class="hint">💡 ${esc(T("Only today's balance is known so far. Analyse a statement of your savings account to see how the balance developed month by month."))}</p>` : "") +
     hint(T("Closing balance of each month, from your statement analyses and the amounts you entered. Credits and debits per month (left scale), interest and fees per month (right scale) come from imported statements. Forecast (optional): today's rates after tax, plus your standing orders. Click a name to show or hide it.")), "wide fixed sav-chart-card");
 }

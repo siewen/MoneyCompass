@@ -813,7 +813,8 @@ export const EXTRA = {
 "{0} payments came from your own accounts – marked \"Not income\". If your salary arrives in an account whose statement you don't import, choose Salary for them below.": "{0} Zahlungen kamen von Ihren eigenen Konten – als „Kein Einkommen“ markiert. Wenn Ihr Gehalt auf ein Konto geht, dessen Auszug Sie nicht importieren, wählen Sie unten Gehalt.",
 "Search…": "Suchen…",
 "Automatic backup is part of MoneyCompass Pro. Save your profile regularly.": "Die automatische Sicherung ist Teil von MoneyCompass Pro. Speichern Sie Ihr Profil regelmäßig.",
-"Backups (profile file and automatic backup) are part of MoneyCompass Pro.": "Sicherungen (Profildatei und automatische Sicherung) sind Teil von MoneyCompass Pro."
+"Backups (profile file and automatic backup) are part of MoneyCompass Pro.": "Sicherungen (Profildatei und automatische Sicherung) sind Teil von MoneyCompass Pro.",
+"\"{0}\": worked back from today's balance and the imported transfers, the balance would go below 0 in {1}. So today's balance is probably at least {2} higher – the money that was on the account before the imported period. Enter the real balance (click the account below) or analyse a statement of this account.": "„{0}“: Vom heutigen Saldo und den importierten Überweisungen zurückgerechnet, fiele der Saldo im {1} unter 0. Der heutige Saldo ist also wahrscheinlich mindestens {2} höher – das Geld, das vor dem importierten Zeitraum auf dem Konto war. Geben Sie den echten Saldo ein (Konto unten anklicken) oder analysieren Sie einen Auszug dieses Kontos."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1628,7 +1629,8 @@ export const EXTRA = {
 "{0} payments came from your own accounts – marked \"Not income\". If your salary arrives in an account whose statement you don't import, choose Salary for them below.": "{0} paiements proviennent de vos propres comptes – marqués « Pas un revenu ». Si votre salaire arrive sur un compte dont vous n'importez pas le relevé, choisissez Salaire ci-dessous.",
 "Search…": "Rechercher…",
 "Automatic backup is part of MoneyCompass Pro. Save your profile regularly.": "La sauvegarde automatique fait partie de MoneyCompass Pro. Enregistrez votre profil régulièrement.",
-"Backups (profile file and automatic backup) are part of MoneyCompass Pro.": "Les sauvegardes (fichier de profil et sauvegarde automatique) font partie de MoneyCompass Pro."
+"Backups (profile file and automatic backup) are part of MoneyCompass Pro.": "Les sauvegardes (fichier de profil et sauvegarde automatique) font partie de MoneyCompass Pro.",
+"\"{0}\": worked back from today's balance and the imported transfers, the balance would go below 0 in {1}. So today's balance is probably at least {2} higher – the money that was on the account before the imported period. Enter the real balance (click the account below) or analyse a statement of this account.": "« {0} » : en remontant depuis le solde actuel et les virements importés, le solde passerait sous 0 en {1}. Le solde actuel est donc probablement supérieur d'au moins {2} – l'argent qui était sur le compte avant la période importée. Saisissez le vrai solde (cliquez sur le compte ci-dessous) ou analysez un relevé de ce compte."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -2443,6 +2445,7 @@ export const EXTRA = {
 "{0} payments came from your own accounts – marked \"Not income\". If your salary arrives in an account whose statement you don't import, choose Salary for them below.": "{0} wpływów pochodzi z Twoich własnych rachunków – oznaczone jako „Nie dochód”. Jeśli pensja wpływa na rachunek, którego wyciągu nie importujesz, wybierz dla nich poniżej Wynagrodzenie.",
 "Search…": "Szukaj…",
 "Automatic backup is part of MoneyCompass Pro. Save your profile regularly.": "Automatyczna kopia jest częścią MoneyCompass Pro. Zapisuj profil regularnie.",
-"Backups (profile file and automatic backup) are part of MoneyCompass Pro.": "Kopie zapasowe (plik profilu i automatyczna kopia) są częścią MoneyCompass Pro."
+"Backups (profile file and automatic backup) are part of MoneyCompass Pro.": "Kopie zapasowe (plik profilu i automatyczna kopia) są częścią MoneyCompass Pro.",
+"\"{0}\": worked back from today's balance and the imported transfers, the balance would go below 0 in {1}. So today's balance is probably at least {2} higher – the money that was on the account before the imported period. Enter the real balance (click the account below) or analyse a statement of this account.": "„{0}”: licząc wstecz od dzisiejszego salda i zaimportowanych przelewów, saldo spadłoby poniżej 0 w {1}. Dzisiejsze saldo jest więc prawdopodobnie wyższe o co najmniej {2} – to pieniądze, które były na rachunku przed importowanym okresem. Wpisz prawdziwe saldo (kliknij rachunek poniżej) lub przeanalizuj wyciąg z tego rachunku."
 }
 };
