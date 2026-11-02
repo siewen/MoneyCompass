@@ -664,11 +664,8 @@ export const ChartData = {
   categories(d) {
     const by = Advisor.spendingByCategory(d);
     const total = by.reduce((s, c) => s + c.perMonth, 0);
-    const slices = by.slice(0, 6).map((c, n) => ({ label: T(c.category), key: c.category, value: c.perMonth, color: COLORS.series[n], text: pln(c.perMonth), icon: categoryIcon(c.category) }));
-    if (by.length > 6) {
-      const rest = by.slice(6).reduce((s, c) => s + c.perMonth, 0);
-      slices.push({ label: T("Everything else"), value: rest, color: COLORS.other, text: pln(rest) });
-    }
+    // Every category its own colour (no grey "Everything else"): the ring and the list always match
+    const slices = by.map((c, n) => ({ label: T(c.category), key: c.category, value: c.perMonth, color: COLORS.cats[n % COLORS.cats.length], text: pln(c.perMonth), icon: categoryIcon(c.category) }));
     return { slices, total, all: by };
   },
   money(p) {

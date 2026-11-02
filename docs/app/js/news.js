@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 67, date: "2026-11-02", items: {
+    en: ["🎨 Overview: \"Outflows by category\" also shows every category with its own colour, like the Outflows tab."],
+    pl: ["🎨 Przegląd: „Wydatki według kategorii” też pokazuje każdą kategorię w jej własnym kolorze, jak zakładka Wydatki."],
+    de: ["🎨 Übersicht: „Ausgaben nach Kategorie“ zeigt jetzt ebenfalls jede Kategorie in eigener Farbe, wie der Tab Ausgaben."],
+    fr: ["🎨 Vue d'ensemble : « Sorties par catégorie » montre aussi chaque catégorie avec sa propre couleur, comme l'onglet Sorties."] } },
   { build: 66, date: "2026-11-02", items: {
     en: ["🎨 Outflows by category: every category now has its own colour in the ring and in the list – no more grey \"Everything else\" slice."],
     pl: ["🎨 Wydatki według kategorii: każda kategoria ma teraz własny kolor na wykresie i na liście – koniec z szarym kawałkiem „Wszystko inne”."],
