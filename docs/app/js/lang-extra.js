@@ -833,7 +833,9 @@ export const EXTRA = {
 "Current account statement.": "Girokontoauszug.",
 "This is a savings account statement →": "Das ist ein Sparkontoauszug →",
 "Savings account statement.": "Sparkontoauszug.",
-"This is a current account statement →": "Das ist ein Girokontoauszug →"
+"This is a current account statement →": "Das ist ein Girokontoauszug →",
+"Data: export, delete": "Daten: Export, Löschen",
+"Save or load your profile file: your profile, top right.": "Profildatei speichern oder laden: Ihr Profil, oben rechts."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1668,7 +1670,9 @@ export const EXTRA = {
 "Current account statement.": "Relevé de compte courant.",
 "This is a savings account statement →": "C'est un relevé de compte d'épargne →",
 "Savings account statement.": "Relevé de compte d'épargne.",
-"This is a current account statement →": "C'est un relevé de compte courant →"
+"This is a current account statement →": "C'est un relevé de compte courant →",
+"Data: export, delete": "Données : export, suppression",
+"Save or load your profile file: your profile, top right.": "Enregistrer ou charger votre fichier de profil : votre profil, en haut à droite."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -2503,6 +2507,8 @@ export const EXTRA = {
 "Current account statement.": "Wyciąg z konta osobistego.",
 "This is a savings account statement →": "To wyciąg z rachunku oszczędnościowego →",
 "Savings account statement.": "Wyciąg z rachunku oszczędnościowego.",
-"This is a current account statement →": "To wyciąg z konta osobistego →"
+"This is a current account statement →": "To wyciąg z konta osobistego →",
+"Data: export, delete": "Dane: eksport, usuwanie",
+"Save or load your profile file: your profile, top right.": "Zapis i wczytanie pliku profilu: Twój profil, prawy górny róg."
 }
 };

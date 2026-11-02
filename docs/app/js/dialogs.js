@@ -196,7 +196,7 @@ export function openOptions() {
       check("showguide", T("Show the step-by-step guide when MoneyCompass starts"), !s.GuideHidden) +
       check("shownews", T("Show what's new after an update"), !s.NewsHidden) +
       field(T("When I close MoneyCompass"), select("closechoice", [["", T("Ask every time")], ["with", T("Save profile and close")], ["without", T("Close without saving")]], s.CloseChoice === "none" ? "without" : s.CloseChoice || "")) +
-      `<div class="buttons">${button(esc(T("Save profile now") + (license.isPro ? "" : " 🔒")), "save-file", "second")}${button(esc(T("Load a profile…")), "load-file", "second")}</div>` +
+      hint("👤 " + T("Save or load your profile file: your profile, top right.")) +
       `<hr><h3>🛡️ ${esc(T("Automatic backup"))}</h3>` +
       hint(T("MoneyCompass keeps a copy of your profile in a file on this computer and updates it by itself after every change. If the browser data is ever deleted, open the file with \"Load a profile…\". Choose a folder like Documents or OneDrive.")) +
       `<p class="backup-line">${esc(backupLine())}</p>` +
@@ -245,14 +245,12 @@ export function openOptions() {
     s.AutoLockMinutes = v; save();
   };
   el.querySelector('input[name="askstart"]').onchange = e => { s.AskOnStart = e.target.checked; save(); };
-  el.querySelector('[data-action="save-file"]').onclick = saveProfileFile;
   el.querySelector('[data-action="reset-layout"]').onclick = () => {
     const o = s.CardOrder || {};
     Object.keys(o).filter(k => k.startsWith("web")).forEach(k => delete o[k]);
     save(); toast(T("All cards are back in their standard order when you close Options."));
   };
   el.querySelector('[data-action="reset-help"]').onclick = () => { App.resetHelpButton?.(); toast(T("The help button is back in the bottom-right corner.")); };
-  el.querySelector('[data-action="load-file"]').onclick = async () => { if (await loadProfileFile()) p.close(); };
   el.querySelector('[data-action="delete"]').onclick = () => { p.close(); openDelete(); };
 }
 
