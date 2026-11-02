@@ -266,7 +266,7 @@ function layoutGrid(grid) {
   }
   const width = grid.clientWidth || grid.parentElement?.clientWidth || window.innerWidth;
   const n = width >= 1100 ? 3 : width >= 720 ? 2 : 1;
-  if (grid._cols === n) return;
+  if (grid._cols === n) { fitCols(grid); return; }
   grid._cols = n;
   // Full-width cards go below the column cards (cards at the very top, like the tiles, stay there):
   // a wide card in the middle would cut the columns into blocks, each ending with an empty gap
@@ -289,7 +289,9 @@ function layoutGrid(grid) {
     group._items = group._items || []; group._items.push(item);
   }
   grid.replaceChildren(...parts);
-  // Fill the columns evenly: each card goes into the column that is shortest so far (no big empty gaps)
+  // Fill the columns evenly: each card goes into the column that is shortest so far (no big empty gaps).
+  // While measuring, no card is stretched – otherwise the newest card fills the whole row and every column looks full.
+  grid.classList.add("laying");
   for (const g of parts) {
     if (!g._items) continue;
     const cols = [...g.children], h = cols.map(() => 0), cnt = cols.map(() => 0);
@@ -300,6 +302,25 @@ function layoutGrid(grid) {
       h[k] += item.offsetHeight || 0;
     }
     delete g._items;
+  }
+  grid.classList.remove("laying");
+  fitCols(grid);
+}
+/** Columns end level only where it looks right: the last card of a shorter column is stretched to the bottom
+ *  when the gap is small. With a big gap (one very long card next to short ones) the card keeps its own height –
+ *  a stretched card would just be a big empty box. */
+function fitCols(grid) {
+  for (const g of grid.querySelectorAll(":scope > .cols")) {
+    const cols = [...g.children].filter(c => c.classList.contains("col"));
+    const lasts = cols.map(c => c.lastElementChild).filter(Boolean);
+    lasts.forEach(x => x.classList.add("no-stretch"));
+    const heights = cols.map(c => [...c.children].reduce((s, x) => s + x.offsetHeight, 0) + Math.max(0, c.children.length - 1) * 12);
+    const max = Math.max(...heights);
+    cols.forEach((c, i) => {
+      const last = c.lastElementChild; if (!last) return;
+      const gap = max - heights[i];
+      if (gap <= Math.max(60, Math.min(220, last.offsetHeight * 0.3))) last.classList.remove("no-stretch");
+    });
   }
 }
 
@@ -372,6 +393,11 @@ const resize = new ResizeObserver(entries => entries.forEach(e => layoutGrid(e.t
 new MutationObserver(() => {
   document.querySelectorAll(".grid:not([data-laid])").forEach(g => {
     g.dataset.laid = "1"; layoutGrid(g); resize.observe(g);
+    // Once more after the page has settled (fonts, charts, the final width): the first heights can be off,
+    // which put cards in the wrong column
+    const again = () => { if (g.isConnected) { g._cols = 0; layoutGrid(g); } };
+    requestAnimationFrame(() => requestAnimationFrame(again));
+    document.fonts?.ready?.then(again);
     // A section opened or closed in a card changes its height: spread the cards over the columns again (no big gaps)
     g.addEventListener("toggle", e => { if (e.target.closest(".grid") === g && e.target.closest(".popup") === g.closest(".popup")) { g._cols = 0; layoutGrid(g); } }, true);
   });

@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 70, date: "2026-11-02", items: {
+    en: ["📐 Better use of space: cards are spread evenly over the columns (a measuring bug put too many in one column), no more big empty cards, and imported inflows are much shorter – the bank's long text on two lines, the choice below it."],
+    pl: ["📐 Lepsze wykorzystanie miejsca: karty są równo rozłożone w kolumnach (błąd pomiaru wkładał zbyt wiele do jednej), koniec z dużymi pustymi kartami, a zaimportowane wpływy są dużo krótsze – długi opis banku w dwóch liniach, wybór pod nim."],
+    de: ["📐 Besser genutzter Platz: Karten werden gleichmäßig auf die Spalten verteilt (ein Messfehler legte zu viele in eine Spalte), keine großen leeren Karten mehr, und importierte Eingänge sind viel kürzer – der lange Banktext auf zwei Zeilen, die Auswahl darunter."],
+    fr: ["📐 Meilleure utilisation de l'espace : les cartes sont réparties équitablement dans les colonnes (une erreur de mesure en mettait trop dans une seule), plus de grandes cartes vides, et les entrées importées sont bien plus courtes – le long texte de la banque sur deux lignes, le choix en dessous."] } },
   { build: 69, date: "2026-11-02", items: {
     en: ["📘 Guide and Help updated: smart import, savings statements, the health check and personal plan, Reports, and a new step \"Protect your data\" (PIN, fingerprint/face, automatic backup)."],
     pl: ["📘 Zaktualizowany przewodnik i pomoc: inteligentny import, wyciągi oszczędnościowe, kontrola finansowego zdrowia i osobisty plan, raporty oraz nowy krok „Chroń swoje dane” (PIN, odcisk palca/twarz, automatyczna kopia)."],
