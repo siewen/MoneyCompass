@@ -179,7 +179,7 @@ export function openOptions() {
   const p = popup(`<h2 class="popup-title">⚙ ${esc(T("Options"))}</h2><div class="grid">
     ${card(heading(T("Language")) + hint(T("Your data stays the same; only the texts change.")) + select("language", LANGS, lang()))}
     ${card(heading(T("Layout")) + hint(T("Drag a card by its handle (⠿, top right) to move it, on any tab. Reset layout puts all cards back in their standard order.")) +
-      `<div class="buttons">${button(esc(T("Reset layout")), "reset-layout", "second")}${button(esc(T("Reset help button position")), "reset-help", "second")}</div>`)}
+      `<div class="buttons">${button(esc(T("Reset layout")), "reset-layout", "second")}</div>`)}
     ${card(heading(T("Modules")) + hint(license.isPro ? T("Switch on the modules you want. Each one adds its own tab; the tabs appear when you close Options. Your entries stay saved when you switch a module off.")
         : T("Modules are part of MoneyCompass Pro. Enter your license key in your profile (top right) to use them.")) +
       MODULES.map(m => `<label class="check"><input type="checkbox" name="mod-${m.code}"${s.Modules.includes(m.code) ? " checked" : ""}${license.isPro ? "" : " disabled"}><span><b>${esc(T(m.name))}</b><br><span class="hint">${esc(T(m.description))}</span></span></label>`).join(""))}
@@ -250,7 +250,6 @@ export function openOptions() {
     Object.keys(o).filter(k => k.startsWith("web")).forEach(k => delete o[k]);
     save(); toast(T("All cards are back in their standard order when you close Options."));
   };
-  el.querySelector('[data-action="reset-help"]').onclick = () => { App.resetHelpButton?.(); toast(T("The help button is back in the bottom-right corner.")); };
   el.querySelector('[data-action="delete"]').onclick = () => { p.close(); openDelete(); };
 }
 

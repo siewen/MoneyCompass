@@ -756,3 +756,8 @@ body.drop-on::after { content: "⬆"; position: fixed; inset: 12px; z-index: 200
   :root[data-design][data-side="auto"] .top:not(.open) .me-row { justify-content: center; padding: 6px 0; }
 }
 @media (max-width: 699px) { .me-row { width: auto; padding: 0; } .me-text, .me-more { display: none; } }
+/* Help, guide and About are in the profile menu: no floating ? button over the page */
+.help-fab { display: none !important; }
+/* Import: soft green outline, so only the page you are on is solid green */
+.import-btn { background: color-mix(in srgb, var(--hi, #0F766E) 14%, transparent); color: var(--hi, #0F766E); border: 1px solid color-mix(in srgb, var(--hi, #0F766E) 45%, transparent); box-shadow: none; }
+.import-btn:hover { background: color-mix(in srgb, var(--hi, #0F766E) 24%, transparent); filter: none; }

@@ -873,7 +873,13 @@ export const EXTRA = {
 "Choose at least one part of the report.": "Wählen Sie mindestens einen Teil des Berichts.",
 "No data in this period.": "Keine Daten in diesem Zeitraum.",
 "Profile & license": "Profil & Lizenz",
-"Demo": "Demo"
+"Demo": "Demo",
+"Diagrams": "Diagramme",
+"Diagrams (PDF and Word)": "Diagramme (PDF und Word)",
+"Inflows and outflows per month": "Eingänge und Ausgaben pro Monat",
+"in this period": "in diesem Zeitraum",
+"Reports are part of MoneyCompass Pro": "Berichte sind Teil von MoneyCompass Pro",
+"Choose any period, pick what to include – summary, monthly totals, outflows by category, savings, loans, budget and more – with diagrams, and export to Excel, PDF or Word.": "Wählen Sie einen beliebigen Zeitraum und was hinein soll – Übersicht, Monatssummen, Ausgaben nach Kategorie, Ersparnisse, Kredite, Budget und mehr – mit Diagrammen, und exportieren Sie nach Excel, PDF oder Word."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1748,7 +1754,13 @@ export const EXTRA = {
 "Choose at least one part of the report.": "Choisissez au moins une partie du rapport.",
 "No data in this period.": "Aucune donnée sur cette période.",
 "Profile & license": "Profil et licence",
-"Demo": "Démo"
+"Demo": "Démo",
+"Diagrams": "Graphiques",
+"Diagrams (PDF and Word)": "Graphiques (PDF et Word)",
+"Inflows and outflows per month": "Entrées et sorties par mois",
+"in this period": "sur la période",
+"Reports are part of MoneyCompass Pro": "Les rapports font partie de MoneyCompass Pro",
+"Choose any period, pick what to include – summary, monthly totals, outflows by category, savings, loans, budget and more – with diagrams, and export to Excel, PDF or Word.": "Choisissez n'importe quelle période et ce qu'il faut inclure – synthèse, totaux mensuels, sorties par catégorie, épargne, prêts, budget et plus – avec des graphiques, et exportez en Excel, PDF ou Word."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -2623,6 +2635,12 @@ export const EXTRA = {
 "Choose at least one part of the report.": "Wybierz co najmniej jedną część raportu.",
 "No data in this period.": "Brak danych w tym okresie.",
 "Profile & license": "Profil i licencja",
-"Demo": "Demo"
+"Demo": "Demo",
+"Diagrams": "Wykresy",
+"Diagrams (PDF and Word)": "Wykresy (PDF i Word)",
+"Inflows and outflows per month": "Wpływy i wydatki miesięcznie",
+"in this period": "w tym okresie",
+"Reports are part of MoneyCompass Pro": "Raporty są częścią MoneyCompass Pro",
+"Choose any period, pick what to include – summary, monthly totals, outflows by category, savings, loans, budget and more – with diagrams, and export to Excel, PDF or Word.": "Wybierz dowolny okres i zawartość – podsumowanie, sumy miesięczne, wydatki według kategorii, oszczędności, kredyty, budżet i więcej – z wykresami, i eksportuj do Excela, PDF lub Worda."
 }
 };
