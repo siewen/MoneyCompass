@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 29, date: "2026-11-02", items: {
+    en: ["🌿 One design: Emerald. Navy and the classic designs are gone, so everything looks the same everywhere – and the profile window opens next to the side menu."],
+    pl: ["🌿 Jeden wygląd: Emerald. Granatowy i klasyczne wyglądy zostały usunięte, więc wszystko wygląda wszędzie tak samo – a okno profilu otwiera się obok menu bocznego."],
+    de: ["🌿 Ein Design: Emerald. Marine und die klassischen Designs sind entfernt, damit alles überall gleich aussieht – und das Profilfenster öffnet sich neben dem Seitenmenü."],
+    fr: ["🌿 Une seule apparence : Emerald. Marine et les apparences classiques ont été retirées, tout se ressemble partout – et la fenêtre du profil s'ouvre à côté du menu latéral."] } },
   { build: 28, date: "2026-11-02", items: {
     en: ["📅 Income sources can have a first and a last payment (optional): a new job counts only from its first payday, a job that ends stops after its last one – in the calendar, the charts and all averages.", "🗓 The Payment calendar is now simply called Calendar.", "🧾 Clearer income form: Payment date, an optional Start date and an End date with \"No end date\" for income that continues.", "📥 \"Imported inflows\" are grouped by month – the newest open, older ones folded – with filters for salary, extra income and not income."],
     pl: ["📅 Źródła dochodu mogą mieć pierwszą i ostatnią wypłatę (opcjonalnie): nowa praca liczy się dopiero od pierwszej wypłaty, a kończąca się – do ostatniej. Dotyczy kalendarza, wykresów i wszystkich średnich.", "🗓 Kalendarz płatności nazywa się teraz po prostu Kalendarz.", "🧾 Czytelniejszy formularz dochodu: Data wypłaty, opcjonalna Data rozpoczęcia i Data zakończenia z opcją „Bez daty zakończenia”.", "📥 „Zaimportowane wpływy” są pogrupowane według miesięcy – najnowszy otwarty, starsze zwinięte – z filtrami: pensja, dodatkowy dochód, nie dochód."],

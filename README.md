@@ -27,7 +27,7 @@ Personal finance for Poland – in your browser or on Windows. Private: your dat
 | 💳 **Loans vs. the market** (Pro) | Your rate compared with today's best offers, with the new payment and the real saving |
 | 🎯 **Savings & goals** | All your money in one place, promotion reminders, savings goals (Pro) |
 | 🔒 **PIN & lock** | A PIN per profile, automatic lock, backups encrypted with a password (AES-256) |
-| 🎨 **Designs** | Emerald (standard), Navy, Classic light and dark |
+| 🎨 **Design** | Emerald – side menu on computers, app-like bottom bar on phones |
 
 Made for Poland: NBP rates, treasury bonds, IKE/IKZE and bank offers, checked every day. Available in Polish, English, German and French.
 

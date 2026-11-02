@@ -38,11 +38,9 @@ const TAB_ICON = {
   calendar: I('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
   savings: I('<path d="M4 7h16M4 12h16M4 17h10"/><path d="M18 15l2 2-2 2"/>'),
 };
-/** Beta design: "navy" or "emerald" (saved in this browser), or "" for the normal design. */
-const BETA_KEY = "mc-beta";
-// Emerald is the standard design; "classic" is saved when someone chooses Classic light or dark
-const beta = () => { let v = null; try { v = localStorage.getItem(BETA_KEY); } catch { /* private window */ } return v === "classic" ? "" : v || "emerald"; };
-/** Beta side menu: "auto" folds to icons and opens when the mouse is on it, "pinned" stays open. */
+/** MoneyCompass has one design: Emerald (dark green, side menu on wide screens, bottom bar on phones). */
+const beta = () => "emerald";
+/** Side menu: "auto" folds to icons and opens when the mouse is on it, "pinned" stays open. */
 const side = () => { try { return localStorage.getItem("mc-side") || "auto"; } catch { return "auto"; } };
 function toggleSide() {
   const v = side() === "pinned" ? "auto" : "pinned";
@@ -50,35 +48,10 @@ function toggleSide() {
   document.documentElement.dataset.side = v;
   const b = document.querySelector(".side-toggle"); if (b) { b.textContent = v === "pinned" ? "‹" : "›"; b.title = T(v === "pinned" ? "Fold the menu (it opens when you point at it)" : "Keep the menu open"); }
 }
-function setBeta(v) { try { localStorage.setItem(BETA_KEY, v || "classic"); } catch { /* private window */ } buildShell(); }
-function betaMenu() {
-  const btn = document.querySelector('[data-act="beta"]'), r = btn.getBoundingClientRect();
-  const now = beta() || (State.data.Settings.Design === "dark" ? "dark" : "light");
-  const shield = document.createElement("div"); shield.className = "help-shield";
-  const menu = document.createElement("div"); menu.className = "tab-menu data-menu beta-menu";
-  const opt = (v, sw, label, sub) => `<button data-b="${v}"${now === v ? ' class="on"' : ""}><span class="swatch ${sw}"></span><span><b>${esc(label)}</b><small>${esc(sub)}</small></span>${now === v ? "<i>✓</i>" : ""}</button>`;
-  menu.innerHTML = `<div class="menu-title">${esc(T("Design"))}</div>` + opt("light", "classic", T("Classic – Light"), T("The design you know")) + opt("dark", "classic-dark", T("Classic – Dark"), T("Same layout, dark background")) + "<hr>" +
-    opt("navy", "navy", T("Navy"), T("Side menu, dark blue with mint and magenta")) + opt("emerald", "emerald", T("Emerald"), T("Standard design: side menu, dark green with lavender"));
-  document.body.append(shield, menu);
-  const w = menu.offsetWidth, h = menu.offsetHeight;
-  menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + "px";
-  menu.style.top = Math.max(8, Math.min(r.bottom + 6, window.innerHeight - h - 8)) + "px";
-  const close = () => { shield.remove(); menu.remove(); };
-  shield.onclick = close;
-  menu.querySelectorAll("[data-b]").forEach(b => b.onclick = () => {
-    close();
-    const v = b.dataset.b;
-    if (v === "light" || v === "dark") { State.data.Settings.Design = v; save(); setBeta(""); } else setBeta(v);
-  });
-}
 
 function applyTheme() {
-  let design = State.data.Settings.Design || "light";
-  if (design === "colourful") design = "light";   // the Colourful theme was replaced by the beta designs
-  if (design === "system") design = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = design;
-  const b = beta();
-  if (b) document.documentElement.dataset.design = b; else delete document.documentElement.dataset.design;
+  document.documentElement.dataset.theme = "light";
+  document.documentElement.dataset.design = "emerald";
   document.documentElement.dataset.side = side();
 }
 
@@ -94,7 +67,6 @@ function buildShell() {
       <a class="brand" href="../index.html" title="MoneyCompass"><img src="../logo.svg" alt=""><span>MoneyCompass</span></a>
       <nav class="tabs" id="tabs">${list.map(t => `<button class="tab" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}"><span class="ti">${TAB_ICON[t.route] || ""}</span><span class="tl">${esc(T(t.title))}</span></button>`).join("")}</nav>
       <div class="actions">
-        <button class="design-switch${beta() ? " on" : ""}" data-act="beta" title="${esc(T("Design: classic light or dark, or the new beta designs"))}"><span class="sw"></span><span class="sw-l">${esc(T("Design"))}</span></button>
         <button class="act data-btn" data-act="data" title="${esc(T("Data: import, export, backup"))}">🗂<span>${esc(T("Data"))}</span> ▾</button>
         <button class="act lang-btn" data-act="lang" title="${esc(T("Language"))}">🌐<b>${esc(lang().toUpperCase())}</b></button>
         <button class="profile-btn" data-act="profile" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}</button>
@@ -106,7 +78,7 @@ function buildShell() {
     <main id="page"></main>
     <button class="help-fab" data-act="help-menu" title="${esc(T("Help & About"))}">?</button>`;
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => App.go(b.dataset.tab));
-  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, beta: betaMenu, side: toggleSide };
+  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide };
   document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
   setupHelpButton();
   render();
