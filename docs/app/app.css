@@ -785,3 +785,22 @@ body.drop-on::after { content: "⬆"; position: fixed; inset: 12px; z-index: 200
 .row.in b, td.in, b.in { color: var(--in); } .row.out b, td.out, b.out { color: var(--out); } b.low, .row.low b { color: var(--low); }
 .row.nil b, td.nil { color: var(--muted); font-weight: 500; }
 .row.strong b { font-weight: 700; }
+
+/* ---------- Overview: one calm "for you" card, ⓘ explanations ---------- */
+.next-card { display: flex; align-items: center; gap: 16px; padding: 14px 16px !important; }
+.next-card .next-list { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.next-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; color: var(--ink); font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 12px; cursor: pointer; }
+.next-item:hover { background: var(--chip, rgba(0,0,0,.04)); }
+.next-item svg { flex: none; color: var(--primary); }
+.next-item.warn svg { color: var(--warn); }
+.next-item span { flex: 1; }
+.next-item i { font-style: normal; color: var(--muted); }
+.next-opt { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; padding: 12px 20px; }
+.next-card.no-sugg { justify-content: flex-end; }
+@media (max-width: 640px) { .next-card { flex-direction: column; align-items: stretch; } .next-opt { justify-content: center; } }
+.i-tip { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 4px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: help; vertical-align: 2px; border-radius: 50%; }
+.i-tip:hover, .i-tip:focus { color: var(--primary); outline: none; }
+.i-pop { z-index: 9999; white-space: pre-line; }
+.tip-box { white-space: pre-line; }
+.wave-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 14px; flex-wrap: wrap; margin-bottom: 8px; }
+.wave-head h3 { margin: 0; }

@@ -6,7 +6,7 @@ import {
   matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText } from "./core.js";
 import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
 import { NEW_CAT } from "./ui.js";
-import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON } from "./ui.js";
+import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON, ICONS, headingTip, infoTip } from "./ui.js";
 import { App, requirePro } from "./app.js";
 import { Rates } from "./rates.js";
 import { adviceCard, bindAdvice, promoBadge, moves } from "./advice.js";
@@ -65,12 +65,13 @@ export const Overview = {
     const growth = hist.length >= 2 ? hist[hist.length - 1][1] - hist[0][1] : null;
     const state = !last ? "" : lastLeft < 0 ? "bad" : lastRate < 0.1 ? "warn" : "good";
     const headline = !last ? hint(T("Import or enter a full month of income and expenses to see whether your savings are growing."))
-      : `<p class="savings-headline ${state}">${state === "bad" ? "📉" : state === "warn" ? "➖" : "📈"} <b>${esc(lastLeft < 0
+      : `<p class="savings-headline ${state}"><b>${esc(lastLeft < 0
           ? T("In {0} you spent {1} more than you earned.", monthName(last.start), pln(-lastLeft))
           : T("In {0} you kept {1} – {2}% of your income.", monthName(last.start), pln(lastLeft), Math.round(lastRate * 100)))}</b></p>` +
-        hint(state === "bad" ? T("Your savings shrink when this happens. Look at your biggest categories in Outflows – and set a Budget plan.")
+        "";
+    const headTip = !last ? "" : state === "bad" ? T("Your savings shrink when this happens. Look at your biggest categories in Outflows – and set a Budget plan.")
           : state === "warn" ? T("You are saving, but little. A good aim is at least 10–20% of your income every month.")
-          : T("Great – you are building up money. Keep it in safe savings until your emergency fund is full, then make it work (Compare offers)."));
+          : T("Great – you are building up money. Keep it in safe savings until your emergency fund is full, then make it work (Compare offers).");
     const bars = done.length ? `<div class="mini-bars">${(() => {
         const max = Math.max(1, ...done.map(m => Math.abs(m.income - m.expenses)));
         return done.map(m => { const v = m.income - m.expenses, h = Math.max(4, Math.abs(v) / max * 44);
@@ -87,12 +88,15 @@ export const Overview = {
     </div>`);
     const sw = shortDataWarning(d);
     if (sw) parts.push(`<div class="tip warn-tip short-data">${sw.replace(/<\/?p[^>]*>/g, "")} ${esc(T("Import or enter at least one whole month."))}</div>`);
-    parts.push(`<button class="btn go big" data-action="optimize">⚡ ${esc(T("Optimize my finances"))}</button>`);
+    // One calm card instead of four full-width bars: your suggestions on the left, "Optimize my finances" on the right.
+    // (Reports have their own tab, so no export button here.)
+    const sugg = [];
     const due = duePromos(d)[0];
-    if (due) parts.push(`<button class="tip warn-tip" data-go="portfolio">⏰ ${esc(due.p.ended ? T("The promotion at {0} ended on {1} – see where to move the money", due.h.Name, fmtDate(due.p.end)) : T("The promotion at {0} ends in {1} days – see where to move the money", due.h.Name, due.p.daysLeft))}  →</button>`);
-    else { const m = moves(d)[0]; if (m) parts.push(`<button class="tip" data-go="portfolio">🧭 ${esc(T("Your savings could earn about {0} more at {1} – see Savings", pln(m.gain), m.o.Bank))}  →</button>`); }
-    if (top) parts.push(`<button class="tip" data-go="${top.route || ""}">💡 ${esc(T("Best next step: {0}", top.title))}${top.route ? "  →" : ""}</button>`);
-    parts.push(`<button class="btn second" data-action="export">⬇ ${esc(T("Export report (Excel, PDF, Word)"))}</button>`);
+    if (due) sugg.push({ ic: "clock", cls: "warn", go: "portfolio", text: due.p.ended ? T("The promotion at {0} ended on {1} – see where to move the money", due.h.Name, fmtDate(due.p.end)) : T("The promotion at {0} ends in {1} days – see where to move the money", due.h.Name, due.p.daysLeft) });
+    else { const m = moves(d)[0]; if (m) sugg.push({ ic: "trend", go: "portfolio", text: T("Your savings could earn about {0} more at {1} – see Savings", pln(m.gain), m.o.Bank) }); }
+    if (top) sugg.push({ ic: "bulb", go: top.route || "", text: T("Best next step: {0}", top.title) });
+    parts.push(card(`<div class="next-list">${sugg.map(x => `<button class="next-item ${x.cls || ""}" data-go="${x.go}">${ICONS[x.ic]}<span>${esc(x.text)}</span>${x.go ? "<i>→</i>" : ""}</button>`).join("")}</div>
+      <button class="btn main next-opt" data-action="optimize">${ICONS.bolt}<span>${esc(T("Optimize my finances"))}</span></button>`, "fixed next-card" + (sugg.length ? "" : " no-sugg")));
 
     const pin = Calc.periodIncome(d);
     // Like the banks show it: balance of inflows and outflows, with a green/red split bar
@@ -101,28 +105,18 @@ export const Overview = {
     const pIn = sum > 0 ? Math.round(inflow / sum * 100) : 0;
     const cov = Calc.coverage(d);
     const period = cov.from ? fmtDate(cov.from) + " – " + fmtDate(cov.to) + " (" + T("{0} days", cov.days) + ")" : "";
-    parts.push(card(heading(T("Inflows and outflows (per month)")) + (ChartData.hasInOut(d) ? `
-      <div class="flow-balance"><span>${esc(T("Balance of inflows and outflows"))}</span><b class="${bal < 0 ? "bad" : "good"}">${bal < 0 ? "−" : ""}${pln(Math.abs(bal))}</b>
-        ${period ? `<small class="hint">${esc(T("Details for the period: {0}", period))}${cov.partial ? " · " + esc(T("converted to one month")) : basisMonths.length > 1 ? " · " + esc(T("average per month")) : ""}</small>` : ""}</div>
-      <div class="flow-bar">
-        <div class="in" style="flex:${Math.max(pIn, 28)}"><span>⬇ ${esc(T("Inflows"))}</span></div>
-        <div class="out" style="flex:${Math.max(100 - pIn, 28)}"><span>⬆ ${esc(T("Outflows"))}</span></div></div>
-      <div class="flow-values">
-        <b class="in" data-tip="${esc(pin.months ? T("Salary {0} + extra income {1}", pln(pin.salary), pln(pin.extra)) : T("From your income sources"))}">${pln(inflow)} <small>${pIn}%</small></b>
-        <b class="out" data-tip="${esc(T("Essential {0} + not essential {1}", pln(avg.essential), pln(avg.nonEssential)))}">${pln(outflow)} <small>${100 - pIn}%</small></b>
-      </div>` : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"income"));
     const cur = months.find(m => m.current);
     const fd = ChartData.firstDate(d);
-    parts.push(card(heading(T("Financial analysis: inflows and outflows by month")) +
-      (fd ? `<p class="period-line">📅 ${esc(T("From {0} to {1} · {2} months", fmtDate(fd), fmtDate(today()), months.length))}</p>` : "") +
-      hint(T("Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered or imported.")) +
+    const waveOn = showTrend && months.length >= 2;
+    if (!waveOn) parts.push(card(headingTip(T("Inflows and outflows by month"), T("Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered or imported.")) +
+      (fd ? `<p class="period-line">${esc(T("From {0} to {1} · {2} months", fmtDate(fd), fmtDate(today()), months.length))}</p>` : "") +
       (showTrend ? monthBars(months, axis, pln, [T("Inflows"), T("Outflows")]) + legend([
         { color: "#2E9E5B", label: T("Inflows"), text: pln(months.reduce((s, m) => s + m.income, 0) / Math.max(1, months.length)) + " " + T("avg.") },
         { color: "#C81E26", label: T("Outflows"), text: pln(months.reduce((s, m) => s + m.expenses, 0) / Math.max(1, months.length)) + " " + T("avg.") },
       ]) + (Calc.coverage(d).partial ? hint(T("Months with only part of the data show what was entered, not a whole month.")) : "") + (cur ? `<p class="hint planned-note"><span class="planned-swatch"></span>${esc(T("{0} is not finished: income as planned from your income sources, expenses entered so far.", monthName(cur.start)))}</p>` : "")
       : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"expenses"));
     // Wave lines: inflows, outflows, saved (inflows − outflows) and, with the module, loan payments – month by month
-    if (showTrend && months.length >= 2) {
+    if (waveOn) {
       const hid = new Set(d.Settings.WaveHidden || []);
       const ser = [
         { key: "in", label: T("Inflows"), color: "var(--w-in)", values: months.map(m => m.income) },
@@ -139,13 +133,16 @@ export const Overview = {
       const avgOf = s => { const v = s.values.filter(x => x !== null && x !== undefined); return v.reduce((a, b) => a + b, 0) / Math.max(1, v.length); };
       const lastOf = s => s.values.filter(x => x !== null && x !== undefined).pop() || 0;
       // No title: the lines and their names speak for themselves (the explanation is in the tooltip)
-      parts.push(card(`<div class="wave-legend" data-tip="${esc(realSavings ? T("Savings balance = what was on your savings accounts at the end of each month. Click a name to show or hide its line.") : T("Saved = inflows minus outflows in that month. Click a name to show or hide its line."))}">${ser.map(s => `<button class="wave-key${hid.has(s.key) ? " off" : ""}" data-wave="${s.key}" style="--c:${s.color}"><i></i>${esc(s.label)}<small>${esc(s.balance ? T("now {0}", pln(lastOf(s))) : T("avg. {0}", pln(avgOf(s))))}</small></button>`).join("")}</div>` +
+      const waveTip = [realSavings ? T("Savings balance = what was on your savings accounts at the end of each month. Click a name to show or hide its line.") : T("Saved = inflows minus outflows in that month. Click a name to show or hide its line."),
+        T("Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered or imported."),
+        cur ? "* " + T("{0} is not finished: income as planned from your income sources, expenses entered so far.", monthName(cur.start)) : ""].filter(Boolean).join("\n\n");
+      parts.push(card(`<div class="wave-head">${headingTip(T("Inflows and outflows by month"), waveTip)}${fd ? `<span class="hint">${esc(T("From {0} to {1} · {2} months", fmtDate(fd), fmtDate(today()), months.length))}</span>` : ""}</div><div class="wave-legend">${ser.map(s => `<button class="wave-key${hid.has(s.key) ? " off" : ""}" data-wave="${s.key}" style="--c:${s.color}"><i></i>${esc(s.label)}<small>${esc(s.balance ? T("now {0}", pln(lastOf(s))) : T("avg. {0}", pln(avgOf(s))))}</small></button>`).join("")}</div>` +
         waveChart(months.map(m => m.month + (m.current ? " *" : "")), ser, axis, pln, hid)));
     }
-    parts.push(card(heading(T("Outflows by category")) + hint(basisText(d)) +
+    parts.push(card(headingTip(T("Outflows by category"), basisText(d)) +
       (cats.slices.length ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.slices.map(s => ({ color: s.color, label: (s.icon ? s.icon + " " : "") + s.label, text: s.text, share: ChartData.share(s.value, cats.total) })))}</div>`
         : hint(T("Add expenses to see where your money goes."))), "link\" data-go=\"expenses"));
-    parts.push(card(`<div class="link" data-go="portfolio">${heading(T("Your savings"))}${state ? `<span class="status-chip ${state}">${esc(state === "good" ? T("Growing") : state === "warn" ? T("Slow") : T("Shrinking"))}</span>` : ""}
+    parts.push(card(`<div class="link" data-go="portfolio">${headingTip(T("Your savings"), headTip)}${state ? `<span class="status-chip ${state}">${esc(state === "good" ? T("Growing") : state === "warn" ? T("Slow") : T("Shrinking"))}</span>` : ""}
       ${headline}${bars}${growthLine}${p.total > 0
         ? `<div class="chart-row">${donut(ChartData.money(p), pln(p.total), T("in total"))}${legend([...ChartData.money(p).map(s => ({ color: s.color, label: s.label, text: s.text, share: ChartData.share(s.value, p.total) })), { label: T("Interest p.a. (gross)"), text: pln(p.yearly) }])}</div>`
         : hint(T("Add your savings in the Savings tab to see this chart."))}</div>
@@ -178,7 +175,7 @@ export const Overview = {
     if (license.isPro) {
       const ranked = d.Offers.map(o => ({ o, r: Calc.savings(o) })).filter(x => x.o.Amount > 0).sort((a, b) => b.r.net - a.r.net).slice(0, 4);
       const best = Rates.bestOffer();
-      parts.push(card(heading(T("Compare offers")) + hint(T("Your saved offers: interest after the 19% tax.")) +
+      parts.push(card(headingTip(T("Compare offers"), T("Your saved offers: interest after the 19% tax.")) +
         (ranked.length ? hbars(ranked.map((x, i) => ({ label: x.o.Name.length > 20 ? x.o.Name.slice(0, 19) + "…" : x.o.Name, value: x.r.net, color: COLORS.series[i], text: `${pln(x.r.net)} · ${rate(x.r.effective)}` })))
           : hint(T("No offers saved yet. Add them in the Compare offers tab, or with the Compare button in Optimize my finances."))) +
         (best ? `<hr><p class="good">🏦 ${esc(T("Best rate right now: {0} – {1} ({2}).", best.Bank, best.Name || best.Bank, rate(best.Rate)))}</p>` : ""), "link\" data-go=\"savings"));

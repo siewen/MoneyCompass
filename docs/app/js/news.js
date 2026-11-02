@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 64, date: "2026-11-02", items: {
+    en: ["✨ Calmer Overview: your suggestions and \"Optimize my finances\" in one card, one monthly chart instead of three, explanations behind a small ⓘ (tap it on a phone), and clean headings without emoji. Reports are in the Reports tab."],
+    pl: ["✨ Spokojniejszy Przegląd: sugestie i „Optymalizuj moje finanse” w jednej karcie, jeden wykres miesięczny zamiast trzech, wyjaśnienia pod małym ⓘ (na telefonie dotknij) i czyste nagłówki bez emoji. Raporty są w zakładce Raporty."],
+    de: ["✨ Ruhigere Übersicht: Ihre Vorschläge und „Meine Finanzen optimieren“ in einer Karte, ein Monatsdiagramm statt drei, Erklärungen hinter einem kleinen ⓘ (am Handy antippen) und klare Überschriften ohne Emoji. Berichte finden Sie im Tab Berichte."],
+    fr: ["✨ Vue d'ensemble plus calme : vos suggestions et « Optimiser mes finances » dans une seule carte, un graphique mensuel au lieu de trois, les explications derrière un petit ⓘ (touchez-le sur téléphone) et des titres sobres sans emoji. Les rapports sont dans l'onglet Rapports."] } },
   { build: 63, date: "2026-11-02", items: {
     en: ["🔒 Saved profile files are now always encrypted (.mcbak) and can't be read in Notepad. Set a password for profile files in Options so that only you can open them. Older .json files still load."],
     pl: ["🔒 Zapisane pliki profilu są teraz zawsze szyfrowane (.mcbak) i nie da się ich odczytać w Notatniku. Ustaw hasło do plików profilu w Opcjach, aby tylko Ty mógł je otworzyć. Starsze pliki .json nadal się wczytują."],
