@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 46, date: "2026-11-02", items: {
+    en: ["⭐ PIN, fingerprint/face unlock, automatic lock and the automatic backup are now part of MoneyCompass Pro. A PIN you already set keeps protecting your profile, and you can always remove it. Saving your profile as a file stays free."],
+    pl: ["⭐ PIN, odblokowanie odciskiem palca/twarzą, automatyczna blokada i automatyczna kopia są teraz częścią MoneyCompass Pro. Ustawiony już PIN nadal chroni Twój profil i zawsze możesz go usunąć. Zapis profilu do pliku pozostaje darmowy."],
+    de: ["⭐ PIN, Entsperren per Fingerabdruck/Gesicht, automatische Sperre und automatische Sicherung sind jetzt Teil von MoneyCompass Pro. Eine bereits gesetzte PIN schützt Ihr Profil weiter, und Sie können sie jederzeit entfernen. Das Speichern des Profils als Datei bleibt kostenlos."],
+    fr: ["⭐ Le PIN, le déverrouillage par empreinte/visage, le verrouillage automatique et la sauvegarde automatique font désormais partie de MoneyCompass Pro. Un PIN déjà défini continue de protéger votre profil, et vous pouvez toujours le supprimer. L'enregistrement du profil dans un fichier reste gratuit."] } },
   { build: 45, date: "2026-11-02", items: {
     en: ["🔎 Category lists now have a search box: click (or start typing) and only matching categories are shown – choose with ↑↓ and Enter.", "🏷️ More icons: son, daughter, investments (📈 💹 🪙), banking (💳 🏧) and cash."],
     pl: ["🔎 Listy kategorii mają teraz pole wyszukiwania: kliknij (lub zacznij pisać), a pokażą się tylko pasujące kategorie – wybierz strzałkami ↑↓ i Enter.", "🏷️ Więcej ikon: syn, córka, inwestycje (📈 💹 🪙), bankowość (💳 🏧) i gotówka."],

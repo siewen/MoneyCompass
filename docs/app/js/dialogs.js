@@ -38,9 +38,9 @@ export function openProfile() {
           field(T("License key"), `<textarea name="key" rows="3" placeholder="MC1-…" data-nofocus></textarea>`) + button(esc(T("Activate")), "activate", "main")}
       <hr><h3>🔒 ${esc(T("PIN"))}</h3>
       ${hint(hasPin() ? T("This profile is protected with a PIN.") : T("No PIN: anyone using this device can open this profile."))}
-      <div class="buttons">${button(esc(hasPin() ? T("Change or remove PIN…") : T("Set a PIN…")), "pin", "second small")}</div>
+      <div class="buttons">${button(esc(hasPin() ? T("Change or remove PIN…") : T("Set a PIN…") + (license.isPro ? "" : " 🔒")), "pin", "second small")}</div>
       ${bioAvailable() ? (hasPin()
-        ? `<label class="check"><input type="checkbox" data-bio${bioOn() ? " checked" : ""}><span>👆 ${esc(T("Unlock with fingerprint or face on this device"))}</span></label>`
+        ? `<label class="check"><input type="checkbox" data-bio${bioOn() ? " checked" : ""}><span>👆 ${esc(T("Unlock with fingerprint or face on this device") + (license.isPro ? "" : " 🔒"))}</span></label>`
         : hint("👆 " + T("Set a PIN to also unlock with fingerprint or face."))) : ""}
       <hr><h3>${esc(T("Profiles"))}</h3>
       <div class="list">${list.map(x => `<div class="item${x.current ? " current" : " clickable"}" data-switch="${x.id}"><div><b>${esc(x.name)}</b>${x.current ? `<span class="hint">${esc(T("in use"))}</span>` : ""}</div>
@@ -62,10 +62,11 @@ export function openProfile() {
       if (url) { setPicture(url); draw(); App.rebuild(); }
     });
     on('[data-a="nopic"]', () => { setPicture(null); draw(); App.rebuild(); });
-    on('[data-action="pin"]', () => pinDialog(draw));
+    on('[data-action="pin"]', async () => { if (!hasPin() && !(await requirePro(T("PIN")))) return; pinDialog(draw); });
     const bx = p.el.querySelector("[data-bio]");
     if (bx) bx.onchange = async () => {
       if (!bx.checked) { removeBio(); toast(T("Fingerprint or face unlock turned off."), "good"); return; }
+      if (!(await requirePro(T("Unlock with fingerprint or face")))) { bx.checked = false; return; }
       bx.disabled = true;
       const ok = await enableBio(); bx.disabled = false;
       if (ok) toast(T("Fingerprint or face unlock is on for this device."), "good");
@@ -198,7 +199,7 @@ export function openOptions() {
       `<p class="backup-line">${esc(backupLine())}</p>` +
       hint("🔒 " + (fileProtected() ? T("The backup is encrypted with your file password.")
         : T("The backup is encrypted, so it can't be read in Notepad. For full protection, also set a password for profile files below."))) +
-      (autoSupported() ? `<div class="buttons">${backupInfo().status === "off" ? button(esc(T("Choose where to keep it…")), "bk-on", "main")
+      (autoSupported() ? `<div class="buttons">${backupInfo().status === "off" ? button(esc(T("Choose where to keep it…") + (license.isPro ? "" : " 🔒")), "bk-on", "main")
         : button(esc(T("Choose another file…")), "bk-on", "second") + button(esc(T("Turn off")), "bk-off", "second")}</div>` : "") +
       `<hr><h3>🔒 ${esc(T("Password for profile files"))}</h3>` +
       hint(fileProtected() ? T("On: profile files you save are encrypted (AES-256). They can only be opened with the password, in the web app.")
@@ -226,13 +227,19 @@ export function openOptions() {
     removeFilePassword(); p.close(); openOptions();
   });
   el.querySelector('[data-action="bk-on"]')?.addEventListener("click", async () => {
+    if (!(await requirePro(T("Automatic backup")))) return;
     if (await chooseBackupFile()) { toast(T("Automatic backup is on: {0}", backupInfo().file), "good"); p.close(); openOptions(); }
   });
   el.querySelector('[data-action="bk-off"]')?.addEventListener("click", async () => {
     if (!(await confirmBox(T("Turn off the automatic backup?"), T("The backup file stays where it is, but it is no longer updated."), T("Turn off"), T("Cancel")))) return;
     await stopBackup(); p.close(); openOptions();
   });
-  el.querySelector('select[name="autolock"]').onchange = e => { s.AutoLockMinutes = +e.target.value; save(); };
+  el.querySelector('select[name="autolock"]').onchange = async e => {
+    const v = +e.target.value;
+    // Turning the automatic lock on (or changing it) is Pro; turning it off is always possible
+    if (v > 0 && !(await requirePro(T("Automatic lock")))) { e.target.value = String(s.AutoLockMinutes || 0); return; }
+    s.AutoLockMinutes = v; save();
+  };
   el.querySelector('input[name="askstart"]').onchange = e => { s.AskOnStart = e.target.checked; save(); };
   el.querySelector('[data-action="save-file"]').onclick = saveProfileFile;
   el.querySelector('[data-action="reset-layout"]').onclick = () => {

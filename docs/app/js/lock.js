@@ -162,6 +162,7 @@ export function pinDialog(done = () => {}) {
   const oldOk = async () => { if (!had) return true; if (await checkPin(v("old"))) return true; toast(T("The current PIN is wrong."), "bad"); return false; };
   p.el.querySelector('[data-p="save"]').onclick = async () => {
     if (!(await oldOk())) return;
+    if (!(await (await import("./app.js")).requirePro(T("PIN")))) return;   // setting or changing a PIN is Pro (removing it is not)
     if (!validPin(v("pin"))) { toast(T("The PIN must have 4 to 8 digits."), "bad"); return; }
     if (v("pin") !== v("pin2")) { toast(T("The two PINs are not the same."), "bad"); return; }
     await setPin(v("pin")); p.close(); toast(T("PIN saved."), "good"); done();

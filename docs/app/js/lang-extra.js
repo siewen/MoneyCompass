@@ -811,7 +811,8 @@ export const EXTRA = {
 "The opening balance of the savings account is not in this file, so this is an estimate. Enter the real balance in Savings, or analyse a statement of the savings account.": "Der Anfangssaldo des Sparkontos ist nicht in dieser Datei, daher ist dies eine Schätzung. Geben Sie den echten Saldo unter Ersparnisse ein oder analysieren Sie einen Auszug des Sparkontos.",
 "from your own account": "von Ihrem eigenen Konto",
 "{0} payments came from your own accounts – marked \"Not income\". If your salary arrives in an account whose statement you don't import, choose Salary for them below.": "{0} Zahlungen kamen von Ihren eigenen Konten – als „Kein Einkommen“ markiert. Wenn Ihr Gehalt auf ein Konto geht, dessen Auszug Sie nicht importieren, wählen Sie unten Gehalt.",
-"Search…": "Suchen…"
+"Search…": "Suchen…",
+"Automatic backup is part of MoneyCompass Pro. Save your profile regularly.": "Die automatische Sicherung ist Teil von MoneyCompass Pro. Speichern Sie Ihr Profil regelmäßig."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1624,7 +1625,8 @@ export const EXTRA = {
 "The opening balance of the savings account is not in this file, so this is an estimate. Enter the real balance in Savings, or analyse a statement of the savings account.": "Le solde d'ouverture du compte d'épargne n'est pas dans ce fichier, il s'agit donc d'une estimation. Saisissez le vrai solde dans Épargne, ou analysez un relevé du compte d'épargne.",
 "from your own account": "de votre propre compte",
 "{0} payments came from your own accounts – marked \"Not income\". If your salary arrives in an account whose statement you don't import, choose Salary for them below.": "{0} paiements proviennent de vos propres comptes – marqués « Pas un revenu ». Si votre salaire arrive sur un compte dont vous n'importez pas le relevé, choisissez Salaire ci-dessous.",
-"Search…": "Rechercher…"
+"Search…": "Rechercher…",
+"Automatic backup is part of MoneyCompass Pro. Save your profile regularly.": "La sauvegarde automatique fait partie de MoneyCompass Pro. Enregistrez votre profil régulièrement."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -2437,6 +2439,7 @@ export const EXTRA = {
 "The opening balance of the savings account is not in this file, so this is an estimate. Enter the real balance in Savings, or analyse a statement of the savings account.": "Saldo początkowe rachunku oszczędnościowego nie występuje w tym pliku, więc to szacunek. Wpisz prawdziwe saldo w Oszczędnościach lub przeanalizuj wyciąg z rachunku oszczędnościowego.",
 "from your own account": "z Twojego własnego rachunku",
 "{0} payments came from your own accounts – marked \"Not income\". If your salary arrives in an account whose statement you don't import, choose Salary for them below.": "{0} wpływów pochodzi z Twoich własnych rachunków – oznaczone jako „Nie dochód”. Jeśli pensja wpływa na rachunek, którego wyciągu nie importujesz, wybierz dla nich poniżej Wynagrodzenie.",
-"Search…": "Szukaj…"
+"Search…": "Szukaj…",
+"Automatic backup is part of MoneyCompass Pro. Save your profile regularly.": "Automatyczna kopia jest częścią MoneyCompass Pro. Zapisuj profil regularnie."
 }
 };
