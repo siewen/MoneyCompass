@@ -20,7 +20,7 @@ let current = "overview";
 
 function tabs() {
   const list = [Overview, Income, Expenses, Emergency, Portfolio];
-  // Savings goals are part of the Savings tab (Pro), not a tab of their own
+  // Savings goals are part of the Budget plan (Pro), not a tab of their own
   for (const m of MODULES) if (moduleOn(m.code) && m.code !== "goals") list.push(MODULE_PAGES[m.code]);
   list.push(Savings);
   return list;
@@ -396,7 +396,7 @@ function render() {
 
 Object.assign(App, {
   go(route) {
-    if (route === "goals") route = "portfolio";
+    if (route === "goals") route = "budget";
     if (!tabs().some(t => t.route === route)) route = "overview";
     current = route; render(); fitTabs(); window.scrollTo(0, 0);
     const tab = document.querySelector(`[data-tab="${route}"]`);
@@ -418,8 +418,8 @@ async function start() {
   loadCurrent();
   await license.load();
   const hash = location.hash.slice(1);
-  if (hash) current = hash === "goals" ? "portfolio" : hash;
-  if (hash === "goals") history.replaceState(null, "", "#portfolio");
+  if (hash) current = hash === "goals" ? "budget" : hash;
+  if (hash === "goals") history.replaceState(null, "", "#budget");
   buildShell();
   const d0 = State.data;
   const isNew = d0.Incomes.length + d0.Expenses.length + d0.Holdings.length + d0.Offers.length === 0;

@@ -3,7 +3,7 @@ import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, addMonths, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
   addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
-  matchKey, learnCategory, similarExpenses, setCategory,
+  matchKey, learnCategory, similarExpenses, setCategory, goalSaved,
 } from "./core.js";
 import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
 import { NEW_CAT } from "./ui.js";
@@ -11,8 +11,8 @@ import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, s
 import { App, requirePro } from "./app.js";
 import { Rates } from "./rates.js";
 import { adviceCard, bindAdvice, promoBadge, moves } from "./advice.js";
-import { loanWarning, Goals as SavingsGoals } from "./pages-pro.js";
-import { openSavingsCheck, savedChecksCard, bindSavedChecks } from "./savings-check.js";
+import { loanWarning } from "./pages-pro.js";
+import { openSavingsCheck, savedChecksCard, bindSavedChecks, savingsChartCard, bindSavingsChart } from "./savings-check.js";
 
 const D = () => State.data;
 const tile = (label, value, route, colors, cls = "", tip = "") =>
@@ -141,7 +141,7 @@ export const Overview = {
         : hint(T("Add expenses to see where your money goes."))), "link\" data-go=\"expenses"));
     parts.push(card(`<div class="link" data-go="portfolio">${heading(T("Your savings"))}${state ? `<span class="status-chip ${state}">${esc(state === "good" ? T("Growing") : state === "warn" ? T("Slow") : T("Shrinking"))}</span>` : ""}
       ${headline}${bars}${growthLine}${p.total > 0
-        ? `<div class="chart-row">${donut(ChartData.money(p), pln(p.total), T("in total"))}${legend([...ChartData.money(p).map(s => ({ color: s.color, label: s.label, text: s.text, share: ChartData.share(s.value, p.total) })), { label: T("Interest per year"), text: pln(p.yearly) }])}</div>`
+        ? `<div class="chart-row">${donut(ChartData.money(p), pln(p.total), T("in total"))}${legend([...ChartData.money(p).map(s => ({ color: s.color, label: s.label, text: s.text, share: ChartData.share(s.value, p.total) })), { label: T("Interest p.a. (gross)"), text: pln(p.yearly) }])}</div>`
         : hint(T("Add your savings in the Savings tab to see this chart."))}</div>
       <hr><div class="link" data-go="emergency">${heading(T("Emergency fund"))}${emergency}</div>`, "savings-card status-" + (state || "none") + " em-" + emState));
 
@@ -160,13 +160,13 @@ export const Overview = {
           loans.map(l => loanWarning(l, true)).join("") + row(T("Loan payments per month"), pln(Calc.loanPayments(d))) + row(T("Debt-free"), monthName(new Date(Math.max(...loans.map(l => parseDate(l.EndDate).getTime())))))
         : hint(T("No loans – great!"))), "link\" data-go=\"loans"));
     }
-    if (moduleOn("goals")) {
-      const goals = [...d.Goals].sort((a, b) => parseDate(a.TargetDate) - parseDate(b.TargetDate));
+    if (moduleOn("budget") && d.Goals.length) {
+      const goals = [...d.Goals].sort((a, b) => parseDate(a.TargetDate) - parseDate(b.TargetDate)).map(g => ({ ...g, Saved: goalSaved(g, d) }));
       parts.push(card(heading(T("Savings goals")) + (goals.length ? goals.map(g => {
         const f = g.Target > 0 ? g.Saved / g.Target : 0, done = g.Target > 0 && g.Saved >= g.Target;
         return `<div class="bar-item"><b>${esc(g.Name)}</b>${progress(f, done ? COLORS.leftOver : "var(--goals)")}<span class="hint">${esc(done ? T("Goal reached – well done!")
           : T("{0} of {1} ({2}%) · by {3}", pln(Math.min(g.Saved, g.Target)), pln(g.Target), Math.round(Math.min(100, f * 100)), fmtDate(g.TargetDate)))}</span></div>`;
-      }).join("") : hint(T("Add your goals in the Savings tab to see them here."))), "link\" data-go=\"portfolio"));
+      }).join("") : ""), "link\" data-go=\"budget"));
     }
     if (moduleOn("budget")) parts.push(card(heading(T("Budget plan")) + hint(monthName(today())) + budgetBars(), "link\" data-go=\"budget"));
     if (license.isPro) {
@@ -255,7 +255,7 @@ export const Income = {
     const dayText = dt => { const n = Math.round((dt - today()) / 86400000); return n === 0 ? T("today") : n === 1 ? T("tomorrow") : T("in {0} days", n); };
 
     el.innerHTML = `<div class="grid">
-      ${card(heading(T("Overview (in złoty)")) +
+      ${card(heading(T("Summary (PLN)")) +
         row(T("Regular income per month"), pln(inc.monthlyTotal)) +
         row(T("Regular income per year"), pln(inc.monthlyTotal * 12)) +
         row(T("One-time income in {0}", today().getFullYear()), pln(inc.oneTimeThisYear)) +
@@ -738,20 +738,21 @@ export const Portfolio = {
     else em = T("Emergency fund: {0} of {1} in safe money. Missing {2}.", pln(p.safe), pln(r.target), pln(r.target - p.safe));
     const rateInfo = s.AutoExchangeRates ? (Rates.data.Usd > 0 ? T("Official NBP average rates from {0}.", fmtDate(Rates.data.ExchangeDate)) : T("The NBP rates will be filled in as soon as there is an internet connection.")) : T("You enter the rates yourself.");
     el.innerHTML = `<div class="grid">
-      ${card(heading(T("Overview (in złoty)")) + row(T("Total"), pln(p.total), "big") + row(T("Safe money (bank, cash)"), pln(p.safe)) +
-        row(T("Risky money (crypto platforms, investments)"), pln(p.risky)) + row(T("Interest per year"), pln(p.yearly)) +
-        row(T("Interest per month"), pln(p.yearly / 12)) + row(T("Interest per day"), pln(p.yearly / 365)) +
+      ${savingsChartCard(d)}
+      ${card(heading(T("Summary (PLN)")) + row(T("Total"), pln(p.total), "big") + row(T("Secure savings (bank, cash)"), pln(p.safe)) +
+        row(T("Investments at risk (crypto, securities)"), pln(p.risky)) + row(T("Interest p.a. (gross)"), pln(p.yearly)) +
+        row(T("Interest per month (gross)"), pln(p.yearly / 12)) + row(T("Interest per day (gross)"), pln(p.yearly / 365)) +
         hint(T("Interest is before tax and assumes today's rates stay the same.")) + hint(em) +
         (p.missing ? hint(T("Some items are in USD or EUR but the exchange rate is empty, so they count as 0 zł. Enter the rates below."), "bad") : ""))}
-      ${card(heading(T("Your savings")) + hint(T("Tap an item to edit it, for example to update the amount.")) + (d.Holdings.length ? `<div class="list">${d.Holdings.map(x => `
+      ${card(heading(T("Accounts & holdings")) + hint(T("Tap an item to edit it, for example to update the amount.")) + (d.Holdings.length ? `<div class="list">${d.Holdings.map(x => `
         <div class="item clickable" data-edit-holding="${x.Id}"><div><b>${esc(x.Name)}</b><span class="hint">${esc(T(x.Place))} · ${esc(x.Safe ? T("Safe") : T("Risky"))} · ${rate(currentRate(x))}</span>${promoBadge(x)}</div>
         <div class="right"><b>${amount(x.Amount, x.Currency)}</b>${currentRate(x) ? `<span class="hint">${esc(T("{0} / year", pln(Calc.toPln(x.Amount, x.Currency, s) * currentRate(x) / 100)))}</span>` : ""}${x.Deposit > 0 ? `<span class="hint primary">🔁 +${esc(pln(x.Deposit))} · ${esc(freqLabel(x.DepositFrequency || "Monthly"))}${x.DepositFrom ? " · " + esc(T("from {0}", x.DepositFrom)) : ""}</span>` : ""}</div>
         ${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("Nothing added yet."))))}
       ${savedChecksCard(d)}
-      ${card(heading(T("What does my savings account really pay?"), "🔍") +
+      ${card(heading(T("Effective rate analysis"), "🔍") +
         hint(T("Import the CSV statement of a savings account: MoneyCompass checks the money on it day by day, the interest, the 19% tax and any fees – and shows the real rate the bank pays you, per year and per month.")) +
-        `<div class="buttons">${button("⬆ " + esc(T("Check a savings account statement (CSV)…")) + (license.isPro ? "" : " 🔒"), "savings-check", "second")}</div>`)}
-      ${card(`<form id="hold">${heading(h ? T("Edit: {0}", h.Name) : T("Add money"))}
+        `<div class="buttons">${button("⬆ " + esc(T("Analyse a statement (CSV)…")) + (license.isPro ? "" : " 🔒"), "savings-check", "second")}</div>`)}
+      ${card(`<form id="hold">${heading(h ? T("Edit: {0}", h.Name) : T("Add an account"))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", "ING, Revolut, …")))}
         <div class="two">${field(T("Where"), select("place", PLACES.map(x => [x, T(x)]), f.Place))}${field(T("Currency"), select("currency", CURRENCIES, f.Currency))}</div>
         <div class="two">${field(T("Amount"), numInput("amount", plain(f.Amount), T("e.g. {0}", "10000")))}${field(T("Interest rate (% per year, 0 if none)"), numInput("rate", plain(f.RatePercent), "0"))}</div>
@@ -775,18 +776,9 @@ export const Portfolio = {
         <div class="two">${field("1 USD = … zł", numInput("usd", plain(s.UsdToPln)))}${field("1 EUR = … zł", numInput("eur", plain(s.EurToPln)))}</div>${hint(rateInfo)}</form>`)}
       ${binCard(["holding"])}
     </div>`;
-    // Savings goals (Pro module): shown under your savings, in the same tab
-    if (moduleOn("goals")) {
-      const sec = document.createElement("section"); sec.className = "goals-section";
-      sec.innerHTML = `<h2 class="section-title">🎯 ${esc(T("Savings goals"))}</h2><div class="goals-host"></div>`;
-      el.appendChild(sec);
-      SavingsGoals.render(sec.querySelector(".goals-host"));
-      // Own card order, so the goal cards can be moved with ⠿ like the others
-      const gg = sec.querySelector(".goals-host .grid"); if (gg) gg.dataset.key = "web2:goals";
-    }
     bindAdvice(el, d);
     el.querySelector('[data-action="savings-check"]')?.addEventListener("click", () => openSavingsCheck());
-    bindSavedChecks(el, d);
+    bindSavedChecks(el, d); bindSavingsChart(el, d);
     const form = el.querySelector("#hold");
     const saveIt = () => {
       const v = values(form), amt = num(v.amount);

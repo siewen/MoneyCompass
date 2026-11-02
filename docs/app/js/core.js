@@ -63,6 +63,8 @@ export function normalise(d) {
     if (!Array.isArray(out[k])) out[k] = [];
   out.Settings = Object.assign(newSettings(), out.Settings || {});
   if (!Array.isArray(out.Settings.Modules)) out.Settings.Modules = [];
+  // Savings goals are now part of the Budget plan: whoever used goals gets the Budget plan ("goals" stays for the Windows app)
+  if (out.Settings.Modules.includes("goals") && !out.Settings.Modules.includes("budget")) out.Settings.Modules.push("budget");
   // Older loans had a "Last payment" typed in by hand: now it is worked out from the amount, payment and interest
   for (const l of out.Loans) if (!l.Planned && l.Remaining > 0) planLoan(l);
   return out;
@@ -95,11 +97,24 @@ export function loadCurrent() {
 }
 let saveFailed = false;
 export function save() {
+  noteHoldingAmounts();
   const ok = store.set("mc-p:" + State.id, JSON.stringify(State.data));
   saveFailed = !ok;
   try { window.dispatchEvent(new Event("mc-saved")); } catch { /* not in a browser */ }
 }
 export const lastSaveFailed = () => saveFailed;
+// Each savings entry keeps the amounts it had over time (one per day, the last one counts) for the Savings chart
+function noteHoldingAmounts() {
+  const d = State.data; if (!d || !Array.isArray(d.Holdings)) return;
+  const t = new Date(), day = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}T00:00:00`;
+  for (const h of d.Holdings) {
+    const hs = Array.isArray(h.History) ? h.History : (h.History = []);
+    const last = hs[hs.length - 1];
+    if (last && last.Amount === h.Amount) continue;
+    if (last && last.Date === day) last.Amount = h.Amount; else hs.push({ Date: day, Amount: h.Amount });
+    if (hs.length > 400) hs.splice(0, hs.length - 400);
+  }
+}
 
 // Changes since the profile was opened or last saved as a file (layout and settings don't count):
 // used to ask before the window is closed with the X
@@ -284,11 +299,15 @@ export const freeExportsLeft = () => Math.max(0, FREE_EXPORTS - (State.data.Sett
 // ---------------------------------------------------------------- modules
 
 export const MODULES = [
-  { code: "goals", name: "Savings goals", description: "Goals like a car or a holiday: progress and how much to save per month – shown in the Savings tab." },
   { code: "loans", name: "Loans & debts", description: "Credits and loans: what is left to pay, monthly payments and when you are debt-free." },
-  { code: "budget", name: "Budget plan", description: "A monthly limit per expense category, with a warning when you go over." },
+  { code: "budget", name: "Budget plan", description: "Monthly limits per expense category and your savings goals: how much to set aside each month." },
   { code: "calendar", name: "Calendar", description: "Everything that comes back every month – salary, bills, subscriptions, savings – in a calendar, with a preview of the next 1 to 12 months." },
 ];
+/** What is saved for a goal: the balance of its linked savings account, or the amount typed in. */
+export function goalSaved(g, d = State.data) {
+  const h = g.HoldingId && d.Holdings.find(x => x.Id === g.HoldingId);
+  return h ? Calc.toPln(h.Amount, h.Currency, d.Settings) : (g.Saved || 0);
+}
 export const moduleOn = code => license.isPro && State.data.Settings.Modules.includes(code);
 export function setModule(code, on) {
   const list = State.data.Settings.Modules.filter(m => m !== code);

@@ -1,8 +1,7 @@
 // MoneyCompass Pro: Compare offers, Optimize my finances, Goals, Loans, Budget, bank import.
 import {
   T, State, save, Calc, Advisor, pln, rate, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addMonths, monthName,
-  uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA,
-} from "./core.js";
+  uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved } from "./core.js";
 import { progress, hbars } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
@@ -211,6 +210,9 @@ function optimizeHtml() {
 
 // ================================================================= Savings goals
 
+/** How much to set aside per month for the goals not reached yet. */
+const monthsTo = date => Math.max(1, (parseDate(date).getFullYear() - today().getFullYear()) * 12 + parseDate(date).getMonth() - today().getMonth());
+export const goalsPerMonth = d => d.Goals.map(x => ({ ...x, Saved: goalSaved(x, d) })).filter(x => x.Saved < x.Target).reduce((s, x) => s + (x.Target - x.Saved) / monthsTo(x.TargetDate), 0);
 let editGoal = null;
 export const Goals = {
   route: "goals", title: "Savings goals",
@@ -222,19 +224,21 @@ export const Goals = {
       const months = Math.max(1, (parseDate(goal.TargetDate).getFullYear() - today().getFullYear()) * 12 + parseDate(goal.TargetDate).getMonth() - today().getMonth());
       return Math.max(0, goal.Target - goal.Saved) / months;
     };
-    const target = d.Goals.reduce((s, x) => s + x.Target, 0), saved = d.Goals.reduce((s, x) => s + Math.min(x.Saved, x.Target), 0);
+    const goals = d.Goals.map(x => ({ ...x, Saved: goalSaved(x, d), ref: x }));
+    const target = goals.reduce((s, x) => s + x.Target, 0), saved = goals.reduce((s, x) => s + Math.min(x.Saved, x.Target), 0);
     el.innerHTML = `<div class="grid">
       ${card(heading(T("All goals together")) + row(T("Goal amount (zł)"), pln(target)) + row(T("Already saved"), pln(saved)) +
-        row(T("To save per month for all goals"), pln(d.Goals.filter(x => x.Saved < x.Target).reduce((s, x) => s + perMonth(x), 0))) + (target > 0 ? progress(saved / target, "var(--goals)") : ""))}
-      ${card(heading(T("Your goals")) + hint(T("Tap a goal to edit it, for example to update how much you have saved.")) + (d.Goals.length ? [...d.Goals].sort((a, b) => parseDate(a.TargetDate) - parseDate(b.TargetDate)).map(x => {
+        row(T("To save per month for all goals"), pln(goals.filter(x => x.Saved < x.Target).reduce((s, x) => s + perMonth(x), 0))) + (target > 0 ? progress(saved / target, "var(--goals)") : ""))}
+      ${card(heading(T("Your goals")) + hint(T("Tap a goal to edit it, for example to update how much you have saved.")) + (goals.length ? [...goals].sort((a, b) => parseDate(a.TargetDate) - parseDate(b.TargetDate)).map(x => {
         const fr = x.Target > 0 ? x.Saved / x.Target : 0, done = x.Target > 0 && x.Saved >= x.Target;
         return `<div class="bar-item clickable" data-edit-goal="${x.Id}"><div class="bar-head"><b>${esc(x.Name)}</b><button class="icon-btn danger" data-del-goal="${x.Id}">🗑</button></div>
-          ${progress(fr, done ? COLORS.leftOver : "var(--goals)")}<span class="hint">${esc(T("{0} of {1} ({2}%) · by {3}", pln(Math.min(x.Saved, x.Target)), pln(x.Target), Math.round(Math.min(100, fr * 100)), fmtDate(x.TargetDate)))}</span>
+          ${progress(fr, done ? COLORS.leftOver : "var(--goals)")}<span class="hint">${esc(T("{0} of {1} ({2}%) · by {3}", pln(Math.min(x.Saved, x.Target)), pln(x.Target), Math.round(Math.min(100, fr * 100)), fmtDate(x.TargetDate)))}${x.HoldingId && d.Holdings.some(h => h.Id === x.HoldingId) ? " · 🔗 " + esc(d.Holdings.find(h => h.Id === x.HoldingId).Name) : ""}</span>
           <span class="${done ? "good" : ""}">${esc(done ? T("Goal reached – well done!") : T("Save about {0} per month to reach it in time.", pln(perMonth(x))))}</span></div>`;
       }).join("") : hint(T("No goals yet. Add your first one above."))))}
       ${card(`<form id="goal">${heading(g ? T("Edit goal") : T("Add a goal"))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("New car, holiday, flat"))))}
         <div class="two">${field(T("Goal amount (zł)"), numInput("target", plain(f.Target)))}${field(T("Already saved (zł)"), numInput("saved", plain(f.Saved)))}</div>
+        ${d.Holdings.length ? field(T("Linked savings account (optional)"), select("holding", [["", T("None – I enter the amount")], ...d.Holdings.map(h => [h.Id, h.Name])], f.HoldingId || "")) + hint(T("With a linked account, the amount saved is its balance and updates by itself.")) : ""}
         ${field(T("Reach it by"), dateInput("date", inputDate(parseDate(f.TargetDate))))}
         <div class="buttons">${button(g ? T("Save changes") : T("Add"), "save-goal", "main")}${g ? button(T("Cancel"), "cancel-goal") : ""}</div></form>`)}
       ${binCard(["goal"])}
@@ -243,7 +247,7 @@ export const Goals = {
     el.querySelector('[data-action="save-goal"]').onclick = () => {
       const v = values(fm), t = num(v.target);
       if (!v.name.trim() || !(t > 0)) { toast(T("Please enter a name and a goal amount."), "bad"); return; }
-      const item = { Name: v.name.trim(), Target: t, Saved: num(v.saved) || 0, TargetDate: isoDate(parseDate(v.date)) };
+      const item = { Name: v.name.trim(), Target: t, Saved: num(v.saved) || 0, TargetDate: isoDate(parseDate(v.date)), HoldingId: v.holding || "" };
       if (g) Object.assign(g, item); else d.Goals.push({ Id: uuid(), ...item });
       editGoal = null; save(); toast(T("Saved.")); App.refresh();
     };
@@ -387,7 +391,8 @@ export const Budget = {
     const total = limits.reduce((s, b) => s + b.MonthlyLimit, 0), spent = limits.reduce((s, b) => s + Calc.spentThisMonth(b.Category), 0);
     el.innerHTML = `<div class="grid">
       ${card(heading(monthName(today())) + row(T("Spent in categories with a limit"), pln(spent)) + row(T("Your limits together"), pln(total)) +
-        row(T("Left this month"), pln(total - spent), total - spent < 0 ? "bad" : "good"))}
+        row(T("Left this month"), pln(total - spent), total - spent < 0 ? "bad" : "good") +
+        (d.Goals.length ? row(T("To set aside for savings goals"), pln(goalsPerMonth(d))) : ""))}
       ${card(heading(T("Limits this month")) + hint(T("From your entries in the Outflows tab. Green: on track, amber: almost used, red: over the limit.")) +
         (limits.length ? budgetBars() : hint(T("No limits yet. Set your first one above."))))}
       ${card(`<form id="budget">${heading(T("Set a monthly limit"))}${hint(T("Choose a category and how much you want to spend on it at most each month. Setting it again changes the limit."))}
@@ -396,6 +401,12 @@ export const Budget = {
         ${button(T("Save limit"), "save-limit", "main")}</form>`)}
       ${binCard(["budget"])}
     </div>`;
+    // Savings goals: part of the budget plan (how much to set aside each month), with their own cards
+    const sec = document.createElement("section"); sec.className = "goals-section";
+    sec.innerHTML = `<h2 class="section-title">🎯 ${esc(T("Savings goals"))}</h2><div class="goals-host"></div>`;
+    el.appendChild(sec);
+    Goals.render(sec.querySelector(".goals-host"));
+    const gg = sec.querySelector(".goals-host .grid"); if (gg) gg.dataset.key = "web2:goals";
     el.querySelectorAll("[data-budget]").forEach(b => {
       const del = document.createElement("button"); del.className = "icon-btn danger"; del.textContent = "🗑";
       del.onclick = async () => {
