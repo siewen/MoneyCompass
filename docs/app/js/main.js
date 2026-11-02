@@ -3,6 +3,8 @@ import { store, T, State, loadCurrent, license, moduleOn, MODULES, lang, current
 import { esc, popup, toast } from "./ui.js";
 import { startLock, lock, hasPin } from "./lock.js";
 import { startBackup, drawBackupBar, backupProfileChanged } from "./backup.js";
+import { smartImport } from "./import.js";
+import { openSavingsCheck } from "./savings-check.js";
 import { App, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
 import { WEB_VERSION, WEB_BUILD, WEB_DATE } from "./version.js";
@@ -70,9 +72,10 @@ function buildShell() {
     <header class="top">
       <button class="side-toggle" data-act="side" title="${esc(T(side() === "pinned" ? "Fold the menu (it opens when you point at it)" : "Keep the menu open"))}">${side() === "pinned" ? "‹" : "›"}</button>
       <a class="brand" href="../index.html" title="MoneyCompass"><img src="../logo.svg" alt=""><span>MoneyCompass</span></a>
+      <button class="import-btn" data-act="import" title="${esc(T("Import a bank statement (CSV) – current or savings account. You can also drop the file onto the app."))}"><span class="ii">⬆</span><span class="il">${esc(T("Import"))}${license.isPro ? "" : " 🔒"}</span></button>
       <nav class="tabs" id="tabs">${list.map(t => `<button class="tab" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}"><span class="ti">${TAB_ICON[t.route] || ""}</span><span class="tl">${esc(T(t.title))}</span></button>`).join("")}</nav>
       <div class="actions">
-        <button class="act data-btn" data-act="data" title="${esc(T("Data: import, export, backup"))}">🗂<span>${esc(T("Data"))}</span> ▾</button>
+        <button class="act data-btn" data-act="data" title="${esc(T("Data: export, profile file, delete"))}">🗂<span>${esc(T("Data"))}</span> ▾</button>
         <button class="act lang-btn" data-act="lang" title="${esc(T("Language"))}">🌐<b>${esc(lang().toUpperCase())}</b></button>
         <button class="profile-btn" data-act="profile" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}</button>
         ${installed() ? `<button class="act exit" data-act="exit" title="${esc(T("Close"))}">⏻</button>` : ""}
@@ -80,11 +83,11 @@ function buildShell() {
     </header>
     ${license.isPro ? "" : `<div class="free-bar">${esc(T("Free web version."))} <a href="${DOWNLOAD_URL}" target="_blank" rel="noopener">${esc(T("Download the Windows app"))}</a> · <a href="#" data-act="profile">${esc(T("Enter license key"))}</a></div>`}
     <div id="backup-bar" class="backup-bar" hidden></div>
-    <div class="page-head"><h1 id="page-title"></h1></div>
+    <div class="page-head"><h1 id="page-title"></h1><button class="btn main small head-import" id="head-import" hidden></button></div>
     <main id="page"></main>
     <button class="help-fab" data-act="help-menu" title="${esc(T("Help & About"))}">?</button>`;
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => App.go(b.dataset.tab));
-  const acts = { delete: openDelete, import: openImport, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide };
+  const acts = { import: () => smartImport(), delete: openDelete, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide };
   document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
   setupHelpButton();
   // Another profile now? Read its backup state; otherwise only draw the bar again
@@ -105,8 +108,9 @@ function dataMenu() {
   const btn = document.querySelector('[data-act="data"]'), r = btn.getBoundingClientRect();
   // Data in, data out, and deleting. Profiles (load/save) are in the profile panel, installing in the ? menu.
   const items = [
-    ["csv", "🏦", T("Import bank statement (CSV)…") + (license.isPro ? "" : " 🔒")],
     ["export", "⬇", T("Export report (Excel, PDF, Word)") + (license.isPro ? "" : " 🔒")],
+    ["save", "💾", T("Save profile") + (license.isPro ? "" : " 🔒")],
+    ["load", "📂", T("Load a profile…")],
     ["-"],
     ["delete", "🗑", T("Delete data…")],
   ];
@@ -377,6 +381,14 @@ function render() {
   document.documentElement.style.setProperty("--accent", ACCENT[page.route]);
   document.documentElement.dataset.page = page.route;
   const pt = document.getElementById("page-title"); if (pt) pt.textContent = T(page.title);
+  // Import right where the data goes: Outflows and Inflows (bank statement), Savings (savings account statement)
+  const hi = document.getElementById("head-import");
+  if (hi) {
+    const lock = license.isPro ? "" : " 🔒";
+    const what = { expenses: ["⬆ " + T("Import bank statement") + lock, () => smartImport()], income: ["⬆ " + T("Import bank statement") + lock, () => smartImport()],
+      portfolio: ["⬆ " + T("Import savings account statement") + lock, () => openSavingsCheck()] }[page.route];
+    hi.hidden = !what; if (what) { hi.textContent = what[0]; hi.onclick = what[1]; }
+  }
   const el = document.getElementById("page");
   const y = window.scrollY;
   page.render(el);

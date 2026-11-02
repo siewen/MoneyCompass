@@ -427,9 +427,9 @@ export const Budget = {
 
 // ================================================================= Bank import (pop-up)
 
-export async function openBankImport() {
+export async function openBankImport(fileObj = null) {
   if (!(await requirePro(T("Import bank statement")))) return;
-  const fileObj = await pickFile(".csv,.txt,text/csv");
+  if (!fileObj) fileObj = await pickFile(".csv,.txt,text/csv");
   if (!fileObj) return;
   let file;
   try { file = Csv.parse(Csv.decode(await fileObj.arrayBuffer())); }
@@ -500,7 +500,7 @@ export async function openBankImport() {
     } else lines.push(T("Nothing new to add."));
     if (dup) lines.push(T("{0} are already in MoneyCompass and are skipped.", dup));
     if (state.known.length) lines.push(T("ⓘ {0} entries you imported before get the details from your bank (accounts, title).", state.known.length));
-    if (transfers.length) lines.push(T("{0} transfers to your own accounts – not expenses. Choose below which ones are savings.", transfers.length));
+    if (transfers.length) lines.push(T("{0} transfers to your own accounts – not expenses (listed in Outflows).", transfers.length));
     if (received.length) lines.push(T("{0} payments received – choose below how each one counts.", received.length));
     if (foreign) lines.push(T("{0} payments in other currencies are skipped (no exchange rate).", foreign));
     if (state.ownIn) lines.push(T("{0} payments came from your own accounts – marked \"Not income\". If your salary arrives in an account whose statement you don't import, choose Salary for them below.", state.ownIn));
@@ -523,6 +523,7 @@ export async function openBankImport() {
       (state.skippedByDate ? hint(T("{0} transactions outside these dates are not imported.", state.skippedByDate)) : ""));
     p.el.innerHTML = `<h2 class="popup-title">⬆ ${esc(T("Import bank statement"))}</h2>
       ${hint(T("The bank statement (CSV) – yours or one you manage for someone – becomes expenses, sorted into categories."))}
+      <p class="hint">${esc(T("Current account statement."))} <a href="#" data-other-kind>${esc(T("This is a savings account statement →"))}</a></p>
       <div class="grid">
       ${card(`<b>${esc(fileObj.name)}</b>` + hint(T("{0} – {1}, {2} rows.", file.bank || T("bank recognised from the columns"), "CSV", file.rows.length)) +
         hint(file.bank ? T("Found automatically for {0}. Change them only if the preview looks wrong.", file.bank) : T("Found from the content of the file. Check that date, amount and description are right.")) +
@@ -560,6 +561,7 @@ export async function openBankImport() {
     });
     p.el.querySelectorAll('select[name^="col-"]').forEach(sel => sel.onchange = () => { file.columns[sel.name.slice(4)] = +sel.value; draw(); });
     p.el.querySelector("[data-import]").onclick = () => doImport();
+    p.el.querySelector("[data-other-kind]").onclick = async e => { e.preventDefault(); p.close(); (await import("./savings-check.js")).openSavingsCheck(fileObj); };
   };
   const doImport = async () => {
     const v = values(p.el);

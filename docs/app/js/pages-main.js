@@ -467,7 +467,7 @@ export const Expenses = {
         ${field(T("Description (optional)"), textInput("description", "", T("e.g. {0}", "Biedronka")))}
         <div class="two">${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), ""))}<div class="hint">${esc(T("Repeating expenses appear automatically in the Calendar, also in the next months."))}</div></div>
         ${check("essential", T("Essential (must pay even in a crisis)"), cat0.Essential)}
-        <div class="buttons">${button(T("Add expense"), "add-expense", "main")}${button("⬆ " + esc(T("Import bank statement (CSV)…")), "import", "second")}</div></form>`)}
+        <div class="buttons">${button(T("Add expense"), "add-expense", "main")}</div></form>`)}
       ${card(heading(T("Outflow history")) + hint(T("Click an expense to switch it between essential and not essential. The pen changes date, category, amount and more.")) + filterBar +
         (months.length ? visible.map(m => {
           const total = m.items.reduce((s, e) => s + e.Amount, 0), ess = m.items.filter(e => e.Essential).reduce((s, e) => s + e.Amount, 0);
@@ -488,7 +488,6 @@ export const Expenses = {
     };
     el.querySelector('[data-action="categories"]').onclick = () => manageCategories();
     el.querySelector('[data-action="sort-other"]')?.addEventListener("click", () => sortOther(() => App.refresh()));
-    el.querySelector('[data-action="import"]').onclick = () => App.openBankImport();
     const olderBtn = el.querySelector('[data-action="older"]');
     if (olderBtn) olderBtn.onclick = () => { showAllMonths = true; App.refresh(); };
     // Filter: re-draw the list, and keep typing in the search box
@@ -759,7 +758,7 @@ export const Portfolio = {
         <div class="item clickable" data-edit-holding="${x.Id}"><div><b>${esc(x.Name)}</b><span class="hint">${esc(T(x.Place))} · ${esc(x.Safe ? T("Safe") : T("Risky"))} · ${rate(currentRate(x))}</span>${promoBadge(x)}</div>
         <div class="right"><b>${amount(x.Amount, x.Currency)}</b>${currentRate(x) ? `<span class="hint">${esc(T("{0} / year", pln(Calc.toPln(x.Amount, x.Currency, s) * currentRate(x) / 100)))}</span>` : ""}${x.Deposit > 0 ? `<span class="hint primary">🔁 +${esc(pln(x.Deposit))} · ${esc(freqLabel(x.DepositFrequency || "Monthly"))}${x.DepositFrom ? " · " + esc(T("from {0}", x.DepositFrom)) : ""}</span>` : ""}</div>
         ${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("Nothing added yet."))))}
-      ${card(heading(T("Import savings account statement"), "🏦") +
+      ${d.SavingsChecks?.length ? "" : card(heading(T("Import savings account statement"), "🏦") +
         hint(T("The balance of a savings account comes from its own statement: import its CSV file and MoneyCompass sets the balance and the month-by-month history from the bank's figures – with the interest, the 19% tax, fees and the real rate.")) +
         `<div class="buttons">${button("⬆ " + esc(T("Import savings account statement (CSV)…")) + (license.isPro ? "" : " 🔒"), "savings-check", "main")}</div>`)}
       ${savedChecksCard(d)}

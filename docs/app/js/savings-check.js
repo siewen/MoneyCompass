@@ -86,9 +86,9 @@ export function analyse(rows, opening) {
   };
 }
 
-export async function openSavingsCheck() {
+export async function openSavingsCheck(fileObj = null) {
   if (!(await requirePro(T("Import savings account statement")))) return;
-  const fileObj = await pickFile(".csv,.txt,text/csv");
+  if (!fileObj) fileObj = await pickFile(".csv,.txt,text/csv");
   if (!fileObj) return;
   let file;
   try { file = Csv.parse(Csv.decode(await fileObj.arrayBuffer())); }
@@ -109,6 +109,7 @@ export async function openSavingsCheck() {
     const warn = r.avg <= 0 ? `<p class="bad">${esc(T("The average balance is 0 or below – enter the balance at the start of the statement."))}</p>` : "";
     // No window title (the button already says what this is). Cards in two even columns, the month table across the bottom.
     p.el.innerHTML = `
+      <p class="hint">${esc(T("Savings account statement."))} <a href="#" data-other-kind>${esc(T("This is a current account statement →"))}</a></p>
       ${hint(T("From your statement {0} – {1} ({2} days). Interest, tax and fees are compared with the money that was really on the account, day by day. Whole months give the most exact result.", fmtDate(r.from), fmtDate(r.to), r.days))}
       <div class="grid">
         ${card(heading(T("Effective interest rate"), "📊") + warn +
@@ -140,6 +141,7 @@ export async function openSavingsCheck() {
           `</tbody></table>`, "wide")}
       </div>
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
+    p.el.querySelector("[data-other-kind]").onclick = async e => { e.preventDefault(); p.close(); (await import("./pages-pro.js")).openBankImport(fileObj); };
     p.el.querySelector('[name="opening"]')?.addEventListener("change", e => { opening = Csv.parseAmount(e.target.value) || 0; draw(); });
     // Puts the balance at the end and the real rate (before tax) into the chosen savings entry, or a new one
     const toHolding = name => {

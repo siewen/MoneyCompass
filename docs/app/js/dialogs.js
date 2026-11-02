@@ -287,7 +287,7 @@ export function openImport() {
     <button class="btn main" data-csv>🏦 ${esc(T("Import bank statement (CSV)…"))}${license.isPro ? "" : " 🔒"}</button>
     <button class="btn second" data-profile>👤 ${esc(T("Load a profile…"))}</button></div>
     <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`, { width: 460 });
-  p.el.querySelector("[data-csv]").onclick = () => { p.close(); openBankImport(); };
+  p.el.querySelector("[data-csv]").onclick = async () => { p.close(); (await import("./import.js")).smartImport(); };
   p.el.querySelector("[data-profile]").onclick = async () => { p.close(); await loadProfileFile(); };
 }
 

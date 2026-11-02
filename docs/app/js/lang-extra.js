@@ -822,7 +822,18 @@ export const EXTRA = {
 "The balance of a savings account comes from its own statement: import its CSV file and MoneyCompass sets the balance and the month-by-month history from the bank's figures – with the interest, the 19% tax, fees and the real rate.": "Der Saldo eines Sparkontos kommt aus dessen eigenem Auszug: Importieren Sie die CSV-Datei, und MoneyCompass setzt Saldo und Monatsverlauf nach den Zahlen der Bank – mit Zinsen, 19 % Steuer, Gebühren und dem echten Zinssatz.",
 "Transfers from your bank imports to your own accounts (savings, another bank). Not spending – they are not counted in your outflows.": "Überweisungen aus Ihren Bankimporten auf eigene Konten (Sparkonto, andere Bank). Keine Ausgaben – sie zählen nicht zu Ihren Ausgaben.",
 "{0} transfers": "{0} Überweisungen",
-"Only today's balance is known so far. Import the statement of your savings account (below) to see how the balance developed month by month.": "Bisher ist nur der heutige Saldo bekannt. Importieren Sie den Auszug Ihres Sparkontos (unten), um die Entwicklung Monat für Monat zu sehen."
+"Only today's balance is known so far. Import the statement of your savings account (below) to see how the balance developed month by month.": "Bisher ist nur der heutige Saldo bekannt. Importieren Sie den Auszug Ihres Sparkontos (unten), um die Entwicklung Monat für Monat zu sehen.",
+"What kind of statement is this?": "Was für ein Auszug ist das?",
+"Card payments, bills, salary – goes to Outflows and Inflows": "Kartenzahlungen, Rechnungen, Gehalt – geht zu Ausgaben und Eingängen",
+"Balance, interest, tax and the real rate – goes to Savings": "Saldo, Zinsen, Steuer und echter Zinssatz – geht zu Ersparnisse",
+"Please drop the CSV file of your bank statement.": "Bitte legen Sie die CSV-Datei Ihres Kontoauszugs ab.",
+"Import a bank statement (CSV) – current or savings account. You can also drop the file onto the app.": "Kontoauszug importieren (CSV) – Giro- oder Sparkonto. Sie können die Datei auch auf die App ziehen.",
+"Data: export, profile file, delete": "Daten: Export, Profildatei, Löschen",
+"{0} transfers to your own accounts – not expenses (listed in Outflows).": "{0} Überweisungen auf eigene Konten – keine Ausgaben (unter Ausgaben aufgeführt).",
+"Current account statement.": "Girokontoauszug.",
+"This is a savings account statement →": "Das ist ein Sparkontoauszug →",
+"Savings account statement.": "Sparkontoauszug.",
+"This is a current account statement →": "Das ist ein Girokontoauszug →"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1646,7 +1657,18 @@ export const EXTRA = {
 "The balance of a savings account comes from its own statement: import its CSV file and MoneyCompass sets the balance and the month-by-month history from the bank's figures – with the interest, the 19% tax, fees and the real rate.": "Le solde d'un compte d'épargne vient de son propre relevé : importez son fichier CSV et MoneyCompass fixe le solde et l'historique mois par mois d'après les chiffres de la banque – avec les intérêts, l'impôt de 19 %, les frais et le taux réel.",
 "Transfers from your bank imports to your own accounts (savings, another bank). Not spending – they are not counted in your outflows.": "Virements de vos imports bancaires vers vos propres comptes (épargne, autre banque). Pas des dépenses – ils ne sont pas comptés dans vos sorties.",
 "{0} transfers": "{0} virements",
-"Only today's balance is known so far. Import the statement of your savings account (below) to see how the balance developed month by month.": "Seul le solde d'aujourd'hui est connu pour l'instant. Importez le relevé de votre compte d'épargne (ci-dessous) pour voir l'évolution du solde mois par mois."
+"Only today's balance is known so far. Import the statement of your savings account (below) to see how the balance developed month by month.": "Seul le solde d'aujourd'hui est connu pour l'instant. Importez le relevé de votre compte d'épargne (ci-dessous) pour voir l'évolution du solde mois par mois.",
+"What kind of statement is this?": "De quel relevé s'agit-il ?",
+"Card payments, bills, salary – goes to Outflows and Inflows": "Paiements par carte, factures, salaire – va dans Sorties et Entrées",
+"Balance, interest, tax and the real rate – goes to Savings": "Solde, intérêts, impôt et taux réel – va dans Épargne",
+"Please drop the CSV file of your bank statement.": "Déposez le fichier CSV de votre relevé bancaire.",
+"Import a bank statement (CSV) – current or savings account. You can also drop the file onto the app.": "Importer un relevé bancaire (CSV) – compte courant ou d'épargne. Vous pouvez aussi déposer le fichier sur l'application.",
+"Data: export, profile file, delete": "Données : export, fichier de profil, suppression",
+"{0} transfers to your own accounts – not expenses (listed in Outflows).": "{0} virements vers vos propres comptes – pas des dépenses (listés dans Sorties).",
+"Current account statement.": "Relevé de compte courant.",
+"This is a savings account statement →": "C'est un relevé de compte d'épargne →",
+"Savings account statement.": "Relevé de compte d'épargne.",
+"This is a current account statement →": "C'est un relevé de compte courant →"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -2470,6 +2492,17 @@ export const EXTRA = {
 "The balance of a savings account comes from its own statement: import its CSV file and MoneyCompass sets the balance and the month-by-month history from the bank's figures – with the interest, the 19% tax, fees and the real rate.": "Saldo rachunku oszczędnościowego pochodzi z jego własnego wyciągu: zaimportuj plik CSV, a MoneyCompass ustawi saldo i historię miesiąc po miesiącu według danych banku – z odsetkami, 19% podatkiem, opłatami i rzeczywistym oprocentowaniem.",
 "Transfers from your bank imports to your own accounts (savings, another bank). Not spending – they are not counted in your outflows.": "Przelewy z importowanych wyciągów na Twoje własne rachunki (oszczędności, inny bank). To nie wydatki – nie są liczone w wydatkach.",
 "{0} transfers": "{0} przelewów",
-"Only today's balance is known so far. Import the statement of your savings account (below) to see how the balance developed month by month.": "Na razie znane jest tylko dzisiejsze saldo. Zaimportuj wyciąg z rachunku oszczędnościowego (poniżej), aby zobaczyć, jak saldo zmieniało się miesiąc po miesiącu."
+"Only today's balance is known so far. Import the statement of your savings account (below) to see how the balance developed month by month.": "Na razie znane jest tylko dzisiejsze saldo. Zaimportuj wyciąg z rachunku oszczędnościowego (poniżej), aby zobaczyć, jak saldo zmieniało się miesiąc po miesiącu.",
+"What kind of statement is this?": "Jaki to wyciąg?",
+"Card payments, bills, salary – goes to Outflows and Inflows": "Płatności kartą, rachunki, pensja – trafia do Wydatków i Wpływów",
+"Balance, interest, tax and the real rate – goes to Savings": "Saldo, odsetki, podatek i rzeczywiste oprocentowanie – trafia do Oszczędności",
+"Please drop the CSV file of your bank statement.": "Upuść plik CSV z wyciągiem bankowym.",
+"Import a bank statement (CSV) – current or savings account. You can also drop the file onto the app.": "Importuj wyciąg bankowy (CSV) – konto osobiste lub oszczędnościowe. Możesz też upuścić plik na aplikację.",
+"Data: export, profile file, delete": "Dane: eksport, plik profilu, usuwanie",
+"{0} transfers to your own accounts – not expenses (listed in Outflows).": "{0} przelewów na własne rachunki – to nie wydatki (widoczne w Wydatkach).",
+"Current account statement.": "Wyciąg z konta osobistego.",
+"This is a savings account statement →": "To wyciąg z rachunku oszczędnościowego →",
+"Savings account statement.": "Wyciąg z rachunku oszczędnościowego.",
+"This is a current account statement →": "To wyciąg z konta osobistego →"
 }
 };
