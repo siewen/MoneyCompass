@@ -1,4 +1,4 @@
-// Module "Payment calendar": everything that comes back regularly – income, fixed costs, transfers to savings,
+// Module "Calendar": everything that comes back regularly – income, fixed costs, transfers to savings,
 // loan payments – in a month calendar and as a preview for 1, 3, 6 or 12 months.
 import {
   T, State, save, Calc, pln, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addDays, addMonths, monthStart, monthName,
@@ -177,7 +177,7 @@ function suggestions(d) {
 }
 
 export const Calendar = {
-  route: "calendar", title: "Payment calendar",
+  route: "calendar", title: "Calendar",
   render(el) {
     const d = D();
     if (!d.Recurring) d.Recurring = [];

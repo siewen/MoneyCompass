@@ -286,7 +286,7 @@ export const MODULES = [
   { code: "goals", name: "Savings goals", description: "Goals like a car or a holiday: progress and how much to save per month – shown in the Savings tab." },
   { code: "loans", name: "Loans & debts", description: "Credits and loans: what is left to pay, monthly payments and when you are debt-free." },
   { code: "budget", name: "Budget plan", description: "A monthly limit per expense category, with a warning when you go over." },
-  { code: "calendar", name: "Payment calendar", description: "Everything that comes back every month – salary, bills, subscriptions, savings – in a calendar, with a preview of the next 1 to 12 months." },
+  { code: "calendar", name: "Calendar", description: "Everything that comes back every month – salary, bills, subscriptions, savings – in a calendar, with a preview of the next 1 to 12 months." },
 ];
 export const moduleOn = code => license.isPro && State.data.Settings.Modules.includes(code);
 export function setModule(code, on) {
@@ -451,7 +451,7 @@ export const Calc = {
   },
   loansCounted(d) { return this.loanPayments(d) > 0; },
   countedExpenses(d) { return this.loansCounted(d) ? d.Expenses.filter(e => e.Category !== LOAN_CATEGORY) : d.Expenses; },
-  /** Regular payments added in the Payment calendar that fall in this month and are NOT already among your
+  /** Regular payments added in the Calendar that fall in this month and are NOT already among your
    *  expenses (same amount within 5%, within 5 days) – e.g. paid from a bank you don't import. */
   recurringIn(d, start, end) {
     if (!moduleOn("calendar")) return [];
@@ -530,12 +530,24 @@ export const Calc = {
     else { while (this.stepN(start, i.Frequency, n) < from) n++; }
     return this.stepN(start, i.Frequency, n);
   },
+  /** The first and last payment of an income source (optional): nothing is counted before or after them. */
+  incomeSpan(i) {
+    const a = i.StartDate ? parseDate(i.StartDate) : null, b = i.EndDate ? parseDate(i.EndDate) : null;
+    return { start: a && !isNaN(a) ? a : null, end: b && !isNaN(b) ? b : null };
+  },
+  /** The next payment of an income source from this day on, within its first and last payment. */
+  nextIncome(i, from) {
+    const { start, end } = this.incomeSpan(i);
+    const n = this.nextPayment(i, start && start > from ? start : from);
+    return n && (!end || n <= end) ? n : null;
+  },
   upcoming(d, from, to) {
     const list = [];
     for (const i of d.Incomes.filter(x => x.Active)) {
       const amt = this.toPln(i.Amount, i.Currency, d.Settings);
-      let next = this.nextPayment(i, from), guard = 0;
-      while (next && next <= to && guard++ < 500) {
+      const { end } = this.incomeSpan(i);
+      let next = this.nextIncome(i, from), guard = 0;
+      while (next && next <= to && (!end || next <= end) && guard++ < 500) {
         list.push({ source: i, date: next, amount: amt });
         if (i.Frequency === ONE_TIME) break;
         next = this.nextPayment(i, addDays(next, 1));
@@ -555,8 +567,11 @@ export const Calc = {
     const year = today().getFullYear();
     for (const i of d.Incomes.filter(x => x.Active)) {
       if (this.rateMissing(i.Currency, d.Settings)) missing = true;
-      if (i.Frequency === ONE_TIME) { if (parseDate(i.Date).getFullYear() === year) oneTime += this.toPln(i.Amount, i.Currency, d.Settings); }
-      else { total += this.monthlyPln(i, d.Settings); count++; }
+      if (i.Frequency === ONE_TIME) { if (parseDate(i.Date).getFullYear() === year) oneTime += this.toPln(i.Amount, i.Currency, d.Settings); continue; }
+      // Regular income counts from its first payment until its last one
+      const { start, end } = this.incomeSpan(i);
+      if ((start && start > addMonths(today(), 1)) || (end && end < today())) continue;
+      total += this.monthlyPln(i, d.Settings); count++;
     }
     return { monthlyTotal: total, activeSources: count, oneTimeThisYear: oneTime, missing };
   },
@@ -724,7 +739,7 @@ export const Advisor = {
     const list = this.perCategory(d);
     const loans = Calc.loanPayments(d);
     if (loans > 0) list.push({ category: LOAN_CATEGORY, perMonth: loans });
-    // Regular payments from the Payment calendar that are not in your expenses
+    // Regular payments from the Calendar that are not in your expenses
     for (const [category, perMonth] of Calc.recurringPerMonth(d).byCategory) {
       const x = list.find(c => c.category === category);
       if (x) x.perMonth += perMonth; else list.push({ category, perMonth });

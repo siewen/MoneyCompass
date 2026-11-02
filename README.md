@@ -23,7 +23,7 @@ Personal finance for Poland – in your browser or on Windows. Private: your dat
 | ⚡ **Optimize my finances** (Pro) | A personal plan: best savings accounts and deposits today, which loan to pay off first, overpaying vs. saving |
 | 🏦 **Bank import (CSV)** (Pro) | PKO BP, mBank, ING, Millennium, Pekao, Santander and others – with smart categories that learn from your changes |
 | 〰️ **Trends** | Smooth lines for inflows, outflows, what you saved and loan payments, month by month |
-| 📅 **Payment calendar** (Pro) | Everything that comes back, with a forecast for the coming months |
+| 📅 **Calendar** (Pro) | Everything that comes back, with a forecast for the coming months |
 | 💳 **Loans vs. the market** (Pro) | Your rate compared with today's best offers, with the new payment and the real saving |
 | 🎯 **Savings & goals** | All your money in one place, promotion reminders, savings goals (Pro) |
 | 🔒 **PIN & lock** | A PIN per profile, automatic lock, backups encrypted with a password (AES-256) |

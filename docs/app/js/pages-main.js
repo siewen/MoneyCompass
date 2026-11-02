@@ -275,6 +275,11 @@ export const Income = {
         ${field(T("Amount you receive each time (net, after tax)"), numInput("amount", plain(f.Amount), T("e.g. 8500 (what you actually receive, after tax)")))}
         <div class="two">${field(T("How often"), select("frequency", FREQUENCIES.map(x => [x[0], T(x[0])]), f.Frequency))}
         ${field(f.Frequency === ONE_TIME ? T("Date the money arrives") : T("Payday - date of any payment (last or next one); the app repeats it"), dateInput("date", inputDate(parseDate(f.Date))))}</div>
+        <div class="income-span"${f.Frequency === ONE_TIME ? " hidden" : ""}>
+          <div class="two">${field(T("First payment (optional)"), dateInput("start", f.StartDate ? inputDate(parseDate(f.StartDate)) : ""))}
+          ${field(T("Last payment (optional)"), dateInput("end", f.EndDate ? inputDate(parseDate(f.EndDate)) : ""))}</div>
+          ${hint(T("For example a new job: enter the first payday and nothing is counted before it. A job or contract that ends: enter the last one. Leave both empty for income you have had for a long time."))}
+        </div>
         ${check("active", T("Active (count it in the totals)"), f.Active)}
         <div class="buttons">${button(e ? T("Save changes") : T("Add income"), "save-income", "main")}${e ? button(T("Cancel editing"), "cancel-income") : ""}</div></form>`)}
       ${card(heading(T("Next payments (next {0} days)", 60)) + (up.length ? `<div class="list">${up.slice(0, 20).map(p => `
@@ -282,8 +287,8 @@ export const Income = {
         : hint(T("No payments expected in this period."))))}
       ${card(heading(T("Your income sources")) + hint(T("Tap a source to edit it. Switch off 'Active' for income that has stopped but you want to keep in the list.")) +
         (d.Incomes.length ? `<div class="list">${d.Incomes.map(i => {
-          const next = Calc.nextPayment(i, today());
-          const info = i.Frequency === ONE_TIME ? `${T("one-time")} · ${T("on {0}", fmtDate(i.Date))}` : `${freqLabel(i.Frequency)} · ${next ? T("next {0}", fmtDate(next)) : ""}`;
+          const next = Calc.nextIncome(i, today()), sp = Calc.incomeSpan(i);
+          const info = i.Frequency === ONE_TIME ? `${T("one-time")} · ${T("on {0}", fmtDate(i.Date))}` : `${freqLabel(i.Frequency)} · ${next ? T("next {0}", fmtDate(next)) : T("ended")}${sp.start ? " · " + T("since {0}", fmtDate(sp.start)) : ""}${sp.end ? " · " + T("until {0}", fmtDate(sp.end)) : ""}`;
           return `<div class="item clickable${i.Active ? "" : " off"}" data-edit-income="${i.Id}"><div><b>${esc(i.Name)}</b><span class="hint">${esc(T(i.Type))} · ${esc(info)}${i.Active ? "" : " · " + esc(T("not active"))}</span></div>
             <div class="right"><b>${amount(i.Amount, i.Currency)}</b>${i.Frequency !== ONE_TIME ? `<span class="hint">${esc(T("{0} / month", pln(Calc.monthlyPln(i, s))))}</span>` : ""}${i.Gross > 0 ? `<span class="hint">${esc(T("gross {0}", pln(i.Gross)))}</span>` : ""}</div>
             <label class="switch" title="${esc(T("Active (count it in the totals)"))}"><input type="checkbox" data-active-income="${i.Id}"${i.Active ? " checked" : ""}><span></span></label>
@@ -302,6 +307,7 @@ export const Income = {
     form.frequency.onchange = () => {
       const lbl = form.date.closest(".field").querySelector("span");
       lbl.textContent = form.frequency.value === ONE_TIME ? T("Date the money arrives") : T("Payday - date of any payment (last or next one); the app repeats it");
+      el.querySelector(".income-span").hidden = form.frequency.value === ONE_TIME;
     };
     const grossBox = el.querySelector(".gross-box");
     const toggleGross = () => { grossBox.hidden = !(form.type.value === "Salary" && form.currency.value === "PLN"); };
@@ -340,7 +346,7 @@ export const Income = {
       const r = d.Received.find(x => x.Id === b.dataset.repeatRec);
       pickRepeat(receivedRepeatOn(d, r), freq => {
         setReceivedRepeat(d, r, freq); save();
-        toast(freq ? T("{0} repeats: {1} – see the Payment calendar.", r.Description || "–", freqLabel(freq)) : T("{0} no longer repeats.", r.Description || "–"));
+        toast(freq ? T("{0} repeats: {1} – see the Calendar.", r.Description || "–", freqLabel(freq)) : T("{0} no longer repeats.", r.Description || "–"));
         App.refresh();
       });
     });
@@ -357,11 +363,15 @@ function saveIncome(form) {
   if (!(amt > 0)) { toast(T("Please enter an amount bigger than 0."), "bad"); return; }
   const date = v.date ? isoDate(parseDate(v.date)) : isoDate(today());
   const name = v.name.trim() || T(v.type);
+  const once = v.frequency === ONE_TIME;
+  const startD = !once && v.start ? parseDate(v.start) : null, endD = !once && v.end ? parseDate(v.end) : null;
+  if (startD && endD && endD < startD) { toast(T("The last payment can't be before the first one."), "bad"); return; }
+  const span = { StartDate: startD ? isoDate(startD) : null, EndDate: endD ? isoDate(endD) : null };
   if (editIncome) {
-    Object.assign(d.Incomes.find(x => x.Id === editIncome), { Name: name, Type: v.type, Amount: amt, Currency: v.currency, Frequency: v.frequency, Date: date, Active: v.active, Gross: num(v.gross) || 0 });
+    Object.assign(d.Incomes.find(x => x.Id === editIncome), { Name: name, Type: v.type, Amount: amt, Currency: v.currency, Frequency: v.frequency, Date: date, Active: v.active, Gross: num(v.gross) || 0, ...span });
     toast(T("Updated: {0}.", name)); editIncome = null;
   } else {
-    d.Incomes.push({ Id: uuid(), Name: name, Type: v.type, Amount: amt, Currency: v.currency, Frequency: v.frequency, Date: date, Active: v.active, Gross: num(v.gross) || 0 });
+    d.Incomes.push({ Id: uuid(), Name: name, Type: v.type, Amount: amt, Currency: v.currency, Frequency: v.frequency, Date: date, Active: v.active, Gross: num(v.gross) || 0, ...span });
     toast(T("Added: {0}.", name));
   }
   save(); App.refresh();
@@ -421,7 +431,7 @@ export const Expenses = {
         <div class="cat-row">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], cat0.Name))}
           ${button(T("Categories…"), "categories", "second small")}</div>
         ${field(T("Description (optional)"), textInput("description", "", T("e.g. {0}", "Biedronka")))}
-        <div class="two">${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), ""))}<div class="hint">${esc(T("Repeating expenses appear automatically in the Payment calendar, also in the next months."))}</div></div>
+        <div class="two">${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), ""))}<div class="hint">${esc(T("Repeating expenses appear automatically in the Calendar, also in the next months."))}</div></div>
         ${check("essential", T("Essential (must pay even in a crisis)"), cat0.Essential)}
         <div class="buttons">${button(T("Add expense"), "add-expense", "main")}${button("⬆ " + esc(T("Import bank statement (CSV)…")), "import", "second")}</div></form>`)}
       ${card(heading(T("Monthly average")) + (avg.monthsUsed ? row(T("Essential"), pln(avg.essential)) + row(T("Not essential"), pln(avg.nonEssential)) + row(T("Total per month"), pln(avg.essential + avg.nonEssential)) +
@@ -495,7 +505,7 @@ export function pickRepeat(current, done) {
     <div class="rep-own${parseCustom(current) ? " on" : ""}"><span>${esc(T("Every"))}</span><input type="number" name="n" min="1" max="999" value="${c.n}">
       ${select("unit", [["d", T("days")], ["w", T("weeks")], ["m", T("months")]], c.unit)}
       <button class="btn main small" data-own>${esc(T("OK"))}</button></div>
-    ${hint(T("Repeating expenses appear automatically in the Payment calendar, also in the next months."))}
+    ${hint(T("Repeating expenses appear automatically in the Calendar, also in the next months."))}
     <div class="box-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button></div>`, { width: 460, cls: "box" });
   p.el.querySelectorAll("[data-f]").forEach(b => b.onclick = () => { p.close(); done(b.dataset.f); });
   p.el.querySelector("[data-own]").onclick = () => {
@@ -525,7 +535,7 @@ function bindExpenseRows(root, after = () => App.refresh()) {
         // The newest payment of this expense carries the repeat
         const k = seriesKey(e);
         const newest = d.Expenses.filter(y => seriesKey(y) === k).reduce((a, b) => parseDate(a.Date) > parseDate(b.Date) ? a : b);
-        setRepeat(d, newest, freq); toast(T("{0} repeats: {1} – see the Payment calendar.", name, freqLabel(freq)));
+        setRepeat(d, newest, freq); toast(T("{0} repeats: {1} – see the Calendar.", name, freqLabel(freq)));
       } else toast(T("{0} no longer repeats.", name));
       save(); after();
     });
@@ -716,7 +726,7 @@ export const Portfolio = {
           <div class="two">${field(T("Date of a payment (last or next one)"), dateInput("depdate", inputDate(parseDate(f.DepositDate || isoDate(today())))))}
           ${field(T("From which account (optional)"), `<input name="depfrom" list="dep-accounts" value="${esc(f.DepositFrom || "")}" placeholder="${esc(T("e.g. {0}", "mBank, PKO – konto osobiste"))}">`)}</div>
           <datalist id="dep-accounts">${[T("Current account"), ...d.Holdings.filter(x => !h || x.Id !== h.Id).map(x => x.Name)].map(n => `<option value="${esc(n)}">`).join("")}</datalist>
-          ${hint(T("Shown as \"To savings\" in the Payment calendar. The amount above is not changed by itself – update it when you check your account."))}
+          ${hint(T("Shown as \"To savings\" in the Calendar. The amount above is not changed by itself – update it when you check your account."))}
         </details>
         <details class="deposit promo"${f.PromoEnd ? " open" : ""}><summary>🎁 ${esc(T("Promotion – optional"))}</summary>
           <div class="two">${field(T("Promotion ends on"), `<input type="date" name="promoend" value="${f.PromoEnd ? inputDate(parseDate(f.PromoEnd)) : ""}">`)}

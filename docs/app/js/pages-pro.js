@@ -529,7 +529,7 @@ export async function openBankImport() {
         field(T("Add savings to"), select("target", holdNames, defaultTarget >= 0 ? defaultTarget : -1)) +
         `<div class="list">${transfers.map((t, n) => `<div class="item"><div><b>${esc(t.row.description || "–")}</b><span class="hint">${date(t.row)} · ${pln(t.pln)}</span></div>
         ${select("tr-" + n, [["1", T("Savings")], ["m", "🔁 " + T("Savings – every month")], ["0", T("Not savings")]], t.toSavings ? "1" : "0")}</div>`).join("")}</div>` +
-        hint(T("\"Savings – every month\" also adds it as a regular deposit to Savings, so it appears in the Payment calendar.")), "wide") : ""}
+        hint(T("\"Savings – every month\" also adds it as a regular deposit to Savings, so it appears in the Calendar.")), "wide") : ""}
       </div>
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button>
       <button class="btn main" data-import ${anything ? "" : "disabled"}>${esc(!anything ? T("Import") : !items.length && !received.length && !transfers.length ? T("Add the bank details") : !received.length ? T("Import {0} expenses", items.length) : T("Import {0} expenses and {1} payments received", items.length, received.length))}</button></div>`;

@@ -223,7 +223,7 @@ export function openDelete() {
   const d = D();
   const parts = [["incomes", T("Income sources"), d.Incomes.length], ["expenses", T("Expenses, money received and transfers (bank imports)"), d.Expenses.length + d.Received.length + d.Transfers.length], ["holdings", T("Savings"), d.Holdings.length],
     ["offers", T("Saved savings offers"), d.Offers.length], ["emergency", T("Emergency fund settings"), T("monthly costs, yearly costs, months, buffer")],
-    ["rates", T("Exchange rates"), ""], ["modules", T("Modules: goals, loans, budget, payment calendar"), d.Goals.length + d.Loans.length + d.Budgets.length + (d.Recurring || []).length],
+    ["rates", T("Exchange rates"), ""], ["modules", T("Modules: goals, loans, budget, calendar"), d.Goals.length + d.Loans.length + d.Budgets.length + (d.Recurring || []).length],
     ["categories", T("Your own expense categories"), d.Categories.length || T("none")], ["bin", T("Deleted items"), (d.Deleted || []).length]];
   const p = popup(`<h2 class="popup-title bad">🗑 ${esc(T("Delete data"))}</h2>${hint(T("Choose exactly what to delete."))}
     <label class="check select-all"><input type="checkbox" data-all><span><b>${esc(T("Select all"))}</b></span></label><hr>
