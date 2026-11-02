@@ -93,6 +93,14 @@
   .cmp th, .cmp td { text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 15px; }
   .cmp th { font-size: 16px; font-weight: 600; } .cmp td:first-child { font-weight: 600; width: 24%; } .cmp tr:last-child td { border-bottom: 0; }
   .cmp td:not(:first-child) { color: var(--muted); }
+  .cmp4 { min-width: 760px; table-layout: fixed; } .cmp4 th:first-child, .cmp4 td:first-child { width: 24%; }
+  .cmp4 th, .cmp4 td { padding: 11px 14px; font-size: 14px; }
+  .cmp4 th.pro-col, .cmp4 td.yes { color: var(--hi); }
+  .cmp4 td.yes { font-weight: 700; font-size: 16px; } .cmp4 td.no { opacity: .5; }
+  @media (max-width: 700px) {
+    .cmp4 { min-width: 620px; } .cmp4 th, .cmp4 td { padding: 9px 10px; font-size: 12.5px; }
+    .cmp4 th:first-child, .cmp4 td:first-child { position: sticky; left: 0; z-index: 1; background: #1B2422; width: 120px; box-shadow: 1px 0 0 var(--line); }
+  }
   .plan { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
   .plan.pro { border: 1.5px solid var(--hi); background: linear-gradient(160deg, rgba(79,197,155,.12), rgba(79,197,155,.02)), var(--card); box-shadow: 0 20px 50px rgba(79,197,155,.12); }
   .plan h3 { margin: 0; font-size: 22px; font-weight: 600; }
@@ -220,18 +228,22 @@
       <h2 data-t="cmp_title"></h2>
       <p class="sub" data-t="cmp_sub"></p>
       <div class="table-wrap">
-      <table class="cmp">
-        <thead><tr><th></th><th>🌐 <span data-t="cmp_web"></span></th><th>🪟 <span data-t="cmp_win"></span></th></tr></thead>
+      <table class="cmp cmp4">
+        <thead><tr><th></th><th>🌐 <span data-t="h_wf"></span></th><th class="pro-col">🌐 <span data-t="h_wp"></span></th><th>🪟 <span data-t="h_xf"></span></th><th class="pro-col">🪟 <span data-t="h_xp"></span></th></tr></thead>
         <tbody>
-          <tr><td data-t="cr1"></td><td data-t="cw1"></td><td data-t="cx1"></td></tr>
-          <tr><td data-t="cr2"></td><td data-t="cw2"></td><td data-t="cx2"></td></tr>
-          <tr><td data-t="cr3"></td><td data-t="cw3"></td><td data-t="cx3"></td></tr>
-          <tr><td data-t="cr4"></td><td data-t="cw4"></td><td data-t="cx4"></td></tr>
-          <tr><td data-t="cr5"></td><td data-t="cw5"></td><td data-t="cx5"></td></tr>
-          <tr><td data-t="cr6"></td><td data-t="cw6"></td><td data-t="cx6"></td></tr>
-          <tr><td data-t="cr7"></td><td data-t="cw7"></td><td data-t="cx7"></td></tr>
-          <tr><td data-t="cr8"></td><td data-t="cw8"></td><td data-t="cx8"></td></tr>
-          <tr><td data-t="cr9"></td><td data-t="cw9"></td><td data-t="cx9"></td></tr>
+          <tr><td data-t="v1"></td><td colspan=2 data-t="v1w"></td><td colspan=2 data-t="v1x"></td></tr>
+          <tr><td data-t="v2"></td><td colspan=2 data-t="v2w"></td><td colspan=2 data-t="v2x"></td></tr>
+          <tr><td data-t="v3"></td><td colspan=2 data-t="v3w"></td><td colspan=2 data-t="v3x"></td></tr>
+          <tr><td data-t="v4"></td><td colspan=2 data-t="v4w"></td><td colspan=2 data-t="v4x"></td></tr>
+          <tr><td data-t="v5"></td><td>1</td><td data-t="v5wp"></td><td colspan=2 data-t="v5x"></td></tr>
+          <tr><td data-t="v6"></td><td class="no">–</td><td data-t="v6wp"></td><td data-t="v6xf"></td><td data-t="v6wp"></td></tr>
+          <tr><td data-t="v7"></td><td class="no">–</td><td class="yes">✔</td><td class="no">–</td><td class="yes">✔</td></tr>
+          <tr><td data-t="v8"></td><td class="no">–</td><td class="yes">✔</td><td class="no">–</td><td class="yes">✔</td></tr>
+          <tr><td data-t="v9"></td><td class="no">–</td><td class="yes">✔</td><td class="no">–</td><td class="yes">✔</td></tr>
+          <tr><td data-t="v10"></td><td class="no">–</td><td class="yes">✔</td><td colspan=2 data-t="v21"></td></tr>
+          <tr><td data-t="v11"></td><td class="yes">✔</td><td class="yes">✔</td><td colspan=2 data-t="v21"></td></tr>
+          <tr><td data-t="v12"></td><td colspan=2 data-t="v12w"></td><td colspan=2 data-t="v12x"></td></tr>
+          <tr><td data-t="v13"></td><td data-t="v13f"></td><td data-t="v13p"></td><td data-t="v13f"></td><td data-t="v13p"></td></tr>
         </tbody>
       </table>
       </div>
@@ -687,6 +699,171 @@ const T3 = {
  }
 };
 for (const l in T3) Object.assign(T[l], T3[l]);
+
+// Comparison of the four versions (web free/pro, Windows free/pro)
+const T4 = {
+ "en": {
+  "nav_compare": "Versions",
+  "cmp_title": "Which version suits you?",
+  "cmp_sub": "The same calculations everywhere. Try it free in the browser – one Pro license key unlocks everything, in the browser and in the Windows app.",
+  "h_wf": "Web Free (demo)",
+  "h_wp": "Web Pro",
+  "h_xf": "Windows Free",
+  "h_xp": "Windows Pro",
+  "v1": "Installation",
+  "v1w": "None – open the page, or install it like an app",
+  "v1x": "Installer for Windows 10 and 11",
+  "v2": "Devices",
+  "v2w": "Any computer, Mac, tablet or phone",
+  "v2x": "Windows PC",
+  "v3": "Where your data is",
+  "v3w": "Only in this browser on this device",
+  "v3x": "Only in the MoneyCompass folder on your PC",
+  "v4": "Internet",
+  "v4w": "Needed to open the page",
+  "v4x": "Not needed (only for current rates and updates)",
+  "v5": "Profiles",
+  "v5wp": "Several",
+  "v5x": "Several",
+  "v6": "Reports (Excel, PDF, Word)",
+  "v6wp": "Unlimited",
+  "v6xf": "3 free",
+  "v7": "Optimize my finances, bank import, compare offers",
+  "v8": "Budget plan & goals, loans, calendar",
+  "v9": "Own categories with icons",
+  "v10": "Savings chart & effective rate analysis",
+  "v11": "PIN, fingerprint/face, auto-lock, automatic backup",
+  "v21": "With version 2.1",
+  "v12": "Updates",
+  "v12w": "Always the newest version",
+  "v12x": "One click – installs itself, your data stays",
+  "v13": "Price",
+  "v13f": "Free",
+  "v13p": "Pro license",
+  "cmp_tip": "Tip: one Pro license key works in both versions, and your profile file moves between them."
+ },
+ "pl": {
+  "nav_compare": "Wersje",
+  "cmp_title": "Która wersja Ci pasuje?",
+  "cmp_sub": "Wszędzie te same obliczenia. Wypróbuj za darmo w przeglądarce – jeden klucz licencji Pro odblokowuje wszystko, w przeglądarce i w aplikacji na Windows.",
+  "h_wf": "Web Free (demo)",
+  "h_wp": "Web Pro",
+  "h_xf": "Windows Free",
+  "h_xp": "Windows Pro",
+  "v1": "Instalacja",
+  "v1w": "Brak – otwórz stronę lub zainstaluj ją jak aplikację",
+  "v1x": "Instalator dla Windows 10 i 11",
+  "v2": "Urządzenia",
+  "v2w": "Każdy komputer, Mac, tablet lub telefon",
+  "v2x": "Komputer z Windows",
+  "v3": "Gdzie są Twoje dane",
+  "v3w": "Tylko w tej przeglądarce na tym urządzeniu",
+  "v3x": "Tylko w folderze MoneyCompass na Twoim komputerze",
+  "v4": "Internet",
+  "v4w": "Potrzebny do otwarcia strony",
+  "v4x": "Niepotrzebny (tylko do aktualnych stawek i aktualizacji)",
+  "v5": "Profile",
+  "v5wp": "Kilka",
+  "v5x": "Kilka",
+  "v6": "Raporty (Excel, PDF, Word)",
+  "v6wp": "Bez limitu",
+  "v6xf": "3 za darmo",
+  "v7": "Optymalizacja finansów, import wyciągów, porównanie ofert",
+  "v8": "Plan budżetu i cele, kredyty, kalendarz",
+  "v9": "Własne kategorie z ikonami",
+  "v10": "Wykres oszczędności i analiza efektywnego oprocentowania",
+  "v11": "PIN, odcisk palca/twarz, autoblokada, automatyczna kopia",
+  "v21": "W wersji 2.1",
+  "v12": "Aktualizacje",
+  "v12w": "Zawsze najnowsza wersja",
+  "v12x": "Jedno kliknięcie – instaluje się sama, dane zostają",
+  "v13": "Cena",
+  "v13f": "Za darmo",
+  "v13p": "Licencja Pro",
+  "cmp_tip": "Wskazówka: jeden klucz licencji Pro działa w obu wersjach, a plik profilu przenosisz między nimi."
+ },
+ "de": {
+  "nav_compare": "Versionen",
+  "cmp_title": "Welche Version passt zu Ihnen?",
+  "cmp_sub": "Überall dieselben Berechnungen. Kostenlos im Browser testen – ein Pro-Lizenzschlüssel schaltet alles frei, im Browser und in der Windows-App.",
+  "h_wf": "Web Free (Demo)",
+  "h_wp": "Web Pro",
+  "h_xf": "Windows Free",
+  "h_xp": "Windows Pro",
+  "v1": "Installation",
+  "v1w": "Keine – Seite öffnen oder wie eine App installieren",
+  "v1x": "Installer für Windows 10 und 11",
+  "v2": "Geräte",
+  "v2w": "Jeder Computer, Mac, Tablet oder jedes Handy",
+  "v2x": "Windows-PC",
+  "v3": "Wo Ihre Daten sind",
+  "v3w": "Nur in diesem Browser auf diesem Gerät",
+  "v3x": "Nur im MoneyCompass-Ordner auf Ihrem PC",
+  "v4": "Internet",
+  "v4w": "Zum Öffnen der Seite nötig",
+  "v4x": "Nicht nötig (nur für aktuelle Zinsen und Updates)",
+  "v5": "Profile",
+  "v5wp": "Mehrere",
+  "v5x": "Mehrere",
+  "v6": "Berichte (Excel, PDF, Word)",
+  "v6wp": "Unbegrenzt",
+  "v6xf": "3 kostenlos",
+  "v7": "Finanzen optimieren, Bankimport, Angebote vergleichen",
+  "v8": "Budgetplan & Ziele, Kredite, Kalender",
+  "v9": "Eigene Kategorien mit Symbolen",
+  "v10": "Spardiagramm & Effektivzins-Analyse",
+  "v11": "PIN, Fingerabdruck/Gesicht, Auto-Sperre, automatische Sicherung",
+  "v21": "Mit Version 2.1",
+  "v12": "Updates",
+  "v12w": "Immer die neueste Version",
+  "v12x": "Ein Klick – installiert sich selbst, Ihre Daten bleiben",
+  "v13": "Preis",
+  "v13f": "Kostenlos",
+  "v13p": "Pro-Lizenz",
+  "cmp_tip": "Tipp: Ein Pro-Lizenzschlüssel gilt in beiden Versionen, und Ihre Profildatei wandert zwischen ihnen."
+ },
+ "fr": {
+  "nav_compare": "Versions",
+  "cmp_title": "Quelle version vous convient ?",
+  "cmp_sub": "Les mêmes calculs partout. Essayez gratuitement dans le navigateur – une clé de licence Pro débloque tout, dans le navigateur et dans l'application Windows.",
+  "h_wf": "Web Free (démo)",
+  "h_wp": "Web Pro",
+  "h_xf": "Windows Free",
+  "h_xp": "Windows Pro",
+  "v1": "Installation",
+  "v1w": "Aucune – ouvrez la page ou installez-la comme une application",
+  "v1x": "Installateur pour Windows 10 et 11",
+  "v2": "Appareils",
+  "v2w": "Tout ordinateur, Mac, tablette ou téléphone",
+  "v2x": "PC Windows",
+  "v3": "Où sont vos données",
+  "v3w": "Uniquement dans ce navigateur sur cet appareil",
+  "v3x": "Uniquement dans le dossier MoneyCompass de votre PC",
+  "v4": "Internet",
+  "v4w": "Nécessaire pour ouvrir la page",
+  "v4x": "Pas nécessaire (seulement pour les taux actuels et les mises à jour)",
+  "v5": "Profils",
+  "v5wp": "Plusieurs",
+  "v5x": "Plusieurs",
+  "v6": "Rapports (Excel, PDF, Word)",
+  "v6wp": "Illimités",
+  "v6xf": "3 gratuits",
+  "v7": "Optimiser mes finances, import bancaire, comparer les offres",
+  "v8": "Plan budgétaire et objectifs, prêts, calendrier",
+  "v9": "Catégories personnelles avec icônes",
+  "v10": "Graphique de l'épargne et analyse du taux effectif",
+  "v11": "PIN, empreinte/visage, verrouillage auto, sauvegarde automatique",
+  "v21": "Avec la version 2.1",
+  "v12": "Mises à jour",
+  "v12w": "Toujours la dernière version",
+  "v12x": "Un clic – s'installe seule, vos données restent",
+  "v13": "Prix",
+  "v13f": "Gratuit",
+  "v13p": "Licence Pro",
+  "cmp_tip": "Astuce : une clé de licence Pro fonctionne dans les deux versions, et votre fichier de profil passe de l'une à l'autre."
+ }
+};
+for (const l in T4) Object.assign(T[l], T4[l]);
 
 let latestVersion = "";
 
