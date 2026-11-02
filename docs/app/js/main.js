@@ -46,6 +46,9 @@ function toggleSide() {
   const v = side() === "pinned" ? "auto" : "pinned";
   try { localStorage.setItem("mc-side", v); } catch { /* private window */ }
   document.documentElement.dataset.side = v;
+  // Folding: close it right away, even though the mouse is still on it (it opens again once the mouse leaves and comes back)
+  const top = document.querySelector(".top");
+  if (top) { top.classList.remove("open"); top.dataset.hold = v === "auto" ? "1" : ""; }
   const b = document.querySelector(".side-toggle"); if (b) { b.textContent = v === "pinned" ? "‹" : "›"; b.title = T(v === "pinned" ? "Fold the menu (it opens when you point at it)" : "Keep the menu open"); }
 }
 
@@ -87,8 +90,8 @@ function buildShell() {
   // because a tap would leave it open over the page.
   const top = document.querySelector(".top");
   if (top && matchMedia("(hover: hover)").matches) {
-    top.addEventListener("mouseenter", () => top.classList.add("open"));
-    top.addEventListener("mouseleave", () => top.classList.remove("open"));
+    top.addEventListener("mouseenter", () => { if (!top.dataset.hold) top.classList.add("open"); });
+    top.addEventListener("mouseleave", () => { top.classList.remove("open"); top.dataset.hold = ""; });
   }
 }
 
