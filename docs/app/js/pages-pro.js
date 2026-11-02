@@ -510,8 +510,6 @@ export async function openBankImport() {
     items.forEach(i => { (byCat[i.category] ||= { n: 0, sum: 0 }); byCat[i.category].n++; byCat[i.category].sum += i.pln; });
     const unsorted = items.filter(i => i.category === OTHER).slice(0, 100);
     const anything = items.length || received.length || transfers.length || state.known.length;
-    const holdNames = [...d.Holdings.map((h, i) => [i, h.Name]), [-1, T("New: Savings account")]];
-    const defaultTarget = d.Holdings.findIndex(h => h.Place === "Bank");
     const date = r => fmtDate(r.date);
     const dates = state.allDates;
     const first = dates.length ? new Date(Math.min(...dates)) : today(), last = dates.length ? new Date(Math.max(...dates)) : today();
@@ -543,12 +541,8 @@ export async function openBankImport() {
       ${received.length ? card(heading(T("Money received")) + hint(T("All money coming in counts as extra income for its month. Choose Salary for your regular pay: MoneyCompass then counts it every month. Not income is ignored.")) +
         `<div class="list">${received.slice(0, 150).map((r, n) => `<div class="item"><div><b>${esc(r.Description || "–")}</b><span class="hint">${fmtDate(r.Date)} · +${pln(r.Amount)}${r.Own ? " · 🔁 " + esc(T("from your own account")) : ""}</span></div>
         ${select("kind-" + n, [[RECEIVED.income, T("Extra income (this month)")], [RECEIVED.salary, T("Salary (regular pay)")], [RECEIVED.none, T("Not income")]], r.Kind)}</div>`).join("")}</div>`, "wide") : ""}
-      ${transfers.length ? card(heading(T("Moved to your own accounts")) + hint(T("These are not expenses. Choose which ones went into savings: they are added to Savings.")) +
-        `<div class="two">${field(T("Add savings to"), select("target", holdNames, defaultTarget >= 0 ? defaultTarget : -1))}${field(T("Balance of this savings account today (optional)"), numInput("savbal", "", T("e.g. {0}", "10000")))}</div>` +
-        hint(T("A current account statement can't show what is on the savings account. Enter today's balance if you know it – otherwise MoneyCompass adds what went in and takes off what came back.")) +
-        `<div class="list">${transfers.map((t, n) => `<div class="item"><div><b>${esc(t.row.description || "–")}</b><span class="hint">${date(t.row)} · ${pln(t.pln)}</span></div>
-        ${select("tr-" + n, [["1", T("Savings")], ["m", "🔁 " + T("Savings – every month")], ["0", T("Not savings")]], t.toSavings ? "1" : "0")}</div>`).join("")}</div>` +
-        hint(T("\"Savings – every month\" also adds it as a regular deposit to Savings, so it appears in the Calendar.")), "wide") : ""}
+      ${transfers.length ? card(heading(T("Moved to your own accounts")) + hint(T("Not expenses and not income: money moved between your own accounts. Listed in Outflows, not counted as spending. A savings account's balance comes only from its own statement (Savings tab).")) +
+        `<div class="list">${transfers.map(t => `<div class="item"><div><b>${esc(t.row.description || "–")}</b><span class="hint">${date(t.row)} · ${pln(t.pln)}${t.toSavings ? " · 🏦 " + esc(T("Savings")) : ""}</span></div></div>`).join("")}</div>`, "wide") : ""}
       </div>
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button>
       <button class="btn main" data-import ${anything ? "" : "disabled"}>${esc(!anything ? T("Import") : !items.length && !received.length && !transfers.length ? T("Add the bank details") : !received.length ? T("Import {0} expenses", items.length) : T("Import {0} expenses and {1} payments received", items.length, received.length))}</button></div>`;
@@ -573,7 +567,6 @@ export async function openBankImport() {
     for (const [x, info] of known) x.Info = info;
     items.forEach((i, n) => { if (v["cat-" + n]) i.category = v["cat-" + n]; });
     received.forEach((r, n) => { if (v["kind-" + n]) r.Kind = v["kind-" + n]; });
-    transfers.forEach((t, n) => { if (v["tr-" + n] !== undefined) { t.toSavings = v["tr-" + n] !== "0"; t.monthly = v["tr-" + n] === "m"; } });
     for (const i of items) {
       const c = findCategory(i.category);
       d.Expenses.push({ Id: uuid(), Date: isoDate(i.row.date), Description: i.row.description, Category: c ? c.Name : OTHER, Amount: i.pln, Essential: !!c?.Essential, ...withInfo(i.row) });
@@ -590,40 +583,13 @@ export async function openBankImport() {
       fixedOwn += moved.length;
     }
     if (fixedOwn) toast(T("{0} earlier payments were moves between your own accounts in different banks – no longer counted as income or expenses.", fixedOwn), "good");
-    const saved = transfers.filter(t => t.toSavings);
-    let target = null, skippedOld = 0, skippedDate = 0, addedToSavings = 0, takenBack = 0, backs = [], balanceTyped = false, wasNew = false;
-    if (saved.length) {
-      const idx = +(v.target ?? -1);
-      target = idx >= 0 ? d.Holdings[idx] : null;
-      if (!target) { target = { Id: uuid(), Name: T("Savings account"), Place: "Bank", Amount: 0, Currency: "PLN", RatePercent: 0, Safe: true }; d.Holdings.push(target); wasNew = true; }
-      // The amount of a savings account is its balance on a date (the last statement analysis or the last time it was changed).
-      // Transfers up to that date are already in it – only later ones are added, so nothing is counted twice.
-      const known = [...(target.History || []).map(x => x.Date), ...(d.SavingsChecks || []).filter(c => c.HoldingId === target.Id).map(c => c.To)].filter(Boolean).map(x => parseDate(x).getTime());
-      const asOf = known.length && target.Amount > 0 ? Math.max(...known) : -Infinity;
-      const newer = saved.filter(t => t.row.date.getTime() > asOf);
-      skippedOld = saved.length - newer.length; skippedDate = asOf;
-      // Money that came back from the same account(s) to this one (withdrawals from savings)
-      const savAcc = new Set(saved.map(t => state.digits(t.row.info?.OtherAccount)).filter(x => x.length >= 10));
-      backs = (state.back || []).filter(b => savAcc.has(state.digits(b.row.info?.OtherAccount)));
-      const backNew = backs.filter(b => b.row.date.getTime() > asOf);
-      addedToSavings = newer.reduce((a, t) => a + t.pln, 0); takenBack = backNew.reduce((a, b) => a + b.pln, 0);
-      const typed = num(v.savbal);
-      if (typed > 0) { target.Amount = Math.round(typed * 100) / 100; balanceTyped = true; }
-      else target.Amount = Math.max(0, Math.round((target.Amount + addedToSavings - takenBack) * 100) / 100);
-      for (const b of backs) d.Transfers.push({ Id: uuid(), Date: isoDate(b.row.date), Amount: -b.pln, Description: b.row.description, Saved: false, Back: true, HoldingId: target.Id, ...withInfo(b.row) });
-      // Marked "every month": the newest such transfer becomes the regular deposit of that savings entry
-      const monthly = saved.filter(t => t.monthly).sort((a, b) => b.row.date - a.row.date)[0];
-      if (monthly) Object.assign(target, { Deposit: monthly.pln, DepositFrequency: "Monthly", DepositDate: isoDate(monthly.row.date),
-        DepositFrom: target.DepositFrom || accountName(monthly.row.info), ...(monthly.row.info && Object.keys(monthly.row.info).length ? { DepositInfo: monthly.row.info } : {}) });
-    }
-    for (const t of transfers) d.Transfers.push({ Id: uuid(), Date: isoDate(t.row.date), Amount: t.pln, Description: t.row.description, Saved: t.toSavings, HoldingId: t.toSavings ? target?.Id ?? null : null, ...withInfo(t.row) });
+    // Transfers to your own accounts (savings, another bank): kept as moves, never as expenses – and they never change a
+    // savings account. Its balance comes only from its own statement (Savings → Import savings account statement).
+    for (const t of transfers) d.Transfers.push({ Id: uuid(), Date: isoDate(t.row.date), Amount: t.pln, Description: t.row.description, Saved: t.toSavings, ...withInfo(t.row) });
     save();
     let msg = !received.length ? T("{0} expenses were added. You find them in the Outflows tab.", items.length)
       : T("{0} expenses were added (Outflows tab) and {1} payments received (Inflows tab).", items.length, received.length);
-    if (target && balanceTyped) msg += "\n" + T("\"{0}\": balance set to {1} as you entered.", target.Name, pln(target.Amount));
-    else if (target && (addedToSavings > 0 || takenBack > 0)) msg += "\n" + T("Savings \"{0}\": {1} paid in, {2} taken back – balance now {3}.", target.Name, pln(addedToSavings), pln(takenBack), pln(target.Amount));
-    if (target && wasNew && !balanceTyped) msg += "\n" + T("The opening balance of the savings account is not in this file, so this is an estimate. Enter the real balance in Savings, or analyse a statement of the savings account.");
-    if (target && skippedOld) msg += "\n" + T("{0} earlier transfers to savings are already in the balance of \"{1}\" (known on {2}) and were not added again.", skippedOld, target.Name, fmtDate(new Date(skippedDate)));
+    if (transfers.length) msg += "\n" + T("{0} transfers to your own accounts ({1}) are listed in Outflows under \"Moved to your own accounts\" – not counted as spending. Savings balances come from the savings account's own statement (Savings tab).", transfers.length, pln(transfers.reduce((a, t) => a + t.pln, 0)));
     p.close();
     await alertBox(T("Import finished"), msg);
     // One salary source is enough: offer the newest salary payment (not one question per month)

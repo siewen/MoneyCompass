@@ -474,6 +474,7 @@ export const Expenses = {
           return `<div class="month-head">${esc(T("{0}  ·  total {1}  ·  essential {2}", monthName(m.start), pln(total), pln(ess)))}</div><div class="list">${m.items.map(expenseRow).join("")}</div>`;
         }).join("") + (!showAllMonths && older ? button(T("Show older expenses ({0})", older), "older", "second") : "")
           : hint(filtering ? T("No expenses match this filter.") : T("No expenses yet."))), "wide")}
+      ${movedCard(d)}
       ${binCard(["expense"])}
     </div>`;
 
@@ -508,6 +509,17 @@ export const Expenses = {
     bindExpenseRows(el);
   },
 };
+/** Money moved to your own accounts (from bank imports): shown month by month, not counted as spending. */
+function movedCard(d) {
+  const tr = (d.Transfers || []).filter(t => t.Amount > 0 && !t.Back && t.Date).sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
+  if (!tr.length) return "";
+  const byMonth = new Map();
+  for (const t of tr) { const k = monthStart(parseDate(t.Date)).getTime(); if (!byMonth.has(k)) byMonth.set(k, []); byMonth.get(k).push(t); }
+  return card(heading(T("Moved to your own accounts"), "🔁") + hint(T("Transfers from your bank imports to your own accounts (savings, another bank). Not spending – they are not counted in your outflows.")) +
+    [...byMonth.entries()].map(([k, items], n) => `<details class="rec-month"${n === 0 ? " open" : ""}><summary><b>${esc(monthName(new Date(k)))}</b>
+      <span class="hint">${esc(T("{0} transfers", items.length))} · <b>${pln(items.reduce((a, t) => a + t.Amount, 0))}</b></span></summary>
+      <div class="list">${items.map(t => `<div class="item"><div><b>${esc(t.Description || "–")}</b><span class="hint">${fmtDate(t.Date)}${t.Saved ? " · 🏦 " + esc(T("Savings")) : ""}${t.Info?.OtherAccount ? " → " + esc(t.Info.OtherAccount) : ""}</span></div><b>${pln(t.Amount)}</b></div>`).join("")}</div></details>`).join(""));
+}
 const REPEAT_OPTIONS = (cur = "") => [["", T("Does not repeat")], ...FREQUENCIES.filter(f => f[0] !== ONE_TIME).map(f => [f[0], "🔁 " + T(f[0])]),
   ...(parseCustom(cur) ? [[cur, "🔁 " + freqLabel(cur)]] : [])];
 function expenseRow(e) {
@@ -747,10 +759,10 @@ export const Portfolio = {
         <div class="item clickable" data-edit-holding="${x.Id}"><div><b>${esc(x.Name)}</b><span class="hint">${esc(T(x.Place))} · ${esc(x.Safe ? T("Safe") : T("Risky"))} · ${rate(currentRate(x))}</span>${promoBadge(x)}</div>
         <div class="right"><b>${amount(x.Amount, x.Currency)}</b>${currentRate(x) ? `<span class="hint">${esc(T("{0} / year", pln(Calc.toPln(x.Amount, x.Currency, s) * currentRate(x) / 100)))}</span>` : ""}${x.Deposit > 0 ? `<span class="hint primary">🔁 +${esc(pln(x.Deposit))} · ${esc(freqLabel(x.DepositFrequency || "Monthly"))}${x.DepositFrom ? " · " + esc(T("from {0}", x.DepositFrom)) : ""}</span>` : ""}</div>
         ${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("Nothing added yet."))))}
+      ${card(heading(T("Import savings account statement"), "🏦") +
+        hint(T("The balance of a savings account comes from its own statement: import its CSV file and MoneyCompass sets the balance and the month-by-month history from the bank's figures – with the interest, the 19% tax, fees and the real rate.")) +
+        `<div class="buttons">${button("⬆ " + esc(T("Import savings account statement (CSV)…")) + (license.isPro ? "" : " 🔒"), "savings-check", "main")}</div>`)}
       ${savedChecksCard(d)}
-      ${card(heading(T("Effective rate analysis"), "🔍") +
-        hint(T("Import the CSV statement of a savings account: MoneyCompass checks the money on it day by day, the interest, the 19% tax and any fees – and shows the real rate the bank pays you, per year and per month.")) +
-        `<div class="buttons">${button("⬆ " + esc(T("Analyse a statement (CSV)…")) + (license.isPro ? "" : " 🔒"), "savings-check", "second")}</div>`)}
       ${card(`<form id="hold">${heading(h ? T("Edit: {0}", h.Name) : T("Add an account"))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", "ING, Revolut, …")))}
         <div class="two">${field(T("Where"), select("place", PLACES.map(x => [x, T(x)]), f.Place))}${field(T("Currency"), select("currency", CURRENCIES, f.Currency))}</div>
