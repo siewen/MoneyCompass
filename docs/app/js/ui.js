@@ -80,11 +80,11 @@ document.addEventListener("change", async e => {
   const sel = e.target;
   if (!(sel instanceof HTMLSelectElement) || sel.value !== "__new__") return;
   const prev = sel.dataset.prev ?? sel.options[0]?.value ?? "";
-  const name = await promptBox(T("New category"), T("Name of the category"));
-  const { addCategory, categoryLabel } = await import("./core.js");
-  const err = name === null ? "" : addCategory(name, false, "");
-  if (name === null || err) { if (err) toast(err, "bad"); sel.value = prev; return; }
-  const clean = name.trim();
+  const { addCategory, categoryLabel, ICON_CHOICES } = await import("./core.js");
+  const got = await categoryBox(ICON_CHOICES);
+  const err = got === null ? "" : addCategory(got.name, got.essential, got.icon);
+  if (got === null || err) { if (err) toast(err, "bad"); sel.value = prev; return; }
+  const clean = got.name.trim();
   // Add the new category to every category list on screen, and choose it here
   document.querySelectorAll("select").forEach(s => {
     const n = s.querySelector('option[value="__new__"]');
@@ -96,6 +96,27 @@ document.addEventListener("change", async e => {
   toast(T("Added: {0}.", clean));
 }, true);
 document.addEventListener("focusin", e => { if (e.target instanceof HTMLSelectElement && e.target.value !== "__new__") e.target.dataset.prev = e.target.value; });
+
+/** New category from a category list: name, icon and essential. Resolves to { name, icon, essential } or null. */
+function categoryBox(icons) {
+  return new Promise(resolve => {
+    let icon = "📦";
+    const p = popup(`<div class="box-head"><span class="box-icon">🏷️</span><h2>${esc(T("New category"))}</h2></div>
+      ${field(T("Name of the category"), textInput("v", "", T("e.g. {0}", T("Pets"))))}
+      <div class="field"><span>${esc(T("Icon"))}</span><div class="icon-grid">${icons.map(i => `<button type="button" class="icon-pick${i === icon ? " on" : ""}" data-icon="${i}">${i}</button>`).join("")}</div></div>
+      ${check("ess", T("Essential (must pay even in a crisis)"), false)}
+      <div class="box-buttons"><button class="btn main" data-r="1">${esc(T("Add category"))}</button><button class="btn second" data-r="0">${esc(T("Cancel"))}</button></div>`,
+      { width: 460, cls: "box", onClose: r => resolve(r) });
+    const input = p.el.querySelector('input[name="v"]');
+    p.el.querySelectorAll("[data-icon]").forEach(b => b.onclick = () => {
+      icon = b.dataset.icon; p.el.querySelectorAll("[data-icon]").forEach(x => x.classList.toggle("on", x === b));
+    });
+    const done = ok => p.close(ok ? { name: input.value, icon, essential: p.el.querySelector('input[name="ess"]').checked } : null);
+    p.el.querySelectorAll("[data-r]").forEach(b => b.onclick = () => done(b.dataset.r === "1"));
+    input.addEventListener("keydown", e => { if (e.key === "Enter") done(true); });
+    setTimeout(() => input.focus(), 50);
+  });
+}
 
 export function promptBox(title, label, value = "") {
   return new Promise(resolve => {

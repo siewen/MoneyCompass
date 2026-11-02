@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 43, date: "2026-11-02", items: {
+    en: ["🏷️ \"New category…\" in any category list now lets you choose an icon and mark the category as essential."],
+    pl: ["🏷️ „Nowa kategoria…” na każdej liście kategorii pozwala teraz wybrać ikonę i oznaczyć kategorię jako niezbędną."],
+    de: ["🏷️ „Neue Kategorie…“ in jeder Kategorieliste lässt Sie jetzt ein Symbol wählen und die Kategorie als notwendig markieren."],
+    fr: ["🏷️ « Nouvelle catégorie… » dans chaque liste de catégories permet désormais de choisir une icône et de marquer la catégorie comme essentielle."] } },
   { build: 42, date: "2026-11-02", items: {
     en: ["🔴 Negative amounts and warnings are now red (were purple), and a savings rate below −100% shows as \"< −100%\"."],
     pl: ["🔴 Kwoty ujemne i ostrzeżenia są teraz czerwone (były fioletowe), a stopa oszczędności poniżej −100% jest pokazana jako „< −100%”."],
