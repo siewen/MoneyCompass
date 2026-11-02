@@ -276,14 +276,13 @@ export function savingsChartCard(d) {
   if (x.accounts.length > 1) x.accounts.forEach(a => lines.push({ ...a, values: pad(a.values) }));
   if (AHEAD) lines.push({ key: "forecast", label: T("Forecast"), color: "var(--primary)", dashed: true, values: [...Array(n - 1).fill(null), x.total[n - 1], ...x.fut] });
   const bars = [
-    { key: "cr", label: T("Credits (deposits)"), color: "#3B82F6", values: x.credits },
+    { key: "cr", label: T("Credits (deposits)"), color: "#3B82F6", values: x.credits, left: true },
     { key: "int", label: T("Net interest (after tax)"), color: "#84CC16", values: x.interest,
       tips: x.interest.map((v, i) => v === null ? "" : "\n" + T("Gross interest") + ": " + pln(x.gross[i] || 0) + "\n" + T("Withholding tax (Belka, 19%)") + ": −" + pln(Math.max(0, (x.gross[i] || 0) - v)) + "\n" + T("Net interest (after tax)") + ": " + pln(v)) },
-    { key: "db", label: T("Debits (withdrawals)"), color: "#F59E0B", values: x.debits },
+    { key: "db", label: T("Debits (withdrawals)"), color: "#F59E0B", values: x.debits, left: true },
     { key: "fee", label: T("Fees & charges"), color: "#E5484D", values: x.fees },
   ];
-  // Credits and debits are already in the balance line; hidden at first so the right scale fits interest and fees
-  const hid = new Set(Array.isArray(d.Settings.SavingsChartHidden) ? d.Settings.SavingsChartHidden : ["cr", "db"]);
+  const hid = new Set(d.Settings.SavingsChartHidden || []);
   const sum = a => a.reduce((p, q) => p + q, 0), start = x.total.find(v => v > 0) || 0, end = x.total[n - 1];
   const fmtV = Object.assign(v => pln(v), { forecast: T("Forecast") });
   const axis = v => v >= 1000 ? +(v / 1000).toFixed(1) + "k" : String(+v.toFixed(v < 10 ? 1 : 0));
@@ -295,12 +294,12 @@ export function savingsChartCard(d) {
       ${AHEAD ? fig(T("Forecast in {0} months", AHEAD), pln(x.fut[AHEAD - 1])) : ""}
       <label class="sav-ahead"><span>${esc(T("Forecast"))}</span><select data-sav-ahead>${[[0, T("Off")], [1, T("1 month")], [3, T("{0} months", 3)], [6, T("{0} months", 6)]].map(([v, l]) => `<option value="${v}"${v === AHEAD ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label></div>` +
     `<div class="wave-legend">${keys}</div>` + savingsChart(labels, lines, bars, axis, fmtV, hid, n) +
-    hint(T("Closing balance of each month, from your statement analyses and the amounts you entered. Credits, debits, interest and fees per month come from imported statements (right scale). Forecast (optional): today's rates after tax, plus your standing orders. Click a name to show or hide it – e.g. hide credits to see interest in detail.")), "wide fixed sav-chart-card");
+    hint(T("Closing balance of each month, from your statement analyses and the amounts you entered. Credits and debits per month (left scale), interest and fees per month (right scale) come from imported statements. Forecast (optional): today's rates after tax, plus your standing orders. Click a name to show or hide it.")), "wide fixed sav-chart-card");
 }
 export function bindSavingsChart(el, d) {
   el.querySelector("[data-sav-ahead]")?.addEventListener("change", e => { d.Settings.SavingsForecast = +e.target.value; save(); App.refresh(); });
   el.querySelectorAll("[data-sav]").forEach(b => b.onclick = () => {
-    const h = new Set(Array.isArray(d.Settings.SavingsChartHidden) ? d.Settings.SavingsChartHidden : ["cr", "db"]), k = b.dataset.sav;
+    const h = new Set(d.Settings.SavingsChartHidden || []), k = b.dataset.sav;
     h.has(k) ? h.delete(k) : h.add(k); d.Settings.SavingsChartHidden = [...h]; save(); App.refresh();
   });
 }

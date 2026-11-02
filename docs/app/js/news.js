@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 39, date: "2026-11-02", items: {
+    en: ["📈 Savings chart: credits and debits now use the left scale with the balance, so the interest and fees line on the right scale is always readable – all lines can be shown together."],
+    pl: ["📈 Wykres oszczędności: uznania i obciążenia są teraz na lewej skali razem z saldem, więc linia odsetek i opłat na prawej skali jest zawsze czytelna – wszystkie linie mogą być widoczne razem."],
+    de: ["📈 Spardiagramm: Gutschriften und Belastungen nutzen jetzt die linke Skala mit dem Saldo, sodass die Zins- und Gebührenlinie rechts immer lesbar ist – alle Linien können zusammen angezeigt werden."],
+    fr: ["📈 Graphique de l'épargne : les crédits et débits utilisent désormais l'échelle de gauche avec le solde, la ligne des intérêts et frais à droite reste donc toujours lisible – toutes les lignes peuvent être affichées ensemble."] } },
   { build: 38, date: "2026-11-02", items: {
     en: ["ℹ️ Savings chart: point at an interest dot (or the interest total) to see gross interest, the 19% tax and net interest."],
     pl: ["ℹ️ Wykres oszczędności: najedź na punkt odsetek (lub ich sumę), aby zobaczyć odsetki brutto, 19% podatek i odsetki netto."],

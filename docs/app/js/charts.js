@@ -112,7 +112,8 @@ export function waveChart(labels, series, fmtAxis, fmtValue, hidden = new Set())
  *  Monthly movements (flows: same shape, amounts ≥ 0) use their own scale on the right, so small fees stay visible next to a big balance.
  *  hidden: Set of keys to leave out. future: index of the first forecast month (or labels.length). */
 export function savingsChart(labels, lines, flows, fmtAxis, fmtValue, hidden = new Set(), future = labels.length) {
-  const L = lines.filter(s => !hidden.has(s.key)), F = flows.filter(s => !hidden.has(s.key));
+  // Series marked left: true (big amounts like credits and debits) share the balance scale; the rest (interest, fees) use the right scale
+  const L = [...lines, ...flows.filter(s => s.left)].filter(s => !hidden.has(s.key)), F = flows.filter(s => !s.left && !hidden.has(s.key));
   const w = 1000, left = 52, right = F.length ? 52 : 12, top = 14, h1 = 250, bottom = 30, h = top + h1 + bottom;
   const n = labels.length, plotW = w - left - right, X = i => left + (n === 1 ? plotW / 2 : plotW * i / (n - 1));
   const vals = a => a.flatMap(s => s.values.filter(v => v !== null && v !== undefined));
@@ -133,7 +134,7 @@ export function savingsChart(labels, lines, flows, fmtAxis, fmtValue, hidden = n
     return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.main ? 3 : thin ? 1.8 : 2.2}" stroke-linejoin="round" stroke-linecap="round"${s.dashed ? ' stroke-dasharray="6 5"' : ""}/>` +
       pts.map((p, i) => p ? `<circle cx="${p[0]}" cy="${p[1]}" r="${s.main ? 3.5 : 2.6}" fill="var(--card)" stroke="${s.color}" stroke-width="2"><title>${esc(labels[i])}${esc(s.tips?.[i] ? s.tips[i] : " · " + s.label + ": " + fmtValue(s.values[i]))}</title></circle>` : "").join("");
   };
-  out += F.map(s => draw(s, Y2, true)).join("") + L.map(s => draw(s, Y1)).join("");
+  out += F.map(s => draw(s, Y2, true)).join("") + L.filter(s => s.left).map(s => draw(s, Y1, true)).join("") + L.filter(s => !s.left).map(s => draw(s, Y1)).join("");
   const step = Math.max(1, Math.ceil(n / 12));
   out += labels.map((l, i) => i % step === 0 || i === n - 1 ? `<text x="${X(i)}" y="${h - 8}" text-anchor="middle" class="axis">${esc(l)}</text>` : "").join("");
   return `<svg class="savings-chart" viewBox="0 0 ${w} ${h}" role="img">${out}</svg>`;
