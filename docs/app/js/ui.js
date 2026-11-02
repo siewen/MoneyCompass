@@ -170,9 +170,21 @@ function layoutGrid(grid) {
       for (let i = 0; i < n; i++) { const c = document.createElement("div"); c.className = "col"; group.appendChild(c); }
       group._count = 0; parts.push(group);
     }
-    group.children[group._count++ % n].appendChild(item);
+    group._items = group._items || []; group._items.push(item);
   }
   grid.replaceChildren(...parts);
+  // Fill the columns evenly: each card goes into the column that is shortest so far (no big empty gaps)
+  for (const g of parts) {
+    if (!g._items) continue;
+    const cols = [...g.children], h = cols.map(() => 0), cnt = cols.map(() => 0);
+    for (const item of g._items) {
+      let k = 0;
+      for (let j = 1; j < cols.length; j++) if (h[j] < h[k] - 1 || (Math.abs(h[j] - h[k]) <= 1 && cnt[j] < cnt[k])) k = j;
+      cols[k].appendChild(item); cnt[k]++;
+      h[k] += item.offsetHeight || 0;
+    }
+    delete g._items;
+  }
 }
 
 function addHandle(grid, card) {

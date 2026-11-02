@@ -26,7 +26,8 @@ function readRows(file) {
     if (!amount) continue;
     const text = [cell(c.Type), cell(c.Counterparty), cell(c.Description)].filter(Boolean).join(" ").replace(/\s+/g, " ").trim()
       || r.filter(x => Csv.parseAmount(x) === null && !Csv.parseDate(x)).join(" ");
-    list.push({ date: dayOf(date), amount, text, balance: bal >= 0 ? Csv.parseAmount(cell(bal)) : null });
+    const desc = [cell(c.Counterparty), cell(c.Description)].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+    list.push({ date: dayOf(date), amount, text, desc, balance: bal >= 0 ? Csv.parseAmount(cell(bal)) : null });
   }
   // Banks list the newest first: put them in date order, keeping the order within one day
   if (list.length > 1 && list[0].date > list[list.length - 1].date) list.reverse();
@@ -66,7 +67,7 @@ export function analyse(rows, opening) {
   // Interest lines with different titles (e.g. promotional and standard interest) – shown separately
   const groups = new Map();
   for (const x of rows.filter(x => kind(x) === "interest")) {
-    const k = x.text.replace(/[\d.,/:-]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 60) || T("Interest");
+    const k = (x.desc || x.text).replace(/[\d.,/:-]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 60) || T("Interest");
     groups.set(k, (groups.get(k) || 0) + x.amount);
   }
   // Polish banks usually credit the interest already after the 19% Belka tax (no tax line in the file):
@@ -103,7 +104,8 @@ export async function openSavingsCheck() {
     const best = [...Rates.savings].sort((a, b) => b.Rate - a.Rate)[0];
     const bestGain = best ? r.avg * best.Rate / 100 * r.days / 365 * (1 - BELKA) - r.netEarned : 0;
     const warn = r.avg <= 0 ? `<p class="bad">${esc(T("The average balance is 0 or below – enter the balance at the start of the statement."))}</p>` : "";
-    p.el.innerHTML = `<h2 class="popup-title">🔍 ${esc(T("What does my savings account really pay?"))}</h2>
+    // No window title (the button already says what this is). Cards in two even columns, the month table across the bottom.
+    p.el.innerHTML = `
       ${hint(T("From your statement {0} – {1} ({2} days). Interest, tax and fees are compared with the money that was really on the account, day by day. Whole months give the most exact result.", fmtDate(r.from), fmtDate(r.to), r.days))}
       <div class="grid">
         ${card(heading(T("The real rate"), "📊") + warn +
@@ -122,16 +124,16 @@ export async function openSavingsCheck() {
           row(T("Your real gain"), pln(r.netAll - r.fees), "big") +
           (r.groups.length > 1 ? `<h3 class="sub-h">${esc(T("Interest by type"))}</h3>` + r.groups.map(([k, v]) => row(k, "+" + pln(v))).join("") +
             hint(T("Your bank credits these separately – e.g. promotional interest on new money and standard interest on the rest.")) : ""))}
-        ${card(heading(T("Month by month"), "📅") + hint(T("Interest credited in the first days of a month counts for the month before.")) +
-          `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Average balance"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Rate per year"))}</th></tr></thead><tbody>` +
-          r.months.map(m => `<tr><td>${esc(monthName(m.m))}</td><td>${pln(m.avg)}</td><td>${m.interest ? "+" + pln(m.interest) : "–"}</td><td class="${m.interest && m.rate < 2 ? "bad" : ""}">${m.interest ? rate(m.rate) : "–"}</td></tr>`).join("") +
-          `</tbody></table>`, "wide")}
         ${card(heading(T("Use it in MoneyCompass"), "✔") + hint(T("Puts the balance at the end and the real rate before tax into one of your savings entries.")) +
           `<div class="two">${`<label class="field"><span>${esc(T("Savings entry"))}</span><select name="hold">${d.Holdings.map((h, i) => `<option value="${i}">${esc(h.Name)}</option>`).join("")}<option value="-1">${esc(T("New: Savings account"))}</option></select></label>`}
           <div class="buttons" style="align-self:end">${button(esc(T("Update")), "use-check", "main")}</div></div>` +
           `<hr>${hint(T("Keep this check in the Savings tab, to compare it with later statements. Nothing is kept unless you save it."))}
           <div class="two"><label class="field"><span>${esc(T("Name of the check"))}</span><input name="checkname" value="${esc(defaultName)}"></label>
           <div class="buttons" style="align-self:end">${button("💾 " + esc(T("Save result")), "save-check", "second")}</div></div>`)}
+        ${card(heading(T("Month by month"), "📅") + hint(T("Interest credited in the first days of a month counts for the month before.")) +
+          `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Average balance"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Rate per year"))}</th></tr></thead><tbody>` +
+          r.months.map(m => `<tr><td>${esc(monthName(m.m))}</td><td>${pln(m.avg)}</td><td>${m.interest ? "+" + pln(m.interest) : "–"}</td><td class="${m.interest && m.rate < 2 ? "bad" : ""}">${m.interest ? rate(m.rate) : "–"}</td></tr>`).join("") +
+          `</tbody></table>`, "wide")}
       </div>
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
     p.el.querySelector('[name="opening"]')?.addEventListener("change", e => { opening = Csv.parseAmount(e.target.value) || 0; draw(); });
