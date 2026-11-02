@@ -182,7 +182,7 @@ export function savedChecksCard(d) {
         ${row(T("Closing balance on {0}", fmtDate(c.To)), pln(c.Closing), "big")}
         ${row(T("Opening balance"), pln(c.Opening))}${row(T("Credits (deposits)"), "+" + pln(c.Deposits))}${row(T("Debits (withdrawals)"), "−" + pln(c.Withdrawals))}${row(T("Average balance"), pln(c.Average))}
         ${row(T("Gross rate p.a."), rate(c.Gross))}${row(T("Net rate p.a. (after tax and fees)"), rate(c.Net))}
-        ${row(T("Gross interest"), "+" + pln(c.Interest), "good")}${row(T("Withholding tax (Belka, 19%)"), "−" + pln(c.Tax))}
+        ${row(T("Gross interest"), "+" + pln(c.Interest), "good")}${row(T("Withholding tax (Belka, 19%)"), "−" + pln(c.Tax))}${row(T("Net interest (after tax)"), "+" + pln(c.Interest - c.Tax), "good")}
         ${row(T("Fees & charges"), "−" + pln(c.Fees), c.Fees > 0 ? "bad" : "")}${row(T("Average monthly fees"), "−" + pln(perMonth), c.Fees > 0 ? "bad" : "")}
         ${(c.Types || []).length > 1 ? c.Types.map(t => row(t.Name, "+" + pln(t.Interest))).join("") : ""}
         ${(c.Months || []).length ? `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Closing balance"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Fees & charges"))}</th><th>${esc(T("Rate p.a."))}</th></tr></thead><tbody>` +
@@ -215,17 +215,26 @@ const MAX_AHEAD = 6;   // forecast: off by default, up to 6 months (chosen by th
 export function savingsData(d, AHEAD = 0) {
   const s = d.Settings, now = monthStart(today()).getTime();
   const acc = new Map(), flows = new Map(), used = new Set();
+  let netTotal = 0;   // net interest of the analyses, as in each analysis (all of it, when no newer analysis covers the same months)
   const get = (k, label) => { if (!acc.has(k)) acc.set(k, { label, pts: new Map() }); return acc.get(k); };
   const linkedId = c => d.Holdings.some(h => h.Id === c.HoldingId) ? c.HoldingId : "check:" + c.Name;
   for (const c of d.SavingsChecks || []) {          // newest check first: it wins for months two checks both cover
     const k = linkedId(c), a = get(k, d.Holdings.find(h => h.Id === k)?.Name || c.Name);
+    // Net share of the credited interest: when the bank books the 19% tax as its own line, the credited interest is gross
+    // (net = gross − tax); when it credits after tax, the credited interest is already net.
+    const credited = (c.Types || []).reduce((s2, t) => s2 + (t.Interest || 0), 0);
+    const toNet = credited > 0 ? Math.min(1, (c.Interest - c.Tax) / credited) : 1 - BELKA;
+    let mine = 0, all = 0, part = 0;
     for (const m of c.Months || []) {
       const t = monthStart(parseDate(m.Month)).getTime(), u = k + "|" + t;
-      if (used.has(u)) continue; used.add(u);
+      all++; if (used.has(u)) continue; used.add(u); mine++;
       a.pts.set(t, m.End ?? m.Average);
       const f = flows.get(t) || { cr: 0, db: 0, int: 0, fee: 0 };
-      f.cr += m.Credits || 0; f.db += m.Debits || 0; f.int += m.Interest || 0; f.fee += m.Fees || 0; flows.set(t, f);
+      f.cr += m.Credits || 0; f.db += m.Debits || 0; f.int += (m.Interest || 0) * toNet; f.fee += m.Fees || 0; flows.set(t, f);
+      part += (m.Interest || 0) * toNet;
     }
+    if (mine === all) netTotal += (c.Interest || 0) - (c.Tax || 0);
+    else netTotal += part;   // partly covered by a newer analysis: only its own months
   }
   for (const h of d.Holdings) {
     const toPln = v => Calc.toPln(v, h.Currency, s);
@@ -253,7 +262,7 @@ export function savingsData(d, AHEAD = 0) {
   const fut = []; let b = total[total.length - 1];
   for (let k = 1; k <= AHEAD; k++) { b = b * (1 + r / 12 * (1 - BELKA)) + dep; fut.push(b); }
   const flowAt = (k) => months.map(m => (flows.get(m.getTime()) || {})[k] || 0).concat(Array(AHEAD).fill(null));
-  return { months, accounts, total, fut, dep, r,
+  return { months, accounts, total, fut, dep, r, netTotal,
     credits: flowAt("cr"), debits: flowAt("db"), interest: flowAt("int"), fees: flowAt("fee") };
 }
 export function savingsChartCard(d) {
@@ -267,7 +276,7 @@ export function savingsChartCard(d) {
   if (AHEAD) lines.push({ key: "forecast", label: T("Forecast"), color: "var(--primary)", dashed: true, values: [...Array(n - 1).fill(null), x.total[n - 1], ...x.fut] });
   const bars = [
     { key: "cr", label: T("Credits (deposits)"), color: "#3B82F6", values: x.credits },
-    { key: "int", label: T("Interest credited"), color: "#84CC16", values: x.interest },
+    { key: "int", label: T("Net interest (after tax)"), color: "#84CC16", values: x.interest },
     { key: "db", label: T("Debits (withdrawals)"), color: "#F59E0B", values: x.debits },
     { key: "fee", label: T("Fees & charges"), color: "#E5484D", values: x.fees },
   ];
@@ -280,7 +289,7 @@ export function savingsChartCard(d) {
   const keys = [...lines, ...bars].map(sr => `<button class="wave-key${hid.has(sr.key) ? " off" : ""}" data-sav="${sr.key}" style="--c:${sr.color}"><i${sr.dashed ? ' class="dash"' : ""}></i>${esc(sr.label)}</button>`).join("");
   return card(heading(T("Savings balance"), "📈") +
     `<div class="sav-figures">${fig(T("Total balance"), pln(end))}${n > 1 ? fig(T("Net change since {0}", monthName(x.months[0])), (end - start >= 0 ? "+" : "−") + pln(Math.abs(end - start)), end >= start ? "good" : "bad") : ""}
-      ${sum(x.interest) ? fig(T("Interest credited"), "+" + pln(sum(x.interest)), "good") : ""}${sum(x.fees) ? fig(T("Fees & charges"), "−" + pln(sum(x.fees)), "bad") : ""}
+      ${sum(x.interest) ? fig(T("Net interest (after tax)"), "+" + pln(x.netTotal || sum(x.interest)), "good") : ""}${sum(x.fees) ? fig(T("Fees & charges"), "−" + pln(sum(x.fees)), "bad") : ""}
       ${AHEAD ? fig(T("Forecast in {0} months", AHEAD), pln(x.fut[AHEAD - 1])) : ""}
       <label class="sav-ahead"><span>${esc(T("Forecast"))}</span><select data-sav-ahead>${[[0, T("Off")], [1, T("1 month")], [3, T("{0} months", 3)], [6, T("{0} months", 6)]].map(([v, l]) => `<option value="${v}"${v === AHEAD ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label></div>` +
     `<div class="wave-legend">${keys}</div>` + savingsChart(labels, lines, bars, axis, fmtV, hid, n) +

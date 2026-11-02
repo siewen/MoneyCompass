@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 37, date: "2026-11-02", items: {
+    en: ["🧮 Savings chart: interest is now shown after the 19% tax (net), exactly as in your statement analysis."],
+    pl: ["🧮 Wykres oszczędności: odsetki są teraz pokazane po 19% podatku (netto), dokładnie jak w analizie wyciągu."],
+    de: ["🧮 Spardiagramm: Zinsen werden jetzt nach 19 % Steuer (netto) angezeigt, genau wie in Ihrer Auszugsanalyse."],
+    fr: ["🧮 Graphique de l'épargne : les intérêts sont désormais affichés après l'impôt de 19 % (nets), exactement comme dans l'analyse du relevé."] } },
   { build: 36, date: "2026-11-02", items: {
     en: ["📈 Savings chart with lines only: balance on the left scale; interest, fees, credits and debits per month on the right scale. Click a name to show or hide a line."],
     pl: ["📈 Wykres oszczędności tylko z liniami: saldo na lewej skali; odsetki, opłaty, uznania i obciążenia miesięcznie na prawej. Kliknij nazwę, aby pokazać lub ukryć linię."],
