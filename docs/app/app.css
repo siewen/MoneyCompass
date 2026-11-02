@@ -663,3 +663,9 @@ body.is-locked .lock-screen ~ .popup-back { visibility: visible; z-index: 1100; 
 .rec-month > summary b:first-of-type { margin-right: auto; }
 .check.small { font-size: 13px; margin-top: 6px; }
 .income-span .two { align-items: start; }
+/* With the side menu, the profile button is at the bottom left: open the profile panel next to it */
+@media (min-width: 700px) {
+  :root[data-design] .popup-back.anchor-top-right { place-items: end start; padding: 12px 12px 16px 92px; }
+  :root[data-design][data-side="pinned"] .popup-back.anchor-top-right { padding-left: 262px; }
+  :root[data-design] .anchor-top-right .popup { transform-origin: bottom left; max-height: calc(100vh - 28px); }
+}
