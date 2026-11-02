@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 63, date: "2026-11-02", items: {
+    en: ["🔒 Saved profile files are now always encrypted (.mcbak) and can't be read in Notepad. Set a password for profile files in Options so that only you can open them. Older .json files still load."],
+    pl: ["🔒 Zapisane pliki profilu są teraz zawsze szyfrowane (.mcbak) i nie da się ich odczytać w Notatniku. Ustaw hasło do plików profilu w Opcjach, aby tylko Ty mógł je otworzyć. Starsze pliki .json nadal się wczytują."],
+    de: ["🔒 Gespeicherte Profildateien sind jetzt immer verschlüsselt (.mcbak) und im Editor nicht lesbar. Legen Sie in den Optionen ein Passwort für Profildateien fest, damit nur Sie sie öffnen können. Ältere .json-Dateien lassen sich weiterhin laden."],
+    fr: ["🔒 Les fichiers de profil enregistrés sont désormais toujours chiffrés (.mcbak) et illisibles dans le Bloc-notes. Définissez un mot de passe pour les fichiers de profil dans Options pour être seul à pouvoir les ouvrir. Les anciens fichiers .json se chargent toujours."] } },
   { build: 62, date: "2026-11-02", items: {
     en: ["👆 Fingerprint and face unlock is more reliable, and if it fails the lock screen now says why."],
     pl: ["👆 Odblokowanie odciskiem palca i twarzą działa pewniej, a gdy się nie uda, ekran blokady podaje przyczynę."],

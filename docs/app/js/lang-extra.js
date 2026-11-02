@@ -894,7 +894,9 @@ export const EXTRA = {
 "the answer came for another address ({0})": "die Antwort gilt für eine andere Adresse ({0})",
 "the device did not confirm your fingerprint or face": "das Gerät hat Fingerabdruck oder Gesicht nicht bestätigt",
 "cancelled, timed out, or this device does not know the saved fingerprint or face – set it up again in the profile": "abgebrochen, Zeit abgelaufen oder dieses Gerät kennt den gespeicherten Fingerabdruck/das Gesicht nicht – im Profil neu einrichten",
-"this device does not know the saved fingerprint or face – set it up again in the profile": "dieses Gerät kennt den gespeicherten Fingerabdruck/das Gesicht nicht – im Profil neu einrichten"
+"this device does not know the saved fingerprint or face – set it up again in the profile": "dieses Gerät kennt den gespeicherten Fingerabdruck/das Gesicht nicht – im Profil neu einrichten",
+"Off: profile files are encrypted with MoneyCompass's own key, so they can't be read in Notepad – but anyone with MoneyCompass can open them. Set a password so that only you can.": "Aus: Profildateien werden mit dem eigenen Schlüssel von MoneyCompass verschlüsselt und sind im Editor nicht lesbar – aber jeder mit MoneyCompass kann sie öffnen. Legen Sie ein Passwort fest, damit nur Sie sie öffnen können.",
+"New profile files will be encrypted with MoneyCompass's own key again (they open without a password). Files you saved before stay protected with the old password.": "Neue Profildateien werden wieder mit dem eigenen Schlüssel von MoneyCompass verschlüsselt (sie öffnen sich ohne Passwort). Bereits gespeicherte Dateien bleiben mit dem alten Passwort geschützt."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1790,7 +1792,9 @@ export const EXTRA = {
 "the answer came for another address ({0})": "la réponse concerne une autre adresse ({0})",
 "the device did not confirm your fingerprint or face": "l'appareil n'a pas confirmé l'empreinte ou le visage",
 "cancelled, timed out, or this device does not know the saved fingerprint or face – set it up again in the profile": "annulé, délai dépassé ou cet appareil ne connaît pas l'empreinte/le visage enregistré – configurez-le à nouveau dans le profil",
-"this device does not know the saved fingerprint or face – set it up again in the profile": "cet appareil ne connaît pas l'empreinte/le visage enregistré – configurez-le à nouveau dans le profil"
+"this device does not know the saved fingerprint or face – set it up again in the profile": "cet appareil ne connaît pas l'empreinte/le visage enregistré – configurez-le à nouveau dans le profil",
+"Off: profile files are encrypted with MoneyCompass's own key, so they can't be read in Notepad – but anyone with MoneyCompass can open them. Set a password so that only you can.": "Désactivé : les fichiers de profil sont chiffrés avec la clé propre de MoneyCompass, ils ne sont donc pas lisibles dans le Bloc-notes – mais toute personne disposant de MoneyCompass peut les ouvrir. Définissez un mot de passe pour être seul à pouvoir les ouvrir.",
+"New profile files will be encrypted with MoneyCompass's own key again (they open without a password). Files you saved before stay protected with the old password.": "Les nouveaux fichiers de profil seront de nouveau chiffrés avec la clé propre de MoneyCompass (ils s'ouvrent sans mot de passe). Les fichiers enregistrés auparavant restent protégés par l'ancien mot de passe."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -2686,6 +2690,8 @@ export const EXTRA = {
 "the answer came for another address ({0})": "odpowiedź dotyczy innego adresu ({0})",
 "the device did not confirm your fingerprint or face": "urządzenie nie potwierdziło odcisku palca ani twarzy",
 "cancelled, timed out, or this device does not know the saved fingerprint or face – set it up again in the profile": "anulowano, upłynął czas lub to urządzenie nie zna zapisanego odcisku palca/twarzy – skonfiguruj go ponownie w profilu",
-"this device does not know the saved fingerprint or face – set it up again in the profile": "to urządzenie nie zna zapisanego odcisku palca/twarzy – skonfiguruj go ponownie w profilu"
+"this device does not know the saved fingerprint or face – set it up again in the profile": "to urządzenie nie zna zapisanego odcisku palca/twarzy – skonfiguruj go ponownie w profilu",
+"Off: profile files are encrypted with MoneyCompass's own key, so they can't be read in Notepad – but anyone with MoneyCompass can open them. Set a password so that only you can.": "Wyłączone: pliki profilu są szyfrowane własnym kluczem MoneyCompass, więc nie da się ich odczytać w Notatniku – ale każdy z MoneyCompass może je otworzyć. Ustaw hasło, aby tylko Ty mógł je otworzyć.",
+"New profile files will be encrypted with MoneyCompass's own key again (they open without a password). Files you saved before stay protected with the old password.": "Nowe pliki profilu będą znów szyfrowane własnym kluczem MoneyCompass (otwierają się bez hasła). Wcześniej zapisane pliki pozostają chronione starym hasłem."
 }
 };

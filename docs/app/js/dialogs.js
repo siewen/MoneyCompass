@@ -7,7 +7,7 @@ import {
 import { esc, card, heading, hint, row, field, textInput, select, check, button, values, popup, confirmBox, alertBox, promptBox, toast, pickFile, download, stamp } from "./ui.js";
 import { App, requirePro, windowsOrPro, DOWNLOAD_URL } from "./app.js";
 import { hasPin, lock, pinDialog, bioAvailable, bioOn, enableBio, removeBio } from "./lock.js";
-import { fileProtected, setFilePassword, removeFilePassword, profileFileText, isEncryptedFile, decryptFile, isBuiltinFile, openBuiltin } from "./crypt.js";
+import { fileProtected, setFilePassword, removeFilePassword, profileFileText, backupFileText, isEncryptedFile, decryptFile, isBuiltinFile, openBuiltin } from "./crypt.js";
 import { Rates } from "./rates.js";
 import { autoSupported, backupInfo, backupLine, chooseBackupFile, stopBackup, drawBackupBar } from "./backup.js";
 import { openBankImport } from "./pages-pro.js";
@@ -123,7 +123,9 @@ export async function saveProfileFile() {
   const now = new Date(); D().Settings.LastProfileSaved = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 19);  // local time
   save();
   const locked = fileProtected();
-  download(`MoneyCompass-profile-${stamp()}${locked ? "-protected" : ""}.json`, await profileFileText(D()), "application/json");
+  // Always encrypted (.mcbak): with the file password when one is set, otherwise with the key built into MoneyCompass,
+  // so the file can never be read in Notepad or another program.
+  download(`MoneyCompass-profile-${stamp()}${locked ? "-protected" : ""}.mcbak`, await backupFileText(D()), "application/octet-stream");
   markFileBase(); drawBackupBar(saveProfileFile);
   toast(locked ? "🔒 " + T("Profile saved, protected with your password") : T("Profile saved"));
   return true;
@@ -211,7 +213,7 @@ export function openOptions() {
         : button(esc(T("Choose another file…")), "bk-on", "second") + button(esc(T("Turn off")), "bk-off", "second")}</div>` : "") +
       `<hr><h3>🔒 ${esc(T("Password for profile files"))}</h3>` +
       hint(fileProtected() ? T("On: profile files you save are encrypted (AES-256). They can only be opened with the password, in the web app.")
-        : T("Off: profile files are plain text – anyone who opens the file can read your figures.")) +
+        : T("Off: profile files are encrypted with MoneyCompass's own key, so they can't be read in Notepad – but anyone with MoneyCompass can open them. Set a password so that only you can.")) +
       hint(T("The password is never saved and can't be recovered – if you forget it, protected files can't be opened. The Windows app can't open protected files.")) +
       `<div class="buttons">${fileProtected() ? button(esc(T("Change password…")), "file-pw", "second") + button(esc(T("Turn off")), "file-pw-off", "second")
         : button(esc(T("Protect with a password…") + (license.isPro ? "" : " 🔒")), "file-pw", "main")}</div>`)}
@@ -232,7 +234,7 @@ export function openOptions() {
     await setFilePassword(pw); toast("🔒 " + T("Profile files are now protected."), "good"); p.close(); openOptions();
   };
   el.querySelector('[data-action="file-pw-off"]')?.addEventListener("click", async () => {
-    if (!(await confirmBox(T("Turn off the password?"), T("New profile files will be plain text again. Files you saved before stay protected with the old password."), T("Turn off"), T("Cancel")))) return;
+    if (!(await confirmBox(T("Turn off the password?"), T("New profile files will be encrypted with MoneyCompass's own key again (they open without a password). Files you saved before stay protected with the old password."), T("Turn off"), T("Cancel")))) return;
     removeFilePassword(); p.close(); openOptions();
   });
   el.querySelector('[data-action="bk-on"]')?.addEventListener("click", async () => {
