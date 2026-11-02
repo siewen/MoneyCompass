@@ -6,10 +6,10 @@ import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
   { build: 32, date: "2026-11-02", items: {
-    en: ["🧩 Tidier pages: on every tab the summary comes first, then your list, then the form to add something – and cards fill the columns evenly without big gaps."],
-    pl: ["🧩 Uporządkowane strony: na każdej zakładce najpierw podsumowanie, potem Twoja lista, a na końcu formularz dodawania – karty równo wypełniają kolumny, bez dużych przerw."],
-    de: ["🧩 Aufgeräumte Seiten: Auf jedem Tab zuerst die Übersicht, dann Ihre Liste, dann das Formular zum Hinzufügen – die Karten füllen die Spalten gleichmäßig, ohne große Lücken."],
-    fr: ["🧩 Pages mieux rangées : sur chaque onglet, d'abord le résumé, puis votre liste, puis le formulaire d'ajout – les cartes remplissent les colonnes sans grands vides."] } },
+    en: ["🧩 Tidier pages: on every tab the summary comes first, then your list, then the form to add something – and cards fill the columns evenly without big gaps.", "📐 More compact: tighter spacing on every page, so you scroll less."],
+    pl: ["🧩 Uporządkowane strony: na każdej zakładce najpierw podsumowanie, potem Twoja lista, a na końcu formularz dodawania – karty równo wypełniają kolumny, bez dużych przerw.", "📐 Bardziej zwarty układ: mniejsze odstępy na każdej stronie, mniej przewijania."],
+    de: ["🧩 Aufgeräumte Seiten: Auf jedem Tab zuerst die Übersicht, dann Ihre Liste, dann das Formular zum Hinzufügen – die Karten füllen die Spalten gleichmäßig, ohne große Lücken.", "📐 Kompakter: engere Abstände auf jeder Seite, weniger Scrollen."],
+    fr: ["🧩 Pages mieux rangées : sur chaque onglet, d'abord le résumé, puis votre liste, puis le formulaire d'ajout – les cartes remplissent les colonnes sans grands vides.", "📐 Plus compact : des espacements réduits sur chaque page, moins de défilement."] } },
   { build: 31, date: "2026-11-02", items: {
     en: ["📑 Keep a savings account check: after checking a statement, \"Save result\" keeps it in the Savings tab under \"Your account checks\" – only if you choose to save it."],
     pl: ["📑 Zachowaj sprawdzenie konta: po sprawdzeniu wyciągu „Zapisz wynik” zachowuje go w zakładce Oszczędności w „Twoich sprawdzeniach kont” – tylko jeśli zdecydujesz się go zapisać."],

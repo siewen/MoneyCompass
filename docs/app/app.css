@@ -628,3 +628,31 @@ body.is-locked .lock-screen ~ .popup-back { visibility: visible; z-index: 1100; 
 .rate-table th { color: var(--muted); font-weight: 600; }
 .check-item > summary .icon-btn { margin-left: 8px; }
 .check-item[open] { padding-bottom: 10px; }
+
+/* Compact: less scrolling – tighter spacing everywhere, same font sizes for reading */
+:root[data-design] .grid, :root[data-design] .cols, :root[data-design] .col { gap: 12px; }
+:root[data-design] .card { padding: 16px 18px; }
+:root[data-design] h3 { margin-bottom: 8px; }
+:root[data-design] .hint { margin: 4px 0; }
+:root[data-design] .row { padding: 4px 0; }
+:root[data-design] .field { margin: 6px 0; }
+:root[data-design] input, :root[data-design] select, :root[data-design] textarea { padding: 8px 10px; }
+:root[data-design] .tile { padding: 12px 16px; }
+:root[data-design] .tile b { margin-top: 2px; }
+:root[data-design] .btn.big { padding: 12px; font-size: 18px; }
+:root[data-design] .tip { padding: 9px 14px; }
+:root[data-design] .tiles { gap: 12px; }
+@media (min-width: 700px) {
+  :root[data-design] .page-head { padding-top: 18px; }
+  :root[data-design] .page-head h1 { font-size: 30px; }
+  :root[data-design] #page { padding-top: 12px; }
+}
+@media (max-width: 699px) {
+  :root[data-design] .page-head h1 { font-size: 24px; }
+  :root[data-design] .page-head { padding-top: 10px; }
+  :root[data-design] #page { padding: 8px 10px 90px; }
+  :root[data-design] .card { padding: 14px; }
+}
+:root[data-design] .popup { padding: 18px; }
+:root[data-design] .item { padding: 7px 4px; }
+:root[data-design] .advice { padding: 10px 12px; margin: 8px 0; }
