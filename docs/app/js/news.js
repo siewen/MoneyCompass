@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 31, date: "2026-11-02", items: {
+    en: ["📑 Keep a savings account check: after checking a statement, \"Save result\" keeps it in the Savings tab under \"Your account checks\" – only if you choose to save it."],
+    pl: ["📑 Zachowaj sprawdzenie konta: po sprawdzeniu wyciągu „Zapisz wynik” zachowuje go w zakładce Oszczędności w „Twoich sprawdzeniach kont” – tylko jeśli zdecydujesz się go zapisać."],
+    de: ["📑 Kontoprüfung behalten: Nach der Prüfung eines Auszugs speichert „Ergebnis speichern“ sie im Tab Ersparnisse unter „Ihre Kontoprüfungen“ – nur wenn Sie es möchten."],
+    fr: ["📑 Garder une vérification : après avoir vérifié un relevé, « Enregistrer le résultat » la garde dans l'onglet Épargne sous « Vos vérifications de comptes » – seulement si vous le choisissez."] } },
   { build: 30, date: "2026-11-02", items: {
     en: ["🔍 New in Savings: \"What does my savings account really pay?\" – import the CSV statement of a savings account and see the real rate per year and per month, worked out from the money really on the account day by day, with interest, the 19% tax and fees. One click puts the result into your savings entry."],
     pl: ["🔍 Nowość w Oszczędnościach: „Ile naprawdę płaci moje konto oszczędnościowe?” – zaimportuj wyciąg CSV z konta oszczędnościowego i zobacz rzeczywiste oprocentowanie rocznie i miesięcznie, wyliczone ze środków dzień po dniu, z odsetkami, 19% podatku i opłatami. Jednym kliknięciem wynik trafia do Twojej pozycji oszczędności."],

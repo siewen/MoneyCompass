@@ -1,6 +1,6 @@
 // "What does my savings account really pay?" – reads the CSV statement of a savings account and works out
 // the rate the bank really paid: interest, Belka tax and fees against the money that was on the account, day by day.
-import { T, State, save, pln, rate, fmtDate, monthName, monthStart, addMonths, addDays, BELKA } from "./core.js";
+import { T, State, save, pln, rate, fmtDate, monthName, monthStart, addMonths, addDays, isoDate, parseDate, BELKA } from "./core.js";
 import { esc, card, heading, hint, row, popup, alertBox, pickFile, toast, numInput, field, button } from "./ui.js";
 import { Rates } from "./rates.js";
 import * as Csv from "./csv.js";
@@ -94,6 +94,8 @@ export async function openSavingsCheck() {
   // Balance at the start: from the bank's balance column, or entered by you
   let opening = hasBalance && rows[0].balance !== null ? Math.round((rows[0].balance - rows[0].amount) * 100) / 100 : 0;
   const d = State.data;
+  const r2 = v => Math.round((v || 0) * 100) / 100;
+  const defaultName = fileObj.name.replace(/\.(csv|txt)$/i, "");
   const p = popup("", { width: 900, cls: "wide-popup" });
   const draw = () => {
     const r = analyse(rows, opening);
@@ -126,10 +128,23 @@ export async function openSavingsCheck() {
           `</tbody></table>`, "wide")}
         ${card(heading(T("Use it in MoneyCompass"), "✔") + hint(T("Puts the balance at the end and the real rate before tax into one of your savings entries.")) +
           `<div class="two">${`<label class="field"><span>${esc(T("Savings entry"))}</span><select name="hold">${d.Holdings.map((h, i) => `<option value="${i}">${esc(h.Name)}</option>`).join("")}<option value="-1">${esc(T("New: Savings account"))}</option></select></label>`}
-          <div class="buttons" style="align-self:end">${button(esc(T("Update")), "use-check", "main")}</div></div>`)}
+          <div class="buttons" style="align-self:end">${button(esc(T("Update")), "use-check", "main")}</div></div>` +
+          `<hr>${hint(T("Keep this check in the Savings tab, to compare it with later statements. Nothing is kept unless you save it."))}
+          <div class="two"><label class="field"><span>${esc(T("Name of the check"))}</span><input name="checkname" value="${esc(defaultName)}"></label>
+          <div class="buttons" style="align-self:end">${button("💾 " + esc(T("Save result")), "save-check", "second")}</div></div>`)}
       </div>
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
     p.el.querySelector('[name="opening"]')?.addEventListener("change", e => { opening = Csv.parseAmount(e.target.value) || 0; draw(); });
+    p.el.querySelector('[data-action="save-check"]').onclick = () => {
+      const name = p.el.querySelector('[name="checkname"]').value.trim() || defaultName;
+      d.SavingsChecks.unshift({ Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: name, Saved: new Date().toISOString().slice(0, 19),
+        From: isoDate(r.from), To: isoDate(r.to), Days: r.days, Opening: r2(r.opening), Closing: r2(r.closing), Average: r2(r.avg),
+        Deposits: r2(r.deposits), Withdrawals: r2(r.withdrawals), Interest: r2(r.grossAll), Tax: r2(r.taxAll), Fees: r2(r.fees),
+        Gross: r2(r.gross), Net: r2(r.netAfterBelka), Months: r.months.map(m => ({ Month: isoDate(m.m), Average: r2(m.avg), Interest: r2(m.interest), Rate: r2(m.rate) })),
+        Types: r.groups.map(([k, v]) => ({ Name: k, Interest: r2(v) })) });
+      save(); p.close(); App.refresh();
+      toast(T("Saved in Savings: {0}.", name), "good");
+    };
     p.el.querySelector('[data-action="use-check"]').onclick = () => {
       const idx = +p.el.querySelector('[name="hold"]').value;
       let h = d.Holdings[idx];
@@ -140,4 +155,27 @@ export async function openSavingsCheck() {
     };
   };
   draw();
+}
+
+/** Saved checks in the Savings tab – only shown when you saved at least one. */
+export function savedChecksCard(d) {
+  if (!d.SavingsChecks?.length) return "";
+  return card(heading(T("Your account checks"), "📑") + hint(T("The real rate of your savings accounts, from the statements you checked. Click a check for the months.")) +
+    d.SavingsChecks.map(c => `<details class="rec-month check-item"><summary><b>${esc(c.Name)}</b>
+      <span class="hint">${fmtDate(c.From)} – ${fmtDate(c.To)} · <b class="${c.Net < 2 ? "bad" : "good"}">${rate(c.Net)}</b> ${esc(T("after tax"))}</span>
+      <button class="icon-btn danger" data-del-check="${esc(c.Id)}" title="${esc(T("Delete"))}">🗑</button></summary>
+      ${row(T("Before tax"), rate(c.Gross))}${row(T("After tax and fees"), rate(c.Net))}${row(T("Average balance"), pln(c.Average))}
+      ${row(T("Interest (before tax)"), "+" + pln(c.Interest))}${row(T("Belka tax 19%"), "−" + pln(c.Tax))}${row(T("Fees"), "−" + pln(c.Fees))}
+      ${(c.Types || []).length > 1 ? c.Types.map(t => row(t.Name, "+" + pln(t.Interest))).join("") : ""}
+      ${(c.Months || []).length ? `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Average balance"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Rate per year"))}</th></tr></thead><tbody>` +
+        c.Months.map(m => `<tr><td>${esc(monthName(parseDate(m.Month)))}</td><td>${pln(m.Average)}</td><td>${m.Interest ? "+" + pln(m.Interest) : "–"}</td><td>${m.Interest ? rate(m.Rate) : "–"}</td></tr>`).join("") + "</tbody></table>" : ""}
+    </details>`).join(""));
+}
+export function bindSavedChecks(el, d) {
+  el.querySelectorAll("[data-del-check]").forEach(b => b.onclick = async ev => {
+    ev.preventDefault(); ev.stopPropagation();
+    const { confirmBox } = await import("./ui.js");
+    if (!(await confirmBox(T("Delete this check?"), d.SavingsChecks.find(c => c.Id === b.dataset.delCheck)?.Name || "", T("Delete"), T("Cancel"), true))) return;
+    d.SavingsChecks = d.SavingsChecks.filter(c => c.Id !== b.dataset.delCheck); save(); App.refresh();
+  });
 }

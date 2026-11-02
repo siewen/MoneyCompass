@@ -53,13 +53,13 @@ export function newSettings() {
 }
 export function newData() {
   return { Incomes: [], Expenses: [], Holdings: [], Offers: [], Loans: [], Goals: [], Received: [],
-           Transfers: [], Categories: [], Budgets: [], Recurring: [], Deleted: [], Settings: newSettings() };
+           Transfers: [], Categories: [], Budgets: [], Recurring: [], Deleted: [], SavingsChecks: [], Settings: newSettings() };
 }
 /** Fills in anything missing (older files, files from the Windows app). */
 export function normalise(d) {
   const base = newData();
   const out = Object.assign(base, d || {});
-  for (const k of ["Incomes", "Expenses", "Holdings", "Offers", "Loans", "Goals", "Received", "Transfers", "Categories", "Budgets", "Recurring", "Deleted"])
+  for (const k of ["Incomes", "Expenses", "Holdings", "Offers", "Loans", "Goals", "Received", "Transfers", "Categories", "Budgets", "Recurring", "Deleted", "SavingsChecks"])
     if (!Array.isArray(out[k])) out[k] = [];
   out.Settings = Object.assign(newSettings(), out.Settings || {});
   if (!Array.isArray(out.Settings.Modules)) out.Settings.Modules = [];
@@ -755,7 +755,7 @@ export function reset(parts) {
   const d = State.data;
   if (parts.incomes) d.Incomes = [];
   if (parts.expenses) { d.Expenses = []; d.Received = []; d.Transfers = []; }
-  if (parts.holdings) d.Holdings = [];
+  if (parts.holdings) { d.Holdings = []; d.SavingsChecks = []; }
   if (parts.offers) d.Offers = [];
   if (parts.emergency) Object.assign(d.Settings, { MonthlyEssentials: 0, YearlyCosts: 0, EmergencyMonths: 3, BufferPercent: 10 });
   if (parts.rates) Object.assign(d.Settings, { UsdToPln: 0, EurToPln: 0 });

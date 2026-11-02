@@ -626,3 +626,5 @@ body.is-locked .lock-screen ~ .popup-back { visibility: visible; z-index: 1100; 
 .rate-table th, .rate-table td { text-align: right; padding: 7px 8px; border-bottom: 1px solid var(--border); }
 .rate-table th:first-child, .rate-table td:first-child { text-align: left; }
 .rate-table th { color: var(--muted); font-weight: 600; }
+.check-item > summary .icon-btn { margin-left: 8px; }
+.check-item[open] { padding-bottom: 10px; }

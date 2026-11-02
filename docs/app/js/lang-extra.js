@@ -705,7 +705,15 @@ export const EXTRA = {
 "{0}: {1} at {2}.": "{0}: {1} zu {2}.",
 "From your statement {0} – {1} ({2} days). Interest, tax and fees are compared with the money that was really on the account, day by day. Whole months give the most exact result.": "Aus Ihrem Auszug {0} – {1} ({2} Tage). Zinsen, Steuer und Gebühren werden mit dem Geld verglichen, das wirklich auf dem Konto war, Tag für Tag. Ganze Monate ergeben das genaueste Ergebnis.",
 "{0} of it was credited on {1} for the month before the statement – not counted in the rate.": "{0} davon wurden am {1} für den Monat vor dem Auszug gebucht – nicht im Zinssatz gezählt.",
-"Your bank credits the interest already after the 19% tax ({0} credited) – the interest before tax is worked out from it.": "Ihre Bank bucht die Zinsen bereits nach 19 % Steuer ({0} gebucht) – die Zinsen vor Steuern werden daraus berechnet."
+"Your bank credits the interest already after the 19% tax ({0} credited) – the interest before tax is worked out from it.": "Ihre Bank bucht die Zinsen bereits nach 19 % Steuer ({0} gebucht) – die Zinsen vor Steuern werden daraus berechnet.",
+"Keep this check in the Savings tab, to compare it with later statements. Nothing is kept unless you save it.": "Behalten Sie diese Prüfung im Tab Ersparnisse, um sie mit späteren Auszügen zu vergleichen. Nichts wird gespeichert, solange Sie es nicht tun.",
+"Name of the check": "Name der Prüfung",
+"Save result": "Ergebnis speichern",
+"Saved in Savings: {0}.": "In Ersparnisse gespeichert: {0}.",
+"Your account checks": "Ihre Kontoprüfungen",
+"The real rate of your savings accounts, from the statements you checked. Click a check for the months.": "Der echte Zinssatz Ihrer Sparkonten aus den geprüften Auszügen. Klicken Sie auf eine Prüfung für die Monate.",
+"after tax": "nach Steuern",
+"Delete this check?": "Diese Prüfung löschen?"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1412,7 +1420,15 @@ export const EXTRA = {
 "{0}: {1} at {2}.": "{0} : {1} à {2}.",
 "From your statement {0} – {1} ({2} days). Interest, tax and fees are compared with the money that was really on the account, day by day. Whole months give the most exact result.": "D'après votre relevé {0} – {1} ({2} jours). Intérêts, impôt et frais sont comparés à l'argent réellement présent sur le compte, jour par jour. Des mois complets donnent le résultat le plus précis.",
 "{0} of it was credited on {1} for the month before the statement – not counted in the rate.": "{0} ont été crédités le {1} pour le mois précédant le relevé – non comptés dans le taux.",
-"Your bank credits the interest already after the 19% tax ({0} credited) – the interest before tax is worked out from it.": "Votre banque crédite les intérêts déjà après l'impôt de 19 % ({0} crédités) – les intérêts avant impôt en sont déduits."
+"Your bank credits the interest already after the 19% tax ({0} credited) – the interest before tax is worked out from it.": "Votre banque crédite les intérêts déjà après l'impôt de 19 % ({0} crédités) – les intérêts avant impôt en sont déduits.",
+"Keep this check in the Savings tab, to compare it with later statements. Nothing is kept unless you save it.": "Gardez cette vérification dans l'onglet Épargne pour la comparer avec des relevés ultérieurs. Rien n'est conservé tant que vous ne l'enregistrez pas.",
+"Name of the check": "Nom de la vérification",
+"Save result": "Enregistrer le résultat",
+"Saved in Savings: {0}.": "Enregistré dans Épargne : {0}.",
+"Your account checks": "Vos vérifications de comptes",
+"The real rate of your savings accounts, from the statements you checked. Click a check for the months.": "Le taux réel de vos comptes d'épargne d'après les relevés vérifiés. Cliquez sur une vérification pour voir les mois.",
+"after tax": "après impôt",
+"Delete this check?": "Supprimer cette vérification ?"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -2119,6 +2135,14 @@ export const EXTRA = {
 "{0}: {1} at {2}.": "{0}: {1} na {2}.",
 "From your statement {0} – {1} ({2} days). Interest, tax and fees are compared with the money that was really on the account, day by day. Whole months give the most exact result.": "Z Twojego wyciągu {0} – {1} ({2} dni). Odsetki, podatek i opłaty są porównane ze środkami, które naprawdę były na koncie, dzień po dniu. Najdokładniejszy wynik dają pełne miesiące.",
 "{0} of it was credited on {1} for the month before the statement – not counted in the rate.": "{0} z tego zaksięgowano {1} za miesiąc przed wyciągiem – nie liczy się do oprocentowania.",
-"Your bank credits the interest already after the 19% tax ({0} credited) – the interest before tax is worked out from it.": "Twój bank księguje odsetki już po 19% podatku (zaksięgowano {0}) – odsetki przed podatkiem są z tego wyliczone."
+"Your bank credits the interest already after the 19% tax ({0} credited) – the interest before tax is worked out from it.": "Twój bank księguje odsetki już po 19% podatku (zaksięgowano {0}) – odsetki przed podatkiem są z tego wyliczone.",
+"Keep this check in the Savings tab, to compare it with later statements. Nothing is kept unless you save it.": "Zachowaj to sprawdzenie w zakładce Oszczędności, aby porównać je z późniejszymi wyciągami. Nic nie jest zapisywane, dopóki tego nie zrobisz.",
+"Name of the check": "Nazwa sprawdzenia",
+"Save result": "Zapisz wynik",
+"Saved in Savings: {0}.": "Zapisano w Oszczędnościach: {0}.",
+"Your account checks": "Twoje sprawdzenia kont",
+"The real rate of your savings accounts, from the statements you checked. Click a check for the months.": "Rzeczywiste oprocentowanie Twoich kont oszczędnościowych z sprawdzonych wyciągów. Kliknij, aby zobaczyć miesiące.",
+"after tax": "po podatku",
+"Delete this check?": "Usunąć to sprawdzenie?"
 }
 };

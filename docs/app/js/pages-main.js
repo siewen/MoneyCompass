@@ -12,6 +12,7 @@ import { App, requirePro } from "./app.js";
 import { Rates } from "./rates.js";
 import { adviceCard, bindAdvice, promoBadge, moves } from "./advice.js";
 import { loanWarning, Goals as SavingsGoals } from "./pages-pro.js";
+import { openSavingsCheck, savedChecksCard, bindSavedChecks } from "./savings-check.js";
 
 const D = () => State.data;
 const tile = (label, value, route, colors, cls = "", tip = "") =>
@@ -768,6 +769,7 @@ export const Portfolio = {
       ${card(heading(T("What does my savings account really pay?"), "🔍") +
         hint(T("Import the CSV statement of a savings account: MoneyCompass checks the money on it day by day, the interest, the 19% tax and any fees – and shows the real rate the bank pays you, per year and per month.")) +
         `<div class="buttons">${button("⬆ " + esc(T("Check a savings account statement (CSV)…")) + (license.isPro ? "" : " 🔒"), "savings-check", "second")}</div>`)}
+      ${savedChecksCard(d)}
       ${card(`<form id="fx">${heading(T("Exchange rates"))}${hint(T("Used to convert dollars and euros to złoty."))}
         ${check("auto", T("Update automatically with the official NBP rates"), s.AutoExchangeRates)}
         <div class="two">${field("1 USD = … zł", numInput("usd", plain(s.UsdToPln)))}${field("1 EUR = … zł", numInput("eur", plain(s.EurToPln)))}</div>${hint(rateInfo)}</form>`)}
@@ -783,7 +785,8 @@ export const Portfolio = {
       const gg = sec.querySelector(".goals-host .grid"); if (gg) gg.dataset.key = "web:goals";
     }
     bindAdvice(el, d);
-    el.querySelector('[data-action="savings-check"]')?.addEventListener("click", async () => (await import("./savings-check.js")).openSavingsCheck());
+    el.querySelector('[data-action="savings-check"]')?.addEventListener("click", () => openSavingsCheck());
+    bindSavedChecks(el, d);
     const form = el.querySelector("#hold");
     const saveIt = () => {
       const v = values(form), amt = num(v.amount);
