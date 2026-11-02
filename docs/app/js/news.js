@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 47, date: "2026-11-02", items: {
+    en: ["⭐ All backups are now part of MoneyCompass Pro: saving your profile as a file, the file password and the automatic backup. The free version is a demo – \"Load a profile…\" still works there."],
+    pl: ["⭐ Wszystkie kopie zapasowe są teraz częścią MoneyCompass Pro: zapis profilu do pliku, hasło do plików i automatyczna kopia. Wersja darmowa to demo – „Wczytaj profil…” nadal tam działa."],
+    de: ["⭐ Alle Sicherungen sind jetzt Teil von MoneyCompass Pro: Profil als Datei speichern, Dateipasswort und automatische Sicherung. Die kostenlose Version ist eine Demo – „Profil laden…“ funktioniert dort weiterhin."],
+    fr: ["⭐ Toutes les sauvegardes font désormais partie de MoneyCompass Pro : enregistrer le profil dans un fichier, le mot de passe de fichier et la sauvegarde automatique. La version gratuite est une démo – « Charger un profil… » y fonctionne toujours."] } },
   { build: 46, date: "2026-11-02", items: {
     en: ["⭐ PIN, fingerprint/face unlock, automatic lock and the automatic backup are now part of MoneyCompass Pro. A PIN you already set keeps protecting your profile, and you can always remove it. Saving your profile as a file stays free."],
     pl: ["⭐ PIN, odblokowanie odciskiem palca/twarzą, automatyczna blokada i automatyczna kopia są teraz częścią MoneyCompass Pro. Ustawiony już PIN nadal chroni Twój profil i zawsze możesz go usunąć. Zapis profilu do pliku pozostaje darmowy."],

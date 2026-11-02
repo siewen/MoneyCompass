@@ -812,7 +812,8 @@ export const EXTRA = {
 "from your own account": "von Ihrem eigenen Konto",
 "{0} payments came from your own accounts – marked \"Not income\". If your salary arrives in an account whose statement you don't import, choose Salary for them below.": "{0} Zahlungen kamen von Ihren eigenen Konten – als „Kein Einkommen“ markiert. Wenn Ihr Gehalt auf ein Konto geht, dessen Auszug Sie nicht importieren, wählen Sie unten Gehalt.",
 "Search…": "Suchen…",
-"Automatic backup is part of MoneyCompass Pro. Save your profile regularly.": "Die automatische Sicherung ist Teil von MoneyCompass Pro. Speichern Sie Ihr Profil regelmäßig."
+"Automatic backup is part of MoneyCompass Pro. Save your profile regularly.": "Die automatische Sicherung ist Teil von MoneyCompass Pro. Speichern Sie Ihr Profil regelmäßig.",
+"Backups (profile file and automatic backup) are part of MoneyCompass Pro.": "Sicherungen (Profildatei und automatische Sicherung) sind Teil von MoneyCompass Pro."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1626,7 +1627,8 @@ export const EXTRA = {
 "from your own account": "de votre propre compte",
 "{0} payments came from your own accounts – marked \"Not income\". If your salary arrives in an account whose statement you don't import, choose Salary for them below.": "{0} paiements proviennent de vos propres comptes – marqués « Pas un revenu ». Si votre salaire arrive sur un compte dont vous n'importez pas le relevé, choisissez Salaire ci-dessous.",
 "Search…": "Rechercher…",
-"Automatic backup is part of MoneyCompass Pro. Save your profile regularly.": "La sauvegarde automatique fait partie de MoneyCompass Pro. Enregistrez votre profil régulièrement."
+"Automatic backup is part of MoneyCompass Pro. Save your profile regularly.": "La sauvegarde automatique fait partie de MoneyCompass Pro. Enregistrez votre profil régulièrement.",
+"Backups (profile file and automatic backup) are part of MoneyCompass Pro.": "Les sauvegardes (fichier de profil et sauvegarde automatique) font partie de MoneyCompass Pro."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -2440,6 +2442,7 @@ export const EXTRA = {
 "from your own account": "z Twojego własnego rachunku",
 "{0} payments came from your own accounts – marked \"Not income\". If your salary arrives in an account whose statement you don't import, choose Salary for them below.": "{0} wpływów pochodzi z Twoich własnych rachunków – oznaczone jako „Nie dochód”. Jeśli pensja wpływa na rachunek, którego wyciągu nie importujesz, wybierz dla nich poniżej Wynagrodzenie.",
 "Search…": "Szukaj…",
-"Automatic backup is part of MoneyCompass Pro. Save your profile regularly.": "Automatyczna kopia jest częścią MoneyCompass Pro. Zapisuj profil regularnie."
+"Automatic backup is part of MoneyCompass Pro. Save your profile regularly.": "Automatyczna kopia jest częścią MoneyCompass Pro. Zapisuj profil regularnie.",
+"Backups (profile file and automatic backup) are part of MoneyCompass Pro.": "Kopie zapasowe (plik profilu i automatyczna kopia) są częścią MoneyCompass Pro."
 }
 };

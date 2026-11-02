@@ -308,7 +308,8 @@ function termsGate(next) {
 async function closeApp() {
   const s = State.data.Settings;
   const choice = s.CloseChoice || "";
-  if (choice === "with") { saveProfileFile(); return savedThenClose(); }
+  if (!license.isPro) return finishClose(false);   // the demo keeps no backups: nothing to save before closing
+  if (choice === "with") { if (await saveProfileFile()) return savedThenClose(); return; }
   if (choice === "without" || choice === "none") return finishClose(false);
   const p = popup(`<div class="box-head"><span class="box-icon">💾</span><h2>${esc(T("Save your profile before closing?"))}</h2></div>
     <p class="hint">${esc(T("Your entries are always kept in this browser. The profile is an extra copy, for example as a backup."))}</p>
@@ -323,7 +324,7 @@ async function closeApp() {
     p.close();
     if (c === "cancel") return;
     if (p.el.querySelector('[name="remember"]').checked) { s.CloseChoice = c; save(); }
-    if (c === "with") { saveProfileFile(); savedThenClose(); }
+    if (c === "with") { saveProfileFile().then(ok => ok && savedThenClose()); }
     else setTimeout(() => finishClose(false), 200);
   });
 }
@@ -442,7 +443,7 @@ async function start() {
   window.addEventListener("beforeunload", e => {
     save();
     const c = State.data.Settings.CloseChoice || "";
-    if (closing || c === "without" || c === "none" || !changedSinceFile()) return;
+    if (closing || !license.isPro || c === "without" || c === "none" || !changedSinceFile()) return;
     e.preventDefault(); e.returnValue = "";
   });
   window.addEventListener("storage", e => { if (e.key && e.key.startsWith("mc-")) { loadCurrent(); buildShell(); } });

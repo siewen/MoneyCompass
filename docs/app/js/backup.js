@@ -92,13 +92,7 @@ const later = () => { const l = store.get(laterKey()); return l && daysSince(l) 
 
 /** Text and buttons for the bar, or null when nothing is needed. */
 function barContent(saveFile) {
-  // Without Pro: no automatic backup – only the reminder to save the profile file (free)
-  if (!license.isPro) {
-    if (entries() < 10 || later()) return null;
-    const last = State.data.Settings.LastProfileSaved, d = daysSince(last);
-    if (d < 14) return null;
-    return { text: "🛡️ " + (last ? T("Last backup: {0} days ago.", d) : T("No backup yet: clearing the browser data would delete your entries.")), btn: T("Save now"), act: saveFile };
-  }
+  if (!license.isPro) return null;   // backups are Pro: the demo shows no backup reminder
   if (status === "paused") return { text: "🛡️ " + T("Automatic backup is paused until you allow it again."), btn: T("Continue backup"), act: resumeBackup };
   if (status === "error") return { text: "⚠️ " + T("The automatic backup could not be written."), btn: T("Choose the file again"), act: chooseBackupFile };
   if (status === "on" || later() || entries() < 10) return null;
@@ -129,7 +123,7 @@ export async function backupProfileChanged() { clearTimeout(timer); await refres
 /** One line for the profile panel and Options. */
 export function backupLine() {
   const b = backupInfo();
-  if (!license.isPro) return T("Automatic backup is part of MoneyCompass Pro. Save your profile regularly.");
+  if (!license.isPro) return T("Backups (profile file and automatic backup) are part of MoneyCompass Pro.");
   if (b.status === "on") return T("Automatic backup: on · file {0} · last saved {1}", b.file, fmtDate(b.at) + " " + b.at.slice(11, 16));
   if (b.status === "paused") return T("Automatic backup: paused · file {0}", b.file);
   if (b.status === "error") return T("Automatic backup: could not write file {0}", b.file);

@@ -45,7 +45,7 @@ export function openProfile() {
       <hr><h3>${esc(T("Profiles"))}</h3>
       <div class="list">${list.map(x => `<div class="item${x.current ? " current" : " clickable"}" data-switch="${x.id}"><div><b>${esc(x.name)}</b>${x.current ? `<span class="hint">${esc(T("in use"))}</span>` : ""}</div>
         ${x.current ? "" : `<button class="icon-btn danger" data-del-profile="${x.id}">🗑</button>`}</div>`).join("")}</div>
-      <div class="buttons">${button("＋ " + esc(T("New profile")), "new-profile", "second")}${button(esc(T("Save profile")), "save-file", "second")}${button(esc(T("Load a profile…")), "load-file", "second")}</div>
+      <div class="buttons">${button("＋ " + esc(T("New profile")), "new-profile", "second")}${button(esc(T("Save profile") + (license.isPro ? "" : " 🔒")), "save-file", "second")}${button(esc(T("Load a profile…")), "load-file", "second")}</div>
       ${hint("🛡️ " + backupLine())}
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
     bind();
@@ -118,12 +118,15 @@ function shrinkPicture(file) {
 }
 
 export async function saveProfileFile() {
+  // Backups (profile file, automatic backup, file password) are part of Pro – the free version is a demo
+  if (!(await requirePro(T("Save profile")))) return false;
   const now = new Date(); D().Settings.LastProfileSaved = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 19);  // local time
   save();
   const locked = fileProtected();
   download(`MoneyCompass-profile-${stamp()}${locked ? "-protected" : ""}.json`, await profileFileText(D()), "application/json");
   markFileBase(); drawBackupBar(saveProfileFile);
   toast(locked ? "🔒 " + T("Profile saved, protected with your password") : T("Profile saved"));
+  return true;
 }
 /** Ask for a password in a box with hidden letters: the text, or null when cancelled. */
 function passwordBox(title, text, twice = false) {
@@ -193,7 +196,7 @@ export function openOptions() {
       check("showguide", T("Show the step-by-step guide when MoneyCompass starts"), !s.GuideHidden) +
       check("shownews", T("Show what's new after an update"), !s.NewsHidden) +
       field(T("When I close MoneyCompass"), select("closechoice", [["", T("Ask every time")], ["with", T("Save profile and close")], ["without", T("Close without saving")]], s.CloseChoice === "none" ? "without" : s.CloseChoice || "")) +
-      `<div class="buttons">${button(esc(T("Save profile now")), "save-file", "second")}${button(esc(T("Load a profile…")), "load-file", "second")}</div>` +
+      `<div class="buttons">${button(esc(T("Save profile now") + (license.isPro ? "" : " 🔒")), "save-file", "second")}${button(esc(T("Load a profile…")), "load-file", "second")}</div>` +
       `<hr><h3>🛡️ ${esc(T("Automatic backup"))}</h3>` +
       hint(T("MoneyCompass keeps a copy of your profile in a file on this computer and updates it by itself after every change. If the browser data is ever deleted, open the file with \"Load a profile…\". Choose a folder like Documents or OneDrive.")) +
       `<p class="backup-line">${esc(backupLine())}</p>` +
@@ -206,7 +209,7 @@ export function openOptions() {
         : T("Off: profile files are plain text – anyone who opens the file can read your figures.")) +
       hint(T("The password is never saved and can't be recovered – if you forget it, protected files can't be opened. The Windows app can't open protected files.")) +
       `<div class="buttons">${fileProtected() ? button(esc(T("Change password…")), "file-pw", "second") + button(esc(T("Turn off")), "file-pw-off", "second")
-        : button(esc(T("Protect with a password…")), "file-pw", "main")}</div>`)}
+        : button(esc(T("Protect with a password…") + (license.isPro ? "" : " 🔒")), "file-pw", "main")}</div>`)}
     ${card(heading(T("Reset")) + hint(T("Delete all or only some of your entries: income, expenses, savings, saved offers, emergency fund settings or exchange rates. Your language and other options stay.")) +
       button(esc(T("Choose what to delete…")), "delete", "danger"))}
     </div><div class="popup-buttons"><button class="btn main" data-close>${esc(T("Close"))}</button></div>`, { width: 980, cls: "wide-popup", onClose: () => App.rebuild() });
@@ -218,6 +221,7 @@ export function openOptions() {
   el.querySelector('input[name="shownews"]').onchange = e => { s.NewsHidden = !e.target.checked; save(); };
   el.querySelector('input[name="showguide"]').onchange = e => { s.GuideHidden = !e.target.checked; save(); };
   el.querySelector('[data-action="file-pw"]').onclick = async () => {
+    if (!(await requirePro(T("Password for profile files")))) return;
     const pw = await passwordBox(T("Password for profile files"), T("At least 8 characters. Every profile file you save from now on is encrypted with it."), true);
     if (!pw) return;
     await setFilePassword(pw); toast("🔒 " + T("Profile files are now protected."), "good"); p.close(); openOptions();
