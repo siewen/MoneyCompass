@@ -107,50 +107,33 @@ export function waveChart(labels, series, fmtAxis, fmtValue, hidden = new Set())
   return `<svg class="wave-chart" viewBox="0 0 ${w} ${h}" role="img"><defs>${defs}</defs>${grid}${lines}${xl}</svg>`;
 }
 
-/** Savings account chart: two panels over the same months.
- *  Top: balance lines (lines: [{ key, label, color, values: [number|null], dashed }]) – null = no data that month.
- *  Bottom: account movements per month as bars (bars: [{ key, label, color, values: [], sign: 1 | -1 }]) – credits above
- *  the zero line, debits below. hidden: Set of keys to leave out. future: index of the first forecast month (or labels.length). */
-export function savingsChart(labels, lines, bars, fmtAxis, fmtValue, hidden = new Set(), future = labels.length) {
-  const w = 1000, left = 52, right = 10, top = 12, h1 = 165, gap = 24, h2 = 84, bottom = 30;
-  const h = top + h1 + gap + h2 + bottom, n = labels.length, plotW = w - left - right;
-  const slot = plotW / Math.max(1, n), X = i => left + slot * i + slot / 2;
-  const L = lines.filter(s => !hidden.has(s.key)), B = bars.filter(s => !hidden.has(s.key));
-  // Top panel: balance
-  const lv = L.flatMap(s => s.values.filter(v => v !== null && v !== undefined));
-  const lMax = niceMax(Math.max(1, ...lv) / 4) * 4, Y1 = v => top + h1 - v / lMax * h1;
+/** Savings account chart: one panel, only lines.
+ *  Balance lines (lines: [{ key, label, color, values: [number|null], dashed, main }]) use the left scale.
+ *  Monthly movements (flows: same shape, amounts ≥ 0) use their own scale on the right, so small fees stay visible next to a big balance.
+ *  hidden: Set of keys to leave out. future: index of the first forecast month (or labels.length). */
+export function savingsChart(labels, lines, flows, fmtAxis, fmtValue, hidden = new Set(), future = labels.length) {
+  const L = lines.filter(s => !hidden.has(s.key)), F = flows.filter(s => !hidden.has(s.key));
+  const w = 1000, left = 52, right = F.length ? 52 : 12, top = 14, h1 = 250, bottom = 30, h = top + h1 + bottom;
+  const n = labels.length, plotW = w - left - right, X = i => left + (n === 1 ? plotW / 2 : plotW * i / (n - 1));
+  const vals = a => a.flatMap(s => s.values.filter(v => v !== null && v !== undefined));
+  const lMax = niceMax(Math.max(1, ...vals(L)) / 4) * 4, Y1 = v => top + h1 - v / lMax * h1;
+  const fMax = niceMax(Math.max(1, ...vals(F)) / 4) * 4, Y2 = v => top + h1 - v / fMax * h1;
   let out = "";
   for (let k = 0; k <= 4; k++) {
-    const v = lMax / 4 * k, y = Y1(v);
-    out += `<line x1="${left}" x2="${w - right}" y1="${y}" y2="${y}" stroke="var(--grid)"${k ? ' stroke-dasharray="3 4"' : ' stroke-width="1.5"'}/><text x="${left - 6}" y="${y + 4}" text-anchor="end" class="axis">${esc(fmtAxis(v))}</text>`;
+    const y = Y1(lMax / 4 * k);
+    out += `<line x1="${left}" x2="${w - right}" y1="${y}" y2="${y}" stroke="var(--grid)"${k ? ' stroke-dasharray="3 4"' : ' stroke-width="1.5"'}/>`;
+    if (L.length) out += `<text x="${left - 6}" y="${y + 4}" text-anchor="end" class="axis">${esc(fmtAxis(lMax / 4 * k))}</text>`;
+    if (F.length) out += `<text x="${w - right + 6}" y="${y + 4}" class="axis">${esc(fmtAxis(fMax / 4 * k))}</text>`;
   }
-  // Forecast area: light background from the first future month
-  if (future < n) out += `<rect x="${left + slot * future}" y="${top}" width="${slot * (n - future)}" height="${h1 + gap + h2}" fill="var(--grid)" opacity=".35"/><text x="${left + slot * future + 6}" y="${top + 12}" class="axis">${esc(fmtValue.forecast || "")}</text>`;
-  for (const s of L) {
-    const pts = s.values.map((v, i) => v === null || v === undefined ? null : [X(i), Y1(v)]);
-    // Separate pieces where there is no data
+  if (future < n) out += `<rect x="${X(future - 1)}" y="${top}" width="${X(n - 1) - X(future - 1)}" height="${h1}" fill="var(--grid)" opacity=".35"/><text x="${X(future - 1) + 6}" y="${top + 12}" class="axis">${esc(fmtValue.forecast || "")}</text>`;
+  const draw = (s, Y, thin) => {
+    const pts = s.values.map((v, i) => v === null || v === undefined ? null : [X(i), Y(v)]);
     let d = "", pen = false;
     pts.forEach(p => { if (!p) { pen = false; return; } d += `${pen ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)} `; pen = true; });
-    out += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.main ? 3 : 2}" stroke-linejoin="round" stroke-linecap="round"${s.dashed ? ' stroke-dasharray="6 5"' : ""}/>`;
-    out += pts.map((p, i) => p ? `<circle cx="${p[0]}" cy="${p[1]}" r="${s.main ? 3.5 : 2.5}" fill="var(--card)" stroke="${s.color}" stroke-width="2"><title>${esc(labels[i])} · ${esc(s.label)}: ${esc(fmtValue(s.values[i]))}</title></circle>` : "").join("");
-  }
-  // Bottom panel: movements
-  const t2 = top + h1 + gap;
-  const up = Math.max(1, ...labels.map((_, i) => B.filter(b => b.sign > 0).reduce((m, b) => Math.max(m, b.values[i] || 0), 0)));
-  const dn = Math.max(0, ...labels.map((_, i) => B.filter(b => b.sign < 0).reduce((m, b) => Math.max(m, b.values[i] || 0), 0)));
-  // Money in above the zero line, money out below – each with its own scale, so small fees stay visible next to big deposits
-  const uMax = niceMax(up), dMax = dn > 0 ? niceMax(dn) : 0, upH = dMax ? h2 * .62 : h2, dnH = h2 - upH;
-  const Y2 = v => v >= 0 ? t2 + upH - v / uMax * upH : t2 + upH + (-v) / dMax * dnH;
-  out += `<line x1="${left}" x2="${w - right}" y1="${Y2(0)}" y2="${Y2(0)}" stroke="var(--grid)" stroke-width="1.5"/>
-    <text x="${left - 6}" y="${t2 + 8}" text-anchor="end" class="axis">${esc(fmtAxis(uMax))}</text>` + (dMax ? `<text x="${left - 6}" y="${t2 + h2}" text-anchor="end" class="axis">−${esc(fmtAxis(dMax))}</text>` : "");
-  const bw = Math.max(2, Math.min(12, slot * .8 / Math.max(1, B.length)));
-  labels.forEach((_, i) => {
-    B.forEach((b, j) => {
-      const v = b.values[i] || 0; if (!v) return;
-      const x = X(i) - bw * B.length / 2 + bw * j, y0 = Y2(0), y = Y2(b.sign * v);
-      out += `<rect x="${x.toFixed(1)}" y="${Math.min(y, y0).toFixed(1)}" width="${(bw - 1).toFixed(1)}" height="${Math.max(1, Math.abs(y0 - y)).toFixed(1)}" rx="2" fill="${b.color}"><title>${esc(labels[i])} · ${esc(b.label)}: ${b.sign < 0 ? "−" : "+"}${esc(fmtValue(v))}</title></rect>`;
-    });
-  });
+    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.main ? 3 : thin ? 1.8 : 2.2}" stroke-linejoin="round" stroke-linecap="round"${s.dashed ? ' stroke-dasharray="6 5"' : ""}/>` +
+      pts.map((p, i) => p ? `<circle cx="${p[0]}" cy="${p[1]}" r="${s.main ? 3.5 : 2.6}" fill="var(--card)" stroke="${s.color}" stroke-width="2"><title>${esc(labels[i])} · ${esc(s.label)}: ${esc(fmtValue(s.values[i]))}</title></circle>` : "").join("");
+  };
+  out += F.map(s => draw(s, Y2, true)).join("") + L.map(s => draw(s, Y1)).join("");
   const step = Math.max(1, Math.ceil(n / 12));
   out += labels.map((l, i) => i % step === 0 || i === n - 1 ? `<text x="${X(i)}" y="${h - 8}" text-anchor="middle" class="axis">${esc(l)}</text>` : "").join("");
   return `<svg class="savings-chart" viewBox="0 0 ${w} ${h}" role="img">${out}</svg>`;

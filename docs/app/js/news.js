@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 36, date: "2026-11-02", items: {
+    en: ["📈 Savings chart with lines only: balance on the left scale; interest, fees, credits and debits per month on the right scale. Click a name to show or hide a line."],
+    pl: ["📈 Wykres oszczędności tylko z liniami: saldo na lewej skali; odsetki, opłaty, uznania i obciążenia miesięcznie na prawej. Kliknij nazwę, aby pokazać lub ukryć linię."],
+    de: ["📈 Spardiagramm nur mit Linien: Saldo auf der linken Skala; Zinsen, Gebühren, Gutschriften und Belastungen pro Monat auf der rechten. Klicken Sie auf einen Namen, um eine Linie ein- oder auszublenden."],
+    fr: ["📈 Graphique de l'épargne uniquement en lignes : solde sur l'échelle de gauche ; intérêts, frais, crédits et débits mensuels sur celle de droite. Cliquez sur un nom pour afficher ou masquer une ligne."] } },
   { build: 35, date: "2026-11-02", items: {
     en: ["📈 Savings balance chart at the top of the Savings tab: closing balance per month for all your accounts, with credits, interest, debits and fees per month. From your oldest data to today – add a 1 to 6 month forecast if you like.", "🎯 Savings goals moved to the Budget plan, next to your monthly limits – a goal can now be linked to an account, so its progress updates by itself.", "🏦 Clearer banking terms: opening and closing balance, credits and debits, gross and net rate, withholding tax, fees & charges.", "🖱️ Scrollbars stay hidden until you move the mouse over a window."],
     pl: ["📈 Wykres salda oszczędności na górze zakładki Oszczędności: saldo końcowe każdego miesiąca dla wszystkich rachunków, z uznaniami, odsetkami, obciążeniami i opłatami. Od najstarszych danych do dziś – opcjonalnie z prognozą na 1–6 miesięcy.", "🎯 Cele oszczędnościowe przeniesione do Planu budżetu, obok miesięcznych limitów – cel można powiązać z rachunkiem, wtedy postęp aktualizuje się sam.", "🏦 Bardziej fachowe nazwy: saldo początkowe i końcowe, uznania i obciążenia, oprocentowanie brutto i netto, podatek od odsetek, opłaty i prowizje.", "🖱️ Paski przewijania są ukryte, dopóki nie najedziesz myszą na okno."],
