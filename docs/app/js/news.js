@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 44, date: "2026-11-02", items: {
+    en: ["👪 More category icons: family, children, toys, wedding, birthday, grandparents, home, and pets (paw, fish, bird, horse, rabbit, parrot)."],
+    pl: ["👪 Więcej ikon kategorii: rodzina, dzieci, zabawki, ślub, urodziny, dziadkowie, dom oraz zwierzęta (łapa, ryba, ptak, koń, królik, papuga)."],
+    de: ["👪 Mehr Kategoriesymbole: Familie, Kinder, Spielzeug, Hochzeit, Geburtstag, Großeltern, Zuhause und Haustiere (Pfote, Fisch, Vogel, Pferd, Hase, Papagei)."],
+    fr: ["👪 Plus d'icônes de catégorie : famille, enfants, jouets, mariage, anniversaire, grands-parents, maison et animaux (patte, poisson, oiseau, cheval, lapin, perroquet)."] } },
   { build: 43, date: "2026-11-02", items: {
     en: ["🏷️ \"New category…\" in any category list now lets you choose an icon and mark the category as essential."],
     pl: ["🏷️ „Nowa kategoria…” na każdej liście kategorii pozwala teraz wybrać ikonę i oznaczyć kategorię jako niezbędną."],
