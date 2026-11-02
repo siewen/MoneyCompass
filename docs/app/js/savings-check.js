@@ -147,6 +147,8 @@ export async function openSavingsCheck() {
       let h = d.Holdings[idx];
       if (!h) { h = { Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: name || T("Savings account"), Place: "Bank", Currency: "PLN", Safe: true }; d.Holdings.push(h); }
       h.Amount = r2(r.closing); h.RatePercent = r2(r.gross);
+      // The month-end balances of the statement become the account's history (the chart keeps them even without the analysis)
+      h.History = mergeHistory(h.History, r.months.map(m => ({ Date: isoDate(new Date(m.m.getFullYear(), m.m.getMonth() + 1, 0)), Amount: r2(m.end) })), isoDate(r.to), h.Amount);
       return h;
     };
     p.el.querySelector('[data-action="save-check"]').onclick = () => {
@@ -195,7 +197,8 @@ export function bindSavedChecks(el, d) {
   // A saved check without a savings entry: create one with the balance at the end and the rate before tax
   el.querySelectorAll('[data-action="check-hold"]').forEach(b => b.onclick = () => {
     const c = d.SavingsChecks.find(x => x.Id === b.dataset.check); if (!c) return;
-    const h = { Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: c.Name, Place: "Bank", Currency: "PLN", Safe: true, Amount: c.Closing, RatePercent: c.Gross };
+    const h = { Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: c.Name, Place: "Bank", Currency: "PLN", Safe: true, Amount: c.Closing, RatePercent: c.Gross,
+      History: mergeHistory([], (c.Months || []).map(m => { const t = parseDate(m.Month); return { Date: isoDate(new Date(t.getFullYear(), t.getMonth() + 1, 0)), Amount: m.End ?? m.Average }; }), c.To, c.Closing) };
     d.Holdings.push(h); c.HoldingId = h.Id; save(); App.refresh();
     toast(T("{0}: {1} at {2}.", h.Name, pln(h.Amount), rate(h.RatePercent)), "good");
   });
@@ -205,6 +208,14 @@ export function bindSavedChecks(el, d) {
     if (!(await confirmBox(T("Delete this check?"), d.SavingsChecks.find(c => c.Id === b.dataset.delCheck)?.Name || "", T("Delete"), T("Cancel"), true))) return;
     d.SavingsChecks = d.SavingsChecks.filter(c => c.Id !== b.dataset.delCheck); save(); App.refresh();
   });
+}
+
+/** History of a savings account: existing points plus month-end balances from a statement, the closing balance last. */
+function mergeHistory(old, points, closingDate, closing) {
+  const map = new Map((old || []).map(x => [x.Date.slice(0, 10), x]));
+  for (const p of points) map.set(p.Date.slice(0, 10), p);
+  map.set(String(closingDate).slice(0, 10), { Date: closingDate, Amount: closing });
+  return [...map.values()].sort((a, b) => a.Date.localeCompare(b.Date));
 }
 
 // ---------- Savings chart (top of the Savings tab) ----------
@@ -294,6 +305,7 @@ export function savingsChartCard(d) {
       ${AHEAD ? fig(T("Forecast in {0} months", AHEAD), pln(x.fut[AHEAD - 1])) : ""}
       <label class="sav-ahead"><span>${esc(T("Forecast"))}</span><select data-sav-ahead>${[[0, T("Off")], [1, T("1 month")], [3, T("{0} months", 3)], [6, T("{0} months", 6)]].map(([v, l]) => `<option value="${v}"${v === AHEAD ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label></div>` +
     `<div class="wave-legend">${keys}</div>` + savingsChart(labels, lines, bars, axis, fmtV, hid, n) +
+    (n === 1 ? `<p class="hint">💡 ${esc(T("Only today's balance is known so far. Analyse a statement of your savings account to see how the balance developed month by month."))}</p>` : "") +
     hint(T("Closing balance of each month, from your statement analyses and the amounts you entered. Credits and debits per month (left scale), interest and fees per month (right scale) come from imported statements. Forecast (optional): today's rates after tax, plus your standing orders. Click a name to show or hide it.")), "wide fixed sav-chart-card");
 }
 export function bindSavingsChart(el, d) {

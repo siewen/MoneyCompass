@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 40, date: "2026-11-02", items: {
+    en: ["🛠️ Bank import: transfers to a savings account are no longer counted twice – transfers dated before the account's known balance (from a statement analysis or your last update) are already in it and are not added again.", "📈 A savings account created from a statement analysis keeps its month-end balances, so the chart shows the history even without the analysis."],
+    pl: ["🛠️ Import wyciągu: przelewy na rachunek oszczędnościowy nie są już liczone podwójnie – przelewy sprzed znanego salda rachunku (z analizy wyciągu lub ostatniej aktualizacji) są już w nim zawarte i nie są dodawane ponownie.", "📈 Rachunek oszczędnościowy utworzony z analizy wyciągu zachowuje salda na koniec miesięcy, więc wykres pokazuje historię nawet bez analizy."],
+    de: ["🛠️ Bankimport: Überweisungen aufs Sparkonto werden nicht mehr doppelt gezählt – Überweisungen vor dem bekannten Kontostand (aus einer Auszugsanalyse oder Ihrer letzten Änderung) sind bereits enthalten und werden nicht erneut addiert.", "📈 Ein aus einer Auszugsanalyse erstelltes Sparkonto behält seine Monatsend-Salden, sodass das Diagramm den Verlauf auch ohne die Analyse zeigt."],
+    fr: ["🛠️ Import bancaire : les virements vers un compte d'épargne ne sont plus comptés deux fois – les virements antérieurs au solde connu du compte (analyse de relevé ou dernière mise à jour) y sont déjà inclus et ne sont pas ajoutés à nouveau.", "📈 Un compte d'épargne créé à partir d'une analyse de relevé garde ses soldes de fin de mois : le graphique montre l'historique même sans l'analyse."] } },
   { build: 39, date: "2026-11-02", items: {
     en: ["📈 Savings chart: credits and debits now use the left scale with the balance, so the interest and fees line on the right scale is always readable – all lines can be shown together."],
     pl: ["📈 Wykres oszczędności: uznania i obciążenia są teraz na lewej skali razem z saldem, więc linia odsetek i opłat na prawej skali jest zawsze czytelna – wszystkie linie mogą być widoczne razem."],

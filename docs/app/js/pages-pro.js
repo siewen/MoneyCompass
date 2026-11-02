@@ -584,12 +584,19 @@ export async function openBankImport() {
     }
     if (fixedOwn) toast(T("{0} earlier payments were moves between your own accounts in different banks – no longer counted as income or expenses.", fixedOwn), "good");
     const saved = transfers.filter(t => t.toSavings);
-    let target = null;
+    let target = null, skippedOld = 0, skippedDate = 0, addedToSavings = 0;
     if (saved.length) {
       const idx = +(v.target ?? -1);
       target = idx >= 0 ? d.Holdings[idx] : null;
       if (!target) { target = { Id: uuid(), Name: T("Savings account"), Place: "Bank", Amount: 0, Currency: "PLN", RatePercent: 0, Safe: true }; d.Holdings.push(target); }
-      target.Amount += saved.reduce((a, t) => a + t.pln, 0);
+      // The amount of a savings account is its balance on a date (the last statement analysis or the last time it was changed).
+      // Transfers up to that date are already in it – only later ones are added, so nothing is counted twice.
+      const known = [...(target.History || []).map(x => x.Date), ...(d.SavingsChecks || []).filter(c => c.HoldingId === target.Id).map(c => c.To)].filter(Boolean).map(x => parseDate(x).getTime());
+      const asOf = known.length && target.Amount > 0 ? Math.max(...known) : -Infinity;
+      const newer = saved.filter(t => t.row.date.getTime() > asOf);
+      skippedOld = saved.length - newer.length; skippedDate = asOf;
+      target.Amount = Math.round((target.Amount + newer.reduce((a, t) => a + t.pln, 0)) * 100) / 100;
+      addedToSavings = newer.reduce((a, t) => a + t.pln, 0);
       // Marked "every month": the newest such transfer becomes the regular deposit of that savings entry
       const monthly = saved.filter(t => t.monthly).sort((a, b) => b.row.date - a.row.date)[0];
       if (monthly) Object.assign(target, { Deposit: monthly.pln, DepositFrequency: "Monthly", DepositDate: isoDate(monthly.row.date),
@@ -599,7 +606,8 @@ export async function openBankImport() {
     save();
     let msg = !received.length ? T("{0} expenses were added. You find them in the Outflows tab.", items.length)
       : T("{0} expenses were added (Outflows tab) and {1} payments received (Inflows tab).", items.length, received.length);
-    if (target) msg += "\n" + T("{0} went into savings: added to \"{1}\" (Savings tab).", pln(saved.reduce((a, t) => a + t.pln, 0)), target.Name);
+    if (target && addedToSavings > 0) msg += "\n" + T("{0} went into savings: added to \"{1}\" (Savings tab).", pln(addedToSavings), target.Name);
+    if (target && skippedOld) msg += "\n" + T("{0} earlier transfers to savings are already in the balance of \"{1}\" (known on {2}) and were not added again.", skippedOld, target.Name, fmtDate(new Date(skippedDate)));
     p.close();
     await alertBox(T("Import finished"), msg);
     for (const r of received.filter(r => r.Kind === RECEIVED.salary)) await offerSalary(r);
