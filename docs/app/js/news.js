@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 30, date: "2026-11-02", items: {
+    en: ["🔍 New in Savings: \"What does my savings account really pay?\" – import the CSV statement of a savings account and see the real rate per year and per month, worked out from the money really on the account day by day, with interest, the 19% tax and fees. One click puts the result into your savings entry."],
+    pl: ["🔍 Nowość w Oszczędnościach: „Ile naprawdę płaci moje konto oszczędnościowe?” – zaimportuj wyciąg CSV z konta oszczędnościowego i zobacz rzeczywiste oprocentowanie rocznie i miesięcznie, wyliczone ze środków dzień po dniu, z odsetkami, 19% podatku i opłatami. Jednym kliknięciem wynik trafia do Twojej pozycji oszczędności."],
+    de: ["🔍 Neu bei Ersparnisse: „Was zahlt mein Sparkonto wirklich?“ – importieren Sie den CSV-Auszug eines Sparkontos und sehen Sie den echten Zinssatz pro Jahr und Monat, berechnet aus dem Guthaben Tag für Tag, mit Zinsen, 19 % Steuer und Gebühren. Ein Klick übernimmt das Ergebnis in Ihren Spar-Eintrag."],
+    fr: ["🔍 Nouveau dans Épargne : « Combien rapporte vraiment mon compte d'épargne ? » – importez le relevé CSV d'un compte d'épargne et voyez le taux réel par an et par mois, calculé sur le solde jour par jour, avec intérêts, impôt de 19 % et frais. Un clic reporte le résultat dans votre ligne d'épargne."] } },
   { build: 29, date: "2026-11-02", items: {
     en: ["🌿 One design: Emerald. Navy and the classic designs are gone, so everything looks the same everywhere – and the profile window opens next to the side menu."],
     pl: ["🌿 Jeden wygląd: Emerald. Granatowy i klasyczne wyglądy zostały usunięte, więc wszystko wygląda wszędzie tak samo – a okno profilu otwiera się obok menu bocznego."],

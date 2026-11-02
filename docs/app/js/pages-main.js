@@ -765,6 +765,9 @@ export const Portfolio = {
         <div class="right"><b>${amount(x.Amount, x.Currency)}</b>${currentRate(x) ? `<span class="hint">${esc(T("{0} / year", pln(Calc.toPln(x.Amount, x.Currency, s) * currentRate(x) / 100)))}</span>` : ""}${x.Deposit > 0 ? `<span class="hint primary">🔁 +${esc(pln(x.Deposit))} · ${esc(freqLabel(x.DepositFrequency || "Monthly"))}${x.DepositFrom ? " · " + esc(T("from {0}", x.DepositFrom)) : ""}</span>` : ""}</div>
         ${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("Nothing added yet."))))}
       ${adviceCard(d)}
+      ${card(heading(T("What does my savings account really pay?"), "🔍") +
+        hint(T("Import the CSV statement of a savings account: MoneyCompass checks the money on it day by day, the interest, the 19% tax and any fees – and shows the real rate the bank pays you, per year and per month.")) +
+        `<div class="buttons">${button("⬆ " + esc(T("Check a savings account statement (CSV)…")) + (license.isPro ? "" : " 🔒"), "savings-check", "second")}</div>`)}
       ${card(`<form id="fx">${heading(T("Exchange rates"))}${hint(T("Used to convert dollars and euros to złoty."))}
         ${check("auto", T("Update automatically with the official NBP rates"), s.AutoExchangeRates)}
         <div class="two">${field("1 USD = … zł", numInput("usd", plain(s.UsdToPln)))}${field("1 EUR = … zł", numInput("eur", plain(s.EurToPln)))}</div>${hint(rateInfo)}</form>`)}
@@ -780,6 +783,7 @@ export const Portfolio = {
       const gg = sec.querySelector(".goals-host .grid"); if (gg) gg.dataset.key = "web:goals";
     }
     bindAdvice(el, d);
+    el.querySelector('[data-action="savings-check"]')?.addEventListener("click", async () => (await import("./savings-check.js")).openSavingsCheck());
     const form = el.querySelector("#hold");
     const saveIt = () => {
       const v = values(form), amt = num(v.amount);

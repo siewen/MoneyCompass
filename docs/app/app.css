@@ -618,3 +618,11 @@ body.is-locked .lock-screen ~ .popup-back { visibility: visible; z-index: 1100; 
   :root[data-design][data-side="pinned"] .popup-back.anchor-top-right { padding-left: 262px; }
   :root[data-design] .anchor-top-right .popup { transform-origin: bottom left; max-height: calc(100vh - 28px); }
 }
+.real-rate { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 6px 0 4px; }
+.real-rate > div { background: var(--soft); border: 1px solid var(--border); border-radius: 16px; padding: 12px 14px; }
+.real-rate span { display: block; font-size: 13px; color: var(--muted); }
+.real-rate b { font-size: 30px; font-weight: 600; }
+.rate-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.rate-table th, .rate-table td { text-align: right; padding: 7px 8px; border-bottom: 1px solid var(--border); }
+.rate-table th:first-child, .rate-table td:first-child { text-align: left; }
+.rate-table th { color: var(--muted); font-weight: 600; }
