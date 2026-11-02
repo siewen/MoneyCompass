@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 57, date: "2026-11-02", items: {
+    en: ["🛠️ Reports: each diagram now belongs to its part and appears right under it – choose only Loans and you get only Loans. Table headers and legend colours now print in PDF too."],
+    pl: ["🛠️ Raporty: każdy wykres należy teraz do swojej części i jest tuż pod nią – wybierz tylko Kredyty, a dostaniesz tylko Kredyty. Nagłówki tabel i kolory legendy są teraz drukowane także w PDF."],
+    de: ["🛠️ Berichte: Jedes Diagramm gehört jetzt zu seinem Teil und steht direkt darunter – wählen Sie nur Kredite, bekommen Sie nur Kredite. Tabellenköpfe und Legendenfarben werden jetzt auch im PDF gedruckt."],
+    fr: ["🛠️ Rapports : chaque graphique appartient désormais à sa partie et apparaît juste en dessous – choisissez seulement Prêts et vous n'obtenez que les Prêts. Les en-têtes de tableau et les couleurs de légende s'impriment aussi en PDF."] } },
   { build: 56, date: "2026-11-02", items: {
     en: ["🟢 Calmer menu: the page you are on is shown with a soft green tint instead of a solid green bar."],
     pl: ["🟢 Spokojniejsze menu: otwarta strona ma teraz delikatne zielone tło zamiast pełnego zielonego paska."],
