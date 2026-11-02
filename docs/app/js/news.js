@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 62, date: "2026-11-02", items: {
+    en: ["👆 Fingerprint and face unlock is more reliable, and if it fails the lock screen now says why."],
+    pl: ["👆 Odblokowanie odciskiem palca i twarzą działa pewniej, a gdy się nie uda, ekran blokady podaje przyczynę."],
+    de: ["👆 Entsperren per Fingerabdruck und Gesicht ist zuverlässiger, und wenn es scheitert, nennt der Sperrbildschirm den Grund."],
+    fr: ["👆 Le déverrouillage par empreinte et visage est plus fiable, et en cas d'échec l'écran de verrouillage en indique la raison."] } },
   { build: 61, date: "2026-11-02", items: {
     en: ["🎨 Statement analyses in soft colours: money in is green, money out is red, nothing (0,00) is grey."],
     pl: ["🎨 Analizy wyciągów w stonowanych kolorach: wpływy na zielono, wypływy na czerwono, zero (0,00) na szaro."],

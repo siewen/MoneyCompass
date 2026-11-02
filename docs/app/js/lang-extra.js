@@ -888,7 +888,13 @@ export const EXTRA = {
 "Up": "Nach oben",
 "Down": "Nach unten",
 "Standard order": "Standardreihenfolge",
-"Change the menu order": "Menü-Reihenfolge ändern"
+"Change the menu order": "Menü-Reihenfolge ändern",
+"no answer from the device": "keine Antwort vom Gerät",
+"the answer did not belong to this request": "die Antwort gehört nicht zu dieser Anfrage",
+"the answer came for another address ({0})": "die Antwort gilt für eine andere Adresse ({0})",
+"the device did not confirm your fingerprint or face": "das Gerät hat Fingerabdruck oder Gesicht nicht bestätigt",
+"cancelled, timed out, or this device does not know the saved fingerprint or face – set it up again in the profile": "abgebrochen, Zeit abgelaufen oder dieses Gerät kennt den gespeicherten Fingerabdruck/das Gesicht nicht – im Profil neu einrichten",
+"this device does not know the saved fingerprint or face – set it up again in the profile": "dieses Gerät kennt den gespeicherten Fingerabdruck/das Gesicht nicht – im Profil neu einrichten"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1778,7 +1784,13 @@ export const EXTRA = {
 "Up": "Monter",
 "Down": "Descendre",
 "Standard order": "Ordre standard",
-"Change the menu order": "Changer l'ordre du menu"
+"Change the menu order": "Changer l'ordre du menu",
+"no answer from the device": "aucune réponse de l'appareil",
+"the answer did not belong to this request": "la réponse ne correspond pas à cette demande",
+"the answer came for another address ({0})": "la réponse concerne une autre adresse ({0})",
+"the device did not confirm your fingerprint or face": "l'appareil n'a pas confirmé l'empreinte ou le visage",
+"cancelled, timed out, or this device does not know the saved fingerprint or face – set it up again in the profile": "annulé, délai dépassé ou cet appareil ne connaît pas l'empreinte/le visage enregistré – configurez-le à nouveau dans le profil",
+"this device does not know the saved fingerprint or face – set it up again in the profile": "cet appareil ne connaît pas l'empreinte/le visage enregistré – configurez-le à nouveau dans le profil"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -2668,6 +2680,12 @@ export const EXTRA = {
 "Up": "W górę",
 "Down": "W dół",
 "Standard order": "Kolejność standardowa",
-"Change the menu order": "Zmień kolejność menu"
+"Change the menu order": "Zmień kolejność menu",
+"no answer from the device": "brak odpowiedzi urządzenia",
+"the answer did not belong to this request": "odpowiedź nie pasuje do tego żądania",
+"the answer came for another address ({0})": "odpowiedź dotyczy innego adresu ({0})",
+"the device did not confirm your fingerprint or face": "urządzenie nie potwierdziło odcisku palca ani twarzy",
+"cancelled, timed out, or this device does not know the saved fingerprint or face – set it up again in the profile": "anulowano, upłynął czas lub to urządzenie nie zna zapisanego odcisku palca/twarzy – skonfiguruj go ponownie w profilu",
+"this device does not know the saved fingerprint or face – set it up again in the profile": "to urządzenie nie zna zapisanego odcisku palca/twarzy – skonfiguruj go ponownie w profilu"
 }
 };

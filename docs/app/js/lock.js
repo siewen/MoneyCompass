@@ -51,15 +51,33 @@ export async function enableBio() {
     store.set(bioKey(), b64u(cred.rawId)); return true;
   } catch { return false; }
 }
-/** Ask the device for the fingerprint or face. True only when the device confirmed the owner. */
-async function bioCheck() {
-  try {
-    const challenge = crypto.getRandomValues(new Uint8Array(32));
-    const a = await navigator.credentials.get({ publicKey: { challenge, allowCredentials: [{ type: "public-key", id: unb64u(store.get(bioKey())) }], userVerification: "required", timeout: 60000 } });
-    const cd = JSON.parse(new TextDecoder().decode(a.response.clientDataJSON));
-    const flags = new Uint8Array(a.response.authenticatorData)[32];
-    return cd.type === "webauthn.get" && cd.challenge === b64u(challenge) && cd.origin === location.origin && !!(flags & 4);
-  } catch { return false; }
+/** Ask the device for the fingerprint or face. True only when the device confirmed the owner.
+ *  Only one request at a time: a second one (button click while the automatic try is still open) waits for the same answer
+ *  instead of cancelling it. When it fails, bioWhy holds the reason shown on the lock screen. */
+let bioPending = null, bioWhy = "";
+function bioCheck() {
+  if (bioPending) return bioPending;
+  bioPending = (async () => {
+    bioWhy = "";
+    try {
+      const challenge = crypto.getRandomValues(new Uint8Array(32));
+      const a = await navigator.credentials.get({ publicKey: { challenge, allowCredentials: [{ type: "public-key", id: unb64u(store.get(bioKey())), transports: ["internal", "hybrid"] }], userVerification: "required", timeout: 60000 } });
+      if (!a) { bioWhy = T("no answer from the device"); return false; }
+      const cd = JSON.parse(new TextDecoder().decode(a.response.clientDataJSON));
+      const flags = new Uint8Array(a.response.authenticatorData)[32];
+      if (cd.type !== "webauthn.get" || cd.challenge !== b64u(challenge)) { bioWhy = T("the answer did not belong to this request"); return false; }
+      if (cd.origin !== location.origin) { bioWhy = T("the answer came for another address ({0})", cd.origin); return false; }
+      if (!(flags & 4)) { bioWhy = T("the device did not confirm your fingerprint or face"); return false; }
+      return true;
+    } catch (e) {
+      bioWhy = e?.name === "NotAllowedError" ? T("cancelled, timed out, or this device does not know the saved fingerprint or face – set it up again in the profile")
+        : e?.name === "InvalidStateError" ? T("this device does not know the saved fingerprint or face – set it up again in the profile")
+        : (e?.name || "") + (e?.message ? ": " + e.message : "");
+      return false;
+    }
+  })();
+  bioPending.finally(() => { bioPending = null; });
+  return bioPending;
 }
 
 // ---------- the lock screen ----------
@@ -103,10 +121,10 @@ export function lock(next = null) {
   el.querySelector(".lock-open").onclick = open;
   const bio = async () => {
     if (await bioCheck()) { if (el.isConnected) { fails = 0; unlock(); } }
-    else if (el.isConnected) { err.hidden = false; err.textContent = T("Not recognised. Try again or enter your PIN."); }
+    else if (el.isConnected && err) { err.hidden = false; err.textContent = T("Not recognised. Try again or enter your PIN.") + (bioWhy ? " (" + bioWhy + ")" : ""); }
   };
   const bioBtn = el.querySelector(".lock-bio");
-  if (bioBtn) { bioBtn.onclick = bio; setTimeout(() => { if (el.isConnected && !document.hidden) bioCheck().then(ok => { if (ok && el.isConnected) { fails = 0; unlock(); } }); }, 300); }
+  if (bioBtn) { bioBtn.onclick = bio; setTimeout(() => { if (el.isConnected && !document.hidden && document.hasFocus()) bio(); }, 300); }
   input?.addEventListener("keydown", e => { if (e.key === "Enter") open(); });
   el.querySelector(".lock-switch select")?.addEventListener("change", e => {
     if (!e.target.value) return;
