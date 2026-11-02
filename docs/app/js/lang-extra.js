@@ -665,7 +665,8 @@ export const EXTRA = {
 "Enter the end date, or tick \"No end date\".": "Geben Sie das Enddatum ein oder wählen Sie „Kein Enddatum“.",
 "Imported inflows": "Importierte Eingänge",
 "{0} payments": "{0} Zahlungen",
-"Nothing here with this filter.": "Nichts mit diesem Filter."
+"Nothing here with this filter.": "Nichts mit diesem Filter.",
+"On {0}: about {1} a year after tax – a savings account, your money stays available.": "Auf {0}: etwa {1} pro Jahr nach Steuern – ein Sparkonto, Ihr Geld bleibt verfügbar."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1332,7 +1333,8 @@ export const EXTRA = {
 "Enter the end date, or tick \"No end date\".": "Saisissez la date de fin ou cochez « Sans date de fin ».",
 "Imported inflows": "Entrées importées",
 "{0} payments": "{0} paiements",
-"Nothing here with this filter.": "Rien avec ce filtre."
+"Nothing here with this filter.": "Rien avec ce filtre.",
+"On {0}: about {1} a year after tax – a savings account, your money stays available.": "Sur {0} : environ {1} par an après impôt – un compte d'épargne, votre argent reste disponible."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -1999,6 +2001,7 @@ export const EXTRA = {
 "Enter the end date, or tick \"No end date\".": "Wpisz datę zakończenia albo zaznacz „Bez daty zakończenia”.",
 "Imported inflows": "Zaimportowane wpływy",
 "{0} payments": "Płatności: {0}",
-"Nothing here with this filter.": "Brak pozycji dla tego filtra."
+"Nothing here with this filter.": "Brak pozycji dla tego filtra.",
+"On {0}: about {1} a year after tax – a savings account, your money stays available.": "Na {0}: około {1} rocznie po podatku – konto oszczędnościowe, pieniądze są cały czas dostępne."
 }
 };

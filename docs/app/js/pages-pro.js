@@ -168,7 +168,7 @@ function optimizeHtml() {
     const inOffer = o.MaxAmount > 0 ? Math.min(amt, o.MaxAmount) : amt, days = Math.min(Math.max(o.Days || 365, 1), 365);
     const net = inOffer * o.Rate / 100 * days / 365 * (1 - BELKA);
     return `<div class="offer"><div><b>${esc(o.Bank)}</b>${o.Name ? `<div>${esc(o.Name)}</div>` : ""}${o.Details ? `<span class="hint">${esc(o.Details)}</span>` : ""}
-      <div class="good small">${esc(days >= 365 ? T("On {0}: about {1} after tax in a year.", pln(inOffer), pln(net)) : T("On {0}: about {1} after tax in {2} days.", pln(inOffer), pln(net), days))}</div></div>
+      <div class="good small">${esc(days >= 365 ? (key === "s" ? T("On {0}: about {1} a year after tax – a savings account, your money stays available.", pln(inOffer), pln(net)) : T("On {0}: about {1} after tax in a year.", pln(inOffer), pln(net))) : T("On {0}: about {1} after tax in {2} days.", pln(inOffer), pln(net), days))}</div></div>
       <div class="offer-right"><b class="rate">${rate(o.Rate)}</b><a class="btn second small" href="${esc(Rates.link(o))}" target="_blank" rel="noopener">${esc(T("Open offer"))}</a>
       <button class="btn second small" data-compare="${key}:${i}">＋ ${esc(T("Compare"))}</button></div></div>`;
   }).join("<hr>");
