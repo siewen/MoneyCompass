@@ -299,11 +299,13 @@
             <li data-t="pr2"></li>
             <li data-t="pr3"></li>
             <li data-t="pr4"></li>
+            <li data-t="pr10"></li>
             <li data-t="pr5"></li>
             <li data-t="pr6"></li>
             <li data-t="pr7"></li>
             <li data-t="pr8"></li>
             <li data-t="pr9"></li>
+            <li data-t="pr11"></li>
           </ul>
           <a class="btn go" id="buy" href="#" data-t="get_pro"></a>
           <p class="small" id="buy-note" data-t="buy_note"></p>
@@ -864,6 +866,55 @@ const T4 = {
  }
 };
 for (const l in T4) Object.assign(T[l], T4[l]);
+
+// Plans: free versions are demos; Pro lists the newest features
+const T5 = {
+ "en": {
+  "plan_web": "Web Free (demo)",
+  "plan_win": "Windows Free (demo)",
+  "pw1": "Inflows, outflows & trends",
+  "pw5": "Automatic encrypted backup",
+  "pw7": "PIN, fingerprint/face unlock & auto-lock",
+  "px1": "Inflows, outflows, emergency fund & savings",
+  "pr4": "Effective rate analysis of savings statements",
+  "pr10": "Savings balance chart & forecast",
+  "pr11": "🔒 PIN, fingerprint/face, auto-lock & encrypted backup (Windows: from version 2.1)"
+ },
+ "pl": {
+  "plan_web": "Web Free (demo)",
+  "plan_win": "Windows Free (demo)",
+  "pw1": "Wpływy, wydatki i trendy",
+  "pw5": "Automatyczna zaszyfrowana kopia",
+  "pw7": "PIN, odblokowanie odciskiem palca/twarzą i autoblokada",
+  "px1": "Wpływy, wydatki, fundusz awaryjny i oszczędności",
+  "pr4": "Analiza efektywnego oprocentowania z wyciągów",
+  "pr10": "Wykres salda oszczędności i prognoza",
+  "pr11": "🔒 PIN, odcisk palca/twarz, autoblokada i zaszyfrowana kopia (Windows: od wersji 2.1)"
+ },
+ "de": {
+  "plan_web": "Web Free (Demo)",
+  "plan_win": "Windows Free (Demo)",
+  "pw1": "Eingänge, Ausgaben & Trends",
+  "pw5": "Automatische verschlüsselte Sicherung",
+  "pw7": "PIN, Entsperren per Fingerabdruck/Gesicht & Auto-Sperre",
+  "px1": "Eingänge, Ausgaben, Notgroschen & Ersparnisse",
+  "pr4": "Effektivzins-Analyse von Sparkontoauszügen",
+  "pr10": "Sparsaldo-Diagramm & Prognose",
+  "pr11": "🔒 PIN, Fingerabdruck/Gesicht, Auto-Sperre & verschlüsselte Sicherung (Windows: ab Version 2.1)"
+ },
+ "fr": {
+  "plan_web": "Web Free (démo)",
+  "plan_win": "Windows Free (démo)",
+  "pw1": "Entrées, sorties et tendances",
+  "pw5": "Sauvegarde automatique chiffrée",
+  "pw7": "PIN, déverrouillage par empreinte/visage et verrouillage auto",
+  "px1": "Entrées, sorties, épargne de précaution et épargne",
+  "pr4": "Analyse du taux effectif des relevés d'épargne",
+  "pr10": "Graphique du solde de l'épargne et prévision",
+  "pr11": "🔒 PIN, empreinte/visage, verrouillage auto et sauvegarde chiffrée (Windows : à partir de la version 2.1)"
+ }
+};
+for (const l in T5) Object.assign(T[l], T5[l]);
 
 let latestVersion = "";
 
