@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 61, date: "2026-11-02", items: {
+    en: ["🎨 Statement analyses in soft colours: money in is green, money out is red, nothing (0,00) is grey."],
+    pl: ["🎨 Analizy wyciągów w stonowanych kolorach: wpływy na zielono, wypływy na czerwono, zero (0,00) na szaro."],
+    de: ["🎨 Auszugsanalysen in sanften Farben: Eingänge grün, Ausgänge rot, nichts (0,00) grau."],
+    fr: ["🎨 Analyses de relevés en couleurs douces : entrées en vert, sorties en rouge, rien (0,00) en gris."] } },
   { build: 60, date: "2026-11-02", items: {
     en: ["↕️ Your own menu order (Pro): drag a page up or down in the side menu, or use Options → Menu order (also on phones). \"Standard order\" puts it back."],
     pl: ["↕️ Własna kolejność menu (Pro): przeciągnij stronę w górę lub w dół w menu bocznym albo użyj Opcje → Kolejność menu (także na telefonie). „Kolejność standardowa” przywraca ustawienie."],

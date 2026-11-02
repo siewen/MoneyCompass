@@ -6,6 +6,10 @@ import { savingsChart } from "./charts.js";
 import { Rates } from "./rates.js";
 import * as Csv from "./csv.js";
 import { App, requirePro } from "./app.js";
+// Soft colours for money: green = in, red = out, grey = nothing (0,00 shown without a sign)
+const flow = (label, v, dir, extra = "") => Math.abs(v) < 0.005 ? row(label, pln(0), ("nil " + extra).trim())
+  : row(label, (dir > 0 ? "+" : "−") + pln(Math.abs(v)), ((dir > 0 ? "in " : "out ") + extra).trim());
+const rateCls = v => v < 0 ? "out" : v < 2 ? "low" : "in";
 
 const DAY = 86400000;
 const INTEREST = /odsetk|kapitalizac|naliczen.{0,12}odset|interest|oprocentowani/i;
@@ -113,20 +117,20 @@ export async function openSavingsCheck(fileObj = null) {
       ${hint(T("From your statement {0} – {1} ({2} days). Interest, tax and fees are compared with the money that was really on the account, day by day. Whole months give the most exact result.", fmtDate(r.from), fmtDate(r.to), r.days))}
       <div class="grid">
         ${card(heading(T("Effective interest rate"), "📊") + warn +
-          `<div class="real-rate"><div><span>${esc(T("Gross rate p.a."))}</span><b>${rate(r.gross)}</b></div><div><span>${esc(T("Net rate p.a. (after tax and fees)"))}</span><b class="${r.netAfterBelka < 2 ? "bad" : "good"}">${rate(r.netAfterBelka)}</b></div></div>` +
+          `<div class="real-rate"><div><span>${esc(T("Gross rate p.a."))}</span><b>${rate(r.gross)}</b></div><div><span>${esc(T("Net rate p.a. (after tax and fees)"))}</span><b class="${rateCls(r.netAfterBelka)}">${rate(r.netAfterBelka)}</b></div></div>` +
           hint(T("Per year, on your average balance. Per month that is about {0} of your money after tax.", rate(r.netAfterBelka / 12))) +
           (best ? `<p>${esc(bestGain > 1 ? T("With {0} ({1}) you would have earned about {2} more in this period, after tax.", `${best.Bank}${best.Name ? " – " + best.Name : ""}`, rate(best.Rate), pln(bestGain)) : T("Your account pays about as much as today's best offers."))}</p>` : ""))}
         ${card(heading(T("Account activity"), "💰") +
           (hasBalance ? "" : field(T("Balance at the start of the statement (zł)"), numInput("opening", String(opening).replace(".", ","))) + hint(T("This file has no balance column – enter what was on the account on {0}.", fmtDate(r.from)))) +
-          row(T("Opening balance"), pln(r.opening)) + row(T("Credits (deposits)"), "+" + pln(r.deposits)) + row(T("Debits (withdrawals)"), "−" + pln(r.withdrawals)) +
+          row(T("Opening balance"), pln(r.opening)) + flow(T("Credits (deposits)"), r.deposits, 1) + flow(T("Debits (withdrawals)"), r.withdrawals, -1) +
           row(T("Closing balance"), pln(r.closing)) + row(T("Average balance"), pln(r.avg)))}
         ${card(heading(T("Interest, tax and charges"), "🧾") +
-          row(T("Gross interest"), "+" + pln(r.grossAll), "good") +
+          flow(T("Gross interest"), r.grossAll, 1) +
           (r.earlier > 0.005 ? hint(T("{0} of it was credited on {1} for the month before the statement – not counted in the rate.", pln(r.grossAll * r.earlierShare), fmtDate(r.from))) : "") +
-          row(T("Withholding tax (Belka, 19%)"), "−" + pln(r.taxAll)) + (r.taxInFile ? "" : hint(T("Your bank credits the interest already after the 19% tax ({0} credited) – the interest before tax is worked out from it.", pln(r.interest)))) +
-          row(T("Fees & charges"), "−" + pln(r.fees), r.fees > 0 ? "bad" : "") + row(T("Average monthly fees"), "−" + pln(r.fees / (r.days / 30.44)), r.fees > 0 ? "bad" : "") +
+          flow(T("Withholding tax (Belka, 19%)"), r.taxAll, -1) + (r.taxInFile ? "" : hint(T("Your bank credits the interest already after the 19% tax ({0} credited) – the interest before tax is worked out from it.", pln(r.interest)))) +
+          flow(T("Fees & charges"), r.fees, -1) + flow(T("Average monthly fees"), r.fees / (r.days / 30.44), -1) +
           row(T("Net interest income"), pln(r.netAll - r.fees), "big") +
-          (r.groups.length > 1 ? `<h3 class="sub-h">${esc(T("Interest by type"))}</h3>` + r.groups.map(([k, v]) => row(k, "+" + pln(v))).join("") +
+          (r.groups.length > 1 ? `<h3 class="sub-h">${esc(T("Interest by type"))}</h3>` + r.groups.map(([k, v]) => flow(k, v, 1)).join("") +
             hint(T("Your bank credits these separately – e.g. promotional interest on new money and standard interest on the rest.")) : ""))}
         ${card(heading(T("Apply to your accounts"), "✔") + hint(T("Puts the balance at the end and the real rate before tax into one of your savings entries.")) +
           `<div class="two">${`<label class="field"><span>${esc(T("Account"))}</span><select name="hold">${d.Holdings.map((h, i) => `<option value="${i}">${esc(h.Name)}</option>`).join("")}<option value="-1" selected>${esc(T("New: Savings account"))}</option></select></label>`}
@@ -137,7 +141,7 @@ export async function openSavingsCheck(fileObj = null) {
           ${check("alsohold", T("Also apply the closing balance and gross rate to the account above"), true)}`)}
         ${card(heading(T("Month by month"), "📅") + hint(T("Interest credited in the first days of a month counts for the month before.")) +
           `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Closing balance"))}</th><th>${esc(T("Average balance"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Fees & charges"))}</th><th>${esc(T("Rate p.a."))}</th></tr></thead><tbody>` +
-          r.months.map(m => `<tr><td>${esc(monthName(m.m))}</td><td>${pln(m.end)}</td><td>${pln(m.avg)}</td><td>${m.interest ? "+" + pln(m.interest) : "–"}</td><td class="${m.fees > 0 ? "bad" : ""}">${m.fees > 0 ? "−" + pln(m.fees) : "–"}</td><td class="${m.interest && m.rate < 2 ? "bad" : ""}">${m.interest ? rate(m.rate) : "–"}</td></tr>`).join("") +
+          r.months.map(m => `<tr><td>${esc(monthName(m.m))}</td><td>${pln(m.end)}</td><td>${pln(m.avg)}</td><td class="${m.interest ? "in" : "nil"}">${m.interest ? "+" + pln(m.interest) : "–"}</td><td class="${m.fees > 0 ? "out" : "nil"}">${m.fees > 0 ? "−" + pln(m.fees) : "–"}</td><td class="${m.interest ? "" : "nil"}">${m.interest ? rate(m.rate) : "–"}</td></tr>`).join("") +
           `</tbody></table>`, "wide")}
       </div>
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
@@ -181,16 +185,16 @@ export function savedChecksCard(d) {
       const linked = d.Holdings.find(h => h.Id === c.HoldingId), perMonth = c.Days ? c.Fees / (c.Days / 30.44) : 0;
       return `<details class="rec-month check-item"><summary><div class="check-head"><b>${esc(c.Name)}</b>
         <span class="hint">${fmtDate(c.From)} – ${fmtDate(c.To)}</span></div>
-        <div class="right"><b>${pln(c.Closing)}</b><span class="hint"><b class="${c.Net < 2 ? "bad" : "good"}">${rate(c.Net)}</b> ${esc(T("net"))}</span></div>
+        <div class="right"><b>${pln(c.Closing)}</b><span class="hint"><b class="${rateCls(c.Net)}">${rate(c.Net)}</b> ${esc(T("net"))}</span></div>
         <button class="icon-btn danger" data-del-check="${esc(c.Id)}" title="${esc(T("Delete"))}">🗑</button></summary>
         ${row(T("Closing balance on {0}", fmtDate(c.To)), pln(c.Closing), "big")}
-        ${row(T("Opening balance"), pln(c.Opening))}${row(T("Credits (deposits)"), "+" + pln(c.Deposits))}${row(T("Debits (withdrawals)"), "−" + pln(c.Withdrawals))}${row(T("Average balance"), pln(c.Average))}
-        ${row(T("Gross rate p.a."), rate(c.Gross))}${row(T("Net rate p.a. (after tax and fees)"), rate(c.Net))}
-        ${row(T("Gross interest"), "+" + pln(c.Interest), "good")}${row(T("Withholding tax (Belka, 19%)"), "−" + pln(c.Tax))}${row(T("Net interest (after tax)"), "+" + pln(c.Interest - c.Tax), "good")}
-        ${row(T("Fees & charges"), "−" + pln(c.Fees), c.Fees > 0 ? "bad" : "")}${row(T("Average monthly fees"), "−" + pln(perMonth), c.Fees > 0 ? "bad" : "")}
-        ${(c.Types || []).length > 1 ? c.Types.map(t => row(t.Name, "+" + pln(t.Interest))).join("") : ""}
+        ${row(T("Opening balance"), pln(c.Opening))}${flow(T("Credits (deposits)"), c.Deposits, 1)}${flow(T("Debits (withdrawals)"), c.Withdrawals, -1)}${row(T("Average balance"), pln(c.Average))}
+        ${row(T("Gross rate p.a."), rate(c.Gross))}${row(T("Net rate p.a. (after tax and fees)"), rate(c.Net), rateCls(c.Net))}
+        ${flow(T("Gross interest"), c.Interest, 1)}${flow(T("Withholding tax (Belka, 19%)"), c.Tax, -1)}${flow(T("Net interest (after tax)"), c.Interest - c.Tax, 1, "strong")}
+        ${flow(T("Fees & charges"), c.Fees, -1)}${flow(T("Average monthly fees"), perMonth, -1)}
+        ${(c.Types || []).length > 1 ? c.Types.map(t => flow(t.Name, t.Interest, 1)).join("") : ""}
         ${(c.Months || []).length ? `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Closing balance"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Fees & charges"))}</th><th>${esc(T("Rate p.a."))}</th></tr></thead><tbody>` +
-          c.Months.map(m => `<tr><td>${esc(monthName(parseDate(m.Month)))}</td><td>${m.End !== undefined ? pln(m.End) : pln(m.Average)}</td><td>${m.Interest ? "+" + pln(m.Interest) : "–"}</td><td class="${m.Fees > 0 ? "bad" : ""}">${m.Fees > 0 ? "−" + pln(m.Fees) : "–"}</td><td>${m.Interest ? rate(m.Rate) : "–"}</td></tr>`).join("") + "</tbody></table>" : ""}
+          c.Months.map(m => `<tr><td>${esc(monthName(parseDate(m.Month)))}</td><td>${m.End !== undefined ? pln(m.End) : pln(m.Average)}</td><td class="${m.Interest ? "in" : "nil"}">${m.Interest ? "+" + pln(m.Interest) : "–"}</td><td class="${m.Fees > 0 ? "out" : "nil"}">${m.Fees > 0 ? "−" + pln(m.Fees) : "–"}</td><td class="${m.Interest ? "" : "nil"}">${m.Interest ? rate(m.Rate) : "–"}</td></tr>`).join("") + "</tbody></table>" : ""}
         ${linked ? hint("✔ " + T("In Accounts & holdings as \"{0}\".", linked.Name))
           : `<div class="buttons">${button("＋ " + esc(T("Add to Accounts & holdings")), "check-hold", "second small", `data-check="${esc(c.Id)}"`)}</div>`}
       </details>`; }).join(""));
