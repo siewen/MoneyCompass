@@ -376,7 +376,7 @@ function render() {
   page.render(el);
   bindBin(el);
   const grid = el.querySelector(".grid");
-  if (grid) grid.dataset.key = "web:" + page.route;
+  if (grid) grid.dataset.key = "web2:" + page.route;   // "web2": the new standard order of the cards (orders saved for the old one are not used)
   el.querySelectorAll("[data-go]").forEach(x => x.addEventListener("click", ev => {
     const inner = ev.target.closest("button,a,input,select,label,[data-cat]");
     if (inner && inner !== x) return;

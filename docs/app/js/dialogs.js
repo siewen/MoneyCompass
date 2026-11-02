@@ -209,7 +209,7 @@ export function openOptions() {
   el.querySelector('[data-action="save-file"]').onclick = saveProfileFile;
   el.querySelector('[data-action="reset-layout"]').onclick = () => {
     const o = s.CardOrder || {};
-    Object.keys(o).filter(k => k.startsWith("web:")).forEach(k => delete o[k]);
+    Object.keys(o).filter(k => k.startsWith("web")).forEach(k => delete o[k]);
     save(); toast(T("All cards are back in their standard order when you close Options."));
   };
   el.querySelector('[data-action="reset-help"]').onclick = () => { App.resetHelpButton?.(); toast(T("The help button is back in the bottom-right corner.")); };

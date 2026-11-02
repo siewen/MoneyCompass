@@ -264,6 +264,18 @@ export const Income = {
         row(T("Balance per month"), avg.monthsUsed ? pln(left) : "–", avg.monthsUsed && left < 0 ? "bad" : "good") +
         row(T("Savings rate"), avg.monthsUsed && inc.monthlyTotal > 0 ? Math.round(left / inc.monthlyTotal * 100) + "%" : "–") +
         hint(message) + (inc.missing ? hint(T("Some income is in USD or EUR but the exchange rate is empty, so it counts as 0 zł. Enter the rates in the Savings tab."), "bad") : ""))}
+      ${card(heading(T("Your income sources")) + hint(T("Tap a source to edit it. Switch off 'Active' for income that has stopped but you want to keep in the list.")) +
+        (d.Incomes.length ? `<div class="list">${d.Incomes.map(i => {
+          const next = Calc.nextIncome(i, today()), sp = Calc.incomeSpan(i);
+          const info = i.Frequency === ONE_TIME ? `${T("one-time")} · ${T("on {0}", fmtDate(i.Date))}` : `${freqLabel(i.Frequency)} · ${next ? T("next {0}", fmtDate(next)) : T("ended")}${sp.start ? " · " + T("since {0}", fmtDate(sp.start)) : ""}${sp.end ? " · " + T("until {0}", fmtDate(sp.end)) : ""}`;
+          return `<div class="item clickable${i.Active ? "" : " off"}" data-edit-income="${i.Id}"><div><b>${esc(i.Name)}</b><span class="hint">${esc(T(i.Type))} · ${esc(info)}${i.Active ? "" : " · " + esc(T("not active"))}</span></div>
+            <div class="right"><b>${amount(i.Amount, i.Currency)}</b>${i.Frequency !== ONE_TIME ? `<span class="hint">${esc(T("{0} / month", pln(Calc.monthlyPln(i, s))))}</span>` : ""}${i.Gross > 0 ? `<span class="hint">${esc(T("gross {0}", pln(i.Gross)))}</span>` : ""}</div>
+            <label class="switch" title="${esc(T("Active (count it in the totals)"))}"><input type="checkbox" data-active-income="${i.Id}"${i.Active ? " checked" : ""}><span></span></label>
+            <button class="icon-btn danger" data-del-income="${i.Id}" title="${esc(T("Delete"))}">🗑</button></div>`;
+        }).join("")}</div>` : hint(T("No income added yet."))))}
+      ${card(heading(T("Next payments (next {0} days)", 60)) + (up.length ? `<div class="list">${up.slice(0, 20).map(p => `
+          <div class="item"><div><b>${esc(p.source.Name)}</b><span class="hint">${fmtDate(p.date)} · ${esc(dayText(p.date))}</span></div><b class="good">${pln(p.amount)}</b></div>`).join("")}</div>`
+        : hint(T("No payments expected in this period."))))}
       ${card(`<form id="income-form">${heading(e ? T("Edit: {0}", e.Name) : T("Add income"))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("Salary, side job"))))}
         <div class="two">${field(T("Type"), select("type", INCOME_TYPES.map(t => [t, T(t)]), f.Type))}
@@ -285,18 +297,6 @@ export const Income = {
         </div>
         ${check("active", T("Active (count it in the totals)"), f.Active)}
         <div class="buttons">${button(e ? T("Save changes") : T("Add income"), "save-income", "main")}${e ? button(T("Cancel editing"), "cancel-income") : ""}</div></form>`)}
-      ${card(heading(T("Next payments (next {0} days)", 60)) + (up.length ? `<div class="list">${up.slice(0, 20).map(p => `
-          <div class="item"><div><b>${esc(p.source.Name)}</b><span class="hint">${fmtDate(p.date)} · ${esc(dayText(p.date))}</span></div><b class="good">${pln(p.amount)}</b></div>`).join("")}</div>`
-        : hint(T("No payments expected in this period."))))}
-      ${card(heading(T("Your income sources")) + hint(T("Tap a source to edit it. Switch off 'Active' for income that has stopped but you want to keep in the list.")) +
-        (d.Incomes.length ? `<div class="list">${d.Incomes.map(i => {
-          const next = Calc.nextIncome(i, today()), sp = Calc.incomeSpan(i);
-          const info = i.Frequency === ONE_TIME ? `${T("one-time")} · ${T("on {0}", fmtDate(i.Date))}` : `${freqLabel(i.Frequency)} · ${next ? T("next {0}", fmtDate(next)) : T("ended")}${sp.start ? " · " + T("since {0}", fmtDate(sp.start)) : ""}${sp.end ? " · " + T("until {0}", fmtDate(sp.end)) : ""}`;
-          return `<div class="item clickable${i.Active ? "" : " off"}" data-edit-income="${i.Id}"><div><b>${esc(i.Name)}</b><span class="hint">${esc(T(i.Type))} · ${esc(info)}${i.Active ? "" : " · " + esc(T("not active"))}</span></div>
-            <div class="right"><b>${amount(i.Amount, i.Currency)}</b>${i.Frequency !== ONE_TIME ? `<span class="hint">${esc(T("{0} / month", pln(Calc.monthlyPln(i, s))))}</span>` : ""}${i.Gross > 0 ? `<span class="hint">${esc(T("gross {0}", pln(i.Gross)))}</span>` : ""}</div>
-            <label class="switch" title="${esc(T("Active (count it in the totals)"))}"><input type="checkbox" data-active-income="${i.Id}"${i.Active ? " checked" : ""}><span></span></label>
-            <button class="icon-btn danger" data-del-income="${i.Id}" title="${esc(T("Delete"))}">🗑</button></div>`;
-        }).join("")}</div>` : hint(T("No income added yet."))))}
       ${card(heading(T("Imported inflows")) + hint(T("Money that came into your account, from your bank imports. Choose for each payment how it counts: Extra income – only in that month. Salary – your regular pay, counted every month through Your income sources. Not income – ignored.")) +
         (d.Received.length ? importedList(d)           : hint(T("Nothing imported yet."))))}
       ${binCard(["income", "received"])}
@@ -453,14 +453,6 @@ export const Expenses = {
     const otherCount = d.Expenses.filter(x => x.Category === OTHER).length;
     el.innerHTML = `<div class="grid">
       ${otherCount >= 2 ? `<button class="tip" data-action="sort-other">🏷 ${esc(T("{0} outflows are in \"Other\" – sort them by shop in one go →", otherCount))}</button>` : ""}
-      ${card(`<form id="expense-form">${heading(T("Add an expense"))}
-        <div class="two">${field(T("Date"), dateInput("date", inputDate(today())))}${field(T("Amount (zł)"), numInput("amount", "", T("e.g. {0}", "120,50")))}</div>
-        <div class="cat-row">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], cat0.Name))}
-          ${button(T("Categories…"), "categories", "second small")}</div>
-        ${field(T("Description (optional)"), textInput("description", "", T("e.g. {0}", "Biedronka")))}
-        <div class="two">${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), ""))}<div class="hint">${esc(T("Repeating expenses appear automatically in the Calendar, also in the next months."))}</div></div>
-        ${check("essential", T("Essential (must pay even in a crisis)"), cat0.Essential)}
-        <div class="buttons">${button(T("Add expense"), "add-expense", "main")}${button("⬆ " + esc(T("Import bank statement (CSV)…")), "import", "second")}</div></form>`)}
       ${card(heading(T("Monthly average")) + (avg.monthsUsed ? row(T("Essential"), pln(avg.essential)) + row(T("Not essential"), pln(avg.nonEssential)) + row(T("Total per month"), pln(avg.essential + avg.nonEssential)) +
           hint(basisText(d)) +
           (loans > 0 ? hint(T("Includes {0} per month of loan payments from the Loans & debts tab. Expenses in the \"Loan payments\" category are not counted, so nothing is counted twice.", pln(loans))) : "")
@@ -469,6 +461,14 @@ export const Expenses = {
         ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.all.map((c, n) => ({
             key: c.category, color: n < 6 ? COLORS.series[n] : COLORS.other, label: categoryLabel(c.category), text: pln(c.perMonth), share: ChartData.share(c.perMonth, cats.total) })))}</div>` + hint(T("Click to see these expenses"))
         : hint(T("Add expenses to see where your money goes."))))}
+      ${card(`<form id="expense-form">${heading(T("Add an expense"))}
+        <div class="two">${field(T("Date"), dateInput("date", inputDate(today())))}${field(T("Amount (zł)"), numInput("amount", "", T("e.g. {0}", "120,50")))}</div>
+        <div class="cat-row">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], cat0.Name))}
+          ${button(T("Categories…"), "categories", "second small")}</div>
+        ${field(T("Description (optional)"), textInput("description", "", T("e.g. {0}", "Biedronka")))}
+        <div class="two">${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), ""))}<div class="hint">${esc(T("Repeating expenses appear automatically in the Calendar, also in the next months."))}</div></div>
+        ${check("essential", T("Essential (must pay even in a crisis)"), cat0.Essential)}
+        <div class="buttons">${button(T("Add expense"), "add-expense", "main")}${button("⬆ " + esc(T("Import bank statement (CSV)…")), "import", "second")}</div></form>`)}
       ${card(heading(T("Outflow history")) + hint(T("Click an expense to switch it between essential and not essential. The pen changes date, category, amount and more.")) + filterBar +
         (months.length ? visible.map(m => {
           const total = m.items.reduce((s, e) => s + e.Amount, 0), ess = m.items.filter(e => e.Essential).reduce((s, e) => s + e.Amount, 0);
@@ -694,6 +694,9 @@ export const Emergency = {
     else if (safe >= r.target) status = `<p class="good">${esc(T("Your safe money ({0}) fully covers this target.", pln(safe)))}</p>`;
     else status = progress(safe / r.target, safe / r.target >= 0.5 ? "#F59E0B" : "#DC2626") + `<p class="warn">${esc(T("Your safe money ({0}) covers {1}% of this target. Still missing: {2}.", pln(safe), Math.round(safe / r.target * 100), pln(r.target - safe)))}</p>`;
     el.innerHTML = `<div class="grid">
+      ${card(heading(T("Result")) + row(T("Monthly need (incl. yearly costs / 12)"), pln(r.monthly)) + row(T("3 months (with buffer)"), pln(r.three)) +
+        row(T("6 months (with buffer)"), pln(r.six)) + row(T("Your target"), pln(r.target), "big") + status)}
+      ${card(heading(T("Where to keep it")) + `<p>${esc(T("In a Polish bank savings account, in złoty: protected by the BFG up to €100,000 and available the same day. Not in crypto, and not in a long fixed deposit (lokata), because breaking it early usually loses the interest."))}</p>`)}
       ${card(`<form id="em">${heading(T("Your monthly costs"))}${hint(T("Only costs you must pay even in a crisis: rent, bills, food, transport, insurance, loan payments."))}
         ${field(T("Essential costs per month (zł)"), numInput("monthly", plain(s.MonthlyEssentials), T("e.g. {0}", "4500")))}
         ${button(T("Use my average from the Outflows tab"), "use-avg", "second small")}<p class="hint" id="avg-note"></p>
@@ -701,9 +704,6 @@ export const Emergency = {
         <h3>${esc(T("Settings"))}</h3>
         <div class="two">${field(T("Months to cover (3 if your job is stable, 6 if less certain)"), select("months", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], s.EmergencyMonths))}
         ${field(T("Extra safety buffer (%)"), numInput("buffer", plain(s.BufferPercent)))}</div></form>`)}
-      ${card(heading(T("Result")) + row(T("Monthly need (incl. yearly costs / 12)"), pln(r.monthly)) + row(T("3 months (with buffer)"), pln(r.three)) +
-        row(T("6 months (with buffer)"), pln(r.six)) + row(T("Your target"), pln(r.target), "big") + status)}
-      ${card(heading(T("Where to keep it")) + `<p>${esc(T("In a Polish bank savings account, in złoty: protected by the BFG up to €100,000 and available the same day. Not in crypto, and not in a long fixed deposit (lokata), because breaking it early usually loses the interest."))}</p>`)}
     </div>`;
     const form = el.querySelector("#em");
     const apply = () => {
@@ -743,6 +743,10 @@ export const Portfolio = {
         row(T("Interest per month"), pln(p.yearly / 12)) + row(T("Interest per day"), pln(p.yearly / 365)) +
         hint(T("Interest is before tax and assumes today's rates stay the same.")) + hint(em) +
         (p.missing ? hint(T("Some items are in USD or EUR but the exchange rate is empty, so they count as 0 zł. Enter the rates below."), "bad") : ""))}
+      ${card(heading(T("Your savings")) + hint(T("Tap an item to edit it, for example to update the amount.")) + (d.Holdings.length ? `<div class="list">${d.Holdings.map(x => `
+        <div class="item clickable" data-edit-holding="${x.Id}"><div><b>${esc(x.Name)}</b><span class="hint">${esc(T(x.Place))} · ${esc(x.Safe ? T("Safe") : T("Risky"))} · ${rate(currentRate(x))}</span>${promoBadge(x)}</div>
+        <div class="right"><b>${amount(x.Amount, x.Currency)}</b>${currentRate(x) ? `<span class="hint">${esc(T("{0} / year", pln(Calc.toPln(x.Amount, x.Currency, s) * currentRate(x) / 100)))}</span>` : ""}${x.Deposit > 0 ? `<span class="hint primary">🔁 +${esc(pln(x.Deposit))} · ${esc(freqLabel(x.DepositFrequency || "Monthly"))}${x.DepositFrom ? " · " + esc(T("from {0}", x.DepositFrom)) : ""}</span>` : ""}</div>
+        ${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("Nothing added yet."))))}
       ${card(`<form id="hold">${heading(h ? T("Edit: {0}", h.Name) : T("Add money"))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", "ING, Revolut, …")))}
         <div class="two">${field(T("Where"), select("place", PLACES.map(x => [x, T(x)]), f.Place))}${field(T("Currency"), select("currency", CURRENCIES, f.Currency))}</div>
@@ -761,10 +765,6 @@ export const Portfolio = {
           ${hint(T("The interest rate above is the promotion rate. MoneyCompass reminds you 2 weeks before it ends and shows where to move the money – after a promotion most banks pay only about 0.5%."))}
         </details>
         <div class="buttons">${button(h ? T("Save changes") : T("Add"), "save-holding", "main")}${h ? button(T("Cancel editing"), "cancel-holding") : ""}</div></form>`)}
-      ${card(heading(T("Your savings")) + hint(T("Tap an item to edit it, for example to update the amount.")) + (d.Holdings.length ? `<div class="list">${d.Holdings.map(x => `
-        <div class="item clickable" data-edit-holding="${x.Id}"><div><b>${esc(x.Name)}</b><span class="hint">${esc(T(x.Place))} · ${esc(x.Safe ? T("Safe") : T("Risky"))} · ${rate(currentRate(x))}</span>${promoBadge(x)}</div>
-        <div class="right"><b>${amount(x.Amount, x.Currency)}</b>${currentRate(x) ? `<span class="hint">${esc(T("{0} / year", pln(Calc.toPln(x.Amount, x.Currency, s) * currentRate(x) / 100)))}</span>` : ""}${x.Deposit > 0 ? `<span class="hint primary">🔁 +${esc(pln(x.Deposit))} · ${esc(freqLabel(x.DepositFrequency || "Monthly"))}${x.DepositFrom ? " · " + esc(T("from {0}", x.DepositFrom)) : ""}</span>` : ""}</div>
-        ${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("Nothing added yet."))))}
       ${adviceCard(d)}
       ${card(heading(T("What does my savings account really pay?"), "🔍") +
         hint(T("Import the CSV statement of a savings account: MoneyCompass checks the money on it day by day, the interest, the 19% tax and any fees – and shows the real rate the bank pays you, per year and per month.")) +
@@ -782,7 +782,7 @@ export const Portfolio = {
       el.appendChild(sec);
       SavingsGoals.render(sec.querySelector(".goals-host"));
       // Own card order, so the goal cards can be moved with ⠿ like the others
-      const gg = sec.querySelector(".goals-host .grid"); if (gg) gg.dataset.key = "web:goals";
+      const gg = sec.querySelector(".goals-host .grid"); if (gg) gg.dataset.key = "web2:goals";
     }
     bindAdvice(el, d);
     el.querySelector('[data-action="savings-check"]')?.addEventListener("click", () => openSavingsCheck());

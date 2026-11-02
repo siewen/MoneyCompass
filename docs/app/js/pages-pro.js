@@ -65,6 +65,9 @@ export const Savings = {
         <button class="btn second small" data-bank="${i}">＋ ${esc(T("Compare"))}</button></div></div>`).join("")}</div>` +
       hint(T("Top rates from the {0} rankings, checked {1}. Conditions apply – always check the bank's own terms.", "rankomat.pl", fmtDate(String(Rates.checked).slice(0, 10)))), "wide");
     el.innerHTML = `<div class="grid">
+      ${card(heading(T("Comparison")) + hint(T("Best offer on top. Tap an offer to load it into the form.")) + (ranked.length ? `<div class="list">${ranked.map((x, i) => `
+        <div class="item clickable${i === 0 ? " best" : ""}" data-load="${x.o.Id}"><div><b>${i === 0 ? "🏆 " : ""}${esc(x.o.Name)}</b><span class="hint">${esc(T("{0} · {1} for {2} days{3}, then {4} · over {5} days", pln(x.o.Amount), rate(x.o.PromoRate), x.o.PromoDays, x.o.PromoLimit > 0 ? " (" + T("up to {0}", pln(x.o.PromoLimit)) + ")" : "", rate(x.o.StandardRate), x.o.PeriodDays))}</span></div>
+        <div class="right"><b class="good">${pln(x.r.net)}</b><span class="hint">${rate(x.r.effective)}</span></div><button class="icon-btn danger" data-del-offer="${x.o.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No saved offers yet."))))}
       ${card(`<form id="offer">${heading(T("Savings offer"))}
         ${d.Holdings.length ? field(T("Fill in from Savings"), select("from-holding", [["", T("Choose…")], ...d.Holdings.map(h => [h.Id, `${h.Name} · ${pln(Calc.toPln(h.Amount, h.Currency, d.Settings))} · ${rate(h.RatePercent || 0)}`])], "")) +
           hint(T("Compare what your savings earn now with other offers.")) : ""}
@@ -77,9 +80,6 @@ export const Savings = {
       ${card(heading(T("Result")) + row(T("Interest during promo"), pln(r.promo)) + row(T("Interest after promo"), pln(r.after)) + row(T("Total before tax"), pln(r.gross)) +
         row(T("Belka tax"), pln(r.tax)) + row(T("You keep"), pln(r.net), "big good") + row(T("Real yearly rate after tax"), rate(r.effective)) +
         hint(T("Simple interest without compounding. Banks pay monthly, so the real result can be slightly higher.")) + button(T("Save to comparison"), "save-offer", "main"))}
-      ${card(heading(T("Comparison")) + hint(T("Best offer on top. Tap an offer to load it into the form.")) + (ranked.length ? `<div class="list">${ranked.map((x, i) => `
-        <div class="item clickable${i === 0 ? " best" : ""}" data-load="${x.o.Id}"><div><b>${i === 0 ? "🏆 " : ""}${esc(x.o.Name)}</b><span class="hint">${esc(T("{0} · {1} for {2} days{3}, then {4} · over {5} days", pln(x.o.Amount), rate(x.o.PromoRate), x.o.PromoDays, x.o.PromoLimit > 0 ? " (" + T("up to {0}", pln(x.o.PromoLimit)) + ")" : "", rate(x.o.StandardRate), x.o.PeriodDays))}</span></div>
-        <div class="right"><b class="good">${pln(x.r.net)}</b><span class="hint">${rate(x.r.effective)}</span></div><button class="icon-btn danger" data-del-offer="${x.o.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No saved offers yet."))))}
       ${bankCard}
       ${binCard(["offer"])}
     </div>`;
@@ -224,11 +224,6 @@ export const Goals = {
     };
     const target = d.Goals.reduce((s, x) => s + x.Target, 0), saved = d.Goals.reduce((s, x) => s + Math.min(x.Saved, x.Target), 0);
     el.innerHTML = `<div class="grid">
-      ${card(`<form id="goal">${heading(g ? T("Edit goal") : T("Add a goal"))}
-        ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("New car, holiday, flat"))))}
-        <div class="two">${field(T("Goal amount (zł)"), numInput("target", plain(f.Target)))}${field(T("Already saved (zł)"), numInput("saved", plain(f.Saved)))}</div>
-        ${field(T("Reach it by"), dateInput("date", inputDate(parseDate(f.TargetDate))))}
-        <div class="buttons">${button(g ? T("Save changes") : T("Add"), "save-goal", "main")}${g ? button(T("Cancel"), "cancel-goal") : ""}</div></form>`)}
       ${card(heading(T("All goals together")) + row(T("Goal amount (zł)"), pln(target)) + row(T("Already saved"), pln(saved)) +
         row(T("To save per month for all goals"), pln(d.Goals.filter(x => x.Saved < x.Target).reduce((s, x) => s + perMonth(x), 0))) + (target > 0 ? progress(saved / target, "var(--goals)") : ""))}
       ${card(heading(T("Your goals")) + hint(T("Tap a goal to edit it, for example to update how much you have saved.")) + (d.Goals.length ? [...d.Goals].sort((a, b) => parseDate(a.TargetDate) - parseDate(b.TargetDate)).map(x => {
@@ -236,7 +231,12 @@ export const Goals = {
         return `<div class="bar-item clickable" data-edit-goal="${x.Id}"><div class="bar-head"><b>${esc(x.Name)}</b><button class="icon-btn danger" data-del-goal="${x.Id}">🗑</button></div>
           ${progress(fr, done ? COLORS.leftOver : "var(--goals)")}<span class="hint">${esc(T("{0} of {1} ({2}%) · by {3}", pln(Math.min(x.Saved, x.Target)), pln(x.Target), Math.round(Math.min(100, fr * 100)), fmtDate(x.TargetDate)))}</span>
           <span class="${done ? "good" : ""}">${esc(done ? T("Goal reached – well done!") : T("Save about {0} per month to reach it in time.", pln(perMonth(x))))}</span></div>`;
-      }).join("") : hint(T("No goals yet. Add your first one above."))), "wide")}
+      }).join("") : hint(T("No goals yet. Add your first one above."))))}
+      ${card(`<form id="goal">${heading(g ? T("Edit goal") : T("Add a goal"))}
+        ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("New car, holiday, flat"))))}
+        <div class="two">${field(T("Goal amount (zł)"), numInput("target", plain(f.Target)))}${field(T("Already saved (zł)"), numInput("saved", plain(f.Saved)))}</div>
+        ${field(T("Reach it by"), dateInput("date", inputDate(parseDate(f.TargetDate))))}
+        <div class="buttons">${button(g ? T("Save changes") : T("Add"), "save-goal", "main")}${g ? button(T("Cancel"), "cancel-goal") : ""}</div></form>`)}
       ${binCard(["goal"])}
     </div>`;
     const fm = el.querySelector("#goal");
@@ -275,6 +275,29 @@ export const Loans = {
     const ends = [...plans.values()];
     const debtFree = !running.length ? "–" : ends.some(p => p.never) ? T("never – see the warning") : monthName(new Date(Math.max(...ends.map(p => p.end.getTime()))));
     el.innerHTML = `<div class="grid">
+      ${card(heading(T("Your debts")) + loanProgress(running.map(x => ({ ...x, Remaining: now(x) }))) +
+        (running.some(x => loanPlan(x).interestRepaid > 0) ? row(T("Interest repaid"), pln(running.reduce((s, x) => s + loanPlan(x).interestRepaid, 0))) : "") +
+        row(T("Remaining principal amount to be repaid"), pln(running.reduce((s, x) => s + now(x), 0))) +
+        row(T("Interest still to be repaid (estimate)"), pln(running.reduce((s, x) => s + (loanPlan(x).never ? 0 : loanPlan(x).interest), 0))) +
+        row(T("Loan payments per month"), pln(payments)) +
+        row(T("Share of your income"), income > 0 ? Math.round(share * 100) + "%" : "–") + row(T("Debt-free"), debtFree) +
+        level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Outflows tab.")))}
+      ${card(heading(T("Loans")) + hint(T("Tap a loan to edit it, for example to update what is left.")) + (d.Loans.length ? `<div class="list">${d.Loans.map(x => `
+        <div class="item clickable loan-item" data-edit-loan="${x.Id}"><div class="loan-main"><b>${esc(x.Name)}</b>
+          <span class="hint">${esc(loanLine(x, plans.get(x.Id) || loanPlan(x)))}</span>
+          ${x.Original > 0 ? `<div class="loan-progress">${progress(1 - now(x) / x.Original, "#1BAF7A")}<span class="hint">${esc(T("Principal amount repaid: {0} of {1} ({2}%)", pln(x.Original - now(x)), pln(x.Original), Math.round((1 - now(x) / x.Original) * 100)))}</span></div>` : ""}
+          ${(x.RateChanges || []).length ? `<span class="hint">${esc(x.RateChanges.slice(-3).map(c => T("Rate change {0}: {1} (previously {2})", fmtDate(c.Date), rate(c.To), rate(c.From))).join(" · "))}</span>` : ""}
+          ${(x.Extra || []).length ? `<span class="hint good">💰 ${esc(T("Overpayments: {0}", x.Extra.map(e => `${pln(e.Amount)} (${fmtDate(e.Date)})`).join(", ")))}</span>` : ""}
+          ${loanWarning(x)}</div>
+        <div class="right"><b>${pln((plans.get(x.Id) || loanPlan(x)).remainingNow)}</b>${(plans.get(x.Id) || loanPlan(x)).done ? `<span class="hint">${esc(T("estimated today"))}</span>` : ""}</div><button class="icon-btn danger" data-del-loan="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No loans – great! Add one above if you have any."))))}
+      ${running.length ? card(`<form id="extra">${heading(T("Partial early repayment (overpayment)"), "💰")}
+        ${hint(T("An overpayment goes straight to the principal (the capital you still owe), so you pay less interest. Banks call it a partial early repayment. Enter it here – or just try an amount to see what it would bring."))}
+        ${field(T("Loan"), select("loan", running.map(x => [x.Id, x.Name]), running[0].Id))}
+        <div class="two">${field(T("Amount paid towards the principal (zł)"), numInput("amount", "", T("e.g. {0}", "5000")))}${field(T("Date"), dateInput("date", inputDate(today())))}</div>
+        ${field(T("After the overpayment"), select("mode", [["shorter", T("Shorten the loan term – same monthly payment")], ["lower", T("Reduce the monthly payment – same term")]], "shorter"))}
+        ${field(T("Regular extra principal every month? (zł, calculation only)"), numInput("monthly", "", T("e.g. {0}", "200")))}
+        <div class="extra-result" id="extra-result"></div>
+        <div class="buttons">${button("✔ " + esc(T("Save the overpayment")), "save-extra", "main")}</div></form>`) : ""}
       ${card(`<form id="loan">${heading(l ? T("Edit loan") : T("Add a loan"))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("Car loan, credit card, mortgage"))))}
         ${field(T("Type of loan"), select("kind", LOAN_KINDS.map(([k, n]) => [k, T(n)]), f.Kind || "other"))}
@@ -289,29 +312,6 @@ export const Loans = {
         <p class="loan-preview hint" id="loan-preview"></p>
         ${hint(T("MoneyCompass works out the debt-free date from what is left, the monthly payment and the interest."))}
         <div class="buttons">${button(l ? T("Save changes") : T("Add"), "save-loan", "main")}${l ? button(T("Cancel"), "cancel-loan") : ""}</div></form>`)}
-      ${card(heading(T("Your debts")) + loanProgress(running.map(x => ({ ...x, Remaining: now(x) }))) +
-        (running.some(x => loanPlan(x).interestRepaid > 0) ? row(T("Interest repaid"), pln(running.reduce((s, x) => s + loanPlan(x).interestRepaid, 0))) : "") +
-        row(T("Remaining principal amount to be repaid"), pln(running.reduce((s, x) => s + now(x), 0))) +
-        row(T("Interest still to be repaid (estimate)"), pln(running.reduce((s, x) => s + (loanPlan(x).never ? 0 : loanPlan(x).interest), 0))) +
-        row(T("Loan payments per month"), pln(payments)) +
-        row(T("Share of your income"), income > 0 ? Math.round(share * 100) + "%" : "–") + row(T("Debt-free"), debtFree) +
-        level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Outflows tab.")))}
-      ${running.length ? card(`<form id="extra">${heading(T("Partial early repayment (overpayment)"), "💰")}
-        ${hint(T("An overpayment goes straight to the principal (the capital you still owe), so you pay less interest. Banks call it a partial early repayment. Enter it here – or just try an amount to see what it would bring."))}
-        ${field(T("Loan"), select("loan", running.map(x => [x.Id, x.Name]), running[0].Id))}
-        <div class="two">${field(T("Amount paid towards the principal (zł)"), numInput("amount", "", T("e.g. {0}", "5000")))}${field(T("Date"), dateInput("date", inputDate(today())))}</div>
-        ${field(T("After the overpayment"), select("mode", [["shorter", T("Shorten the loan term – same monthly payment")], ["lower", T("Reduce the monthly payment – same term")]], "shorter"))}
-        ${field(T("Regular extra principal every month? (zł, calculation only)"), numInput("monthly", "", T("e.g. {0}", "200")))}
-        <div class="extra-result" id="extra-result"></div>
-        <div class="buttons">${button("✔ " + esc(T("Save the overpayment")), "save-extra", "main")}</div></form>`) : ""}
-      ${card(heading(T("Loans")) + hint(T("Tap a loan to edit it, for example to update what is left.")) + (d.Loans.length ? `<div class="list">${d.Loans.map(x => `
-        <div class="item clickable loan-item" data-edit-loan="${x.Id}"><div class="loan-main"><b>${esc(x.Name)}</b>
-          <span class="hint">${esc(loanLine(x, plans.get(x.Id) || loanPlan(x)))}</span>
-          ${x.Original > 0 ? `<div class="loan-progress">${progress(1 - now(x) / x.Original, "#1BAF7A")}<span class="hint">${esc(T("Principal amount repaid: {0} of {1} ({2}%)", pln(x.Original - now(x)), pln(x.Original), Math.round((1 - now(x) / x.Original) * 100)))}</span></div>` : ""}
-          ${(x.RateChanges || []).length ? `<span class="hint">${esc(x.RateChanges.slice(-3).map(c => T("Rate change {0}: {1} (previously {2})", fmtDate(c.Date), rate(c.To), rate(c.From))).join(" · "))}</span>` : ""}
-          ${(x.Extra || []).length ? `<span class="hint good">💰 ${esc(T("Overpayments: {0}", x.Extra.map(e => `${pln(e.Amount)} (${fmtDate(e.Date)})`).join(", ")))}</span>` : ""}
-          ${loanWarning(x)}</div>
-        <div class="right"><b>${pln((plans.get(x.Id) || loanPlan(x)).remainingNow)}</b>${(plans.get(x.Id) || loanPlan(x)).done ? `<span class="hint">${esc(T("estimated today"))}</span>` : ""}</div><button class="icon-btn danger" data-del-loan="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No loans – great! Add one above if you have any."))), "wide")}
       ${binCard(["loan"])}
     </div>`;
     const fm = el.querySelector("#loan");
@@ -388,12 +388,12 @@ export const Budget = {
     el.innerHTML = `<div class="grid">
       ${card(heading(monthName(today())) + row(T("Spent in categories with a limit"), pln(spent)) + row(T("Your limits together"), pln(total)) +
         row(T("Left this month"), pln(total - spent), total - spent < 0 ? "bad" : "good"))}
+      ${card(heading(T("Limits this month")) + hint(T("From your entries in the Outflows tab. Green: on track, amber: almost used, red: over the limit.")) +
+        (limits.length ? budgetBars() : hint(T("No limits yet. Set your first one above."))))}
       ${card(`<form id="budget">${heading(T("Set a monthly limit"))}${hint(T("Choose a category and how much you want to spend on it at most each month. Setting it again changes the limit."))}
         ${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], categories()[0].Name))}
         ${field(T("Limit per month (zł)"), numInput("limit", "", T("e.g. {0}", "800")))}
         ${button(T("Save limit"), "save-limit", "main")}</form>`)}
-      ${card(heading(T("Limits this month")) + hint(T("From your entries in the Outflows tab. Green: on track, amber: almost used, red: over the limit.")) +
-        (limits.length ? budgetBars() : hint(T("No limits yet. Set your first one above."))), "wide")}
       ${binCard(["budget"])}
     </div>`;
     el.querySelectorAll("[data-budget]").forEach(b => {

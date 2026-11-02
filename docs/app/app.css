@@ -406,7 +406,7 @@ details.cal-month > summary:hover .m-name b { text-decoration: underline; }
 .alert.warn { background: rgba(217,119,6,.10); border-color: rgba(217,119,6,.5); font-size: 13.5px; }
 .loan-item { align-items: flex-start; }
 .loan-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-.loan-main .loan-progress { max-width: 360px; }
+.loan-main .loan-progress { max-width: 360px; flex: none; }   /* in a column a 160px flex-basis became 160px of empty height */
 .loan-main .alert { margin-top: 4px; }
 .loan-preview { font-weight: 600; margin: 4px 0; }
 .past-chips { margin: 0 0 6px; }

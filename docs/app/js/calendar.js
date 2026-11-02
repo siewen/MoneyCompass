@@ -252,15 +252,6 @@ export const Calendar = {
         <div class="cal-legend"><span><i class="cal-dot in"></i>${esc(T("Inflows"))}</span><span><i class="cal-dot out"></i>${esc(T("Outflows"))}</span><span><i class="cal-dot save"></i>${esc(T("Savings"))}</span><span><i class="cal-dot info"></i>${esc(T("Promotion ends"))}</span></div>` +
         hint(T("Before today: actual transactions (your entries and bank imports). From today: scheduled payments.")) +
         (selectedDay ? `<h3>${esc(fmtDate(new Date(shown.getFullYear(), shown.getMonth(), selectedDay)))}</h3>` + (dayList.length ? `<div class="list">${dayList.map(evRow).join("")}</div>` : hint(T("Nothing on this day."))) : hint(T("Click a day to see its payments."))))}
-      ${card(`<form id="rec">${heading(r ? T("Edit: {0}", r.Name) : T("Add a regular payment"))}
-        ${hint(T("Rent, bills, subscriptions, insurance or a standing order to savings – anything that recurs. Payments added here are included in your expenses, budget and forecasts, unless the same payment is already in your expenses. Income is managed in the Inflows tab."))}
-        ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", "Netflix, czynsz, PZU")))}
-        <div class="two">${field(T("Type"), select("kind", KINDS.map(k => [k[0], T(k[1])]), f.Kind))}${field(T("Amount (zł)"), numInput("amount", plain(f.Amount)))}</div>
-        <div class="two">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], f.Category))}${field(T("How often"), select("frequency", FREQUENCIES.map(x => [x[0], T(x[0])]), f.Frequency))}</div>
-        <div class="two">${field(T("Date of a payment (past or upcoming)"), dateInput("date", inputDate(parseDate(f.Date))))}
-        ${field(T("Final payment (optional)"), `<input type="date" name="end" value="${f.EndDate ? inputDate(parseDate(f.EndDate)) : ""}">`)}</div>
-        ${hint(T("For payments that end, such as a contract: enter the final payment date and it stops counting after that. You can also switch a payment off in the list below."))}
-        <div class="buttons">${button(r ? T("Save changes") : T("Add"), "save-rec", "main")}${r ? button(T("Cancel"), "cancel-rec") : ""}</div></form>`)}
       ${card(heading(T("Regular payments")) + (deps.length ? `<h3 class="sub-h">🔁 ${esc(T("Standing orders to savings"))}</h3><div class="list">${deps.map(h => `
         <div class="item clickable" data-go="portfolio"><span class="cal-dot save"></span><div><b>${esc(h.Name)}</b>
         <span class="hint">${esc(freqLabel(h.DepositFrequency || "Monthly"))} · ${esc(T("Transfer to savings"))}${h.DepositFrom ? " · " + esc(T("from {0}", h.DepositFrom)) : ""} · ${esc(T("next {0}", fmtDate(Calc.nextPayment({ Date: h.DepositDate, Frequency: h.DepositFrequency || "Monthly" }, today()) || h.DepositDate)))}</span></div>
@@ -278,6 +269,15 @@ export const Calendar = {
         (sugg.length ? `<hr><h3>💡 ${esc(T("Suggestions from your expenses"))}</h3>${hint(T("These recur every month. Add them with one click."))}<div class="list">${sugg.map((x, i) => `
           <div class="item"><div><b>${esc(x.name)}</b><span class="hint">${esc(categoryLabel(x.category))} · ${esc(T("in {0} months", x.months))}</span></div><b>${pln(x.amount)}</b>
           <button class="btn second small" data-sugg="${i}">＋ ${esc(T("Add"))}</button></div>`).join("")}</div>` : ""))}
+      ${card(`<form id="rec">${heading(r ? T("Edit: {0}", r.Name) : T("Add a regular payment"))}
+        ${hint(T("Rent, bills, subscriptions, insurance or a standing order to savings – anything that recurs. Payments added here are included in your expenses, budget and forecasts, unless the same payment is already in your expenses. Income is managed in the Inflows tab."))}
+        ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", "Netflix, czynsz, PZU")))}
+        <div class="two">${field(T("Type"), select("kind", KINDS.map(k => [k[0], T(k[1])]), f.Kind))}${field(T("Amount (zł)"), numInput("amount", plain(f.Amount)))}</div>
+        <div class="two">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], f.Category))}${field(T("How often"), select("frequency", FREQUENCIES.map(x => [x[0], T(x[0])]), f.Frequency))}</div>
+        <div class="two">${field(T("Date of a payment (past or upcoming)"), dateInput("date", inputDate(parseDate(f.Date))))}
+        ${field(T("Final payment (optional)"), `<input type="date" name="end" value="${f.EndDate ? inputDate(parseDate(f.EndDate)) : ""}">`)}</div>
+        ${hint(T("For payments that end, such as a contract: enter the final payment date and it stops counting after that. You can also switch a payment off in the list below."))}
+        <div class="buttons">${button(r ? T("Save changes") : T("Add"), "save-rec", "main")}${r ? button(T("Cancel"), "cancel-rec") : ""}</div></form>`)}
       ${card(heading(T("Month by month")) + `<div class="chips past-chips"><button class="chip${allPast ? "" : " on"}" data-past="0">🔁 ${esc(T("Recurring only"))}</button><button class="chip${allPast ? " on" : ""}" data-past="1">${esc(T("All transactions"))}</button></div>` +
         hint(allPast ? T("Past months show every transaction from your entries and bank imports.") : T("Past months show recurring items only: expenses marked 🔁, salary, recurring income and transfers to savings. Mark an expense with 🔁 in the Outflows tab to include it.")) + pastMonths.map(m => `<details class="cal-month past" data-m="${mkey(m.ms)}"${folded.get(mkey(m.ms)) ? " open" : ""}><summary class="cal-month-head"><span class="m-name"><b>${esc(monthName(m.ms))}</b> <small class="hint">· ${esc(T("actual"))}</small></span>
         <span><span class="good">+${pln(m.inn)}</span> · <span class="bad">−${pln(m.out)}</span>${m.sav ? ` · <span class="primary">${pln(m.sav)}</span>` : ""} · <b class="${m.inn - m.out - m.sav >= 0 ? "good" : "bad"}">${pln(m.inn - m.out - m.sav)}</b></span></summary>
