@@ -1,5 +1,5 @@
 // MoneyCompass web: the window, the tabs and starting up.
-import { store, T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed, summary, fmtDate, changedSinceFile } from "./core.js";
+import { store, T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed, summary, fmtDate, changedSinceFile, LANGS } from "./core.js";
 import { esc, popup, toast } from "./ui.js";
 import { startLock, lock, hasPin } from "./lock.js";
 import { startBackup, drawBackupBar, backupProfileChanged } from "./backup.js";
@@ -15,7 +15,7 @@ import { Overview, Income, Expenses, Emergency, Portfolio, bindBin } from "./pag
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
 import { Calendar } from "./calendar.js";
 import { promoReminder } from "./advice.js";
-import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile, openLanguage } from "./dialogs.js";
+import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile, openLanguage, setLanguage } from "./dialogs.js";
 
 const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", reports: "#0E7490", savings: "#7E22CE" };
 const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget, calendar: Calendar };
@@ -77,8 +77,9 @@ function buildShell() {
       <button class="import-btn" data-act="import" title="${esc(T("Import a bank statement (CSV) – current or savings account. You can also drop the file onto the app."))}"><span class="ii">⬆</span><span class="il">${esc(T("Import"))}${license.isPro ? "" : " 🔒"}</span></button>
       <nav class="tabs" id="tabs">${list.map(t => `<button class="tab" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}"><span class="ti">${TAB_ICON[t.route] || ""}</span><span class="tl">${esc(T(t.title))}</span></button>`).join("")}</nav>
       <div class="actions">
-        <button class="profile-btn" data-act="profile" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}</button>
-        ${installed() ? `<button class="act exit" data-act="exit" title="${esc(T("Close"))}">⏻</button>` : ""}
+        <button class="me-row profile-btn" data-act="me" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}
+          <span class="me-text"><b>${esc(currentName())}</b><small class="me-badge ${license.isPro ? "pro" : "demo"}">${esc(license.isPro ? "Pro" : T("Demo"))}</small></span>
+          <span class="me-more" aria-hidden="true">⋯</span></button>
       </div>
     </header>
     ${license.isPro ? "" : `<div class="free-bar">${esc(T("Free web version."))} <a href="${DOWNLOAD_URL}" target="_blank" rel="noopener">${esc(T("Download the Windows app"))}</a> · <a href="#" data-act="profile">${esc(T("Enter license key"))}</a></div>`}
@@ -87,7 +88,7 @@ function buildShell() {
     <main id="page"></main>
     <button class="help-fab" data-act="help-menu" title="${esc(T("Help & About"))}">?</button>`;
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => App.go(b.dataset.tab));
-  const acts = { import: () => smartImport(), delete: openDelete, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide };
+  const acts = { import: () => smartImport(), delete: openDelete, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide, me: meMenu };
   document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
   setupHelpButton();
   // Another profile now? Read its backup state; otherwise only draw the bar again
@@ -101,6 +102,29 @@ function buildShell() {
     top.addEventListener("mouseenter", () => { if (!top.dataset.hold) top.classList.add("open"); });
     top.addEventListener("mouseleave", () => { top.classList.remove("open"); top.dataset.hold = ""; });
   }
+}
+
+// ---------- The profile row: one small menu for profile, options, language, help and closing ----------
+function meMenu() {
+  if (document.querySelector(".me-menu")) { document.querySelectorAll(".me-menu, .me-shield").forEach(x => x.remove()); return; }
+  const btn = document.querySelector(".me-row"), r = btn.getBoundingClientRect();
+  const shield = document.createElement("div"); shield.className = "help-shield me-shield";
+  const menu = document.createElement("div"); menu.className = "tab-menu data-menu me-menu";
+  menu.innerHTML = `<button data-m="profile"><span class="mi">👤</span>${esc(T("Profile & license"))}</button>
+    <button data-m="options"><span class="mi">⚙</span>${esc(T("Options"))}</button>
+    <div class="me-lang"><span class="mi">🌐</span>${LANGS.map(([c]) => `<button class="chip${c === lang() ? " on" : ""}" data-lang="${c}">${c.toUpperCase()}</button>`).join("")}</div>
+    <button data-m="help"><span class="mi">❓</span>${esc(T("Help & About"))}</button>
+    ${installed() ? `<hr><button data-m="exit" class="danger-item"><span class="mi">⏻</span>${esc(T("Close MoneyCompass"))}</button>` : ""}`;
+  document.body.append(shield, menu);
+  const w = menu.offsetWidth, h = menu.offsetHeight, below = r.top < window.innerHeight / 2;
+  menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + "px";
+  menu.style.top = (below ? Math.min(r.bottom + 6, window.innerHeight - h - 8) : Math.max(8, r.top - h - 6)) + "px";
+  const close = () => { shield.remove(); menu.remove(); };
+  shield.onclick = close;
+  document.addEventListener("keydown", function esc1(e) { if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc1); } });
+  const run = { profile: openProfile, options: openOptions, help: () => helpMenu(), exit: closeApp };
+  menu.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { close(); run[b.dataset.m](); });
+  menu.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { close(); setLanguage(b.dataset.lang); });
 }
 
 // ---------- One "Data ▾" menu instead of four buttons: import, export, backup, install, delete ----------

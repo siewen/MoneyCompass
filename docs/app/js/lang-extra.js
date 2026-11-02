@@ -871,7 +871,9 @@ export const EXTRA = {
 "Word (.docx)": "Word (.docx)",
 "Export": "Export",
 "Choose at least one part of the report.": "Wählen Sie mindestens einen Teil des Berichts.",
-"No data in this period.": "Keine Daten in diesem Zeitraum."
+"No data in this period.": "Keine Daten in diesem Zeitraum.",
+"Profile & license": "Profil & Lizenz",
+"Demo": "Demo"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -1744,7 +1746,9 @@ export const EXTRA = {
 "Word (.docx)": "Word (.docx)",
 "Export": "Export",
 "Choose at least one part of the report.": "Choisissez au moins une partie du rapport.",
-"No data in this period.": "Aucune donnée sur cette période."
+"No data in this period.": "Aucune donnée sur cette période.",
+"Profile & license": "Profil et licence",
+"Demo": "Démo"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -2617,6 +2621,8 @@ export const EXTRA = {
 "Word (.docx)": "Word (.docx)",
 "Export": "Eksport",
 "Choose at least one part of the report.": "Wybierz co najmniej jedną część raportu.",
-"No data in this period.": "Brak danych w tym okresie."
+"No data in this period.": "Brak danych w tym okresie.",
+"Profile & license": "Profil i licencja",
+"Demo": "Demo"
 }
 };

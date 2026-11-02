@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 54, date: "2026-11-02", items: {
+    en: ["👤 One profile row at the bottom of the menu: your photo, name and Pro/Demo badge. Click it for Profile & license, Options, Language, Help and Close."],
+    pl: ["👤 Jeden wiersz profilu na dole menu: Twoje zdjęcie, imię i oznaczenie Pro/Demo. Kliknij, aby otworzyć Profil i licencję, Opcje, Język, Pomoc i Zamknij."],
+    de: ["👤 Eine Profilzeile unten im Menü: Ihr Foto, Name und Pro/Demo-Abzeichen. Klicken für Profil & Lizenz, Optionen, Sprache, Hilfe und Schließen."],
+    fr: ["👤 Une ligne de profil en bas du menu : votre photo, votre nom et le badge Pro/Démo. Cliquez pour Profil et licence, Options, Langue, Aide et Fermer."] } },
   { build: 53, date: "2026-11-02", items: {
     en: ["🧹 Cleaner menu: the language button is gone (change the language in Options), your photo is round and the close button matches it."],
     pl: ["🧹 Czystsze menu: przycisk języka zniknął (język zmienisz w Opcjach), Twoje zdjęcie jest okrągłe, a przycisk zamykania do niego pasuje."],
