@@ -77,7 +77,6 @@ function buildShell() {
       <button class="import-btn" data-act="import" title="${esc(T("Import a bank statement (CSV) – current or savings account. You can also drop the file onto the app."))}"><span class="ii">⬆</span><span class="il">${esc(T("Import"))}${license.isPro ? "" : " 🔒"}</span></button>
       <nav class="tabs" id="tabs">${list.map(t => `<button class="tab" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}"><span class="ti">${TAB_ICON[t.route] || ""}</span><span class="tl">${esc(T(t.title))}</span></button>`).join("")}</nav>
       <div class="actions">
-        <button class="act lang-btn" data-act="lang" title="${esc(T("Language"))}">🌐<b>${esc(lang().toUpperCase())}</b></button>
         <button class="profile-btn" data-act="profile" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}</button>
         ${installed() ? `<button class="act exit" data-act="exit" title="${esc(T("Close"))}">⏻</button>` : ""}
       </div>

@@ -732,3 +732,8 @@ body.drop-on::after { content: "⬆"; position: fixed; inset: 12px; z-index: 200
 .rep-parts .check.off { opacity: .5; }
 .rep-export .btn { text-align: left; }
 .rep-figures b { font-size: 17px; }
+/* Bottom of the side menu: the round profile photo and, in the installed app, a matching round close button */
+.profile-btn .avatar, .profile-btn img.avatar { border-radius: 50% !important; }
+.actions .act.exit { width: 36px; height: 36px; padding: 0; border-radius: 50%; justify-content: center; background: var(--chip, #334155); color: var(--muted, #cbd5e1); font-size: 16px; }
+.actions .act.exit:hover { background: color-mix(in srgb, var(--bad, #B91C1C) 30%, var(--chip, #334155)); color: #fff; }
+@media (min-width: 700px) { :root[data-design] .actions { justify-content: space-between; align-items: center; } }

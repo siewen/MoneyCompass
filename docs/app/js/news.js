@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 53, date: "2026-11-02", items: {
+    en: ["🧹 Cleaner menu: the language button is gone (change the language in Options), your photo is round and the close button matches it."],
+    pl: ["🧹 Czystsze menu: przycisk języka zniknął (język zmienisz w Opcjach), Twoje zdjęcie jest okrągłe, a przycisk zamykania do niego pasuje."],
+    de: ["🧹 Aufgeräumtes Menü: Der Sprachknopf ist weg (Sprache in den Optionen ändern), Ihr Foto ist rund und der Schließen-Knopf passt dazu."],
+    fr: ["🧹 Menu plus net : le bouton de langue a disparu (changez la langue dans les Options), votre photo est ronde et le bouton de fermeture assorti."] } },
   { build: 52, date: "2026-11-02", items: {
     en: ["📑 New Reports tab: choose the period (this month, last 3 months, this year, your own dates…) and what to include, see the key figures, then export to Excel, PDF or Word. The Data button is gone – Export is in Reports, Delete data in Options."],
     pl: ["📑 Nowa zakładka Raporty: wybierz okres (ten miesiąc, ostatnie 3 miesiące, ten rok, własne daty…) i co ma się znaleźć w raporcie, zobacz najważniejsze liczby, a potem eksportuj do Excela, PDF lub Worda. Przycisk Dane zniknął – eksport jest w Raportach, usuwanie danych w Opcjach."],
