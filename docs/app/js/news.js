@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 60, date: "2026-11-02", items: {
+    en: ["↕️ Your own menu order (Pro): drag a page up or down in the side menu, or use Options → Menu order (also on phones). \"Standard order\" puts it back."],
+    pl: ["↕️ Własna kolejność menu (Pro): przeciągnij stronę w górę lub w dół w menu bocznym albo użyj Opcje → Kolejność menu (także na telefonie). „Kolejność standardowa” przywraca ustawienie."],
+    de: ["↕️ Eigene Menü-Reihenfolge (Pro): Ziehen Sie eine Seite im Seitenmenü nach oben oder unten, oder nutzen Sie Optionen → Menü-Reihenfolge (auch am Handy). „Standardreihenfolge“ stellt sie zurück."],
+    fr: ["↕️ Votre propre ordre de menu (Pro) : faites glisser une page vers le haut ou le bas dans le menu latéral, ou utilisez Options → Ordre du menu (aussi sur téléphone). « Ordre standard » le rétablit."] } },
   { build: 59, date: "2026-11-02", items: {
     en: ["🧩 Tidier pages: cards fill the columns evenly and the columns end level – no more empty holes, no need to drag cards around. Full-width cards come after the columns.", "📈 The savings chart is flatter, so it takes less space."],
     pl: ["🧩 Uporządkowane strony: karty równo wypełniają kolumny, a kolumny kończą się na tej samej wysokości – bez pustych dziur i bez przeciągania kart. Karty na całą szerokość są pod kolumnami.", "📈 Wykres oszczędności jest niższy i zajmuje mniej miejsca."],

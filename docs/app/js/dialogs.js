@@ -178,6 +178,11 @@ export function openOptions() {
   const s = D().Settings;
   const p = popup(`<h2 class="popup-title">⚙ ${esc(T("Options"))}</h2><div class="grid">
     ${card(heading(T("Language")) + hint(T("Your data stays the same; only the texts change.")) + select("language", LANGS, lang()))}
+    ${card(heading(T("Menu order")) + hint(T("Change the order of the pages in the menu. On a computer you can also drag a page in the menu.")) +
+      (license.isPro ? `<div class="list tab-order">${App.tabList().map((t, i, a) => `<div class="item"><span>${esc(t.title)}</span><span class="tab-arrows">
+        <button class="icon-btn" data-tab-up="${t.route}"${i === 0 ? " disabled" : ""} title="${esc(T("Up"))}">▲</button><button class="icon-btn" data-tab-down="${t.route}"${i === a.length - 1 ? " disabled" : ""} title="${esc(T("Down"))}">▼</button></span></div>`).join("")}</div>
+        <div class="buttons">${button(esc(T("Standard order")), "reset-tabs", "second small")}</div>`
+        : `<div class="buttons">${button(esc(T("Change the menu order")) + " 🔒", "tabs-pro", "second")}</div>`))}
     ${card(heading(T("Layout")) + hint(T("Drag a card by its handle (⠿, top right) to move it, on any tab. Reset layout puts all cards back in their standard order.")) +
       `<div class="buttons">${button(esc(T("Reset layout")), "reset-layout", "second")}</div>`)}
     ${card(heading(T("Modules")) + hint(license.isPro ? T("Switch on the modules you want. Each one adds its own tab; the tabs appear when you close Options. Your entries stay saved when you switch a module off.")
@@ -245,6 +250,11 @@ export function openOptions() {
     s.AutoLockMinutes = v; save();
   };
   el.querySelector('input[name="askstart"]').onchange = e => { s.AskOnStart = e.target.checked; save(); };
+  const redrawOptions = () => { p.close(); openOptions(); };
+  el.querySelectorAll("[data-tab-up]").forEach(b => b.onclick = () => { App.moveTab(b.dataset.tabUp, -1); redrawOptions(); });
+  el.querySelectorAll("[data-tab-down]").forEach(b => b.onclick = () => { App.moveTab(b.dataset.tabDown, 1); redrawOptions(); });
+  el.querySelector('[data-action="reset-tabs"]')?.addEventListener("click", () => { App.resetTabs(); redrawOptions(); });
+  el.querySelector('[data-action="tabs-pro"]')?.addEventListener("click", () => requirePro(T("Menu order")));
   el.querySelector('[data-action="reset-layout"]').onclick = () => {
     const o = s.CardOrder || {};
     Object.keys(o).filter(k => k.startsWith("web")).forEach(k => delete o[k]);

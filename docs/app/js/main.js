@@ -26,7 +26,21 @@ function tabs() {
   // Savings goals are part of the Budget plan (Pro), not a tab of their own
   for (const m of MODULES) if (moduleOn(m.code) && m.code !== "goals") list.push(MODULE_PAGES[m.code]);
   list.push(Savings, Reports);
-  return list;
+  // Pro: your own menu order (pages not in it keep their usual place)
+  const order = license.isPro && Array.isArray(State.data.Settings.TabOrder) ? State.data.Settings.TabOrder : null;
+  if (!order) return list;
+  const known = list.filter(t => order.includes(t.route)).sort((a, b) => order.indexOf(a.route) - order.indexOf(b.route));
+  const out = [...known];
+  list.forEach((t, i) => { if (!order.includes(t.route)) out.splice(Math.min(i, out.length), 0, t); });
+  return out;
+}
+/** Move a page in the menu (Pro): to the place of another page, or one up/down. */
+export function moveTab(route, target) {
+  const routes = tabs().map(t => t.route), from = routes.indexOf(route);
+  let to = typeof target === "number" ? from + target : routes.indexOf(target);
+  if (from < 0 || to < 0 || to >= routes.length || from === to) return;
+  routes.splice(to, 0, routes.splice(from, 1)[0]);
+  State.data.Settings.TabOrder = routes; save(); buildShell();
 }
 
 // Line icons for the tabs (shown in the beta design's side menu)
@@ -88,6 +102,15 @@ function buildShell() {
     <main id="page"></main>
     <button class="help-fab" data-act="help-menu" title="${esc(T("Help & About"))}">?</button>`;
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => App.go(b.dataset.tab));
+  // Pro: drag a page up or down in the side menu to change the order
+  if (license.isPro && matchMedia("(hover: hover)").matches) document.querySelectorAll("#tabs [data-tab]").forEach(b => {
+    b.draggable = true;
+    b.addEventListener("dragstart", e => { e.dataTransfer.setData("text/mc-tab", b.dataset.tab); e.dataTransfer.effectAllowed = "move"; b.classList.add("dragging-tab"); });
+    b.addEventListener("dragend", () => b.classList.remove("dragging-tab"));
+    b.addEventListener("dragover", e => { if ([...e.dataTransfer.types].includes("text/mc-tab")) { e.preventDefault(); b.classList.add("drop-tab"); } });
+    b.addEventListener("dragleave", () => b.classList.remove("drop-tab"));
+    b.addEventListener("drop", e => { const r = e.dataTransfer.getData("text/mc-tab"); b.classList.remove("drop-tab"); if (r) { e.preventDefault(); e.stopPropagation(); moveTab(r, b.dataset.tab); } });
+  });
   const acts = { import: () => smartImport(), delete: openDelete, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide, me: meMenu };
   document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
   setupHelpButton();
@@ -450,6 +473,8 @@ Object.assign(App, {
   applyTheme,
   openProfile, openOptions, openHelp, openExport, openImport, openDelete, openOptimize, openBankImport, install, openGuide,
   saveProfile: saveProfileFile,
+  tabList: () => tabs().map(t => ({ route: t.route, title: T(t.title) })),
+  moveTab, resetTabs: () => { delete State.data.Settings.TabOrder; save(); buildShell(); },
 });
 
 async function start() {
