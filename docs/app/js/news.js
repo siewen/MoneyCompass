@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 85, date: "2026-11-03", items: {
+    en: ["🛡️ Automatic backup: clearer message after a browser restart. The backup stays on – the browser only asks once for permission. Choose \"Allow on every visit\" and it won't ask again."],
+    pl: ["🛡️ Automatyczna kopia: jaśniejszy komunikat po ponownym uruchomieniu przeglądarki. Kopia pozostaje włączona – przeglądarka tylko raz prosi o zgodę. Wybierz „Zezwalaj przy każdej wizycie”, a nie zapyta ponownie."],
+    de: ["🛡️ Automatische Sicherung: klarere Meldung nach einem Browser-Neustart. Die Sicherung bleibt an – der Browser fragt nur einmal um Erlaubnis. Wählen Sie „Bei jedem Besuch erlauben“, dann fragt er nicht mehr."],
+    fr: ["🛡️ Sauvegarde automatique : message plus clair après un redémarrage du navigateur. La sauvegarde reste activée – le navigateur demande seulement une fois l'autorisation. Choisissez « Autoriser à chaque visite » et il ne demandera plus."] } },
   { build: 84, date: "2026-11-03", items: {
     en: ["⬆ Import centre simplified: current account (everything, expenses only, income only) and savings account statements."],
     pl: ["⬆ Uproszczone centrum importu: konto osobiste (wszystko, tylko wydatki, tylko dochody) i wyciągi z kont oszczędnościowych."],

@@ -93,7 +93,9 @@ const later = () => { const l = store.get(laterKey()); return l && daysSince(l) 
 /** Text and buttons for the bar, or null when nothing is needed. */
 function barContent(saveFile) {
   if (!license.isPro) return null;   // backups are Pro: the demo shows no backup reminder
-  if (status === "paused") return { text: "🛡️ " + T("Automatic backup is paused until you allow it again."), btn: T("Continue backup"), act: resumeBackup };
+  // The backup is set up, but after a restart the browser asks once more for permission to write the file.
+  // In its question, "Allow on every visit" makes this permanent (Chrome and Edge, installed app).
+  if (status === "paused") return { text: "🛡️ " + T("Automatic backup is on, but your browser needs your permission again after a restart. Click Allow and choose \"Allow on every visit\" – then it won't ask again."), btn: T("Allow"), act: resumeBackup };
   if (status === "error") return { text: "⚠️ " + T("The automatic backup could not be written."), btn: T("Choose the file again"), act: chooseBackupFile };
   if (status === "on" || later() || entries() < 10) return null;
   if (autoSupported()) return { text: "🛡️ " + T("Protect your data: keep an automatic backup on this computer."), btn: T("Choose where to keep it"), act: chooseBackupFile };
@@ -116,6 +118,8 @@ export async function startBackup(redraw) {
   try { if (navigator.storage?.persist && !(await navigator.storage.persisted())) await navigator.storage.persist(); } catch { /* not supported */ }
   await refresh(); onChange();
   window.addEventListener("mc-saved", backupSoon);
+  // Permission can come back while the app is open (e.g. granted in the browser's site settings): check again when the window gets focus
+  window.addEventListener("focus", async () => { if (status !== "paused") return; await refresh(); if (status === "on") { onChange(); backupSoon(); } });
 }
 /** After switching profile. */
 export async function backupProfileChanged() { clearTimeout(timer); await refresh(); onChange(); }
@@ -125,7 +129,7 @@ export function backupLine() {
   const b = backupInfo();
   if (!license.isPro) return T("Backups (profile file and automatic backup) are part of MoneyCompass Pro.");
   if (b.status === "on") return T("Automatic backup: on · file {0} · last saved {1}", b.file, fmtDate(b.at) + " " + b.at.slice(11, 16));
-  if (b.status === "paused") return T("Automatic backup: paused · file {0}", b.file);
+  if (b.status === "paused") return T("Automatic backup: on, waiting for the browser's permission · file {0}", b.file);
   if (b.status === "error") return T("Automatic backup: could not write file {0}", b.file);
   return autoSupported() ? T("Automatic backup: off") : T("Automatic backup is not possible in this browser (use Chrome or Edge on a computer). Save your profile regularly.");
 }
