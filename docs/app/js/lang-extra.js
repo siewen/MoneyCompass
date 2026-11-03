@@ -1152,7 +1152,14 @@ export const EXTRA = {
 "Only your Savings are changed: Inflows and Outflows stay as they are.": "Nur Ihre Ersparnisse werden geändert: Eingänge und Ausgaben bleiben, wie sie sind.",
 "Updates your savings account": "Aktualisiert Ihr Sparkonto",
 "The import is not kept and your savings account is not updated.": "Der Import wird nicht behalten und Ihr Sparkonto nicht aktualisiert.",
-"Import the transaction history of your Nexo account: MoneyCompass works out your coins, the interest you earned and today's value – shows a preview first – and saves it as a savings account in Savings.": "Importieren Sie den Transaktionsverlauf Ihres Nexo-Kontos: MoneyCompass ermittelt Ihre Coins, die erhaltenen Zinsen und den heutigen Wert – zeigt zuerst eine Vorschau – und speichert es als Sparkonto in den Ersparnissen."
+"Import the transaction history of your Nexo account: MoneyCompass works out your coins, the interest you earned and today's value – shows a preview first – and saves it as a savings account in Savings.": "Importieren Sie den Transaktionsverlauf Ihres Nexo-Kontos: MoneyCompass ermittelt Ihre Coins, die erhaltenen Zinsen und den heutigen Wert – zeigt zuerst eine Vorschau – und speichert es als Sparkonto in den Ersparnissen.",
+"Edit category": "Kategorie bearbeiten",
+"Edit categories…": "Kategorien bearbeiten…",
+"Edit categories": "Kategorien bearbeiten",
+"This category no longer exists.": "Diese Kategorie gibt es nicht mehr.",
+"Your own categories: change the name, icon or \"essential\" with ✎, or delete one with 🗑 (its expenses move to \"Other\"). The standard categories can't be changed.": "Ihre eigenen Kategorien: Name, Symbol oder „notwendig“ mit ✎ ändern oder mit 🗑 löschen (ihre Ausgaben gehen zu „Sonstiges“). Die Standardkategorien lassen sich nicht ändern.",
+"Edit": "Bearbeiten",
+"1 expense": "1 Ausgabe"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -2306,7 +2313,14 @@ export const EXTRA = {
 "Only your Savings are changed: Inflows and Outflows stay as they are.": "Seule votre Épargne est modifiée : Entrées et Sorties restent inchangées.",
 "Updates your savings account": "Met à jour votre compte d'épargne",
 "The import is not kept and your savings account is not updated.": "L'import n'est pas conservé et votre compte d'épargne n'est pas mis à jour.",
-"Import the transaction history of your Nexo account: MoneyCompass works out your coins, the interest you earned and today's value – shows a preview first – and saves it as a savings account in Savings.": "Importez l'historique de votre compte Nexo : MoneyCompass calcule vos cryptos, les intérêts perçus et la valeur du jour – affiche d'abord un aperçu – et l'enregistre comme compte d'épargne dans Épargne."
+"Import the transaction history of your Nexo account: MoneyCompass works out your coins, the interest you earned and today's value – shows a preview first – and saves it as a savings account in Savings.": "Importez l'historique de votre compte Nexo : MoneyCompass calcule vos cryptos, les intérêts perçus et la valeur du jour – affiche d'abord un aperçu – et l'enregistre comme compte d'épargne dans Épargne.",
+"Edit category": "Modifier la catégorie",
+"Edit categories…": "Modifier les catégories…",
+"Edit categories": "Modifier les catégories",
+"This category no longer exists.": "Cette catégorie n'existe plus.",
+"Your own categories: change the name, icon or \"essential\" with ✎, or delete one with 🗑 (its expenses move to \"Other\"). The standard categories can't be changed.": "Vos propres catégories : modifiez le nom, l'icône ou « essentiel » avec ✎, ou supprimez-en une avec 🗑 (ses dépenses passent dans « Autre »). Les catégories standard ne peuvent pas être modifiées.",
+"Edit": "Modifier",
+"1 expense": "1 dépense"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -3460,6 +3474,13 @@ export const EXTRA = {
 "Only your Savings are changed: Inflows and Outflows stay as they are.": "Zmieniane są tylko Twoje Oszczędności: Wpływy i Wydatki pozostają bez zmian.",
 "Updates your savings account": "Aktualizuje Twoje konto oszczędnościowe",
 "The import is not kept and your savings account is not updated.": "Import nie zostanie zachowany, a konto oszczędnościowe nie zostanie zaktualizowane.",
-"Import the transaction history of your Nexo account: MoneyCompass works out your coins, the interest you earned and today's value – shows a preview first – and saves it as a savings account in Savings.": "Zaimportuj historię transakcji konta Nexo: MoneyCompass obliczy Twoje kryptowaluty, zarobione odsetki i dzisiejszą wartość – najpierw pokaże podgląd – i zapisze to jako konto oszczędnościowe w Oszczędnościach."
+"Import the transaction history of your Nexo account: MoneyCompass works out your coins, the interest you earned and today's value – shows a preview first – and saves it as a savings account in Savings.": "Zaimportuj historię transakcji konta Nexo: MoneyCompass obliczy Twoje kryptowaluty, zarobione odsetki i dzisiejszą wartość – najpierw pokaże podgląd – i zapisze to jako konto oszczędnościowe w Oszczędnościach.",
+"Edit category": "Edytuj kategorię",
+"Edit categories…": "Edytuj kategorie…",
+"Edit categories": "Edytuj kategorie",
+"This category no longer exists.": "Ta kategoria już nie istnieje.",
+"Your own categories: change the name, icon or \"essential\" with ✎, or delete one with 🗑 (its expenses move to \"Other\"). The standard categories can't be changed.": "Twoje własne kategorie: zmień nazwę, ikonę lub „niezbędne” przyciskiem ✎ albo usuń przyciskiem 🗑 (jej wydatki trafią do „Inne”). Kategorii standardowych nie można zmieniać.",
+"Edit": "Edytuj",
+"1 expense": "1 wydatek"
 }
 };

@@ -894,3 +894,5 @@ html.lite[data-design] .tabs, html.lite .top { background: var(--side, #1A2120) 
 .save-bar .field { margin: 0; min-width: 180px; } .save-bar .save-gap { flex: 1; }
 .save-bar .big-save { padding: 12px 22px; font-size: 16px; }
 @media (max-width: 640px) { .save-bar .field { flex: 1 1 100%; } .save-bar .save-gap { display: none; } .save-bar .btn { flex: 1; } }
+.cat-pop .cat-edit { border-top: 1px solid var(--border); color: var(--primary); font-weight: 600; width: 100%; text-align: left; }
+.item .row-actions { display: flex; gap: 4px; }

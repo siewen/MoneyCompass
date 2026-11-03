@@ -357,11 +357,31 @@ export function addCategory(name, essential, icon) {
   State.data.Categories.push({ Name: name, Essential: !!essential, Icon: icon || "" }); save();
   return null;
 }
+/** Change one of your own categories: name, icon and essential. A new name follows everywhere (expenses, budget,
+ *  regular payments, learned shops); "essential" is also applied to the expenses already in it. Returns an error text or null. */
+export function updateCategory(oldName, name, essential, icon) {
+  const d = State.data, c = d.Categories.find(x => x.Name === oldName);
+  if (!c) return T("This category no longer exists.");
+  name = (name || "").trim();
+  if (!name) return T("Please enter a name.");
+  if (name.length > 40) return T("Please use a shorter name (up to 40 letters).");
+  const lower = s => s.toLowerCase();
+  if (lower(name) !== lower(oldName) && categories().some(x => x.Name !== oldName && (lower(x.Name) === lower(name) || lower(T(x.Name)) === lower(name)))) return T("This category already exists.");
+  Object.assign(c, { Name: name, Essential: !!essential, Icon: icon || "" });
+  for (const e of d.Expenses) if (e.Category === oldName) { e.Category = name; e.Essential = !!essential; }
+  for (const b of d.Budgets) if (b.Category === oldName) b.Category = name;
+  for (const r of d.Recurring || []) if (r.Category === oldName) r.Category = name;
+  for (const r of d.Settings.CategoryRules || []) if (r.Category === oldName) r.Category = name;
+  save();
+  return null;
+}
 export function removeCategory(name) {
   const d = State.data;
   d.Categories = d.Categories.filter(c => c.Name !== name);
   d.Expenses.forEach(e => { if (e.Category === name) e.Category = OTHER; });
   d.Budgets = d.Budgets.filter(b => b.Category !== name);
+  for (const r of d.Recurring || []) if (r.Category === name) r.Category = OTHER;
+  d.Settings.CategoryRules = (d.Settings.CategoryRules || []).filter(r => r.Category !== name);   // shops learned for it: forgotten
   save();
 }
 

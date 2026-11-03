@@ -2,11 +2,11 @@
 import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, addMonths, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
-  addCategory, removeCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
+  addCategory, removeCategory, updateCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
   matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText } from "./core.js";
 import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
 import { NEW_CAT } from "./ui.js";
-import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON, ICONS, headingTip, infoTip } from "./ui.js";
+import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON, ICONS, headingTip, categoryBox, infoTip } from "./ui.js";
 import { App, requirePro } from "./app.js";
 import { Rates } from "./rates.js";
 import { adviceCard, bindAdvice, promoBadge, moves } from "./advice.js";
@@ -497,7 +497,7 @@ export const Expenses = {
       ${card(`<form id="expense-form">${heading(T("Add an expense"))}
         <div class="two">${field(T("Date"), dateInput("date", inputDate(today())))}${field(T("Amount (zł)"), numInput("amount", "", T("e.g. {0}", "120,50")))}</div>
         <div class="cat-row">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], cat0.Name))}
-          ${button(T("Categories…"), "categories", "second small")}</div>
+          ${button(T("Edit categories…"), "categories", "second small")}</div>
         ${field(T("Description (optional)"), textInput("description", "", T("e.g. {0}", "Biedronka")))}
         <div class="two">${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), ""))}<div class="hint">${esc(T("Repeating expenses appear automatically in the Calendar, also in the next months."))}</div></div>
         ${check("essential", T("Essential (must pay even in a crisis)"), cat0.Essential)}
@@ -712,22 +712,28 @@ function showCategory(name) {
 export async function manageCategories() {
   if (!(await requirePro(T("Own categories")))) return;
   const d = D();
-  const draw = () => `<h2 class="popup-title">${esc(T("Your own categories"))}</h2>
-    ${hint(T("Delete a category with the red button. Its expenses move to \"Other\"."))}
+  const draw = () => `<h2 class="popup-title">${esc(T("Edit categories"))}</h2>
+    ${hint(T("Your own categories: change the name, icon or \"essential\" with ✎, or delete one with 🗑 (its expenses move to \"Other\"). The standard categories can't be changed."))}
     <div class="list">${d.Categories.length ? d.Categories.map(c => `<div class="item"><div><b>${esc((c.Icon ? c.Icon + " " : "") + c.Name)}</b>
-      <span class="hint">${esc(c.Essential ? T("Essential") : T("Not essential"))}</span></div>
-      <button class="icon-btn danger" data-del-cat="${esc(c.Name)}">🗑</button></div>`).join("") : hint(T("No own categories yet."))}</div>
-    <hr><h3>${esc(T("New category"))}</h3>
-    <div class="two">${field(T("Name"), textInput("name", "", T("e.g. {0}", T("Pets"))))}${field(T("Icon"), select("icon", ICON_CHOICES, "📦"))}</div>
-    ${check("essential", T("Essential (must pay even in a crisis)"), false)}
-    <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button><button class="btn main" data-add>${esc(T("Add category"))}</button></div>`;
+      <span class="hint">${esc(c.Essential ? T("Essential") : T("Not essential"))} · ${esc((n => n === 1 ? T("1 expense") : T("{0} expenses", n))(d.Expenses.filter(e => e.Category === c.Name).length))}</span></div>
+      <div class="row-actions"><button class="icon-btn" data-edit-cat="${esc(c.Name)}" title="${esc(T("Edit"))}">✎</button>
+      <button class="icon-btn danger" data-del-cat="${esc(c.Name)}" title="${esc(T("Delete"))}">🗑</button></div></div>`).join("") : hint(T("No own categories yet."))}</div>
+    <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button><button class="btn main" data-add>＋ ${esc(T("New category"))}</button></div>`;
   const p = popup(draw(), { width: 560, onClose: () => App.refresh() });
   const bind = () => {
-    p.el.querySelector("[data-add]").onclick = () => {
-      const v = values(p.el), err = addCategory(v.name, v.essential, v.icon);
+    p.el.querySelector("[data-add]").onclick = async () => {
+      const got = await categoryBox(ICON_CHOICES); if (!got) return;
+      const err = addCategory(got.name, got.essential, got.icon);
       if (err) { toast(err, "bad"); return; }
-      toast(T("New category: {0}", v.name.trim())); p.el.innerHTML = draw(); bind();
+      toast(T("New category: {0}", got.name.trim())); p.el.innerHTML = draw(); bind();
     };
+    p.el.querySelectorAll("[data-edit-cat]").forEach(b => b.onclick = async () => {
+      const c = d.Categories.find(x => x.Name === b.dataset.editCat); if (!c) return;
+      const got = await categoryBox(ICON_CHOICES, { name: c.Name, icon: c.Icon, essential: c.Essential }); if (!got) return;
+      const err = updateCategory(c.Name, got.name, got.essential, got.icon);
+      if (err) { toast(err, "bad"); return; }
+      toast(T("Saved."), "good"); p.el.innerHTML = draw(); bind();
+    });
     p.el.querySelectorAll("[data-del-cat]").forEach(b => b.onclick = async () => {
       if (await confirmBox(T("Delete category?"), T("Expenses in \"{0}\" move to \"Other\". A budget limit for it is removed.", b.dataset.delCat), T("Delete"), T("Cancel"), true)) {
         removeCategory(b.dataset.delCat); p.el.innerHTML = draw(); bind();

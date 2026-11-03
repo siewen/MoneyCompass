@@ -134,7 +134,8 @@ function openCatPicker(sel) {
   const w = Math.max(r.width, 260), below = window.innerHeight - r.bottom > 300 || r.top < 300;
   Object.assign(pop.style, { left: Math.min(r.left, window.innerWidth - w - 8) + "px", width: w + "px",
     ...(below ? { top: r.bottom + 4 + "px" } : { bottom: window.innerHeight - r.top + 4 + "px" }) });
-  pop.innerHTML = `<input type="search" class="cat-search" placeholder="${esc(T("Search…"))}" autocomplete="off"><div class="cat-list"></div>`;
+  pop.innerHTML = `<input type="search" class="cat-search" placeholder="${esc(T("Search…"))}" autocomplete="off"><div class="cat-list"></div>
+    <button type="button" class="cat-opt cat-edit">✎ ${esc(T("Edit categories…"))}</button>`;
   document.body.appendChild(pop);
   const input = pop.querySelector("input"), list = pop.querySelector(".cat-list");
   let shown = [], active = 0;
@@ -154,6 +155,7 @@ function openCatPicker(sel) {
   };
   const outside = e => { if (!pop.contains(e.target) && e.target !== sel) close(); };
   list.onclick = e => { const b = e.target.closest("[data-i]"); if (b) pick(shown[+b.dataset.i]); };
+  pop.querySelector(".cat-edit").onclick = async () => { close(); (await import("./pages-main.js")).manageCategories(); };
   input.oninput = () => { active = 0; draw(); };
   input.onkeydown = e => {
     if (e.key === "ArrowDown") { active = Math.min(shown.length - 1, active + 1); draw(); e.preventDefault(); }
@@ -181,15 +183,15 @@ document.addEventListener("keydown", e => {
   }
 }, true);
 
-/** New category from a category list: name, icon and essential. Resolves to { name, icon, essential } or null. */
-function categoryBox(icons) {
+/** New category (or edit one: pass { name, icon, essential }): name, icon and essential. Resolves to { name, icon, essential } or null. */
+export function categoryBox(icons, init = null) {
   return new Promise(resolve => {
-    let icon = "📦";
-    const p = popup(`<div class="box-head"><span class="box-icon">🏷️</span><h2>${esc(T("New category"))}</h2></div>
-      ${field(T("Name of the category"), textInput("v", "", T("e.g. {0}", T("Pets"))))}
+    let icon = init?.icon || "📦";
+    const p = popup(`<div class="box-head"><span class="box-icon">🏷️</span><h2>${esc(init ? T("Edit category") : T("New category"))}</h2></div>
+      ${field(T("Name of the category"), textInput("v", init?.name || "", T("e.g. {0}", T("Pets"))))}
       <div class="field"><span>${esc(T("Icon"))}</span><div class="icon-grid">${icons.map(i => `<button type="button" class="icon-pick${i === icon ? " on" : ""}" data-icon="${i}">${i}</button>`).join("")}</div></div>
-      ${check("ess", T("Essential (must pay even in a crisis)"), false)}
-      <div class="box-buttons"><button class="btn main" data-r="1">${esc(T("Add category"))}</button><button class="btn second" data-r="0">${esc(T("Cancel"))}</button></div>`,
+      ${check("ess", T("Essential (must pay even in a crisis)"), !!init?.essential)}
+      <div class="box-buttons"><button class="btn main" data-r="1">${esc(init ? T("Save changes") : T("Add category"))}</button><button class="btn second" data-r="0">${esc(T("Cancel"))}</button></div>`,
       { width: 460, cls: "box", onClose: r => resolve(r) });
     const input = p.el.querySelector('input[name="v"]');
     p.el.querySelectorAll("[data-icon]").forEach(b => b.onclick = () => {
