@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 80, date: "2026-11-03", items: {
+    en: ["🛠 Nexo import fixed: when no dollar exchange rate was set yet, the monthly balances, interest and rate were saved as 0. It now takes today's NBP rate automatically – please import your Nexo file again."],
+    pl: ["🛠 Poprawiono import z Nexo: gdy kurs dolara nie był jeszcze ustawiony, salda miesięczne, odsetki i oprocentowanie zapisywały się jako 0. Teraz automatycznie pobierany jest dzisiejszy kurs NBP – zaimportuj plik z Nexo ponownie."],
+    de: ["🛠 Nexo-Import korrigiert: Wenn noch kein Dollarkurs eingestellt war, wurden Monatssalden, Zinsen und Zinssatz als 0 gespeichert. Jetzt wird automatisch der heutige NBP-Kurs verwendet – bitte importieren Sie Ihre Nexo-Datei erneut."],
+    fr: ["🛠 Import Nexo corrigé : sans cours du dollar défini, les soldes mensuels, intérêts et taux étaient enregistrés à 0. Le cours NBP du jour est maintenant pris automatiquement – importez à nouveau votre fichier Nexo."] } },
   { build: 79, date: "2026-11-03", items: {
     en: ["💰 Your savings (Overview) per account: choose \"All accounts\" or one account. The bars show the balance at each month end with the amount and the monthly change; combined, each account has its own colour."],
     pl: ["💰 Twoje oszczędności (Przegląd) według kont: wybierz „Wszystkie konta” lub jedno konto. Słupki pokazują saldo na koniec każdego miesiąca z kwotą i zmianą miesięczną; łącznie każde konto ma swój kolor."],

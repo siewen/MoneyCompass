@@ -111,7 +111,9 @@ export const Rates = {
   },
   applyExchange() {
     const s = State.data.Settings;
-    if (!s.AutoExchangeRates || !(this.data.Usd > 0) || !(this.data.Eur > 0)) return;
+    if (!(this.data.Usd > 0) || !(this.data.Eur > 0)) return;
+    // A rate that was never set (0) is always filled in; your own rates are only replaced with automatic rates on
+    if (!s.AutoExchangeRates) { if (!(s.UsdToPln > 0) || !(s.EurToPln > 0)) { s.UsdToPln ||= this.data.Usd; s.EurToPln ||= this.data.Eur; save(); } return; }
     if (s.UsdToPln === this.data.Usd && s.EurToPln === this.data.Eur) return;
     s.UsdToPln = this.data.Usd; s.EurToPln = this.data.Eur; save();
   },

@@ -9,6 +9,7 @@ import { esc, popup, pickFile, alertBox, confirmBox, toast } from "./ui.js";
 import { App, requirePro } from "./app.js";
 import { parseDate } from "./csv.js";
 import { loadPrices, priceOf, hasPrice } from "./investments.js";
+import { Rates } from "./rates.js";
 
 const D = () => State.data;
 
@@ -137,13 +138,30 @@ export async function openInvestImport(fileObj = null) {
   let x;
   try { x = parseNexo(text); } catch (e) { await alertBox(T("Import CSV"), T("The file could not be read: {0}", e.message)); return; }
   if (!x.used) { await alertBox(T("Import CSV"), T("No transactions found in this file.")); return; }
-  await loadPrices(x.assets.map(a => a.Coin).filter(hasPrice), true);
-  preview(x, fileObj.name);
+  await loadPrices([...x.assets.map(a => a.Coin).filter(hasPrice), "USDC"], true);
+  const fx = await usdRate();
+  if (!(fx.usd > 0)) { await alertBox(T("Import CSV"), T("The dollar exchange rate is not known, so the Nexo amounts (in USD) cannot be converted. Connect to the internet or enter the rate in Savings → Exchange rates, then import again.")); return; }
+  preview(x, fileObj.name, fx);
+}
+/** 1 USD and 1 EUR in złoty: your exchange rates, else today's NBP rates (downloaded now), else the USDC price as a last resort. */
+async function usdRate() {
+  const s = D().Settings;
+  let usd = s.UsdToPln || Rates.data.Usd || 0, eur = s.EurToPln || Rates.data.Eur || 0;
+  if (!(usd > 0) || !(eur > 0)) {
+    const get = c => fetch(`https://api.nbp.pl/api/exchangerates/rates/a/${c}/?format=json`).then(r => r.json()).then(j => j.rates[0].mid).catch(() => 0);
+    const [u, e] = await Promise.all([usd > 0 ? usd : get("usd"), eur > 0 ? eur : get("eur")]);
+    usd = u; eur = e;
+  }
+  if (!(usd > 0)) usd = priceOf("USDC") || priceOf("USDT") || 0;
+  return { usd, eur };
 }
 
-function preview(x, name) {
-  const d = D(), s = d.Settings, usd = v => Calc.toPln(v, "USD", s);
-  const rows = x.assets.map(a => ({ ...a, cost: usd(a.CostUsd), price: priceOf(a.Coin) })).map(a => ({ ...a, value: a.price ? a.price * a.Amount : null }));
+function preview(x, name, fx) {
+  // Nexo keeps everything in USD: amounts go into the main currency through złoty (rates from usdRate)
+  const d = D(), s = d.Settings, toMain = v => Calc.toPln(v, "PLN", s), usd = v => toMain(v * fx.usd);
+  const FX = { USDX: fx.usd, USD: fx.usd, EURX: fx.eur, EUR: fx.eur, PLN: 1 };
+  const priceMain = c => c in FX ? toMain(FX[c] || 0) : toMain(priceOf(c));   // coin prices come in złoty
+  const rows = x.assets.map(a => ({ ...a, cost: usd(a.CostUsd), price: priceMain(a.Coin) })).map(a => ({ ...a, value: a.price ? a.price * a.Amount : null }));
   const value = rows.reduce((t, a) => t + (a.value ?? a.cost), 0), paid = rows.reduce((t, a) => t + a.cost, 0);
   const days = x.from && x.to ? Math.max(30, (x.to - x.from) / 86400000) : 365;
   const rate = value > 0 ? usd(x.interestUsd) / (days / 365) / value * 100 : 0;
@@ -182,6 +200,9 @@ function preview(x, name) {
     { width: 900, beforeClose: () => saved || confirmBox(T("Close without saving?"), T("The import is not kept and your savings account is not updated."), T("Close without saving"), T("Back")) });
   p.el.querySelector("[data-go]").onclick = () => {
     const day = isoDate(today());
+    // Keep the rates that were used, so the rest of the app can convert dollars and euros too
+    if (!(s.UsdToPln > 0) && fx.usd > 0) s.UsdToPln = fx.usd;
+    if (!(s.EurToPln > 0) && fx.eur > 0) s.EurToPln = fx.eur;
     const stats = { LoanInterestPln: usd(x.loanInterestUsd), File: name, From: x.from ? isoDate(x.from) : "", To: x.to ? isoDate(x.to) : "", InterestPln: usd(x.interestUsd),
       DepositsPln: usd(x.depositsUsd), WithdrawalsPln: usd(x.withdrawalsUsd), Rows: x.used, At: day, Coins: rows.map(a => ({ Coin: a.Coin, Amount: a.Amount, Value: Math.round((a.value ?? a.cost) * 100) / 100 })) };
     // Only Savings: one savings account (risky money, crypto platform) with today's value and the estimated rate

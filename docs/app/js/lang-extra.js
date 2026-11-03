@@ -1198,7 +1198,8 @@ export const EXTRA = {
 "You can switch this question back on in Settings → Backup & restore.": "Sie können diese Frage unter Einstellungen → Sichern und wiederherstellen wieder einschalten.",
 "All accounts": "Alle Konten",
 "Balance at month end": "Saldo zum Monatsende",
-"Account balance": "Kontostand"
+"Account balance": "Kontostand",
+"The dollar exchange rate is not known, so the Nexo amounts (in USD) cannot be converted. Connect to the internet or enter the rate in Savings → Exchange rates, then import again.": "Der Dollarkurs ist nicht bekannt, daher können die Nexo-Beträge (in USD) nicht umgerechnet werden. Verbinden Sie sich mit dem Internet oder geben Sie den Kurs unter Ersparnisse → Wechselkurse ein und importieren Sie erneut."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -2398,7 +2399,8 @@ export const EXTRA = {
 "You can switch this question back on in Settings → Backup & restore.": "Vous pouvez réactiver cette question dans Réglages → Sauvegarde et restauration.",
 "All accounts": "Tous les comptes",
 "Balance at month end": "Solde en fin de mois",
-"Account balance": "Solde du compte"
+"Account balance": "Solde du compte",
+"The dollar exchange rate is not known, so the Nexo amounts (in USD) cannot be converted. Connect to the internet or enter the rate in Savings → Exchange rates, then import again.": "Le cours du dollar n'est pas connu, les montants Nexo (en USD) ne peuvent donc pas être convertis. Connectez-vous à Internet ou saisissez le cours dans Épargne → Taux de change, puis importez à nouveau."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -3598,6 +3600,7 @@ export const EXTRA = {
 "You can switch this question back on in Settings → Backup & restore.": "Możesz ponownie włączyć to pytanie w Ustawienia → Kopia zapasowa i przywracanie.",
 "All accounts": "Wszystkie konta",
 "Balance at month end": "Saldo na koniec miesiąca",
-"Account balance": "Saldo rachunku"
+"Account balance": "Saldo rachunku",
+"The dollar exchange rate is not known, so the Nexo amounts (in USD) cannot be converted. Connect to the internet or enter the rate in Savings → Exchange rates, then import again.": "Kurs dolara nie jest znany, więc kwot z Nexo (w USD) nie można przeliczyć. Połącz się z internetem lub wpisz kurs w Oszczędności → Kursy walut i zaimportuj ponownie."
 }
 };
