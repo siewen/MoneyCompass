@@ -437,7 +437,7 @@ function render() {
     const lock = license.isPro ? "" : " 🔒";
     const what = { expenses: ["⬆ " + T("Import bank statement") + lock, () => smartImport()], income: ["⬆ " + T("Import bank statement") + lock, () => smartImport()],
       portfolio: ["⬆ " + T("Import savings account statement") + lock, () => openSavingsCheck()],
-      investments: ["⬆ " + T("Import CSV") + " · " + T("In preparation"), () => toast(T("Importing crypto and trading accounts is in preparation and comes in a later version."))] }[page.route];
+      investments: ["⬆ " + T("Import CSV") + lock, async () => (await import("./invest-import.js")).openInvestImport()] }[page.route];
     hi.hidden = !what; if (what) { hi.textContent = what[0]; hi.onclick = what[1]; }
   }
   const el = document.getElementById("page");

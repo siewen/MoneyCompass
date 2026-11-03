@@ -881,3 +881,16 @@ html.lite[data-design] .tabs, html.lite .top { background: var(--side, #1A2120) 
 .inv-rules li { margin: 4px 0; }
 .inv-add > summary { color: var(--primary); }
 .inv-add[open] > summary { margin-bottom: 6px; }
+
+/* ---------- Import previews: the result on top, saving always visible at the bottom ---------- */
+.import-top { display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: flex-end; padding: 14px 18px; margin: 8px 0 12px; border-radius: 18px;
+  background: color-mix(in srgb, var(--primary) 12%, var(--card)); border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent); }
+.import-top > div { display: flex; flex-direction: column; }
+.import-top span { color: var(--muted); font-size: 13px; }
+.import-top b { font-size: 24px; } .import-top > div:first-child b { font-size: 30px; }
+.import-top b.in { color: var(--in); } .import-top b.out { color: var(--out); }
+.popup-buttons.save-bar { position: sticky; bottom: -18px; z-index: 5; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px;
+  background: var(--card, #1F2826); border-top: 1px solid var(--border); box-shadow: 0 -8px 20px rgba(0,0,0,.18); }
+.save-bar .field { margin: 0; min-width: 180px; } .save-bar .save-gap { flex: 1; }
+.save-bar .big-save { padding: 12px 22px; font-size: 16px; }
+@media (max-width: 640px) { .save-bar .field { flex: 1 1 100%; } .save-bar .save-gap { display: none; } .save-bar .btn { flex: 1; } }

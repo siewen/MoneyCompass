@@ -2,7 +2,7 @@
 import {
   T, State, save, Calc, Advisor, pln, rate, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addMonths, monthName,
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved } from "./core.js";
-import { progress, hbars } from "./charts.js";
+import { progress, hbars, savingsChart } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, alertBox, toast, pickFile, ICONS, headingTip } from "./ui.js";
@@ -10,7 +10,7 @@ import { App, requirePro } from "./app.js";
 import { Rates, BOND_CODES, BONDS_WEBSITE, SAVINGS_RANKING, DEPOSITS_RANKING } from "./rates.js";
 import { budgetBars, offerSalary, binCard, bindBin } from "./pages-main.js";
 import * as Csv from "./csv.js";
-import { toBin, loanPlan, planLoan, loanNextPayment, lang, ruleFor, healthCheck } from "./core.js";
+import { toBin, loanPlan, planLoan, loanNextPayment, lang, ruleFor, healthCheck, loanSchedule } from "./core.js";
 
 const D = () => State.data;
 const locked = (title, text) => `<div class="grid">${card(`<div class="locked">🔒<h3>${esc(title)}</h3><p>${esc(text)}</p>${button(esc(T("Enter license key")), "unlock", "main")}</div>`)}</div>`;
@@ -269,6 +269,33 @@ export const Goals = {
 // ================================================================= Loans & debts
 
 let editLoan = null;
+/** Chart at the top of Loans & debts: outstanding principal, principal repaid and interest paid (the lender's income),
+ *  month by month over the whole term – the months from today on are a projection with today's rate and payment. */
+function loanChartCard(d) {
+  const x = loanSchedule(d); if (!x || x.months.length < 2) return "";
+  const hid = new Set(d.Settings.LoanChartHidden || []);
+  const short = m => m.toLocaleDateString(lang(), { month: "short", year: "2-digit" });
+  const lines = [
+    { key: "bal", label: T("Outstanding principal"), color: "#E5484D", values: x.balance, main: true },
+    { key: "prin", label: T("Principal repaid (cumulative)"), color: "#1BAF7A", values: x.principal },
+    { key: "int", label: T("Interest paid – lender's income (cumulative)"), color: "#F59E0B", values: x.interest },
+  ];
+  const axis = v => v >= 1000 ? +(v / 1000).toFixed(v >= 100000 ? 0 : 1) + "k" : String(Math.round(v));
+  const fmtV = Object.assign(v => pln(v), { forecast: T("Projection") });
+  const fig = (l, v, cls = "", tip = "") => `<div${tip ? ` data-tip="${esc(tip)}"` : ""}><span>${esc(l)}${tip ? " ⓘ" : ""}</span><b class="${cls}">${esc(v)}</b></div>`;
+  const keys = lines.map(sr => `<button class="wave-key${hid.has(sr.key) ? " off" : ""}" data-loanchart="${sr.key}" style="--c:${sr.color}"><i></i>${esc(sr.label)}</button>`).join("");
+  // Today's figures exactly as on the Overview (payments made up to today)
+  const run = d.Loans.filter(l => l.Remaining > 0), pl = run.map(l => [l, loanPlan(l)]);
+  const nowBal = pl.reduce((s2, [, p]) => s2 + p.remainingNow, 0), nowInt = pl.reduce((s2, [, p]) => s2 + p.interestRepaid, 0);
+  const nowPrin = pl.reduce((s2, [l, p]) => s2 + (l.Original > p.remainingNow ? l.Original - p.remainingNow : 0), 0);
+  return card(heading(T("Loan repayment")) +
+    `<div class="sav-figures">${fig(T("Outstanding principal"), pln(nowBal), "bad")}${nowPrin > 0 ? fig(T("Principal repaid to date"), pln(nowPrin), "good") : ""}
+      ${fig(T("Interest paid to date (lender's income)"), pln(nowInt), "warn", T("Interest you have paid so far: what the bank has earned on your loans. Includes the interest you entered from your bank."))}
+      ${fig(T("Total cost of credit (all interest)"), pln(x.totalInterest), "", T("All interest over the whole term: paid so far plus the interest still to come with today's rate and payment. Fees and insurance are not included."))}
+      ${x.end ? fig(T("Debt-free"), monthName(x.end)) : ""}</div>` +
+    `<div class="wave-legend">${keys}</div>` + savingsChart(x.months.map(short), lines, [], axis, fmtV, hid, x.pastCount, ...(window.innerWidth < 700 ? [760, 230] : [1500, 190])) +
+    hint(T("Month by month for all your loans together. Up to today: from the payments since you entered each loan; from today on (shaded): a projection with today's rate and monthly payment. Click a name to show or hide it.")), "wide fixed loan-chart-card");
+}
 export const Loans = {
   route: "loans", title: "Loans & debts",
   render(el) {
@@ -285,6 +312,7 @@ export const Loans = {
     const ends = [...plans.values()];
     const debtFree = !running.length ? "–" : ends.some(p => p.never) ? T("never – see the warning") : monthName(new Date(Math.max(...ends.map(p => p.end.getTime()))));
     el.innerHTML = `<div class="grid">
+      ${loanChartCard(d)}
       ${card(heading(T("Your debts")) + loanProgress(running.map(x => ({ ...x, Remaining: now(x) }))) +
         (running.some(x => loanPlan(x).interestRepaid > 0) ? row(T("Interest repaid"), pln(running.reduce((s, x) => s + loanPlan(x).interestRepaid, 0))) : "") +
         row(T("Remaining principal amount to be repaid"), pln(running.reduce((s, x) => s + now(x), 0))) +
@@ -379,6 +407,10 @@ export const Loans = {
     };
     fm.querySelectorAll("input").forEach(i => i.addEventListener("input", preview)); preview();
     const c = el.querySelector('[data-action="cancel-loan"]'); if (c) c.onclick = () => { editLoan = null; App.refresh(); };
+    el.querySelectorAll("[data-loanchart]").forEach(b => b.onclick = () => {
+      const h = new Set(d.Settings.LoanChartHidden || []), k = b.dataset.loanchart;
+      h.has(k) ? h.delete(k) : h.add(k); d.Settings.LoanChartHidden = [...h]; save(); App.refresh();
+    });
     el.querySelectorAll("[data-edit-loan]").forEach(x => x.onclick = ev => { if (ev.target.closest("[data-del-loan]")) return; editLoan = x.dataset.editLoan; App.refresh(); window.scrollTo({ top: 0, behavior: "smooth" }); });
     el.querySelectorAll("[data-del-loan]").forEach(b => b.onclick = async () => {
       const x = d.Loans.find(y => y.Id === b.dataset.delLoan);

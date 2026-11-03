@@ -46,7 +46,11 @@ export async function smartImport(fileObj = null) {
   if (!fileObj) fileObj = await pickFile(".csv,.txt,text/csv");
   if (!fileObj) return;
   let file;
-  try { file = Csv.parse(Csv.decode(await fileObj.arrayBuffer())); }
+  // A crypto platform export (Nexo) goes to Investments
+  const raw = Csv.decode(await fileObj.arrayBuffer());
+  const inv = await import("./invest-import.js");
+  if (inv.isNexoCsv(raw)) { inv.openInvestImport(fileObj); return; }
+  try { file = Csv.parse(raw); }
   catch (e) { await alertBox(T("Import bank statement"), T("The file could not be read: {0}", e.message)); return; }
   if (!file.rows.length) { await alertBox(T("Import bank statement"), T("No transactions found in this file. Please choose the CSV export of your account history.")); return; }
   let { kind } = statementKind(file, fileObj.name);

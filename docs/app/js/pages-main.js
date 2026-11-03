@@ -153,10 +153,16 @@ export const Overview = {
       const items = loans.map((l, i) => ({ label: l.Name, value: l.Remaining, color: COLORS.series[i % 6], text: pln(l.Remaining) }));
       // Paid back so far (green) – for loans where the amount at the start is known
       const paid = loans.reduce((s, l) => s + (l.Original > l.Remaining ? l.Original - l.Remaining : 0), 0);
-      const ring = paid > 0 ? [...items, { label: T("Principal repaid"), value: paid, color: COLORS.leftOver, text: pln(paid) }] : items;
+      // What the bank has earned so far: interest paid (entered from your bank + the payments since)
+      const intPaid = loans.reduce((s, l) => s + loanPlan(d.Loans.find(x => x.Id === l.Id) || l).interestRepaid, 0);
+      const intAll = intPaid + loans.reduce((s, l) => { const pl = loanPlan(d.Loans.find(x => x.Id === l.Id) || l); return s + (pl.never ? 0 : pl.interest); }, 0);
+      const ring = [...items, ...(paid > 0 ? [{ label: T("Principal repaid"), value: paid, color: COLORS.leftOver, text: pln(paid) }] : []),
+        ...(intPaid > 0 ? [{ label: T("Interest paid (lender's income)"), value: intPaid, color: "#F59E0B", text: pln(intPaid) }] : [])];
       const borrowed = total + paid;
       parts.push(card(heading(T("Loans & debts")) + (loans.length
-        ? `<div class="chart-row">${donut(ring, pln(total), T("Remaining principal"))}${legend(ring.map(s => ({ ...s, share: ChartData.share(s.value, paid > 0 ? borrowed : total) })))}</div>` +
+        ? `<div class="chart-row">${donut(ring, pln(total), T("Remaining principal"))}${legend(ring.map(s => ({ ...s, share: ChartData.share(s.value, borrowed + intPaid) })))}</div>` +
+          (intPaid > 0 ? row(T("Interest paid to date (lender's income)"), pln(intPaid), "out") : "") +
+          (intAll > 0 ? row(T("Total cost of credit (all interest)"), pln(intAll)) : "") +
           (paid > 0 ? `<p class="good"><b>${esc(T("Principal amount repaid: {0} of {1} ({2}%)", pln(paid), pln(borrowed), Math.round(paid / borrowed * 100)))}</b></p>` : hint(T("Tip: enter how much you borrowed at the start (Loans & debts tab) to see how much is already paid back."))) +
           loans.map(l => loanWarning(l, true)).join("") + row(T("Loan payments per month"), pln(Calc.loanPayments(d))) + row(T("Debt-free"), monthName(new Date(Math.max(...loans.map(l => parseDate(l.EndDate).getTime())))))
         : hint(T("No loans – great!"))), "link\" data-go=\"loans"));

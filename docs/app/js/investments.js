@@ -61,13 +61,13 @@ export const BROKERS = [
 
 // ---------------------------------------------------------------- live crypto prices (CoinGecko, free, no key)
 const COINS = { BTC: "bitcoin", ETH: "ethereum", USDT: "tether", USDC: "usd-coin", SOL: "solana", XRP: "ripple", DOT: "polkadot", ADA: "cardano",
-  BNB: "binancecoin", NEXO: "nexo", DOGE: "dogecoin", LTC: "litecoin", TRX: "tron", AVAX: "avalanche-2", LINK: "chainlink", POL: "polygon-ecosystem-token", EURC: "euro-coin" };
+  BNB: "binancecoin", NEXO: "nexo", DOGE: "dogecoin", LTC: "litecoin", TRX: "tron", AVAX: "avalanche-2", LINK: "chainlink", POL: "polygon-ecosystem-token", EURC: "euro-coin", XLM: "stellar", AXS: "axie-infinity", ETHW: "ethereum-pow-iou", DAI: "dai", PAXG: "pax-gold", ATOM: "cosmos", MATIC: "matic-network" };
 export const COIN_LIST = Object.keys(COINS);
 const PRICE_KEY = "mc-prices";
 let prices = null, loading = false;
 const cache = () => prices || (prices = (() => { try { return JSON.parse(store.get(PRICE_KEY) || "null") || { at: 0, pln: {} }; } catch { return { at: 0, pln: {} }; } })());
 /** Prices in złoty for the coins you hold (refreshed at most every 10 minutes). True when new prices arrived. */
-async function loadPrices(symbols, force = false) {
+export async function loadPrices(symbols, force = false) {
   const ids = [...new Set(symbols.map(s => COINS[s]).filter(Boolean))], c = cache();
   if (!ids.length || loading) return false;
   if (!force && Date.now() - c.at < 10 * 60000 && ids.every(id => c.pln[id] > 0)) return false;
@@ -82,7 +82,10 @@ async function loadPrices(symbols, force = false) {
     return true;
   } catch { return false; } finally { loading = false; }
 }
-const priceOf = sym => cache().pln[COINS[sym]] || 0;
+// Cash balances on a platform (Nexo: EURX, USDX) and plain currencies: priced with the NBP rates
+const FIAT = { EURX: "EUR", USDX: "USD", EUR: "EUR", USD: "USD", PLN: "PLN" };
+export const priceOf = sym => FIAT[sym] ? Calc.toPln(1, FIAT[sym], D().Settings) : (cache().pln[COINS[sym]] || 0);
+export const hasPrice = sym => !!FIAT[sym] || !!COINS[sym];
 
 // ---------------------------------------------------------------- one position
 const pct = v => (v >= 0 ? "+" : "−") + (Math.round(Math.abs(v) * 100) / 100).toString().replace(".", ",") + "%";
@@ -92,7 +95,7 @@ const coinsOf = p => (p.Assets || []).filter(x => +x.Amount > 0);
 /** Value now: with coins and known prices, from the live prices; otherwise the amount you entered. */
 export function positionValue(p) {
   const a = coinsOf(p);
-  if (a.length && a.every(x => priceOf(x.Coin) > 0)) return a.reduce((s, x) => s + x.Amount * priceOf(x.Coin), 0);
+  if (a.length && a.some(x => priceOf(x.Coin) > 0)) return a.reduce((s, x) => s + (priceOf(x.Coin) > 0 ? x.Amount * priceOf(x.Coin) : (+x.Cost || 0)), 0);
   return inPln(p.Value, p);
 }
 export function positionInvested(p) {
@@ -173,6 +176,7 @@ export const Investments = {
           row(T("Profit / loss"), (r.gain >= 0 ? "+" : "−") + pln(Math.abs(r.gain)), r.gain >= 0 ? "in" : "out") +
           (r.since !== null ? row(T("Since your last update"), pct(r.since), r.since >= 0 ? "in" : "out") : "") +
           (+p.Monthly > 0 ? row(T("Regular investing"), T("{0} per month", pln(inPln(p.Monthly, p)))) : "") +
+          (p.Import ? row(T("Interest and bonuses earned"), "+" + pln(p.Import.InterestPln), "in") + (p.Import.LoanInterestPln > 0 ? row(T("Interest paid on the credit line"), "−" + pln(p.Import.LoanInterestPln), "out") : "") + hint(T("Imported from {0} ({1} – {2}).", p.Import.File, fmtDate(p.Import.From), fmtDate(p.Import.To))) : "") +
           (p.Updated ? hint(T("Last updated {0}.", fmtDate(p.Updated))) : "")
           : hint(b.crypto ? T("Add your coins (e.g. BTC 0,05) – the value comes from live prices – or enter one total amount.") : T("Enter what you put in and what it is worth today – MoneyCompass shows your return."))}
         ${has ? "" : `<details class="inv-more inv-add"><summary>＋ ${esc(T("Add your position"))}</summary>`}
@@ -221,11 +225,13 @@ export const Investments = {
         hint(T("Your investments count as risky money in the Overview and in Savings. If you also entered the same money as a savings entry, delete it there, so it isn't counted twice.")))}
       ${taxCard()}
       ${BROKERS.map(brokerCard).join("")}
-      ${card(heading(T("Import transactions (CSV)")) + `<span class="soon-tag">${esc(T("In preparation"))}</span>` +
-        `<p>${esc(T("Soon you can import the transaction history from your crypto or trading account: deposits, purchases, interest and fees – and MoneyCompass works out your return by itself."))}</p>` +
-        `<p class="hint">${esc(T("Planned: Nexo, Binance, Revolut, XTB, eToro and a general CSV format."))}</p>`)}
+      ${card(heading(T("Import transactions (CSV)")) + `<span class="soon-tag">${esc(T("Preview"))}</span>` +
+        `<p>${esc(T("Import the transaction history of your Nexo account: MoneyCompass works out your coins, the interest you earned and today's value – shows a preview first – and saves it as a savings account in Savings."))}</p>` +
+        `<p class="hint">${esc(T("In Nexo: Transactions → Export (CSV). Planned next: Binance, Revolut, XTB, eToro and a general CSV format."))}</p>` +
+        `<div class="buttons"><button class="btn main" data-inv-import>⬆ ${esc(T("Import CSV"))}</button></div>`)}
     </div>`;
 
+    el.querySelector("[data-inv-import]")?.addEventListener("click", async () => (await import("./invest-import.js")).openInvestImport());
     const get = id => { let p = pos(id); if (!p) { p = { Id: uuid(), Broker: id, Currency: "PLN", History: [], Assets: [] }; d.Investments.push(p); } return p; };
     el.querySelectorAll(".inv-form").forEach(f => {
       const id = f.dataset.broker;

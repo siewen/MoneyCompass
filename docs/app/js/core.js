@@ -1079,6 +1079,35 @@ export function loanPlan(l) {
     // Interest repaid: what you entered from your bank, plus the interest in the payments made since then
     interestRepaid: (+l.InterestPaid || 0) + interest };
 }
+/** All running loans together, month by month from the first payment you entered to the last one:
+ *  outstanding principal, cumulative principal repaid and cumulative interest paid (the lender's income).
+ *  Before the first entered payment only what you entered is known (amount borrowed, interest paid so far). */
+export function loanSchedule(d) {
+  const loans = (d.Loans || []).filter(l => l.Remaining > 0 && l.MonthlyPayment > 0);
+  if (!loans.length) return null;
+  const per = loans.map(l => {
+    const first = monthStart(parseDate(l.NextPayment || "") || loanNextPayment(l)), r = (+l.RatePercent || 0) / 100 / 12, P = +l.MonthlyPayment;
+    const n = Math.min(loanMonthsNeeded(l), 600);
+    return { first, r, P, n: n === Infinity ? 600 : n, A0: +l.Remaining, prin0: l.Original > l.Remaining ? l.Original - l.Remaining : 0, int0: +l.InterestPaid || 0 };
+  });
+  const start = new Date(Math.min(...per.map(p => addMonths(p.first, -1).getTime())));
+  const endT = Math.max(...per.map(p => addMonths(p.first, p.n - 1).getTime()));
+  const months = []; for (let m = new Date(start); m.getTime() <= endT && months.length < 601; m = addMonths(m, 1)) months.push(m);
+  const balance = months.map(() => 0), principal = months.map(() => 0), interest = months.map(() => 0);
+  for (const p of per) {
+    let A = p.A0, cp = p.prin0, ci = p.int0;
+    months.forEach((m, i) => {
+      const k = Math.round((m - p.first) / (30.44 * 86400000));   // payment number (0 = the first payment you entered)
+      if (k >= 0 && k < p.n && A > 0) { const it = A * p.r, pr = Math.min(A, p.P - it); ci += it; cp += pr; A = Math.max(0, A - pr); }
+      balance[i] += A; principal[i] += cp; interest[i] += ci;
+    });
+  }
+  const nowIdx = Math.max(0, months.findIndex(m => m > today()) - 1), past = months.findIndex(m => m > today());
+  const round = a => a.map(v => Math.round(v * 100) / 100);
+  return { months, balance: round(balance), principal: round(principal), interest: round(interest), pastCount: past < 0 ? months.length : Math.max(1, past),
+    now: { balance: balance[nowIdx], principal: principal[nowIdx], interest: interest[nowIdx] }, totalInterest: interest[interest.length - 1],
+    end: months[months.length - 1] };
+}
 export function planLoan(l) {
   if (!l.NextPayment) l.NextPayment = isoDate(loanNextPayment(l));
   const p = loanPlan(l);

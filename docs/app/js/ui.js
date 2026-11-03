@@ -59,7 +59,7 @@ export function values(root) {
 // ---------------------------------------------------------------- pop-up windows (same pop style as the app)
 
 const stack = [];
-export function popup(html, { width = 560, onClose, cls = "", anchor = "" } = {}) {
+export function popup(html, { width = 560, onClose, cls = "", anchor = "", beforeClose = null } = {}) {
   const back = document.createElement("div");
   back.className = "popup-back" + (anchor ? " anchor-" + anchor : "");
   back.innerHTML = `<div class="popup ${cls}" role="dialog" aria-modal="true" style="max-width:${width}px">${html}</div>`;
@@ -68,8 +68,10 @@ export function popup(html, { width = 560, onClose, cls = "", anchor = "" } = {}
   requestAnimationFrame(() => back.classList.add("open"));
   const api = {
     el: box,
-    close(result) {
-      if (api.closed) return;
+    close(result, force = false) {
+      if (api.closed || api.asking) return;
+      // beforeClose (e.g. "not saved yet – close anyway?"): only closes when it answers yes
+      if (!force && beforeClose) { api.asking = true; Promise.resolve(beforeClose()).then(ok => { api.asking = false; if (ok) api.close(result, true); }); return; }
       api.closed = true;
       back.classList.remove("open"); back.classList.add("closing");
       setTimeout(() => back.remove(), 180);

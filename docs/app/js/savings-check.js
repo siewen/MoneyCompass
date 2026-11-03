@@ -1,7 +1,7 @@
 // "What does my savings account really pay?" – reads the CSV statement of a savings account and works out
 // the rate the bank really paid: interest, Belka tax and fees against the money that was on the account, day by day.
 import { T, State, save, pln, rate, fmtDate, monthName, monthStart, addMonths, addDays, isoDate, parseDate, BELKA, Calc, currentRate, today, lang, FREQUENCIES } from "./core.js";
-import { esc, card, heading, hint, row, popup, alertBox, pickFile, toast, numInput, field, button, check } from "./ui.js";
+import { esc, card, heading, hint, row, popup, alertBox, confirmBox, pickFile, toast, numInput, field, button, check } from "./ui.js";
 import { savingsChart } from "./charts.js";
 import { Rates } from "./rates.js";
 import * as Csv from "./csv.js";
@@ -95,7 +95,10 @@ export async function openSavingsCheck(fileObj = null) {
   if (!fileObj) fileObj = await pickFile(".csv,.txt,text/csv");
   if (!fileObj) return;
   let file;
-  try { file = Csv.parse(Csv.decode(await fileObj.arrayBuffer())); }
+  const raw = Csv.decode(await fileObj.arrayBuffer());
+  const inv = await import("./invest-import.js");
+  if (inv.isNexoCsv(raw)) { inv.openInvestImport(fileObj); return; }   // a Nexo export: its own preview, also saved as a savings account
+  try { file = Csv.parse(raw); }
   catch (e) { await alertBox(T("Import bank statement"), T("The file could not be read: {0}", e.message)); return; }
   const { rows, hasBalance } = readRows(file);
   if (!rows.length) { await alertBox(T("Import bank statement"), T("No transactions found in this file. Please choose the CSV export of your account history.")); return; }
@@ -104,7 +107,11 @@ export async function openSavingsCheck(fileObj = null) {
   const d = State.data;
   const r2 = v => Math.round((v || 0) * 100) / 100;
   const defaultName = fileObj.name.replace(/\.(csv|txt)$/i, "");
-  const p = popup("", { width: 900, cls: "wide-popup" });
+  // Saving: into a savings account you already have (one with a similar name first), or a new one. Closing without saving asks.
+  // Preselected: the account your last saved analysis went into (usually the same account again)
+  const lastLinked = (d.SavingsChecks || []).map(c => d.Holdings.findIndex(h => h.Id === c.HoldingId)).find(i => i >= 0);
+  let saved = false, newName = T("Savings account"), holdSel = lastLinked ?? -1;
+  const p = popup("", { width: 900, cls: "wide-popup", beforeClose: () => saved || confirmBox(T("Close without saving?"), T("The analysis is not kept and your savings account is not updated."), T("Close without saving"), T("Back")) });
   const draw = () => {
     const r = analyse(rows, opening);
     // Compared with the best savings ACCOUNT (money stays available), not with a locked deposit
@@ -115,6 +122,9 @@ export async function openSavingsCheck(fileObj = null) {
     p.el.innerHTML = `
       <p class="hint">${esc(T("Savings account statement."))} <a href="#" data-other-kind>${esc(T("This is a current account statement →"))}</a></p>
       ${hint(T("From your statement {0} – {1} ({2} days). Interest, tax and fees are compared with the money that was really on the account, day by day. Whole months give the most exact result.", fmtDate(r.from), fmtDate(r.to), r.days))}
+      <div class="import-top"><div><span>${esc(T("Closing balance on {0}", fmtDate(r.to)))}</span><b>${pln(r.closing)}</b></div>
+        <div><span>${esc(T("Net interest income"))}</span><b class="${r.netAll - r.fees >= 0 ? "in" : "out"}">${r.netAll - r.fees >= 0 ? "+" : "−"}${pln(Math.abs(r.netAll - r.fees))}</b></div>
+        <div><span>${esc(T("Net rate p.a. (after tax and fees)"))}</span><b class="${rateCls(r.netAfterBelka)}">${rate(r.netAfterBelka)}</b></div></div>
       <div class="grid">
         ${card(heading(T("Effective interest rate"), "📊") + warn +
           `<div class="real-rate"><div><span>${esc(T("Gross rate p.a."))}</span><b>${rate(r.gross)}</b></div><div><span>${esc(T("Net rate p.a. (after tax and fees)"))}</span><b class="${rateCls(r.netAfterBelka)}">${rate(r.netAfterBelka)}</b></div></div>` +
@@ -132,20 +142,20 @@ export async function openSavingsCheck(fileObj = null) {
           row(T("Net interest income"), pln(r.netAll - r.fees), "big") +
           (r.groups.length > 1 ? `<h3 class="sub-h">${esc(T("Interest by type"))}</h3>` + r.groups.map(([k, v]) => flow(k, v, 1)).join("") +
             hint(T("Your bank credits these separately – e.g. promotional interest on new money and standard interest on the rest.")) : ""))}
-        ${card(heading(T("Apply to your accounts"), "✔") + hint(T("Puts the balance at the end and the real rate before tax into one of your savings entries.")) +
-          `<div class="two">${`<label class="field"><span>${esc(T("Account"))}</span><select name="hold">${d.Holdings.map((h, i) => `<option value="${i}">${esc(h.Name)}</option>`).join("")}<option value="-1" selected>${esc(T("New: Savings account"))}</option></select></label>`}
-          <div class="buttons" style="align-self:end">${button(esc(T("Update")), "use-check", "main")}</div></div>` +
-          `<hr>${hint(T("Keep this check in the Savings tab, to compare it with later statements. Nothing is kept unless you save it."))}
-          <div class="two"><label class="field"><span>${esc(T("Name of the check"))}</span><input name="checkname" value="${esc(defaultName)}"></label>
-          <div class="buttons" style="align-self:end">${button("💾 " + esc(T("Save result")), "save-check", "second")}</div></div>
-          ${check("alsohold", T("Also apply the closing balance and gross rate to the account above"), true)}`)}
         ${card(heading(T("Month by month"), "📅") + hint(T("Interest credited in the first days of a month counts for the month before.")) +
           `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Closing balance"))}</th><th>${esc(T("Average balance"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Fees & charges"))}</th><th>${esc(T("Rate p.a."))}</th></tr></thead><tbody>` +
           r.months.map(m => `<tr><td>${esc(monthName(m.m))}</td><td>${pln(m.end)}</td><td>${pln(m.avg)}</td><td class="${m.interest ? "in" : "nil"}">${m.interest ? "+" + pln(m.interest) : "–"}</td><td class="${m.fees > 0 ? "out" : "nil"}">${m.fees > 0 ? "−" + pln(m.fees) : "–"}</td><td class="${m.interest ? "" : "nil"}">${m.interest ? rate(m.rate) : "–"}</td></tr>`).join("") +
           `</tbody></table>`, "wide")}
       </div>
-      <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
-    p.el.querySelector("[data-other-kind]").onclick = async e => { e.preventDefault(); p.close(); (await import("./pages-pro.js")).openBankImport(fileObj); };
+      <div class="popup-buttons save-bar">
+        <label class="field"><span>${esc(T("Save to"))}</span><select name="hold">${d.Holdings.map((h, i) => `<option value="${i}"${i === holdSel ? " selected" : ""}>${esc(h.Name)}</option>`).join("")}<option value="-1"${holdSel === -1 ? " selected" : ""}>${esc(T("New savings account"))}</option></select></label>
+        <label class="field save-name"${holdSel === -1 ? "" : " hidden"}><span>${esc(T("Name"))}</span><input name="checkname" value="${esc(newName)}"></label>
+        <span class="save-gap"></span>
+        <button class="btn second" data-close>${esc(T("Close"))}</button>
+        <button class="btn main big-save" data-action="save-check">💾 ${esc(T("Save to Savings"))}</button></div>`;
+    p.el.querySelector('[name="hold"]').onchange = e => { holdSel = +e.target.value; p.el.querySelector(".save-name").hidden = holdSel !== -1; };
+    p.el.querySelector('[name="checkname"]').oninput = e => { newName = e.target.value; };
+    p.el.querySelector("[data-other-kind]").onclick = async e => { e.preventDefault(); p.close(undefined, true); (await import("./pages-pro.js")).openBankImport(fileObj); };
     p.el.querySelector('[name="opening"]')?.addEventListener("change", e => { opening = Csv.parseAmount(e.target.value) || 0; draw(); });
     // Puts the balance at the end and the real rate (before tax) into the chosen savings entry, or a new one
     const toHolding = name => {
@@ -158,20 +168,17 @@ export async function openSavingsCheck(fileObj = null) {
       return h;
     };
     p.el.querySelector('[data-action="save-check"]').onclick = () => {
-      const name = p.el.querySelector('[name="checkname"]').value.trim() || defaultName;
-      const h = p.el.querySelector('[name="alsohold"]').checked ? toHolding(name) : null;
+      const idx = +p.el.querySelector('[name="hold"]').value;
+      const name = idx >= 0 ? d.Holdings[idx].Name : (p.el.querySelector('[name="checkname"]').value.trim() || T("Savings account"));
+      const h = toHolding(name);
+      saved = true;
       d.SavingsChecks.unshift({ HoldingId: h?.Id || "", Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: name, Saved: new Date().toISOString().slice(0, 19),
         From: isoDate(r.from), To: isoDate(r.to), Days: r.days, Opening: r2(r.opening), Closing: r2(r.closing), Average: r2(r.avg),
         Deposits: r2(r.deposits), Withdrawals: r2(r.withdrawals), Interest: r2(r.grossAll), Tax: r2(r.taxAll), Fees: r2(r.fees),
         Gross: r2(r.gross), Net: r2(r.netAfterBelka), Months: r.months.map(m => ({ Month: isoDate(m.m), End: r2(m.end), Average: r2(m.avg), Interest: r2(m.interest), Fees: r2(m.fees), Credits: r2(m.credits), Debits: r2(m.debits), Rate: r2(m.rate) })),
         Types: r.groups.map(([k, v]) => ({ Name: k, Interest: r2(v) })) });
-      save(); p.close(); App.refresh();
+      save(); p.close(undefined, true); App.refresh();
       toast(T("Saved in Savings: {0}.", name) + (h ? " " + T("{0}: {1} at {2}.", h.Name, pln(h.Amount), rate(h.RatePercent)) : ""), "good");
-    };
-    p.el.querySelector('[data-action="use-check"]').onclick = () => {
-      const h = toHolding(T("Savings account"));
-      save(); p.close(); App.refresh();
-      toast(T("{0}: {1} at {2}.", h.Name, pln(h.Amount), rate(h.RatePercent)), "good");
     };
   };
   draw();

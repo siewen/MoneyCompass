@@ -133,7 +133,7 @@ export function savingsChart(labels, lines, flows, fmtAxis, fmtValue, hidden = n
     let d = "", pen = false;
     pts.forEach(p => { if (!p) { pen = false; return; } d += `${pen ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)} `; pen = true; });
     return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.main ? 3 : thin ? 1.8 : 2.2}" stroke-linejoin="round" stroke-linecap="round"${s.dashed ? ' stroke-dasharray="6 5"' : ""}/>` +
-      pts.map((p, i) => p ? `<circle cx="${p[0]}" cy="${p[1]}" r="${s.main ? 3.5 : 2.6}" fill="var(--card)" stroke="${s.color}" stroke-width="2"><title>${esc(labels[i])}${esc(s.tips?.[i] ? s.tips[i] : " · " + s.label + ": " + fmtValue(s.values[i]))}</title></circle>` : "").join("");
+      pts.map((p, i) => p ? `<circle cx="${p[0]}" cy="${p[1]}" r="${s.main ? 3.5 : 2.6}" fill="var(--card)" stroke="${s.color}" stroke-width="2"${n > 60 ? ' opacity="0"' : ""}><title>${esc(labels[i])}${esc(s.tips?.[i] ? s.tips[i] : " · " + s.label + ": " + fmtValue(s.values[i]))}</title></circle>` : "").join("");
   };
   out += F.map(s => draw(s, Y2, true)).join("") + L.filter(s => s.left).map(s => draw(s, Y1, true)).join("") + L.filter(s => !s.left).map(s => draw(s, Y1)).join("");
   const step = Math.max(1, Math.ceil(n / 12));
