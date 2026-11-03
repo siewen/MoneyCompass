@@ -1,3 +1,4 @@
+import { Calc, State } from "./core.js";
 // Bank statements (CSV) – ported from BankCsv.cs of the Windows app.
 
 export function decode(buffer) {
@@ -233,8 +234,10 @@ export function transactions(file, c) {
     if (amount === null && c.Credit >= 0) { const v = parseAmount(cell(c.Credit)); if (v) amount = Math.abs(v); }
     if (!amount) continue;
     const cur = /\b(PLN|EUR|USD|GBP|CHF)\b/.exec(cell(c.Currency) + " " + cell(c.Amount));
+    // Bank statements are in their own currency (Polish banks: złoty): amounts go into the profile's main currency
+    const currency = cur ? cur[1] : "PLN", inMain = Math.round(Calc.toPln(amount, currency, State.data.Settings) * 100) / 100 || amount;
     list.push({
-      date, amount, currency: cur ? cur[1] : "PLN",
+      date, amount: inMain, original: amount, currency,
       description: describe(cell(c.Counterparty), cell(c.Description), r),
       bankCategory: cell(c.Category),
       allText: r.filter(x => parseAmount(x) === null && !parseDate(x)).join(" "),

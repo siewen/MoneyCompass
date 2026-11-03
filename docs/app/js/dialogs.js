@@ -1,9 +1,9 @@
-// Pop-up windows: profile & license, Options, Help, Delete data, Import, Export.
+// Pop-up windows: profile & license, Settings, Help, Delete data, Import, Export.
 import {
   T, State, save, license, LANGS, lang, currentName, initials, picture, setPicture, profiles, switchTo, createProfile, deleteProfile,
   replaceData, normalise, looksLikeProfile, summary, reset, MODULES, setModule, moduleOn, Calc, Advisor, ChartData, pln, rate, fmtDate,
   parseDate, categoryLabel, monthName, ONE_TIME, store,
-  markFileBase, savingsRateText } from "./core.js";
+  markFileBase, savingsRateText, convertProfile, plnRate } from "./core.js";
 import { esc, card, heading, hint, row, field, textInput, select, check, button, values, popup, confirmBox, alertBox, promptBox, toast, pickFile, download, stamp } from "./ui.js";
 import { App, requirePro, windowsOrPro, DOWNLOAD_URL } from "./app.js";
 import { hasPin, lock, pinDialog, bioAvailable, bioOn, enableBio, removeBio } from "./lock.js";
@@ -174,12 +174,14 @@ export async function loadProfileFile() {
   replaceData(n); markFileBase(); App.rebuild(); return true;
 }
 
-// ================================================================= Options
+// ================================================================= Settings
 
 export function openOptions() {
   const s = D().Settings;
-  const p = popup(`<h2 class="popup-title">⚙ ${esc(T("Options"))}</h2><div class="grid">
+  const p = popup(`<h2 class="popup-title">⚙ ${esc(T("Settings"))}</h2><div class="grid">
     ${card(heading(T("Language")) + hint(T("Your data stays the same; only the texts change.")) + select("language", LANGS, lang()))}
+    ${card(heading(T("Main currency")) + hint(T("All amounts are shown and entered in this currency. Changing it converts everything in this profile once, at today's NBP rate. Savings accounts and income in another currency keep their own currency.")) +
+      select("maincur", [["PLN", "PLN – złoty"], ["EUR", "EUR – euro"], ["USD", "USD – dollar"]], s.Currency || "PLN"))}
     ${card(heading(T("Menu order")) + hint(T("Change the order of the pages in the menu. On a computer you can also drag a page in the menu.")) +
       (license.isPro ? `<div class="list tab-order">${App.tabList().map((t, i, a) => `<div class="item"><span>${esc(t.title)}</span><span class="tab-arrows">
         <button class="icon-btn" data-tab-up="${t.route}"${i === 0 ? " disabled" : ""} title="${esc(T("Up"))}">▲</button><button class="icon-btn" data-tab-down="${t.route}"${i === a.length - 1 ? " disabled" : ""} title="${esc(T("Down"))}">▼</button></span></div>`).join("")}</div>
@@ -187,7 +189,7 @@ export function openOptions() {
         : `<div class="buttons">${button(esc(T("Change the menu order")) + " 🔒", "tabs-pro", "second")}</div>`))}
     ${card(heading(T("Layout")) + hint(T("Drag a card by its handle (⠿, top right) to move it, on any tab. Reset layout puts all cards back in their standard order.")) +
       `<div class="buttons">${button(esc(T("Reset layout")), "reset-layout", "second")}</div>`)}
-    ${card(heading(T("Modules")) + hint(license.isPro ? T("Switch on the modules you want. Each one adds its own tab; the tabs appear when you close Options. Your entries stay saved when you switch a module off.")
+    ${card(heading(T("Modules")) + hint(license.isPro ? T("Switch on the modules you want. Each one adds its own tab; the tabs appear when you close Settings. Your entries stay saved when you switch a module off.")
         : T("Modules are part of MoneyCompass Pro. Enter your license key in your profile (click your name) to use them.")) +
       MODULES.map(m => `<label class="check"><input type="checkbox" name="mod-${m.code}"${s.Modules.includes(m.code) ? " checked" : ""}${license.isPro ? "" : " disabled"}><span><b>${esc(T(m.name))}</b>${m.beta ? ` <span class="beta-tag">${esc(T("In development"))}</span>` : ""}<br><span class="hint">${esc(T(m.description))}</span></span></label>`).join(""))}
     ${card(heading(T("Current rates")) + check("online", T("Download current rates from the internet"), s.OnlineRates) +
@@ -221,6 +223,14 @@ export function openOptions() {
       button(esc(T("Choose what to delete…")), "delete", "danger"))}
     </div><div class="popup-buttons"><button class="btn main" data-close>${esc(T("Close"))}</button></div>`, { width: 980, cls: "wide-popup", onClose: () => App.rebuild() });
   const el = p.el;
+  el.querySelector('select[name="maincur"]').onchange = async e => {
+    const to = e.target.value, from = s.Currency || "PLN";
+    const rateText = [from, to].filter(c => c !== "PLN").map(c => `1 ${c} = ${plnRate(c, s).toFixed(4).replace(".", ",")} zł`).join(" · ");
+    if (!(await confirmBox(T("Change the main currency to {0}?", to), T("All amounts in this profile are converted from {0} to {1} at today's NBP rate ({2}). Tip: save your profile first, so you can go back exactly.", from, to, rateText), T("Convert"), T("Cancel")))) { e.target.value = from; return; }
+    const err = convertProfile(D(), to);
+    if (err) { await alertBox(T("Main currency"), err); e.target.value = from; return; }
+    toast(T("Main currency: {0}. All amounts were converted.", to), "good"); p.close(); App.rebuild(); openOptions();
+  };
   el.querySelector('select[name="language"]').onchange = e => { s.Language = e.target.value; store.set("mc-lang", s.Language); save(); p.close(); openOptions(); };
   el.querySelectorAll('input[name^="mod-"]').forEach(c => c.onchange = () => setModule(c.name.slice(4), c.checked));
   el.querySelector('input[name="online"]').onchange = e => { s.OnlineRates = e.target.checked; save(); if (s.OnlineRates) Rates.refresh(true); };
@@ -260,7 +270,7 @@ export function openOptions() {
   el.querySelector('[data-action="reset-layout"]').onclick = () => {
     const o = s.CardOrder || {};
     Object.keys(o).filter(k => k.startsWith("web")).forEach(k => delete o[k]);
-    save(); toast(T("All cards are back in their standard order when you close Options."));
+    save(); toast(T("All cards are back in their standard order when you close Settings."));
   };
   el.querySelector('[data-action="delete"]').onclick = () => { p.close(); openDelete(); };
 }
@@ -271,7 +281,7 @@ export function openDelete() {
   const d = D();
   const parts = [["incomes", T("Income sources"), d.Incomes.length], ["expenses", T("Expenses, money received and transfers (bank imports)"), d.Expenses.length + d.Received.length + d.Transfers.length], ["holdings", T("Savings"), d.Holdings.length],
     ["offers", T("Saved savings offers"), d.Offers.length], ["emergency", T("Emergency fund settings"), T("monthly costs, yearly costs, months, buffer")],
-    ["rates", T("Exchange rates"), ""], ["modules", T("Modules: loans, budget and goals, calendar, investments"), d.Goals.length + d.Loans.length + d.Budgets.length + (d.Recurring || []).length + (d.Investments || []).length],
+    ["rates", T("Exchange rates"), ""], ["modules", T("Modules: loans, budget and goals, calendar"), d.Goals.length + d.Loans.length + d.Budgets.length + (d.Recurring || []).length + (d.Investments || []).length],
     ["categories", T("Your own expense categories"), d.Categories.length || T("none")], ["bin", T("Deleted items"), (d.Deleted || []).length]];
   const p = popup(`<h2 class="popup-title bad">🗑 ${esc(T("Delete data"))}</h2>${hint(T("Choose exactly what to delete."))}
     <label class="check select-all"><input type="checkbox" data-all><span><b>${esc(T("Select all"))}</b></span></label><hr>
@@ -317,17 +327,17 @@ export function openHelp() {
       "Emergency fund: enter your essential monthly costs to see how much to keep aside.",
       "Savings: add your bank accounts, cash and other savings with their interest rate. Import the statement of a savings account to see its real rate after tax and fees, and its balance month by month.",
       "Overview: see everything together, then press \"Optimize my finances\" for your health check and personal plan with concrete tips. Reports (Excel, PDF, Word) are in the Reports tab.",
-      "Protect your data: set a PIN or fingerprint/face unlock in your profile, and turn on the automatic encrypted backup (Options). Install MoneyCompass as an app on your phone or computer."].map(x => `<li>${esc(T(x))}</li>`).join("")}</ol>` + hint(T("Numbers can be typed with a dot or a comma: 1234.50 or 1234,50.")))}
-    ${card(heading(T("The tabs")) + tabs.map(t => `<p><b>${esc(T(t[0]))}</b><br><span class="hint">${esc(T(t[1]))}</span></p>`).join("") + hint(T("Loans & debts, Budget plan (with savings goals) and Calendar are modules: switch them on in Options → Modules.")))}
+      "Protect your data: set a PIN or fingerprint/face unlock in your profile, and turn on the automatic encrypted backup (Settings). Install MoneyCompass as an app on your phone or computer."].map(x => `<li>${esc(T(x))}</li>`).join("")}</ol>` + hint(T("Numbers can be typed with a dot or a comma: 1234.50 or 1234,50.")))}
+    ${card(heading(T("The tabs")) + tabs.map(t => `<p><b>${esc(T(t[0]))}</b><br><span class="hint">${esc(T(t[1]))}</span></p>`).join("") + hint(T("Loans & debts, Budget plan (with savings goals) and Calendar are modules: switch them on in Settings → Modules.")))}
     ${card(heading("MoneyCompass Pro") + `<p>${esc(T("The free version has all the basics. A license key unlocks:"))}</p><ul>${[
       ["Optimize my finances", "Your personal plan for savings and loans, with current rates from NBP, the Ministry of Finance and bank rankings."], ["Compare offers", "See which bank offer really pays the most after tax."],
       ["Smart import", "Current and savings account statements (CSV): one Import button, or drop the file – MoneyCompass recognises which account it is and sorts the payments into categories."], ["Own categories", "Make your own expense categories, each with an icon of your choice."],
       ["Security & backups", "PIN, fingerprint/face unlock, automatic lock, an automatic encrypted backup and encrypted profile files."], ["Menu order", "Put the tabs in your own order."],
-      ["Modules", "Loans & debts, Budget plan and Calendar (Pro): switch them on in Options → Modules. Each adds its own tab; savings goals are in the Budget plan."]].map(x => `<li><b>${esc(T(x[0]))}</b> – ${esc(T(x[1]))}</li>`).join("")}
+      ["Modules", "Loans & debts, Budget plan and Calendar (Pro): switch them on in Settings → Modules. Each adds its own tab; savings goals are in the Budget plan."]].map(x => `<li><b>${esc(T(x[0]))}</b> – ${esc(T(x[1]))}</li>`).join("")}
       <li><b>${esc(T("Reports"))}</b> – ${esc(T("Reports as Excel, PDF or Word."))}</li><li><b>${esc(T("Profiles"))}</b> – ${esc(T("Separate data for each person or household."))}</li></ul>` +
       hint(T("To unlock: click your name → Profile & license, paste your key under Activation and press Activate.")))}
     ${card(heading(T("Your data & backup")) + `<p>${esc(T("Everything you enter is saved automatically, only in this browser on this device. Nothing is sent to the internet."))}</p>` +
-      hint(T("Clearing your browser data deletes your entries. With Pro, turn on the automatic encrypted backup (Options) or save your profile (click your name → Profile). Loading a profile is free. The Windows app opens these files from version 2.1.")))}
+      hint(T("Clearing your browser data deletes your entries. With Pro, turn on the automatic encrypted backup (Settings) or save your profile (click your name → Profile). Loading a profile is free. The Windows app opens these files from version 2.1.")))}
     ${card(heading(T("Windows app")) + `<p>${esc(T("The free Windows app has more than the free web version: reports and several profiles. From version 2.1 it also opens the encrypted profile files of the web app."))}</p>
       <a class="btn go" href="${DOWNLOAD_URL}" target="_blank" rel="noopener">⬇ ${esc(T("Download for Windows"))}</a>`)}
     ${card(heading(T("Please note")) + hint(T("MoneyCompass helps you keep an overview. All results are estimates based on what you enter. They are not financial, investment or tax advice. Interest rates and offers change - always check the bank's own terms.")) +

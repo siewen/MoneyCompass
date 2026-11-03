@@ -4,7 +4,7 @@
 // cancelled rows say "rejected" in Details. Nexo keeps euro and dollar balances as EURX / USDX.
 // MoneyCompass works out what you hold now (per coin), what you paid for it (from the USD value at the time), the interest
 // you earned, deposits and withdrawals – shows a preview – and saves it as ONE savings account in Savings (never in Inflows/Outflows).
-import { T, State, save, Calc, pln, fmtDate, isoDate, today, uuid } from "./core.js";
+import { T, State, save, Calc, pln, fmtDate, isoDate, today, uuid, mainCur } from "./core.js";
 import { esc, popup, pickFile, alertBox, confirmBox, toast } from "./ui.js";
 import { App, requirePro } from "./app.js";
 import { parseDate } from "./csv.js";
@@ -186,8 +186,8 @@ function preview(x, name) {
       DepositsPln: usd(x.depositsUsd), WithdrawalsPln: usd(x.withdrawalsUsd), Rows: x.used, At: day, Coins: rows.map(a => ({ Coin: a.Coin, Amount: a.Amount, Value: Math.round((a.value ?? a.cost) * 100) / 100 })) };
     // Only Savings: one savings account (risky money, crypto platform) with today's value and the estimated rate
     let h = old;
-    if (!h) { h = { Id: uuid(), Name: "Nexo", Place: "Crypto platform", Currency: "PLN", Safe: false, History: [] }; d.Holdings.push(h); }
-    Object.assign(h, { Name: p.el.querySelector('[name="savname"]').value.trim() || "Nexo", Place: "Crypto platform", Amount: Math.round(value * 100) / 100, Currency: "PLN",
+    if (!h) { h = { Id: uuid(), Name: "Nexo", Place: "Crypto platform", Currency: mainCur(), Safe: false, History: [] }; d.Holdings.push(h); }
+    Object.assign(h, { Name: p.el.querySelector('[name="savname"]').value.trim() || "Nexo", Place: "Crypto platform", Amount: Math.round(value * 100) / 100, Currency: mainCur(),
       RatePercent: Math.round(rate * 100) / 100, Safe: false, ImportedFrom: "nexo", Import: stats });
     // The month-end balances become the account's history: the Savings chart shows how it developed
     // (in złoty at today's USD rate; the current month is today's value)

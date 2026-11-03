@@ -1,7 +1,7 @@
 // MoneyCompass Pro: Compare offers, Optimize my finances, Goals, Loans, Budget, bank import.
 import {
   T, State, save, Calc, Advisor, pln, rate, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addMonths, monthName,
-  uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved } from "./core.js";
+  uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved, fromPln } from "./core.js";
 import { progress, hbars, savingsChart } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
@@ -37,7 +37,7 @@ export const Savings = {
     const period = Math.round(num(f.PeriodDays) || 365);
     const after = bankAfter ?? 0;
     const bankRows = [...Rates.savings.map(o => ({ o, kind: T("Savings account") })), ...Rates.deposits.map(o => ({ o, kind: T("12-month deposit") }))].map(x => {
-      const offer = { Amount: A, PromoRate: x.o.Rate, PromoLimit: x.o.MaxAmount || 0, PromoDays: Math.min(Math.max(x.o.Days || 365, 1), period), StandardRate: after, PeriodDays: period, ApplyTax: f.ApplyTax !== false };
+      const offer = { Amount: A, PromoRate: x.o.Rate, PromoLimit: x.o.MaxAmount ? fromPln(x.o.MaxAmount) : 0, PromoDays: Math.min(Math.max(x.o.Days || 365, 1), period), StandardRate: after, PeriodDays: period, ApplyTax: f.ApplyTax !== false };
       return { ...x, offer, r: Calc.savings(offer) };
     }).sort((a, b) => b.r.net - a.r.net);
     const mine = (num(f.Amount) || 0) > 0 ? r : null;
@@ -58,7 +58,7 @@ export const Savings = {
       hbars(chartItems) +
       `<div class="list bank-list">${bankRows.map((x, i) => `<div class="item${i === 0 ? " best" : ""}">
         <div><b>${i === 0 ? "🏆 " : ""}${esc(x.o.Bank)}</b>${x.o.Name ? ` – ${esc(x.o.Name)}` : ""}
-          <span class="hint">${esc(x.kind)} · ${rate(x.o.Rate)} · ${esc(x.o.MaxAmount > 0 ? T("up to {0}", pln(x.o.MaxAmount)) : T("no limit"))} · ${esc(T("{0} days", Math.min(x.o.Days || 365, period)))}${x.o.Details ? " · " + esc(x.o.Details) : ""}</span></div>
+          <span class="hint">${esc(x.kind)} · ${rate(x.o.Rate)} · ${esc(x.o.MaxAmount > 0 ? T("up to {0}", pln(fromPln(x.o.MaxAmount))) : T("no limit"))} · ${esc(T("{0} days", Math.min(x.o.Days || 365, period)))}${x.o.Details ? " · " + esc(x.o.Details) : ""}</span></div>
         <div class="right"><b class="good">${pln(x.r.net)}</b><span class="hint">${rate(x.r.effective)} ${diff(x.r.net)}</span></div>
         <div class="row-actions"><a class="btn second small" href="${esc(Rates.link(x.o))}" target="_blank" rel="noopener">${esc(T("Open offer"))}</a>
         <button class="btn second small" data-bank="${i}">＋ ${esc(T("Compare"))}</button></div></div>`).join("")}</div>` +
@@ -157,14 +157,14 @@ function optimizeHtml() {
   const gain = advice.filter(a => a.kind === "money" || a.kind === "tip").reduce((s, a) => s + a.benefit, 0);
   const r = Rates.data;
   let status;
-  if (!d.Settings.OnlineRates) status = T("Current rates are switched off in Options.");
+  if (!d.Settings.OnlineRates) status = T("Current rates are switched off in Settings.");
   else if (Rates.updating) status = T("Updating rates…");
   else if (r.Updated) status = T("Current rates from NBP and the Ministry of Finance, updated {0}.", fmtDate(r.Updated.slice(0, 10)) + " " + r.Updated.slice(11, 16)) + (Rates.failed ? " " + T("No internet right now – showing the last known rates.") : "");
   else status = Rates.failed ? T("Could not download the current rates. Check your internet connection and press Refresh.") : T("Current rates have not been downloaded yet.");
   const ref = r.ReferenceRate > 0 ? rate(r.ReferenceRate) : null;
   const amt = exampleAmount();
   const offerRows = (list, key) => list.slice(0, 5).map((o, i) => {
-    const inOffer = o.MaxAmount > 0 ? Math.min(amt, o.MaxAmount) : amt, days = Math.min(Math.max(o.Days || 365, 1), 365);
+    const inOffer = o.MaxAmount > 0 ? Math.min(amt, fromPln(o.MaxAmount)) : amt, days = Math.min(Math.max(o.Days || 365, 1), 365);
     const net = inOffer * o.Rate / 100 * days / 365 * (1 - BELKA);
     return `<div class="offer"><div><b>${esc(o.Bank)}</b>${o.Name ? `<div>${esc(o.Name)}</div>` : ""}${o.Details ? `<span class="hint">${esc(o.Details)}</span>` : ""}
       <div class="good small">${esc(days >= 365 ? (key === "s" ? T("On {0}: about {1} a year after tax – a savings account, your money stays available.", pln(inOffer), pln(net)) : T("On {0}: about {1} after tax in a year.", pln(inOffer), pln(net))) : T("On {0}: about {1} after tax in {2} days.", pln(inOffer), pln(net), days))}</div></div>
@@ -205,7 +205,7 @@ function optimizeHtml() {
       `<div class="bonds">${bonds}</div><span class="hint">${esc(T("Interest in the first period for the bonds on sale now. Inflation-linked bonds then pay inflation plus a margin."))}</span><br><a class="btn second small" href="${BONDS_WEBSITE}" target="_blank" rel="noopener">${esc(T("Open the official bond website"))}</a>`,
       ["low", T("Very low – backed by the State")], T("Early redemption possible for a small fee"), T("Protecting savings against inflation"))}
     ${option("👤", T("IKE / IKZE (retirement accounts)"), T("Special accounts with tax benefits: IKE – no 19% Belka tax when you withdraw after 60. IKZE – payments lower your income tax every year. Can hold deposits, bonds or funds."),
-      esc(T("Yearly limits in {0}: IKE {1}, IKZE {2} (self-employed: {3}).", LIMITS_YEAR, pln(IKE), pln(IKZE), pln(IKZE_SELF))), ["mid", T("Depends on what you put inside")], T("Long-term (until retirement)"), T("Saving for retirement with less tax"))}
+      esc(T("Yearly limits in {0}: IKE {1}, IKZE {2} (self-employed: {3}).", LIMITS_YEAR, pln(fromPln(IKE)), pln(fromPln(IKZE)), pln(fromPln(IKZE_SELF)))), ["mid", T("Depends on what you put inside")], T("Long-term (until retirement)"), T("Saving for retirement with less tax"))}
     ${option("💼", T("PPK (employee capital plan)"), T("Workplace plan: you pay a small part of your salary, your employer and the State add extra money on top. Leaving it means losing that free money."),
       esc(T("You pay 2% of your salary (0.5–4% possible), your employer at least 1.5%, and the State adds 250 zł once and 240 zł every year.")), ["mid", T("Medium – invested in funds")], T("Long-term"), T("Almost everyone who is employed"))}
     ${option("📊", T("Crypto savings"), T("Higher rates on stablecoins and crypto, often without time limits. But no state guarantee: if the platform fails, your money can be lost."),

@@ -120,7 +120,7 @@ export async function startBackup(redraw) {
 /** After switching profile. */
 export async function backupProfileChanged() { clearTimeout(timer); await refresh(); onChange(); }
 
-/** One line for the profile panel and Options. */
+/** One line for the profile panel and Settings. */
 export function backupLine() {
   const b = backupInfo();
   if (!license.isPro) return T("Backups (profile file and automatic backup) are part of MoneyCompass Pro.");

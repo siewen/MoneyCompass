@@ -3,7 +3,7 @@ import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, addMonths, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
   addCategory, removeCategory, updateCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
-  matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText } from "./core.js";
+  matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText, mainCur } from "./core.js";
 import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
 import { NEW_CAT } from "./ui.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON, ICONS, headingTip, categoryBox, infoTip } from "./ui.js";
@@ -280,7 +280,7 @@ export const Income = {
         : T("If you save everything left over, your emergency fund ({0}) is complete in about {1} month(s).", pln(target), Math.ceil((target - safe) / Math.max(1, left)));
     }
     const e = editIncome ? d.Incomes.find(x => x.Id === editIncome) : null;
-    const f = e || { Name: "", Type: "Salary", Amount: "", Currency: "PLN", Frequency: "Monthly", Date: isoDate(today()), Active: true };
+    const f = e || { Name: "", Type: "Salary", Amount: "", Currency: mainCur(), Frequency: "Monthly", Date: isoDate(today()), Active: true };
     const up = Calc.upcoming(d, today(), addDays(today(), 60));
     const dayText = dt => { const n = Math.round((dt - today()) / 86400000); return n === 0 ? T("today") : n === 1 ? T("tomorrow") : T("in {0} days", n); };
 
@@ -441,7 +441,7 @@ export async function offerSalary(r) {
   if (d.Incomes.some(i => i.Active && i.Frequency !== ONE_TIME && Math.abs(Calc.toPln(i.Amount, i.Currency, d.Settings) - r.Amount) < 1)) return;
   const day = parseDate(r.Date).getDate();
   if (await confirmBox(T("Salary"), T("Add {0} as your monthly salary? MoneyCompass then counts it every month (Your income sources), with payday on the {1}.", pln(r.Amount), day + "."), T("Add salary"), T("Not now"))) {
-    d.Incomes.push({ Id: uuid(), Name: T("Salary"), Type: "Salary", Amount: r.Amount, Currency: "PLN", Frequency: "Monthly", Date: isoDate(parseDate(r.Date)), Active: true });
+    d.Incomes.push({ Id: uuid(), Name: T("Salary"), Type: "Salary", Amount: r.Amount, Currency: mainCur(), Frequency: "Monthly", Date: isoDate(parseDate(r.Date)), Active: true });
     save();
   }
 }
@@ -792,7 +792,7 @@ export const Portfolio = {
   render(el) {
     const d = D(), s = d.Settings, p = Calc.portfolio(d), r = Calc.emergency(s);
     const h = editHolding ? d.Holdings.find(x => x.Id === editHolding) : null;
-    const f = h || { Name: "", Place: "Bank", Amount: "", Currency: "PLN", RatePercent: "", Safe: true };
+    const f = h || { Name: "", Place: "Bank", Amount: "", Currency: mainCur(), RatePercent: "", Safe: true };
     let em;
     if (r.target <= 0) em = T("Set up your emergency fund target in the Emergency fund tab.");
     else if (p.safe >= r.target) em = T("Emergency fund target ({0}) is fully covered by safe money.", pln(r.target));

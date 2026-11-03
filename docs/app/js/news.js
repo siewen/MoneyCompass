@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 78, date: "2026-11-03", items: {
+    en: ["💱 Main currency: choose PLN, EUR or USD in Settings – all amounts follow it. Changing it converts your whole profile once at today's NBP rate.", "⚙ \"Options\" is now called \"Settings\".", "📈 The Investments module was taken out of MoneyCompass; it will become its own app. The Nexo import to Savings stays."],
+    pl: ["💱 Waluta główna: wybierz PLN, EUR lub USD w Ustawieniach – wszystkie kwoty się do niej dostosują. Zmiana przelicza jednorazowo cały profil po dzisiejszym kursie NBP.", "⚙ „Opcje” nazywają się teraz „Ustawienia”.", "📈 Moduł Inwestycje został wydzielony z MoneyCompass – powstanie z niego osobna aplikacja. Import z Nexo do Oszczędności pozostaje."],
+    de: ["💱 Hauptwährung: Wählen Sie PLN, EUR oder USD in den Einstellungen – alle Beträge folgen ihr. Eine Änderung rechnet das ganze Profil einmalig zum heutigen NBP-Kurs um.", "⚙ „Optionen“ heißen jetzt „Einstellungen“.", "📈 Das Modul Investments wurde aus MoneyCompass herausgenommen und wird eine eigene App. Der Nexo-Import in die Ersparnisse bleibt."],
+    fr: ["💱 Devise principale : choisissez PLN, EUR ou USD dans les Réglages – tous les montants la suivent. La modifier convertit une fois tout le profil au cours NBP du jour.", "⚙ « Options » s'appelle désormais « Réglages ».", "📈 Le module Investissements a été retiré de MoneyCompass ; il deviendra une application à part. L'import Nexo vers l'Épargne reste."] } },
   { build: 77, date: "2026-11-03", items: {
     en: ["📈 Nexo import now works like a bank savings statement: the balance at the end of every month since your first transaction, credits, debits, interest earned and fees & charges – in the Savings chart and as a statement analysis. The extra import card in Savings is gone – use the button at the top right."],
     pl: ["📈 Import z Nexo działa teraz jak wyciąg z konta oszczędnościowego: saldo na koniec każdego miesiąca od pierwszej transakcji, wpływy, wypływy, zarobione odsetki oraz opłaty i prowizje – na wykresie w Oszczędnościach i jako analiza wyciągu. Dodatkowa karta importu w Oszczędnościach zniknęła – użyj przycisku w prawym górnym rogu."],

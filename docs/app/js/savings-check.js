@@ -1,6 +1,6 @@
 // "What does my savings account really pay?" – reads the CSV statement of a savings account and works out
 // the rate the bank really paid: interest, Belka tax and fees against the money that was on the account, day by day.
-import { T, State, save, pln, rate, fmtDate, monthName, monthStart, addMonths, addDays, isoDate, parseDate, BELKA, Calc, currentRate, today, lang, FREQUENCIES } from "./core.js";
+import { T, State, save, pln, rate, fmtDate, monthName, monthStart, addMonths, addDays, isoDate, parseDate, BELKA, Calc, currentRate, today, lang, FREQUENCIES, mainCur } from "./core.js";
 import { esc, card, heading, hint, row, popup, alertBox, confirmBox, pickFile, toast, numInput, field, button, check } from "./ui.js";
 import { savingsChart } from "./charts.js";
 import { Rates } from "./rates.js";
@@ -32,7 +32,9 @@ function readRows(file) {
     const text = [cell(c.Type), cell(c.Counterparty), cell(c.Description)].filter(Boolean).join(" ").replace(/\s+/g, " ").trim()
       || r.filter(x => Csv.parseAmount(x) === null && !Csv.parseDate(x)).join(" ");
     const desc = [cell(c.Counterparty), cell(c.Description)].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
-    list.push({ date: dayOf(date), amount, text, desc, balance: bal >= 0 ? Csv.parseAmount(cell(bal)) : null });
+    // A Polish savings statement is in złoty: amounts and balances go into the profile's main currency
+    const k = Calc.toPln(1, "PLN", State.data.Settings) || 1, b0 = bal >= 0 ? Csv.parseAmount(cell(bal)) : null;
+    list.push({ date: dayOf(date), amount: amount * k, text, desc, balance: b0 === null ? null : b0 * k });
   }
   // Banks list the newest first: put them in date order, keeping the order within one day
   if (list.length > 1 && list[0].date > list[list.length - 1].date) list.reverse();
@@ -161,7 +163,7 @@ export async function openSavingsCheck(fileObj = null) {
     const toHolding = name => {
       const idx = +p.el.querySelector('[name="hold"]').value;
       let h = d.Holdings[idx];
-      if (!h) { h = { Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: name || T("Savings account"), Place: "Bank", Currency: "PLN", Safe: true }; d.Holdings.push(h); }
+      if (!h) { h = { Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: name || T("Savings account"), Place: "Bank", Currency: mainCur(), Safe: true }; d.Holdings.push(h); }
       h.Amount = r2(r.closing); h.RatePercent = r2(r.gross);
       // The month-end balances of the statement become the account's history (the chart keeps them even without the analysis)
       h.History = mergeHistory(h.History, r.months.map(m => ({ Date: isoDate(new Date(m.m.getFullYear(), m.m.getMonth() + 1, 0)), Amount: r2(m.end) })), isoDate(r.to), h.Amount);
@@ -210,7 +212,7 @@ export function bindSavedChecks(el, d) {
   // A saved check without a savings entry: create one with the balance at the end and the rate before tax
   el.querySelectorAll('[data-action="check-hold"]').forEach(b => b.onclick = () => {
     const c = d.SavingsChecks.find(x => x.Id === b.dataset.check); if (!c) return;
-    const h = { Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: c.Name, Place: "Bank", Currency: "PLN", Safe: true, Amount: c.Closing, RatePercent: c.Gross,
+    const h = { Id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), Name: c.Name, Place: "Bank", Currency: mainCur(), Safe: true, Amount: c.Closing, RatePercent: c.Gross,
       History: mergeHistory([], (c.Months || []).map(m => { const t = parseDate(m.Month); return { Date: isoDate(new Date(t.getFullYear(), t.getMonth() + 1, 0)), Amount: m.End ?? m.Average }; }), c.To, c.Closing) };
     d.Holdings.push(h); c.HoldingId = h.Id; save(); App.refresh();
     toast(T("{0}: {1} at {2}.", h.Name, pln(h.Amount), rate(h.RatePercent)), "good");

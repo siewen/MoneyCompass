@@ -1,7 +1,7 @@
 // "Where should my savings go?" and promotion reminders.
 // Compares what each savings entry earns now with today's best bank offers (from rates.json),
 // and warns before a promotion ends – after that most banks pay only about 0.5%.
-import { T, State, save, Calc, pln, rate, fmtDate, isoDate, today, addDays, uuid, license, promo, currentRate, duePromos } from "./core.js";
+import { T, State, save, Calc, pln, rate, fmtDate, isoDate, today, addDays, uuid, license, promo, currentRate, duePromos, fromPln } from "./core.js";
 import { esc, card, heading, hint, popup, confirmBox, toast } from "./ui.js";
 import { App } from "./app.js";
 import { Rates } from "./rates.js";
@@ -19,7 +19,7 @@ function bestMove(d, h) {
   for (const { o, kind } of offers) {
     if (!(o.Rate > 0)) continue;
     const days = Math.min(Math.max(o.Days || 365, 30), 365);
-    const moved = o.MaxAmount > 0 ? Math.min(amount, o.MaxAmount) : amount;
+    const moved = o.MaxAmount > 0 ? Math.min(amount, fromPln(o.MaxAmount)) : amount;
     // What the moved money would earn where it is now, over the same days (the promo may end on the way)
     const left = p && !p.ended ? Math.max(0, Math.min(days, p.daysLeft)) : 0;
     const stay = moved * (now * left + after * (days - left)) / 100 / 365 * TAX;

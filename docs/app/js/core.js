@@ -44,7 +44,7 @@ export const sameDay = (a, b) => a.getTime() === b.getTime();
 
 export function newSettings() {
   return {
-    MonthlyEssentials: 0, YearlyCosts: 0, EmergencyMonths: 3, BufferPercent: 10, UsdToPln: 0, EurToPln: 0,
+    MonthlyEssentials: 0, YearlyCosts: 0, EmergencyMonths: 3, BufferPercent: 10, UsdToPln: 0, EurToPln: 0, Currency: "PLN",
     HelpButtonX: 0, HelpButtonY: 0, Language: "", AutoSaveProfile: true, CloseChoice: "", AskOnStart: true,
     MenuPosition: "top", ExportCharts: true, Design: "light", OnlineRates: true, CheckForUpdates: true,
     LastUpdateCheck: null, AutoExchangeRates: true, LicenseKey: "", Modules: [], CardOrder: {},
@@ -65,6 +65,7 @@ export function normalise(d) {
   if (!Array.isArray(out.Settings.Modules)) out.Settings.Modules = [];
   // Savings goals are now part of the Budget plan: whoever used goals gets the Budget plan ("goals" stays for the Windows app)
   if (out.Settings.Modules.includes("goals") && !out.Settings.Modules.includes("budget")) out.Settings.Modules.push("budget");
+  out.Settings.Modules = out.Settings.Modules.filter(m => m !== "investments"); // module moved to its own app
   // Older loans had a "Last payment" typed in by hand: now it is worked out from the amount, payment and interest
   for (const l of out.Loans) if (!l.Planned && l.Remaining > 0) planLoan(l);
   return out;
@@ -183,8 +184,22 @@ export function T(english, ...args) {
   const l = lang();
   let text = english;
   if (l !== "en") text = (TABLE[l] && TABLE[l][english]) || (EXTRA[l] && EXTRA[l][english]) || english;
+  if (text.includes("zł")) text = withCurrency(text);
   return args.length ? text.replace(/\{(\d+)\}/g, (m, i) => (args[i] ?? m)) : text;
 }
+// ---------- Main currency of the profile (Settings): PLN, EUR or USD. All amounts without their own currency are in it. ----------
+export const CURRENCY_NAMES = { PLN: "złoty", EUR: "euro", USD: "dollars" };
+export const mainCur = () => State.data?.Settings?.Currency || "PLN";
+const SYMBOL = { PLN: "zł", EUR: "€", USD: "$" };
+/** Texts written for złoty: "(zł)" and "złoty" follow the main currency. */
+function withCurrency(text) {
+  const c = mainCur(); if (c === "PLN") return text;
+  return text.replace(/\(zł\)/g, "(" + SYMBOL[c] + ")").replace(/złotych|złote|złoty|Złoty/g, CURRENCY_NAMES[c]);
+}
+/** 1 unit of a currency in złoty (NBP rates); 0 when not known yet. */
+export const plnRate = (cur, s = State.data?.Settings || {}) => cur === "PLN" ? 1 : cur === "USD" ? (s.UsdToPln || 0) : cur === "EUR" ? (s.EurToPln || 0) : 1;
+/** A fixed amount in złoty (Polish limits and rules, bank offers) in the main currency. */
+export const fromPln = v => { const r = plnRate(mainCur()); return r > 0 ? v / r : v; };
 export function monthsCount(n) {
   switch (lang()) {
     case "pl": return n === 1 ? "1 miesiąc" : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? `${n} miesiące` : `${n} miesięcy`;
@@ -202,7 +217,7 @@ export const monthShort = d => parseDate(d).toLocaleDateString(locale(), { month
 
 const nf = new Intl.NumberFormat("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: "always" });
 const round2 = v => Math.round((v + Number.EPSILON) * 100) / 100;
-export const pln = v => nf.format(round2(v || 0)).replace(/ /g, " ") + " zł";
+export const pln = v => { const n = nf.format(round2(v || 0)).replace(/ /g, " "), c = mainCur(); return c === "EUR" ? n + " €" : c === "USD" ? (n.startsWith("-") ? "-$" + n.slice(1) : "$" + n) : n + " zł"; };
 export const rate = v => (v || 0).toFixed(2).replace(".", ",") + "%";
 export function amount(v, cur) {
   const n = nf.format(round2(v || 0)).replace(/ /g, " ");
@@ -304,7 +319,7 @@ export const MODULES = [
   { code: "loans", name: "Loans & debts", description: "Credits and loans: what is left to pay, monthly payments and when you are debt-free." },
   { code: "budget", name: "Budget plan", description: "Monthly limits per expense category and your savings goals: how much to set aside each month." },
   { code: "calendar", name: "Calendar", description: "Everything that comes back every month – salary, bills, subscriptions, savings – in a calendar, with a preview of the next 1 to 12 months." },
-  { code: "investments", name: "Investments", beta: true, description: "Crypto platforms and brokers: what they offer, your position and your return in %. In development – information only, no advice." },
+  // Investments module: moved out (kept in modules-archive/investments for a separate app).
 ];
 /** What is saved for a goal: the balance of its linked savings account, or the amount typed in. */
 export function goalSaved(g, d = State.data) {
@@ -372,6 +387,34 @@ export function updateCategory(oldName, name, essential, icon) {
   for (const b of d.Budgets) if (b.Category === oldName) b.Category = name;
   for (const r of d.Recurring || []) if (r.Category === oldName) r.Category = name;
   for (const r of d.Settings.CategoryRules || []) if (r.Category === oldName) r.Category = name;
+  save();
+  return null;
+}
+/** Change the main currency of a profile: every amount that has no currency of its own is converted once at today's NBP rate
+ *  (expenses, inflows, transfers, loans, goals, budget limits, regular payments, offers, emergency fund costs, statement analyses,
+ *  the bin). Savings entries and income sources keep their own currency and are shown converted. Returns an error text or null. */
+export function convertProfile(d, to) {
+  const s = d.Settings, from = s.Currency || "PLN";
+  if (to === from) return null;
+  const a = plnRate(from, s), b = plnRate(to, s);
+  if (!(a > 0) || !(b > 0)) return T("The exchange rates are not known yet. Connect to the internet (NBP rates) or enter them in Savings → Exchange rates.");
+  const f = a / b, r = v => typeof v === "number" ? Math.round(v * f * 100) / 100 : v;
+  const fix = (o, keys) => { if (o) for (const k of keys) if (typeof o[k] === "number") o[k] = r(o[k]); };
+  const byKind = {
+    expense: o => fix(o, ["Amount"]), received: o => fix(o, ["Amount"]), transfer: o => fix(o, ["Amount"]),
+    loan: o => { fix(o, ["Remaining", "MonthlyPayment", "Original", "InterestPaid"]); (o.Extra || []).forEach(e => fix(e, ["Amount"])); },
+    goal: o => fix(o, ["Target", "Saved"]), budget: o => fix(o, ["MonthlyLimit"]), recurring: o => fix(o, ["Amount"]),
+    offer: o => fix(o, ["Amount", "PromoLimit"]),
+    check: o => { fix(o, ["Opening", "Closing", "Average", "Deposits", "Withdrawals", "Interest", "Tax", "Fees"]);
+      (o.Months || []).forEach(m => fix(m, ["End", "Average", "Interest", "Fees", "Credits", "Debits"])); (o.Types || []).forEach(t => fix(t, ["Interest"])); },
+  };
+  d.Expenses.forEach(byKind.expense); d.Received.forEach(byKind.received); (d.Transfers || []).forEach(byKind.transfer);
+  d.Loans.forEach(byKind.loan); d.Goals.forEach(byKind.goal); d.Budgets.forEach(byKind.budget); (d.Recurring || []).forEach(byKind.recurring);
+  d.Offers.forEach(byKind.offer); (d.SavingsChecks || []).forEach(byKind.check);
+  for (const x of d.Deleted || []) byKind[x.Kind]?.(x.Item);
+  fix(s, ["MonthlyEssentials", "YearlyCosts"]);
+  if (s.SavingsHistory) for (const k in s.SavingsHistory) s.SavingsHistory[k] = r(s.SavingsHistory[k]);
+  s.Currency = to;
   save();
   return null;
 }
@@ -552,8 +595,14 @@ export const Calc = {
     const net = gross - tax;
     return { promo, after, gross, tax, net, effective: net / o.Amount * 365 / o.PeriodDays * 100 };
   },
-  toPln(value, currency, s) { return currency === "USD" ? value * (s.UsdToPln || 0) : currency === "EUR" ? value * (s.EurToPln || 0) : value; },
-  rateMissing(currency, s) { return (currency === "USD" && !(s.UsdToPln > 0)) || (currency === "EUR" && !(s.EurToPln > 0)); },
+  // An amount in its own currency → the main currency of the profile (the name stays "toPln": PLN is the default)
+  toPln(value, currency, s) {
+    const main = s?.Currency || "PLN", cur = currency || main;
+    if (cur === main) return value;
+    const a = plnRate(cur, s), b = plnRate(main, s);
+    return a > 0 && b > 0 ? value * a / b : (cur === "PLN" ? value : 0);
+  },
+  rateMissing(currency, s) { const m = s?.Currency || "PLN"; return (currency || m) !== m && (!(plnRate(currency, s) > 0) || !(plnRate(m, s) > 0)); },
   stepN(start, freq, n) {
     switch (freq) {
       case "Daily": return addDays(start, n);
@@ -845,7 +894,7 @@ function moreAdvice(d, add, { income, avg, spending, left, p, target, missing, b
   // 1. Category tips (cigarettes, shopping, groceries...): the biggest ones first, at most 6
   let n = 0;
   for (const c of cats) {
-    const r = categoryRule(c.category); if (!r || c.perMonth < r.min || n >= 6) continue;
+    const r = categoryRule(c.category); if (!r || c.perMonth < fromPln(r.min) || n >= 6) continue;
     const name = T(c.category), year = c.perMonth * 12, save = year * r.cut;
     add(r.info ? "insight" : "money", T(r.title, pln(r.title.includes("a year") ? year : c.perMonth)),
       T(r.text, pln(c.perMonth), pln(year), pln(futureValue(c.perMonth, rateForGrowth, 5)), pln(save)), save, "expenses");
@@ -858,15 +907,15 @@ function moreAdvice(d, add, { income, avg, spending, left, p, target, missing, b
     const sumBy = m => m.items.reduce((map, e) => map.set(e.Category, (map.get(e.Category) || 0) + e.Amount), new Map());
     const now = sumBy(lastM), prev = before.map(sumBy);
     const ups = [...now.entries()].map(([k, v]) => ({ k, v, was: prev.reduce((s, m) => s + (m.get(k) || 0), 0) / prev.length }))
-      .filter(x => x.was > 0 && x.v - x.was >= 150 && x.v >= x.was * 1.3).sort((a, b) => (b.v - b.was) - (a.v - a.was)).slice(0, 2);
+      .filter(x => x.was > 0 && x.v - x.was >= fromPln(150) && x.v >= x.was * 1.3).sort((a, b) => (b.v - b.was) - (a.v - a.was)).slice(0, 2);
     for (const u of ups) add("insight", T("\"{0}\" went up in {1}", T(u.k), monthName(lastM.start)),
       T("{0} in {1}, against {2} a month on average before (+{3}%). A one-off – or a new habit worth watching?", pln(u.v), monthName(lastM.start), pln(u.was), Math.round((u.v / u.was - 1) * 100)), 0, "expenses");
   }
   // 3. Many small payments ("latte effect")
   const cov = Calc.coverage(d);
-  const small = cov.months.flatMap(m => m.items).filter(e => e.Amount > 0 && e.Amount < 30 && e.Category !== LOAN_CATEGORY);
+  const small = cov.months.flatMap(m => m.items).filter(e => e.Amount > 0 && e.Amount < fromPln(30) && e.Category !== LOAN_CATEGORY);
   const smallCount = small.length / cov.units, smallSum = small.reduce((s, e) => s + e.Amount, 0) / cov.units;
-  if (smallCount >= 25 && smallSum >= 250)
+  if (smallCount >= 25 && smallSum >= fromPln(250))
     add("money", T("Small payments add up: {0} a month", pln(smallSum)),
       T("About {0} payments under 30 zł a month – coffee, snacks, small shopping – together {1} a month, {2} a year. Set a weekly limit for them, or take one cash amount per week. A fifth less saves {3} a year.", Math.round(smallCount), pln(smallSum), pln(smallSum * 12), pln(smallSum * 12 * 0.2)), smallSum * 12 * 0.2, "expenses");
   // 4. Too much in "Other": the plan can't see where it goes
@@ -912,7 +961,7 @@ function moreAdvice(d, add, { income, avg, spending, left, p, target, missing, b
   }
   // 11. IKZE: lower income tax
   if (left > 300 && missing <= 0 && target > 0) {
-    const yearly = Math.min(left * 12, 11304);
+    const yearly = Math.min(left * 12, fromPln(11304));
     add("money", T("IKZE could lower your tax by about {0} a year", pln(yearly * 0.12)),
       T("Payments into an IKZE are deducted from your taxable income: putting {0} a year in returns about {1} in your tax settlement (12% tax bracket; 32% above 120 000 zł). The money is for retirement.", pln(yearly), pln(yearly * 0.12)), yearly * 0.12, "portfolio");
   }

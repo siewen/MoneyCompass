@@ -16,7 +16,7 @@ const STEPS = [
     done: d => d.Holdings.length > 0, savingsImport: true },
   { route: "overview", color: "#0F766E", title: "Overview", text: "Overview: see everything together, then press \"Optimize my finances\" for your health check and personal plan with concrete tips. Reports (Excel, PDF, Word) are in the Reports tab.",
     done: d => STEPS.slice(0, 4).every(s => s.done(d)), optimize: true },
-  { route: null, color: "#7E22CE", title: "Protect your data", text: "Protect your data: set a PIN or fingerprint/face unlock in your profile, and turn on the automatic encrypted backup (Options). Install MoneyCompass as an app on your phone or computer.",
+  { route: null, color: "#7E22CE", title: "Protect your data", text: "Protect your data: set a PIN or fingerprint/face unlock in your profile, and turn on the automatic encrypted backup (Settings). Install MoneyCompass as an app on your phone or computer.",
     done: d => !!d.Settings.LastProfileSaved || !!d.Settings.PinHash, backup: true },
 ];
 let current = 0;

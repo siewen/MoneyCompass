@@ -150,7 +150,7 @@ function unlock() {
   const n = after; after = null; n && n();
 }
 
-/** Start watching for activity. The app locks after the minutes set in Options (and at start when the profile has a PIN). */
+/** Start watching for activity. The app locks after the minutes set in Settings (and at start when the profile has a PIN). */
 export function startLock(rebuildApp) {
   rebuild = rebuildApp;
   const touch = () => { if (!locked) last = Date.now(); };

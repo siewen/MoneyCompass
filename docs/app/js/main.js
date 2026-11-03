@@ -14,12 +14,11 @@ import { hasNews, openNews } from "./news.js";
 import { Overview, Income, Expenses, Emergency, Portfolio, bindBin } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
 import { Calendar } from "./calendar.js";
-import { Investments } from "./investments.js";
 import { promoReminder } from "./advice.js";
 import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile, openLanguage, setLanguage } from "./dialogs.js";
 
 const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", investments: "#CA8A04", reports: "#0E7490", savings: "#7E22CE" };
-const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget, calendar: Calendar, investments: Investments };
+const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget, calendar: Calendar };
 let current = "overview";
 
 function tabs() {
@@ -136,7 +135,7 @@ function meMenu() {
   const shield = document.createElement("div"); shield.className = "help-shield me-shield";
   const menu = document.createElement("div"); menu.className = "tab-menu data-menu me-menu";
   menu.innerHTML = `<button data-m="profile"><span class="mi">👤</span>${esc(T("Profile & license"))}</button>
-    <button data-m="options"><span class="mi">⚙</span>${esc(T("Options"))}</button>
+    <button data-m="options"><span class="mi">⚙</span>${esc(T("Settings"))}</button>
     <hr><button data-m="help"><span class="mi">❓</span>${esc(T("Help"))}</button>
     <button data-m="guide"><span class="mi">🧭</span>${esc(T("Guide"))}</button>
     <button data-m="about"><span class="mi">ℹ</span>${esc(T("About"))}</button>
@@ -252,7 +251,7 @@ function helpMenu() {
   if (document.querySelector(".help-menu")) return closeHelpMenu();
   const shield = document.createElement("div"); shield.className = "help-shield";
   const menu = document.createElement("div"); menu.className = "help-menu";
-  const items = [["guide", "🧭  " + T("Guide")], ["about", "ℹ  " + T("About")], ["help", "?  " + T("Help")], ["options", "⚙  " + T("Options")]];
+  const items = [["guide", "🧭  " + T("Guide")], ["about", "ℹ  " + T("About")], ["help", "?  " + T("Help")], ["options", "⚙  " + T("Settings")]];
   if (!installed()) items.push(["install", "📲  " + T("Install app")]);
   items.push(["exit", "⏻  " + T("Close")]);
   menu.innerHTML = items.map(([k, t]) => `<button data-m="${k}">${esc(t)}</button>`).join("");
@@ -326,7 +325,7 @@ function welcome(next = () => {}) {
       <button class="btn danger" data-w="fresh">🗑 ${esc(T("Start fresh…"))}</button></div>
     <p class="hint">${esc(T("Choose exactly what to delete."))}</p>
     <label class="check"><input type="checkbox" name="dontask"><span>${esc(T("Don't ask again when MoneyCompass starts"))}</span></label>
-    <p class="hint">${esc(T("You can switch this question back on in Options → Backup & restore."))}</p>`, { width: 440, cls: "box",
+    <p class="hint">${esc(T("You can switch this question back on in Settings → Backup & restore."))}</p>`, { width: 440, cls: "box",
     onClose: () => { if (action === "continue") setTimeout(next, 250); } });
   p.el.querySelectorAll("[data-w]").forEach(b => b.onclick = async () => {
     if (p.el.querySelector('[name="dontask"]').checked) { s.AskOnStart = false; save(); }
@@ -372,7 +371,7 @@ async function closeApp() {
       <button class="btn second" data-c="without">${esc(T("Close without saving"))}</button>
       <button class="btn second" data-c="cancel">${esc(T("Cancel"))}</button></div>
     <label class="check"><input type="checkbox" name="remember"><span>${esc(T("Remember my choice"))}</span></label>
-    <p class="hint">${esc(T("You can change this later in Options → Backup & restore."))}</p>`, { width: 440, cls: "box" });
+    <p class="hint">${esc(T("You can change this later in Settings → Backup & restore."))}</p>`, { width: 440, cls: "box" });
   p.el.querySelectorAll("[data-c]").forEach(b => b.onclick = () => {
     const c = b.dataset.c;
     p.close();
