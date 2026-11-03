@@ -298,6 +298,8 @@ export const freeExportsLeft = () => Math.max(0, FREE_EXPORTS - (State.data.Sett
 
 // ---------------------------------------------------------------- modules
 
+/** Filled in by other files at start (avoids circular imports): investmentsTotal(d) from investments.js. */
+export const Hooks = { investmentsTotal: null };
 export const MODULES = [
   { code: "loans", name: "Loans & debts", description: "Credits and loans: what is left to pay, monthly payments and when you are debt-free." },
   { code: "budget", name: "Budget plan", description: "Monthly limits per expense category and your savings goals: how much to set aside each month." },
@@ -608,7 +610,10 @@ export const Calc = {
       total += v; if (h.Safe) safe += v; else risky += v;
       yearly += v * currentRate(h) / 100;
     }
-    return { total, safe, risky, yearly, missing };
+    // Investments module: the value of your positions counts as risky money
+    const invest = moduleOn("investments") && Hooks.investmentsTotal ? Hooks.investmentsTotal(d) : 0;
+    total += invest; risky += invest;
+    return { total, safe, risky, yearly, missing, invest };
   },
   spentThisMonth(category) {
     const start = monthStart(today()), end = addMonths(start, 1);
@@ -910,7 +915,7 @@ export function healthCheck(d) {
   if (loans > 0) rows.push({ label: T("Loan payments"), value: pc(loans / income), aim: T("up to 30%"), state: loans / income <= 0.3 ? "good" : loans / income <= 0.45 ? "warn" : "bad" });
   const ess = em.monthly || avg.essential;
   if (ess > 0) { const m = p.safe / ess; rows.push({ label: T("Emergency fund"), value: T("{0} months", (Math.round(m * 10) / 10).toString().replace(".", ",")), aim: T("3–6 months"), state: m >= 3 ? "good" : m >= 1 ? "warn" : "bad" }); }
-  if (p.safe > 0) { const yr = p.yearly / Math.max(1, p.total) * 100; rows.push({ label: T("Interest on your savings"), value: fmtPct(yr), aim: T("about the NBP rate or more"), state: yr >= 4 ? "good" : yr >= 2 ? "warn" : "bad" }); }
+  if (p.safe > 0) { const yr = p.yearly / Math.max(1, p.total - (p.invest || 0)) * 100; rows.push({ label: T("Interest on your savings"), value: fmtPct(yr), aim: T("about the NBP rate or more"), state: yr >= 4 ? "good" : yr >= 2 ? "warn" : "bad" }); }
   return rows;
 }
 

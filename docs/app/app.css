@@ -867,3 +867,17 @@ html.lite[data-design] .tabs, html.lite .top { background: var(--side, #1A2120) 
 .inv-card .facts { margin: 8px 0; }
 .inv-head { padding-right: 30px; }
 .inv-form .buttons { flex-wrap: nowrap; gap: 8px; }
+.three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+@media (max-width: 640px) { .three { grid-template-columns: 1fr 1fr; } }
+.inv-spark { width: 100%; height: 60px; display: block; margin: 4px 0 8px; }
+.inv-spark .line { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.inv-spark.up .line { stroke: var(--in, #4FC59B); } .inv-spark.down .line { stroke: var(--out, #F2777A); }
+.inv-spark.up .fill { fill: color-mix(in srgb, var(--good) 14%, transparent); } .inv-spark.down .fill { fill: color-mix(in srgb, var(--bad) 14%, transparent); }
+.inv-asset .right { display: flex; flex-direction: column; align-items: flex-end; }
+.inv-more { margin-top: 8px; }
+.inv-more > summary { cursor: pointer; color: var(--primary); font-weight: 600; padding: 6px 0; }
+.inv-alert { margin: 8px 0; }
+.inv-rules { margin: 8px 0; padding-left: 18px; font-size: 13.5px; color: var(--ink); }
+.inv-rules li { margin: 4px 0; }
+.inv-add > summary { color: var(--primary); }
+.inv-add[open] > summary { margin-bottom: 6px; }
