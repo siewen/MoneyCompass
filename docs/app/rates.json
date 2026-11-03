@@ -1,7 +1,7 @@
 {
- "Usd": 3.9389,
- "Eur": 4.4185,
- "ExchangeDate": "2026-11-02",
+ "Usd": 3.9526,
+ "Eur": 4.4233,
+ "ExchangeDate": "2026-11-03",
  "ReferenceRate": 3.75,
  "ReferenceSince": "2026-03-05",
  "Bonds": [
@@ -151,5 +151,5 @@
   }
  ],
  "OffersChecked": "2026-11-01T11:49:18.435Z",
- "Updated": "2026-11-02T13:28:48.886Z"
+ "Updated": "2026-11-03T12:46:41.696Z"
 }
