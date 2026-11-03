@@ -923,6 +923,7 @@ html.lite[data-design] .tabs, html.lite .top { background: var(--side, #1A2120) 
 .import-center h3.ic-sub { margin: 16px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
 .import-center h3.ic-sub small { text-transform: none; letter-spacing: 0; font-weight: 600; margin-left: 4px; color: var(--primary); }
 .ic-grid.two-up { grid-template-columns: repeat(2, 1fr); }
+.ic-grid.one-up { grid-template-columns: 1fr; }
 .ic-touch { display: none; }
 @media (hover: none) and (pointer: coarse) { .ic-desk { display: none; } .ic-touch { display: inline; } }
 .ic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
@@ -939,7 +940,7 @@ html.lite[data-design] .tabs, html.lite .top { background: var(--side, #1A2120) 
 .seg-btn { border: 0; background: none; font: inherit; font-size: 13px; padding: 6px 14px; border-radius: 999px; cursor: pointer; color: var(--muted); }
 .seg-btn.on { background: var(--primary); color: #fff; font-weight: 700; }
 @media (max-width: 560px) {
-  .ic-grid, .ic-grid.two-up { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ic-grid, .ic-grid.two-up { grid-template-columns: 1fr 1fr; gap: 8px; } .ic-grid.one-up { grid-template-columns: 1fr; }
   .ic-tile { grid-template-columns: 1fr; padding: 12px; row-gap: 6px; }
   .ic-icon { grid-row: auto; width: 34px; height: 34px; font-size: 16px; }
   .ic-text small { display: none; }

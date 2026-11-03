@@ -46,7 +46,6 @@ const KINDS = [
   { k: "out", icon: "↑", c: "#C2410C", title: "Expenses only", text: "Only the money going out – the income stays as it is", to: "Outflows" },
   { k: "in", icon: "↓", c: "#1D4ED8", title: "Income only", text: "Only the money coming in: salary, refunds, other income", to: "Inflows" },
   { k: "savings", icon: "🏦", c: "#15803D", title: "Savings account statement", text: "Balance month by month, interest, tax, fees and the real rate", to: "Savings" },
-  { k: "crypto", icon: "₿", c: "#7E22CE", title: "Crypto platform (Nexo)", text: "Month-end balances, interest earned, deposits and withdrawals", to: "Savings" },
 ];
 const tile = x => `<button class="ic-tile" data-kind="${x.k}" style="--c:${x.c}"><span class="ic-icon">${x.icon}</span>
   <span class="ic-text"><b>${esc(T(x.title))}</b><small>${esc(T(x.text))}</small></span><span class="ic-to">→ ${esc(T(x.to))}</span></button>`;
@@ -60,9 +59,9 @@ export async function openImportCenter() {
       <span class="hint ic-desk">${esc(T("or click to choose it – the kind of statement is recognised automatically"))}</span><span class="hint ic-touch">${esc(T("The kind of statement is recognised automatically."))}</span></label>
     <h3 class="ic-sub">${esc(T("Current account"))} <small>→ ${esc(T("Inflows and Outflows"))}</small></h3>
     <div class="ic-grid">${KINDS.slice(0, 3).map(tile).join("")}</div>
-    <h3 class="ic-sub">${esc(T("Savings and crypto"))} <small>→ ${esc(T("Savings"))}</small></h3>
-    <div class="ic-grid two-up">${KINDS.slice(3).map(tile).join("")}</div>
-    <p class="ic-note">🔒 ${esc(T("The file is read only on this device. Recognised automatically: PKO BP, Pekao, mBank, ING, Millennium and most other banks' CSV exports, and Nexo."))}</p>
+    <h3 class="ic-sub">${esc(T("Savings account"))} <small>→ ${esc(T("Savings"))}</small></h3>
+    <div class="ic-grid one-up">${KINDS.slice(3).map(tile).join("")}</div>
+    <p class="ic-note">🔒 ${esc(T("The file is read only on this device. Recognised automatically: PKO BP, Pekao, mBank, ING, Millennium and most other banks' CSV exports."))}</p>
     <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`, { width: 780, cls: "import-center" });
   const drop = p.el.querySelector(".ic-drop"), input = drop.querySelector("input");
   const go = f => { if (f) { p.close(); smartImport(f); } };
@@ -74,7 +73,6 @@ export async function openImportCenter() {
   p.el.querySelectorAll("[data-kind]").forEach(b => b.onclick = async () => {
     const k = b.dataset.kind; p.close();
     if (k === "savings") return (await import("./savings-check.js")).openSavingsCheck();
-    if (k === "crypto") return (await import("./invest-import.js")).openInvestImport();
     (await import("./pages-pro.js")).openBankImport(null, k);
   });
 }

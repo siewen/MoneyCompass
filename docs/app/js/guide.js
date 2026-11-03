@@ -71,7 +71,7 @@ const STEPS = [
     checks: d => { const p = Calc.portfolio(d);
       return [[d.Holdings.length > 0, d.Holdings.length ? T("{0} accounts · {1}", d.Holdings.length, pln(p.total)) : T("No savings account yet")],
         [(d.SavingsChecks || []).length > 0, (d.SavingsChecks || []).length ? T("{0} statements analysed", d.SavingsChecks.length) : T("No savings statement imported yet")]]; },
-    actions: [["import-sav", "🏦 " + "Import savings account statement", true], ["import-crypto", "₿ " + "Crypto platform (Nexo)", true]] },
+    actions: [["import-sav", "🏦 " + "Import savings account statement", true]] },
   { key: "ov", route: "overview", color: "#0F766E", icon: "🧭", title: "Overview",
     why: "Everything together – and a personal plan with concrete tips.",
     text: "Overview: see everything together, then press \"Optimize my finances\" for your health check and personal plan with concrete tips. Reports (Excel, PDF, Word) are in the Reports tab.",
@@ -156,7 +156,6 @@ export function openGuide(step) {
     act("import-in", leave("income", async () => (await import("./pages-pro.js")).openBankImport(null, "in")));
     act("import-out", leave("expenses", async () => (await import("./pages-pro.js")).openBankImport(null, "out")));
     act("import-sav", leave("portfolio", async () => (await import("./savings-check.js")).openSavingsCheck()));
-    act("import-crypto", leave("portfolio", async () => (await import("./invest-import.js")).openInvestImport()));
     act("optimize", () => { p.close(); App.openOptimize(); });
     act("profile", () => { p.close(); App.openProfile(); });
     act("options", () => { p.close(); App.openOptions(); });

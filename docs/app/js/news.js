@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 84, date: "2026-11-03", items: {
+    en: ["⬆ Import centre simplified: current account (everything, expenses only, income only) and savings account statements."],
+    pl: ["⬆ Uproszczone centrum importu: konto osobiste (wszystko, tylko wydatki, tylko dochody) i wyciągi z kont oszczędnościowych."],
+    de: ["⬆ Importzentrum vereinfacht: Girokonto (alles, nur Ausgaben, nur Einnahmen) und Sparkontoauszüge."],
+    fr: ["⬆ Centre d'import simplifié : compte courant (tout, dépenses uniquement, revenus uniquement) et relevés de comptes d'épargne."] } },
   { build: 83, date: "2026-11-03", items: {
     en: ["🧭 New Getting started guide: steps on the left, a progress ring, and a quick form in each step – enter your salary, an expense, your essential costs or a savings account right in the guide. Live checklist and all import options per step.", "⬆ New import centre (Import button): drop a file and it is recognised automatically, or choose what to import – everything from a current account, expenses only, income only, a savings account statement or a crypto platform (Nexo). The bank import preview can also switch between Everything, Outflows only and Inflows only."],
     pl: ["🧭 Nowy przewodnik „Pierwsze kroki”: kroki po lewej, pierścień postępu i szybki formularz w każdym kroku – wpisz wynagrodzenie, wydatek, niezbędne koszty lub konto oszczędnościowe bezpośrednio w przewodniku. Lista kontrolna na żywo i wszystkie opcje importu przy każdym kroku.", "⬆ Nowe centrum importu (przycisk Import): upuść plik, a zostanie rozpoznany automatycznie, albo wybierz, co zaimportować – wszystko z konta osobistego, tylko wydatki, tylko dochody, wyciąg z konta oszczędnościowego lub platformę krypto (Nexo). W podglądzie importu bankowego można też przełączać: Wszystko, Tylko wydatki, Tylko wpływy."],

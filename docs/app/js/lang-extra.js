@@ -1267,7 +1267,8 @@ export const EXTRA = {
 "{0} payments received were added. You find them in the Inflows tab.": "{0} Zahlungseingänge wurden hinzugefügt. Sie finden sie im Reiter Eingänge.",
 "{0} statements analysed": "{0} Auszüge analysiert",
 "{0}% covered by safe savings": "{0} % durch sichere Ersparnisse gedeckt",
-"{0}% sorted into categories": "{0} % in Kategorien sortiert"
+"{0}% sorted into categories": "{0} % in Kategorien sortiert",
+"The file is read only on this device. Recognised automatically: PKO BP, Pekao, mBank, ING, Millennium and most other banks' CSV exports.": "Die Datei wird nur auf diesem Gerät gelesen. Automatisch erkannt: PKO BP, Pekao, mBank, ING, Millennium und die CSV-Exporte der meisten anderen Banken."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -2536,7 +2537,8 @@ export const EXTRA = {
 "{0} payments received were added. You find them in the Inflows tab.": "{0} paiements reçus ont été ajoutés. Vous les trouvez dans l'onglet Entrées.",
 "{0} statements analysed": "{0} relevés analysés",
 "{0}% covered by safe savings": "{0} % couvert par l'épargne sûre",
-"{0}% sorted into categories": "{0} % classé par catégories"
+"{0}% sorted into categories": "{0} % classé par catégories",
+"The file is read only on this device. Recognised automatically: PKO BP, Pekao, mBank, ING, Millennium and most other banks' CSV exports.": "Le fichier est lu uniquement sur cet appareil. Reconnus automatiquement : PKO BP, Pekao, mBank, ING, Millennium et les exports CSV de la plupart des autres banques."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -3805,6 +3807,7 @@ export const EXTRA = {
 "{0} payments received were added. You find them in the Inflows tab.": "Dodano wpływy: {0}. Znajdziesz je w zakładce Wpływy.",
 "{0} statements analysed": "Przeanalizowane wyciągi: {0}",
 "{0}% covered by safe savings": "{0}% pokryte bezpiecznymi oszczędnościami",
-"{0}% sorted into categories": "{0}% posortowane w kategorie"
+"{0}% sorted into categories": "{0}% posortowane w kategorie",
+"The file is read only on this device. Recognised automatically: PKO BP, Pekao, mBank, ING, Millennium and most other banks' CSV exports.": "Plik jest odczytywany tylko na tym urządzeniu. Rozpoznawane automatycznie: PKO BP, Pekao, mBank, ING, Millennium i eksporty CSV większości innych banków."
 }
 };
