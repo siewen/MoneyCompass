@@ -260,8 +260,10 @@ export function savingsData(d, AHEAD = 0) {
       f.cr += m.Credits || 0; f.db += m.Debits || 0; f.int += (m.Interest || 0) * toNet; f.gross = (f.gross || 0) + (m.Interest || 0) * toGross; f.fee += m.Fees || 0; flows.set(t, f);
       part += (m.Interest || 0) * toNet;
     }
-    if (mine === all) { netTotal += (c.Interest || 0) - (c.Tax || 0); grossTotal += c.Interest || 0; }
-    else { netTotal += part; grossTotal += part / (toNet || 1) * toGross; }   // partly covered by a newer analysis: only its own months
+    const net = mine === all ? (c.Interest || 0) - (c.Tax || 0) : part;
+    if (mine === all) { netTotal += net; grossTotal += c.Interest || 0; }
+    else { netTotal += part; grossTotal += part / (toNet || 1) * toGross; }
+    a.net = (a.net || 0) + net;   // net interest per account   // partly covered by a newer analysis: only its own months
   }
   for (const h of d.Holdings) {
     const toPln = v => Calc.toPln(v, h.Currency, s);
@@ -271,13 +273,13 @@ export function savingsData(d, AHEAD = 0) {
     for (const x of hist) { const t = monthStart(parseDate(x.Date)).getTime(); if (!a.pts.has(t) || t === now) a.pts.set(t, toPln(x.Amount)); }
     a.pts.set(now, toPln(h.Amount));                // today's amount is what you have now
   }
-  const list = [...acc.values()].filter(a => a.pts.size);
+  const list = [...acc.entries()].map(([id, a]) => ({ ...a, id })).filter(a => a.pts.size);
   if (!list.length) return null;
   const first = Math.min(...list.flatMap(a => [...a.pts.keys()]), now);
   const months = []; for (let m = new Date(first); m.getTime() <= now; m = addMonths(m, 1)) months.push(m);
   const accounts = list.map((a, i) => {
     let last = null; const startT = Math.min(...a.pts.keys());
-    return { key: "acc" + i, label: a.label, color: COLORS[i % COLORS.length],
+    return { key: "acc" + i, id: a.id, label: a.label, net: a.net || 0, color: COLORS[i % COLORS.length],
       values: months.map(m => { const t = m.getTime(); if (a.pts.has(t)) last = a.pts.get(t); return t < startT ? null : last; }) };
   });
   const total = months.map((_, i) => accounts.reduce((sum, a) => sum + (a.values[i] || 0), 0));

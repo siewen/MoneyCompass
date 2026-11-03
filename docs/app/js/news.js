@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 79, date: "2026-11-03", items: {
+    en: ["💰 Your savings (Overview) per account: choose \"All accounts\" or one account. The bars show the balance at each month end with the amount and the monthly change; combined, each account has its own colour."],
+    pl: ["💰 Twoje oszczędności (Przegląd) według kont: wybierz „Wszystkie konta” lub jedno konto. Słupki pokazują saldo na koniec każdego miesiąca z kwotą i zmianą miesięczną; łącznie każde konto ma swój kolor."],
+    de: ["💰 Ihre Ersparnisse (Überblick) pro Konto: Wählen Sie „Alle Konten“ oder ein Konto. Die Balken zeigen das Saldo zum Monatsende mit Betrag und monatlicher Veränderung; zusammen hat jedes Konto seine eigene Farbe."],
+    fr: ["💰 Votre épargne (Vue d'ensemble) par compte : choisissez « Tous les comptes » ou un seul compte. Les barres montrent le solde en fin de mois avec le montant et la variation mensuelle ; ensemble, chaque compte a sa couleur."] } },
   { build: 78, date: "2026-11-03", items: {
     en: ["💱 Main currency: choose PLN, EUR or USD in Settings – all amounts follow it. Changing it converts your whole profile once at today's NBP rate.", "⚙ \"Options\" is now called \"Settings\".", "📈 The Investments module was taken out of MoneyCompass; it will become its own app. The Nexo import to Savings stays."],
     pl: ["💱 Waluta główna: wybierz PLN, EUR lub USD w Ustawieniach – wszystkie kwoty się do niej dostosują. Zmiana przelicza jednorazowo cały profil po dzisiejszym kursie NBP.", "⚙ „Opcje” nazywają się teraz „Ustawienia”.", "📈 Moduł Inwestycje został wydzielony z MoneyCompass – powstanie z niego osobna aplikacja. Import z Nexo do Oszczędności pozostaje."],

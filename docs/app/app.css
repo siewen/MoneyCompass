@@ -848,6 +848,18 @@ html.lite[data-design] .tabs, html.lite .top { background: var(--side, #1A2120) 
 .hint.fold:not(.unfold):hover { color: var(--ink); }
 
 .sav-bars .mb .sav { background: var(--w-save, #E9D16A); opacity: .9; }
+.sav-bars { height: 112px; margin-top: 18px; }
+.sav-bars .mb { height: 104px; max-width: 54px; gap: 2px; }
+.sav-bars .mb em { font-style: normal; font-size: 10.5px; font-weight: 600; color: var(--ink); opacity: .85; white-space: nowrap; }
+.sav-bars .mb .stack { display: flex; flex-direction: column; overflow: hidden; opacity: 1; background: none; }
+.sav-bars .mb .stack b { display: block; min-height: 2px; opacity: .85; }
+.sav-bars .mb small.up { color: var(--in); }
+.sav-bars .mb small.down { color: var(--out); }
+.sav-bars .mb-label { top: -16px; }
+.sav-pick { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 2px; }
+.sav-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; }
+.sav-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.sav-chip.on { color: var(--ink); border-color: var(--primary); background: rgba(52,211,153,.12); }
 
 /* ---------- Investments (module, in development) ---------- */
 .beta-tag { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .03em; padding: 1px 7px; border-radius: 999px; background: color-mix(in srgb, var(--warn) 22%, transparent); color: var(--warn); vertical-align: 2px; }

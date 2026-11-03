@@ -185,6 +185,9 @@ export const Overview = {
         (best ? `<hr><p class="good">🏦 ${esc(T("Best rate right now: {0} – {1} ({2}).", best.Bank, best.Name || best.Bank, rate(best.Rate)))}</p>` : ""), "link\" data-go=\"savings"));
     }
     el.innerHTML = `<div class="grid">${parts.join("")}</div>`;
+    el.querySelectorAll("[data-savview]").forEach(b => b.onclick = ev => {
+      ev.stopPropagation(); d.Settings.SavingsView = b.dataset.savview || null; save(); App.refresh();
+    });
     el.querySelectorAll("[data-wave]").forEach(b => b.onclick = ev => {
       ev.stopPropagation();
       const h = new Set(d.Settings.WaveHidden || []), k = b.dataset.wave;
@@ -196,20 +199,37 @@ export const Overview = {
 /** "Your savings" on the Overview: the balance at each month end (from your statements) and the key figures, like a bank shows them. */
 function savingsFacts(d, p) {
   const sv = savingsData(d);
-  const pts = sv ? sv.months.map((m, i) => ({ m, v: sv.total[i] })).filter(x => x.v > 0) : [];
+  const accs = sv ? sv.accounts.filter(a => a.values.some(v => v > 0)) : [];
+  // Which account the chart shows: all accounts combined (stacked by account) or one account
+  const pick = accs.find(a => a.id === d.Settings.SavingsView) || null;
+  const valAt = i => pick ? (pick.values[i] || 0) : sv.total[i];
+  const pts = sv ? sv.months.map((m, i) => ({ m, i, v: valAt(i) })).filter(x => x.v > 0) : [];
+  const short = v => { const a = Math.abs(v); return a >= 1000 ? (Math.round(a / 100) / 10).toString().replace(".", ",") + "k" : String(Math.round(a)); };
+  const sign = v => (v >= 0 ? "+" : "−") + pln(Math.abs(v));
   let out = "";
+  if (accs.length >= 2) out += `<div class="sav-pick">${[{ id: "", label: T("All accounts"), color: "" }, ...accs].map(a =>
+    `<button class="sav-chip${(pick ? pick.id : "") === a.id ? " on" : ""}" data-savview="${esc(a.id)}"${a.color ? ` style="--c:${a.color}"` : ""}>${a.color ? "<i></i>" : ""}${esc(a.label)}</button>`).join("")}</div>`;
   if (pts.length >= 2) {
-    const shown = pts.slice(-6), max = Math.max(...shown.map(x => x.v));
-    out += `<div class="mini-bars sav-bars">${shown.map(x => `<div class="mb" title="${esc(monthName(x.m))}: ${esc(pln(x.v))}"><span class="sav" style="height:${Math.max(4, x.v / max * 44)}px"></span><small>${esc(monthName(x.m).slice(0, 3))}</small></div>`).join("")}<span class="mb-label">${esc(T("Savings balance at month end"))}</span></div>`;
+    const shown = pts.slice(-6), max = Math.max(...shown.map(x => x.v)), min = Math.min(...shown.map(x => x.v));
+    // Zoomed scale: balances that change little would otherwise all look the same height (exact values are written above the bars)
+    const lo = Math.max(0, min - (max - min) * 1.2), hgt = v => max > lo ? 10 + (v - lo) / (max - lo) * 46 : 56;
+    const segs = x => pick || accs.length < 2 ? `<span class="sav" style="height:${hgt(x.v)}px${pick ? `;background:${pick.color}` : ""}"></span>`
+      : `<span class="sav stack" style="height:${hgt(x.v)}px">${accs.map(a => (a.values[x.i] || 0) > 0 ? `<b style="flex:${a.values[x.i]};background:${a.color}"></b>` : "").reverse().join("")}</span>`;
+    const tip = x => monthName(x.m) + ": " + pln(x.v) + (pick || accs.length < 2 ? "" : "\n" + accs.filter(a => a.values[x.i] > 0).map(a => a.label + ": " + pln(a.values[x.i])).join("\n"));
+    out += `<div class="mini-bars sav-bars">${shown.map((x, k) => {
+      const prev = k ? shown[k - 1].v : pts[pts.indexOf(x) - 1]?.v, ch = prev !== undefined ? x.v - prev : null;
+      return `<div class="mb" title="${esc(tip(x))}"><em>${esc(short(x.v))}</em>${segs(x)}<small>${esc(monthName(x.m).slice(0, 3))}</small>${ch === null ? "<small>&nbsp;</small>" : `<small class="${ch >= 0 ? "up" : "down"}">${ch >= 0 ? "+" : "−"}${esc(short(ch))}</small>`}</div>`;
+    }).join("")}<span class="mb-label">${esc(T("Balance at month end"))}</span></div>`;
     const first = pts[0], cur = pts[pts.length - 1], ch = cur.v - first.v, months = Math.max(1, pts.length - 1);
-    const sign = v => (v >= 0 ? "+" : "−") + pln(Math.abs(v));
-    out += row(T("Savings balance"), pln(p.total), "strong") +
+    const net = pick ? pick.net : sv.netTotal;
+    out += row(pick ? T("Account balance") : T("Savings balance"), pln(pick ? cur.v : p.total), "strong") +
       row(T("Change since {0}", monthName(first.m)), sign(ch), ch >= 0 ? "in" : "out") +
       row(T("Average change per month"), sign(ch / months), ch >= 0 ? "in" : "out") +
-      (sv.netTotal > 0 ? row(T("Net interest earned (after tax)"), "+" + pln(sv.netTotal), "in") : "");
+      (net > 0 ? row(T("Net interest earned (after tax)"), "+" + pln(net), "in") : "");
   } else {
     out += row(T("Savings balance"), pln(p.total), "strong") + hint(T("Import the statement of your savings account (Savings tab) to see your balance month by month."));
   }
+  if (pick) return out;
   const share = v => Math.round(v / p.total * 100) + "%";
   out += row(T("Secure savings (bank, cash)"), p.risky > 0 ? `${pln(p.safe)} <small class="hint">${share(p.safe)}</small>` : pln(p.safe)) +
     (p.risky > 0 ? row(T("Investments at risk (crypto, securities)"), `${pln(p.risky)} <small class="hint">${share(p.risky)}</small>`, "out") : "") +

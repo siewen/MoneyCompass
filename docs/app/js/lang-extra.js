@@ -1195,7 +1195,10 @@ export const EXTRA = {
 "When you close MoneyCompass with X, it asks whether to save your profile. Tick \"Remember my choice\" to stop asking; change it again in Settings → Backup & restore.": "Wenn Sie MoneyCompass mit X schließen, fragt es, ob Ihr Profil gespeichert werden soll. Mit „Meine Auswahl merken“ wird nicht mehr gefragt; ändern unter Einstellungen → Sichern und wiederherstellen.",
 "You can change this later in Settings → Backup & restore.": "Sie können das später unter Einstellungen → Sichern und wiederherstellen ändern.",
 "When MoneyCompass starts, it asks: continue with your data, load a profile, or start fresh. Tick \"Don't ask again\" to go straight in; switch it back on in Settings → Backup & restore.": "Beim Start fragt MoneyCompass: mit Ihren Daten weitermachen, ein Profil laden oder neu beginnen. Mit „Nicht mehr fragen“ geht es direkt los; wieder einschalten unter Einstellungen → Sichern und wiederherstellen.",
-"You can switch this question back on in Settings → Backup & restore.": "Sie können diese Frage unter Einstellungen → Sichern und wiederherstellen wieder einschalten."
+"You can switch this question back on in Settings → Backup & restore.": "Sie können diese Frage unter Einstellungen → Sichern und wiederherstellen wieder einschalten.",
+"All accounts": "Alle Konten",
+"Balance at month end": "Saldo zum Monatsende",
+"Account balance": "Kontostand"
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -2392,7 +2395,10 @@ export const EXTRA = {
 "When you close MoneyCompass with X, it asks whether to save your profile. Tick \"Remember my choice\" to stop asking; change it again in Settings → Backup & restore.": "Quand vous fermez MoneyCompass avec X, il demande s'il faut enregistrer votre profil. Cochez « Mémoriser mon choix » pour ne plus être interrogé ; modifiable dans Réglages → Sauvegarde et restauration.",
 "You can change this later in Settings → Backup & restore.": "Vous pouvez le modifier plus tard dans Réglages → Sauvegarde et restauration.",
 "When MoneyCompass starts, it asks: continue with your data, load a profile, or start fresh. Tick \"Don't ask again\" to go straight in; switch it back on in Settings → Backup & restore.": "Au démarrage, MoneyCompass demande : continuer avec vos données, charger un profil ou repartir de zéro. Cochez « Ne plus demander » pour entrer directement ; réactivez-le dans Réglages → Sauvegarde et restauration.",
-"You can switch this question back on in Settings → Backup & restore.": "Vous pouvez réactiver cette question dans Réglages → Sauvegarde et restauration."
+"You can switch this question back on in Settings → Backup & restore.": "Vous pouvez réactiver cette question dans Réglages → Sauvegarde et restauration.",
+"All accounts": "Tous les comptes",
+"Balance at month end": "Solde en fin de mois",
+"Account balance": "Solde du compte"
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -3589,6 +3595,9 @@ export const EXTRA = {
 "When you close MoneyCompass with X, it asks whether to save your profile. Tick \"Remember my choice\" to stop asking; change it again in Settings → Backup & restore.": "Gdy zamykasz MoneyCompass przyciskiem X, pyta, czy zapisać profil. Zaznacz „Zapamiętaj mój wybór”, aby nie pytał; zmienisz to w Ustawienia → Kopia zapasowa i przywracanie.",
 "You can change this later in Settings → Backup & restore.": "Możesz to później zmienić w Ustawienia → Kopia zapasowa i przywracanie.",
 "When MoneyCompass starts, it asks: continue with your data, load a profile, or start fresh. Tick \"Don't ask again\" to go straight in; switch it back on in Settings → Backup & restore.": "Przy starcie MoneyCompass pyta: kontynuować z Twoimi danymi, wczytać profil czy zacząć od nowa. Zaznacz „Nie pytaj więcej”, aby od razu wejść; włączysz to ponownie w Ustawienia → Kopia zapasowa i przywracanie.",
-"You can switch this question back on in Settings → Backup & restore.": "Możesz ponownie włączyć to pytanie w Ustawienia → Kopia zapasowa i przywracanie."
+"You can switch this question back on in Settings → Backup & restore.": "Możesz ponownie włączyć to pytanie w Ustawienia → Kopia zapasowa i przywracanie.",
+"All accounts": "Wszystkie konta",
+"Balance at month end": "Saldo na koniec miesiąca",
+"Account balance": "Saldo rachunku"
 }
 };
