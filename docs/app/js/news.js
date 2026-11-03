@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 81, date: "2026-11-03", items: {
+    en: ["📅 Savings imports month by month: deposits and withdrawals per month next to the closing balance, interest and fees – in the import preview (also Nexo) and in Statement analyses (button \"Month by month\")."],
+    pl: ["📅 Importy oszczędności miesiąc po miesiącu: wpłaty i wypłaty w każdym miesiącu obok salda końcowego, odsetek i opłat – w podglądzie importu (także Nexo) i w Analizach wyciągów (przycisk „Miesiąc po miesiącu”)."],
+    de: ["📅 Spar-Importe Monat für Monat: Einzahlungen und Abhebungen pro Monat neben Endsaldo, Zinsen und Gebühren – in der Importvorschau (auch Nexo) und in den Auszugsanalysen (Schaltfläche „Monat für Monat“)."],
+    fr: ["📅 Imports d'épargne mois par mois : versements et retraits de chaque mois à côté du solde de clôture, des intérêts et des frais – dans l'aperçu d'import (Nexo aussi) et dans les Analyses de relevés (bouton « Mois par mois »)."] } },
   { build: 80, date: "2026-11-03", items: {
     en: ["🛠 Nexo import fixed: when no dollar exchange rate was set yet, the monthly balances, interest and rate were saved as 0. It now takes today's NBP rate automatically – please import your Nexo file again."],
     pl: ["🛠 Poprawiono import z Nexo: gdy kurs dolara nie był jeszcze ustawiony, salda miesięczne, odsetki i oprocentowanie zapisywały się jako 0. Teraz automatycznie pobierany jest dzisiejszy kurs NBP – zaimportuj plik z Nexo ponownie."],

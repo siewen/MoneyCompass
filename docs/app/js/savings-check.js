@@ -145,8 +145,8 @@ export async function openSavingsCheck(fileObj = null) {
           (r.groups.length > 1 ? `<h3 class="sub-h">${esc(T("Interest by type"))}</h3>` + r.groups.map(([k, v]) => flow(k, v, 1)).join("") +
             hint(T("Your bank credits these separately – e.g. promotional interest on new money and standard interest on the rest.")) : ""))}
         ${card(heading(T("Month by month"), "📅") + hint(T("Interest credited in the first days of a month counts for the month before.")) +
-          `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Closing balance"))}</th><th>${esc(T("Average balance"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Fees & charges"))}</th><th>${esc(T("Rate p.a."))}</th></tr></thead><tbody>` +
-          r.months.map(m => `<tr><td>${esc(monthName(m.m))}</td><td>${pln(m.end)}</td><td>${pln(m.avg)}</td><td class="${m.interest ? "in" : "nil"}">${m.interest ? "+" + pln(m.interest) : "–"}</td><td class="${m.fees > 0 ? "out" : "nil"}">${m.fees > 0 ? "−" + pln(m.fees) : "–"}</td><td class="${m.interest ? "" : "nil"}">${m.interest ? rate(m.rate) : "–"}</td></tr>`).join("") +
+          `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Closing balance"))}</th><th>${esc(T("Average balance"))}</th><th>${esc(T("Deposits"))}</th><th>${esc(T("Withdrawals"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Fees & charges"))}</th><th>${esc(T("Rate p.a."))}</th></tr></thead><tbody>` +
+          r.months.map(m => `<tr><td>${esc(monthName(m.m))}</td><td>${pln(m.end)}</td><td>${pln(m.avg)}</td>${moneyCell(m.credits, 1)}${moneyCell(m.debits, -1)}<td class="${m.interest ? "in" : "nil"}">${m.interest ? "+" + pln(m.interest) : "–"}</td><td class="${m.fees > 0 ? "out" : "nil"}">${m.fees > 0 ? "−" + pln(m.fees) : "–"}</td><td class="${m.interest ? "" : "nil"}">${m.interest ? rate(m.rate) : "–"}</td></tr>`).join("") +
           `</tbody></table>`, "wide")}
       </div>
       <div class="popup-buttons save-bar">
@@ -186,6 +186,8 @@ export async function openSavingsCheck(fileObj = null) {
   draw();
 }
 
+/** A table cell with a credit (+) or debit (−), or a dash. */
+const moneyCell = (v, sign) => v > 0.005 ? `<td class="${sign > 0 ? "in" : "out"}">${sign > 0 ? "+" : "−"}${pln(v)}</td>` : `<td class="nil">–</td>`;
 /** Saved checks in the Savings tab – only shown when you saved at least one. */
 export function savedChecksCard(d) {
   if (!d.SavingsChecks?.length) return "";
@@ -202,13 +204,23 @@ export function savedChecksCard(d) {
         ${flow(T("Gross interest"), c.Interest, 1)}${flow(T("Withholding tax (Belka, 19%)"), c.Tax, -1)}${flow(T("Net interest (after tax)"), c.Interest - c.Tax, 1, "strong")}
         ${flow(T("Fees & charges"), c.Fees, -1)}${flow(T("Average monthly fees"), perMonth, -1)}
         ${(c.Types || []).length > 1 ? c.Types.map(t => flow(t.Name, t.Interest, 1)).join("") : ""}
-        ${(c.Months || []).length ? `<table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Closing balance"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Fees & charges"))}</th><th>${esc(T("Rate p.a."))}</th></tr></thead><tbody>` +
-          c.Months.map(m => `<tr><td>${esc(monthName(parseDate(m.Month)))}</td><td>${m.End !== undefined ? pln(m.End) : pln(m.Average)}</td><td class="${m.Interest ? "in" : "nil"}">${m.Interest ? "+" + pln(m.Interest) : "–"}</td><td class="${m.Fees > 0 ? "out" : "nil"}">${m.Fees > 0 ? "−" + pln(m.Fees) : "–"}</td><td class="${m.Interest ? "" : "nil"}">${m.Interest ? rate(m.Rate) : "–"}</td></tr>`).join("") + "</tbody></table>" : ""}
+        ${(c.Months || []).length ? `<div class="buttons">${button("📅 " + esc(T("Month by month")) + ` (${c.Months.length})`, "check-months", "second small", `data-check="${esc(c.Id)}"`)}</div>` : ""}
         ${linked ? hint("✔ " + T("In Accounts & holdings as \"{0}\".", linked.Name))
           : `<div class="buttons">${button("＋ " + esc(T("Add to Accounts & holdings")), "check-hold", "second small", `data-check="${esc(c.Id)}"`)}</div>`}
       </details>`; }).join(""));
 }
 export function bindSavedChecks(el, d) {
+  // The months of a saved analysis in a window: closing balance, deposits, withdrawals, interest, fees and rate – newest first
+  el.querySelectorAll('[data-action="check-months"]').forEach(b => b.onclick = ev => {
+    ev.preventDefault(); ev.stopPropagation();
+    const c = d.SavingsChecks.find(x => x.Id === b.dataset.check); if (!c) return;
+    const ms = [...(c.Months || [])].reverse();
+    popup(`<h2 class="popup-title">📅 ${esc(c.Name)} – ${esc(T("Month by month"))}</h2>${hint(fmtDate(c.From) + " – " + fmtDate(c.To) + " · " + T("Newest month first."))}
+      <table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Closing balance"))}</th><th>${esc(T("Deposits"))}</th><th>${esc(T("Withdrawals"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Fees & charges"))}</th><th>${esc(T("Rate p.a."))}</th></tr></thead><tbody>` +
+      ms.map(m => `<tr><td>${esc(monthName(parseDate(m.Month)))}</td><td>${m.End !== undefined ? pln(m.End) : pln(m.Average)}</td>${moneyCell(m.Credits, 1)}${moneyCell(m.Debits, -1)}${moneyCell(m.Interest, 1)}${moneyCell(m.Fees, -1)}<td class="${m.Interest ? "" : "nil"}">${m.Interest ? rate(m.Rate) : "–"}</td></tr>`).join("") +
+      `</tbody><tfoot><tr><th>${esc(T("Total"))}</th><th></th>${moneyCell(c.Deposits, 1)}${moneyCell(c.Withdrawals, -1)}${moneyCell(c.Interest, 1)}${moneyCell(c.Fees, -1)}<th></th></tr></tfoot></table>
+      <div class="popup-buttons"><button class="btn main" data-close>${esc(T("Close"))}</button></div>`, { width: 860 });
+  });
   // A saved check without a savings entry: create one with the balance at the end and the rate before tax
   el.querySelectorAll('[data-action="check-hold"]').forEach(b => b.onclick = () => {
     const c = d.SavingsChecks.find(x => x.Id === b.dataset.check); if (!c) return;

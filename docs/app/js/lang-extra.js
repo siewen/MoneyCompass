@@ -1109,7 +1109,7 @@ export const EXTRA = {
 "Interest and bonuses earned": "Erhaltene Zinsen und Boni",
 "Estimated interest rate p.a.": "Geschätzter Zinssatz p. a.",
 "Deposits": "Einzahlungen",
-"Withdrawals": "Auszahlungen",
+"Withdrawals": "Abhebungen",
 "Not counted (loans, card payments and similar): {0}": "Nicht gezählt (Kredite, Kartenzahlungen und Ähnliches): {0}",
 "Where should it go?": "Wohin soll es?",
 "Investments – Nexo position": "Investments – Nexo-Position",
@@ -1199,7 +1199,9 @@ export const EXTRA = {
 "All accounts": "Alle Konten",
 "Balance at month end": "Saldo zum Monatsende",
 "Account balance": "Kontostand",
-"The dollar exchange rate is not known, so the Nexo amounts (in USD) cannot be converted. Connect to the internet or enter the rate in Savings → Exchange rates, then import again.": "Der Dollarkurs ist nicht bekannt, daher können die Nexo-Beträge (in USD) nicht umgerechnet werden. Verbinden Sie sich mit dem Internet oder geben Sie den Kurs unter Ersparnisse → Wechselkurse ein und importieren Sie erneut."
+"The dollar exchange rate is not known, so the Nexo amounts (in USD) cannot be converted. Connect to the internet or enter the rate in Savings → Exchange rates, then import again.": "Der Dollarkurs ist nicht bekannt, daher können die Nexo-Beträge (in USD) nicht umgerechnet werden. Verbinden Sie sich mit dem Internet oder geben Sie den Kurs unter Ersparnisse → Wechselkurse ein und importieren Sie erneut.",
+"Newest month first. Deposits and withdrawals are money moved to or from Nexo; exchanges between coins are not counted.": "Neuester Monat zuerst. Einzahlungen und Abhebungen sind Geld, das zu oder von Nexo überwiesen wurde; Tausch zwischen Coins wird nicht gezählt.",
+"Newest month first.": "Neuester Monat zuerst."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -2309,7 +2311,7 @@ export const EXTRA = {
 "Interest and money in / out": "Intérêts et entrées / sorties",
 "Interest and bonuses earned": "Intérêts et bonus perçus",
 "Estimated interest rate p.a.": "Taux d'intérêt annuel estimé",
-"Deposits": "Dépôts",
+"Deposits": "Versements",
 "Withdrawals": "Retraits",
 "Not counted (loans, card payments and similar): {0}": "Non comptés (prêts, paiements par carte et similaires) : {0}",
 "Where should it go?": "Où l'enregistrer ?",
@@ -2400,7 +2402,9 @@ export const EXTRA = {
 "All accounts": "Tous les comptes",
 "Balance at month end": "Solde en fin de mois",
 "Account balance": "Solde du compte",
-"The dollar exchange rate is not known, so the Nexo amounts (in USD) cannot be converted. Connect to the internet or enter the rate in Savings → Exchange rates, then import again.": "Le cours du dollar n'est pas connu, les montants Nexo (en USD) ne peuvent donc pas être convertis. Connectez-vous à Internet ou saisissez le cours dans Épargne → Taux de change, puis importez à nouveau."
+"The dollar exchange rate is not known, so the Nexo amounts (in USD) cannot be converted. Connect to the internet or enter the rate in Savings → Exchange rates, then import again.": "Le cours du dollar n'est pas connu, les montants Nexo (en USD) ne peuvent donc pas être convertis. Connectez-vous à Internet ou saisissez le cours dans Épargne → Taux de change, puis importez à nouveau.",
+"Newest month first. Deposits and withdrawals are money moved to or from Nexo; exchanges between coins are not counted.": "Mois le plus récent en premier. Les versements et retraits sont l'argent transféré vers ou depuis Nexo ; les échanges entre cryptos ne sont pas comptés.",
+"Newest month first.": "Mois le plus récent en premier."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -3601,6 +3605,8 @@ export const EXTRA = {
 "All accounts": "Wszystkie konta",
 "Balance at month end": "Saldo na koniec miesiąca",
 "Account balance": "Saldo rachunku",
-"The dollar exchange rate is not known, so the Nexo amounts (in USD) cannot be converted. Connect to the internet or enter the rate in Savings → Exchange rates, then import again.": "Kurs dolara nie jest znany, więc kwot z Nexo (w USD) nie można przeliczyć. Połącz się z internetem lub wpisz kurs w Oszczędności → Kursy walut i zaimportuj ponownie."
+"The dollar exchange rate is not known, so the Nexo amounts (in USD) cannot be converted. Connect to the internet or enter the rate in Savings → Exchange rates, then import again.": "Kurs dolara nie jest znany, więc kwot z Nexo (w USD) nie można przeliczyć. Połącz się z internetem lub wpisz kurs w Oszczędności → Kursy walut i zaimportuj ponownie.",
+"Newest month first. Deposits and withdrawals are money moved to or from Nexo; exchanges between coins are not counted.": "Najnowszy miesiąc na górze. Wpłaty i wypłaty to pieniądze przelane do lub z Nexo; wymiany między kryptowalutami nie są liczone.",
+"Newest month first.": "Najnowszy miesiąc na górze."
 }
 };

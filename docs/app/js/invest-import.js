@@ -4,7 +4,7 @@
 // cancelled rows say "rejected" in Details. Nexo keeps euro and dollar balances as EURX / USDX.
 // MoneyCompass works out what you hold now (per coin), what you paid for it (from the USD value at the time), the interest
 // you earned, deposits and withdrawals – shows a preview – and saves it as ONE savings account in Savings (never in Inflows/Outflows).
-import { T, State, save, Calc, pln, fmtDate, isoDate, today, uuid, mainCur } from "./core.js";
+import { T, State, save, Calc, pln, fmtDate, isoDate, today, uuid, mainCur, monthName } from "./core.js";
 import { esc, popup, pickFile, alertBox, confirmBox, toast } from "./ui.js";
 import { App, requirePro } from "./app.js";
 import { parseDate } from "./csv.js";
@@ -156,6 +156,7 @@ async function usdRate() {
   return { usd, eur };
 }
 
+const cellOf = (v, sign) => v > 0.005 ? `<td class="${sign > 0 ? "in" : "out"}">${sign > 0 ? "+" : "−"}${pln(v)}</td>` : `<td class="nil">–</td>`;
 function preview(x, name, fx) {
   // Nexo keeps everything in USD: amounts go into the main currency through złoty (rates from usdRate)
   const d = D(), s = d.Settings, toMain = v => Calc.toPln(v, "PLN", s), usd = v => toMain(v * fx.usd);
@@ -190,6 +191,12 @@ function preview(x, name, fx) {
         ${skipped.length ? `<p class="hint">${esc(T("Not counted (loans, card payments and similar): {0}", skipped.map(([k, n]) => k + " ×" + n).join(", ")))}</p>` : ""}
         <p class="hint">${esc(T("The balance at the end of each month ({0} months) is saved too, so the Savings chart shows how it developed – valued with the prices in your file, in złoty at today's USD rate.", x.months.length))}</p>
         <p class="hint">${esc(T("Only your Savings are changed: Inflows and Outflows stay as they are."))}</p>
+      </section>
+      <section class="card wide"><h3>📅 ${esc(T("Month by month"))}</h3>
+        <table class="rate-table"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Closing balance"))}</th><th>${esc(T("Deposits"))}</th><th>${esc(T("Withdrawals"))}</th><th>${esc(T("Interest"))}</th><th>${esc(T("Fees & charges"))}</th></tr></thead><tbody>
+        ${[...x.months].reverse().map(m => `<tr><td>${esc(monthName(m.date))}</td><td>${pln(usd(m.usd))}</td>${cellOf(usd(m.dep), 1)}${cellOf(usd(m.wd), -1)}${cellOf(usd(m.int), 1)}${cellOf(usd(m.fee), -1)}</tr>`).join("")}
+        </tbody></table>
+        <p class="hint">${esc(T("Newest month first. Deposits and withdrawals are money moved to or from Nexo; exchanges between coins are not counted."))}</p>
       </section>
     </div>
     <div class="popup-buttons save-bar">
