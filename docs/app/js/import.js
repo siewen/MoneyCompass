@@ -40,6 +40,45 @@ function askKind(fileName) {
   });
 }
 
+// ---------- The import centre: one window for every kind of import ----------
+const KINDS = [
+  { k: "all", icon: "↕", c: "#0F766E", title: "Everything", text: "Salary, other income, card payments, bills and transfers in one go", to: "Inflows + Outflows" },
+  { k: "out", icon: "↑", c: "#C2410C", title: "Expenses only", text: "Only the money going out – the income stays as it is", to: "Outflows" },
+  { k: "in", icon: "↓", c: "#1D4ED8", title: "Income only", text: "Only the money coming in: salary, refunds, other income", to: "Inflows" },
+  { k: "savings", icon: "🏦", c: "#15803D", title: "Savings account statement", text: "Balance month by month, interest, tax, fees and the real rate", to: "Savings" },
+  { k: "crypto", icon: "₿", c: "#7E22CE", title: "Crypto platform (Nexo)", text: "Month-end balances, interest earned, deposits and withdrawals", to: "Savings" },
+];
+const tile = x => `<button class="ic-tile" data-kind="${x.k}" style="--c:${x.c}"><span class="ic-icon">${x.icon}</span>
+  <span class="ic-text"><b>${esc(T(x.title))}</b><small>${esc(T(x.text))}</small></span><span class="ic-to">→ ${esc(T(x.to))}</span></button>`;
+/** Opens the import centre: drop a file (recognised automatically) or choose what to import. */
+export async function openImportCenter() {
+  if (!(await requirePro(T("Import bank statement")))) return;
+  const p = popup(`<div class="ic-head"><span class="ic-badge">⬆</span><div><h2>${esc(T("Import"))}</h2>
+      <p class="hint">${esc(T("Bring in your statements – MoneyCompass recognises the file and sorts everything for you."))}</p></div></div>
+    <label class="ic-drop" tabindex="0"><input type="file" accept=".csv,.txt,text/csv" hidden>
+      <span class="ic-drop-icon">📄</span><b class="ic-desk">${esc(T("Drop your CSV file here"))}</b><b class="ic-touch">${esc(T("Choose your CSV file"))}</b>
+      <span class="hint ic-desk">${esc(T("or click to choose it – the kind of statement is recognised automatically"))}</span><span class="hint ic-touch">${esc(T("The kind of statement is recognised automatically."))}</span></label>
+    <h3 class="ic-sub">${esc(T("Current account"))} <small>→ ${esc(T("Inflows and Outflows"))}</small></h3>
+    <div class="ic-grid">${KINDS.slice(0, 3).map(tile).join("")}</div>
+    <h3 class="ic-sub">${esc(T("Savings and crypto"))} <small>→ ${esc(T("Savings"))}</small></h3>
+    <div class="ic-grid two-up">${KINDS.slice(3).map(tile).join("")}</div>
+    <p class="ic-note">🔒 ${esc(T("The file is read only on this device. Recognised automatically: PKO BP, Pekao, mBank, ING, Millennium and most other banks' CSV exports, and Nexo."))}</p>
+    <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`, { width: 780, cls: "import-center" });
+  const drop = p.el.querySelector(".ic-drop"), input = drop.querySelector("input");
+  const go = f => { if (f) { p.close(); smartImport(f); } };
+  input.onchange = () => go(input.files[0]);
+  drop.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); } });
+  drop.addEventListener("dragover", e => { e.preventDefault(); e.stopPropagation(); drop.classList.add("over"); });
+  drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+  drop.addEventListener("drop", e => { e.preventDefault(); e.stopPropagation(); dragDepth = 0; document.body.classList.remove("drop-on"); go([...e.dataTransfer.files][0]); });
+  p.el.querySelectorAll("[data-kind]").forEach(b => b.onclick = async () => {
+    const k = b.dataset.kind; p.close();
+    if (k === "savings") return (await import("./savings-check.js")).openSavingsCheck();
+    if (k === "crypto") return (await import("./invest-import.js")).openInvestImport();
+    (await import("./pages-pro.js")).openBankImport(null, k);
+  });
+}
+
 /** The one import: pick (or drop) a CSV file, recognise it, open the right import with it. */
 export async function smartImport(fileObj = null) {
   if (!(await requirePro(T("Import bank statement")))) return;

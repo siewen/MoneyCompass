@@ -465,7 +465,8 @@ export const Budget = {
 
 // ================================================================= Bank import (pop-up)
 
-export async function openBankImport(fileObj = null) {
+/** mode: "all" (salary, income and expenses together), "out" (only the expenses) or "in" (only the money received). */
+export async function openBankImport(fileObj = null, mode = "all") {
   if (!(await requirePro(T("Import bank statement")))) return;
   if (!fileObj) fileObj = await pickFile(".csv,.txt,text/csv");
   if (!fileObj) return;
@@ -524,6 +525,9 @@ export async function openBankImport(fileObj = null) {
       received.push({ Id: uuid(), Date: isoDate(r.date), Amount: v, Description: r.description, Kind: RECEIVED.income, ...withInfo(r) });
     }
     received.sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
+    // Only part of the statement: the other side is left out (nothing of it is added)
+    if (mode === "out") { received.length = 0; back.length = 0; }
+    if (mode === "in") { items.length = 0; transfers.length = 0; }
     state = { ...state, mine, digits, items, transfers, received, back, known, dup, foreign, ownIn, total: rows.length, skippedByDate: all.length - rows.length };
   };
 
@@ -562,6 +566,8 @@ export async function openBankImport(fileObj = null) {
     p.el.innerHTML = `<h2 class="popup-title">⬆ ${esc(T("Import bank statement"))}</h2>
       ${hint(T("The bank statement (CSV) – yours or one you manage for someone – becomes expenses, sorted into categories."))}
       <p class="hint">${esc(T("Current account statement."))} <a href="#" data-other-kind>${esc(T("This is a savings account statement →"))}</a></p>
+      <div class="seg import-mode" role="group" aria-label="${esc(T("What to import"))}">${[["all", "↕ " + T("Everything")], ["out", "↑ " + T("Outflows only")], ["in", "↓ " + T("Inflows only")]].map(([k, l]) =>
+        `<button class="seg-btn${mode === k ? " on" : ""}" data-mode="${k}">${esc(l)}</button>`).join("")}</div>
       <div class="grid">
       ${card(`<b>${esc(fileObj.name)}</b>` + hint(T("{0} – {1}, {2} rows.", file.bank || T("bank recognised from the columns"), "CSV", file.rows.length)) +
         hint(file.bank ? T("Found automatically for {0}. Change them only if the preview looks wrong.", file.bank) : T("Found from the content of the file. Check that date, amount and description are right.")) +
@@ -584,8 +590,9 @@ export async function openBankImport(fileObj = null) {
         `<div class="list">${transfers.map(t => `<div class="item"><div><b>${esc(t.row.description || "–")}</b><span class="hint">${date(t.row)} · ${pln(t.pln)}${t.toSavings ? " · 🏦 " + esc(T("Savings")) : ""}</span></div></div>`).join("")}</div>`, "wide") : ""}
       </div>
       <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button>
-      <button class="btn main" data-import ${anything ? "" : "disabled"}>${esc(!anything ? T("Import") : !items.length && !received.length && !transfers.length ? T("Add the bank details") : !received.length ? T("Import {0} expenses", items.length) : T("Import {0} expenses and {1} payments received", items.length, received.length))}</button></div>`;
+      <button class="btn main" data-import ${anything ? "" : "disabled"}>${esc(!anything ? T("Import") : !items.length && !received.length && !transfers.length ? T("Add the bank details") : !received.length ? T("Import {0} expenses", items.length) : !items.length ? T("Import {0} payments received", received.length) : T("Import {0} expenses and {1} payments received", items.length, received.length))}</button></div>`;
     p.el.querySelector('[data-action="columns"]').onclick = () => { showColumns = !showColumns; draw(); };
+    p.el.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { mode = b.dataset.mode; draw(); });
     p.el.querySelectorAll("[data-range]").forEach(b => b.onclick = () => {
       if (b.dataset.range === "all") { from = to = null; }
       else { const m = months[+b.dataset.range]; from = m; to = new Date(addMonths(m, 1).getTime() - 86400000); }
@@ -628,6 +635,7 @@ export async function openBankImport(fileObj = null) {
     for (const t of transfers) d.Transfers.push({ Id: uuid(), Date: isoDate(t.row.date), Amount: t.pln, Description: t.row.description, Saved: t.toSavings, ...withInfo(t.row) });
     save();
     let msg = !received.length ? T("{0} expenses were added. You find them in the Outflows tab.", items.length)
+      : !items.length ? T("{0} payments received were added. You find them in the Inflows tab.", received.length)
       : T("{0} expenses were added (Outflows tab) and {1} payments received (Inflows tab).", items.length, received.length);
     if (transfers.length) msg += "\n" + T("{0} transfers to your own accounts ({1}) are listed in Outflows under \"Moved to your own accounts\" – not counted as spending. Savings balances come from the savings account's own statement (Savings tab).", transfers.length, pln(transfers.reduce((a, t) => a + t.pln, 0)));
     p.close();

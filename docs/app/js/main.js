@@ -3,7 +3,7 @@ import { store, T, State, loadCurrent, license, moduleOn, MODULES, lang, current
 import { esc, popup, toast } from "./ui.js";
 import { startLock, lock, hasPin } from "./lock.js";
 import { startBackup, drawBackupBar, backupProfileChanged } from "./backup.js";
-import { smartImport } from "./import.js";
+import { smartImport, openImportCenter } from "./import.js";
 import { Reports } from "./reports.js";
 import { openSavingsCheck } from "./savings-check.js";
 import { App, DOWNLOAD_URL } from "./app.js";
@@ -112,7 +112,7 @@ function buildShell() {
     b.addEventListener("dragleave", () => b.classList.remove("drop-tab"));
     b.addEventListener("drop", e => { const r = e.dataTransfer.getData("text/mc-tab"); b.classList.remove("drop-tab"); if (r) { e.preventDefault(); e.stopPropagation(); moveTab(r, b.dataset.tab); } });
   });
-  const acts = { import: () => smartImport(), delete: openDelete, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide, me: meMenu };
+  const acts = { import: () => openImportCenter(), delete: openDelete, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide, me: meMenu };
   document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
   setupHelpButton();
   // Another profile now? Read its backup state; otherwise only draw the bar again
