@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 82, date: "2026-11-03", items: {
+    en: ["📈 Savings chart per account: deposits, withdrawals, interest and fees follow the accounts you show. Hide an account (click its name) and its movements disappear too; the figures at the top then show only the accounts you see."],
+    pl: ["📈 Wykres oszczędności według kont: wpłaty, wypłaty, odsetki i opłaty dotyczą pokazanych kont. Ukryj konto (kliknij jego nazwę), a znikną też jego operacje; liczby u góry pokazują wtedy tylko widoczne konta."],
+    de: ["📈 Spardiagramm pro Konto: Einzahlungen, Abhebungen, Zinsen und Gebühren folgen den angezeigten Konten. Blenden Sie ein Konto aus (Name anklicken), verschwinden auch seine Bewegungen; die Zahlen oben zeigen dann nur die sichtbaren Konten."],
+    fr: ["📈 Graphique d'épargne par compte : versements, retraits, intérêts et frais suivent les comptes affichés. Masquez un compte (cliquez sur son nom) et ses mouvements disparaissent aussi ; les chiffres en haut ne montrent alors que les comptes visibles."] } },
   { build: 81, date: "2026-11-03", items: {
     en: ["📅 Savings imports month by month: deposits and withdrawals per month next to the closing balance, interest and fees – in the import preview (also Nexo) and in Statement analyses (button \"Month by month\")."],
     pl: ["📅 Importy oszczędności miesiąc po miesiącu: wpłaty i wypłaty w każdym miesiącu obok salda końcowego, odsetek i opłat – w podglądzie importu (także Nexo) i w Analizach wyciągów (przycisk „Miesiąc po miesiącu”)."],

@@ -268,6 +268,8 @@ export function savingsData(d, AHEAD = 0) {
       const t = monthStart(parseDate(m.Month)).getTime(), u = k + "|" + t;
       all++; if (used.has(u)) continue; used.add(u); mine++;
       a.pts.set(t, m.End ?? m.Average);
+      const af = a.flows || (a.flows = new Map()), g = af.get(t) || { cr: 0, db: 0, int: 0, fee: 0, gross: 0 };   // the same per account
+      g.cr += m.Credits || 0; g.db += m.Debits || 0; g.int += (m.Interest || 0) * toNet; g.gross += (m.Interest || 0) * toGross; g.fee += m.Fees || 0; af.set(t, g);
       const f = flows.get(t) || { cr: 0, db: 0, int: 0, fee: 0 };
       f.cr += m.Credits || 0; f.db += m.Debits || 0; f.int += (m.Interest || 0) * toNet; f.gross = (f.gross || 0) + (m.Interest || 0) * toGross; f.fee += m.Fees || 0; flows.set(t, f);
       part += (m.Interest || 0) * toNet;
@@ -291,7 +293,9 @@ export function savingsData(d, AHEAD = 0) {
   const months = []; for (let m = new Date(first); m.getTime() <= now; m = addMonths(m, 1)) months.push(m);
   const accounts = list.map((a, i) => {
     let last = null; const startT = Math.min(...a.pts.keys());
+    const fl = k => months.map(m => (a.flows?.get(m.getTime()) || {})[k] || 0).concat(Array(AHEAD).fill(null));
     return { key: "acc" + i, id: a.id, label: a.label, net: a.net || 0, color: COLORS[i % COLORS.length],
+      flows: { cr: fl("cr"), db: fl("db"), int: fl("int"), fee: fl("fee"), gross: fl("gross") },
       values: months.map(m => { const t = m.getTime(); if (a.pts.has(t)) last = a.pts.get(t); return t < startT ? null : last; }) };
   });
   const total = months.map((_, i) => accounts.reduce((sum, a) => sum + (a.values[i] || 0), 0));
@@ -315,6 +319,14 @@ export function savingsChartCard(d) {
   const lines = [{ key: "total", label: T("Total balance"), color: "var(--primary)", values: pad(x.total), main: true }];
   if (x.accounts.length > 1) x.accounts.forEach(a => lines.push({ ...a, values: pad(a.values) }));
   if (AHEAD) lines.push({ key: "forecast", label: T("Forecast"), color: "var(--primary)", dashed: true, values: [...Array(n - 1).fill(null), x.total[n - 1], ...x.fut] });
+  // Credits, debits, interest and fees follow the accounts you show: hide an account's line and its movements go too
+  const hid = new Set(d.Settings.SavingsChartHidden || []);
+  const shownAcc = x.accounts.length > 1 ? x.accounts.filter(a => !hid.has(a.key)) : [];
+  const only = shownAcc.length && shownAcc.length < x.accounts.length ? shownAcc : null;
+  const fsum = k => only ? only[0].flows[k].map((_, i) => only.reduce((s, a) => s + (a.flows[k][i] || 0), 0)) : null;
+  if (only) Object.assign(x, { credits: fsum("cr"), debits: fsum("db"), interest: fsum("int"), fees: fsum("fee"), gross: fsum("gross") },
+    { netTotal: only.reduce((s, a) => s + a.net, 0), grossTotal: fsum("gross").reduce((s, v) => s + (v || 0), 0) });
+  const forWhom = only ? " – " + only.map(a => a.label).join(", ") : "";
   const bars = [
     { key: "cr", label: T("Credits (deposits)"), color: "#3B82F6", values: x.credits, left: true },
     { key: "int", label: T("Net interest (after tax)"), color: "#84CC16", values: x.interest,
@@ -324,14 +336,15 @@ export function savingsChartCard(d) {
   ];
   // Series with no data at all (e.g. interest and fees when only a current account was imported) are left out
   for (let i = bars.length - 1; i >= 0; i--) if (!bars[i].values.some(v => v)) bars.splice(i, 1);
-  const hid = new Set(d.Settings.SavingsChartHidden || []);
-  const sum = a => a.reduce((p, q) => p + q, 0), start = x.total.find(v => v > 0) || 0, end = x.total[n - 1];
+  if (only) bars.forEach(b => b.label += forWhom);
+  const base = only ? x.total.map((_, i) => only.reduce((s, a) => s + (a.values[i] || 0), 0)) : x.total;   // the figures follow the shown accounts too
+  const sum = a => a.reduce((p, q) => p + q, 0), start = base.find(v => v > 0) || 0, end = base[n - 1];
   const fmtV = Object.assign(v => pln(v), { forecast: T("Forecast") });
   const axis = v => v >= 1000 ? +(v / 1000).toFixed(1) + "k" : String(+v.toFixed(v < 10 ? 1 : 0));
   const fig = (l, v, cls = "") => `<div><span>${esc(l)}</span><b class="${cls}">${esc(v)}</b></div>`;
   const keys = [...lines, ...bars].map(sr => `<button class="wave-key${hid.has(sr.key) ? " off" : ""}" data-sav="${sr.key}" style="--c:${sr.color}"><i${sr.dashed ? ' class="dash"' : ""}></i>${esc(sr.label)}</button>`).join("");
   return card(heading(T("Savings balance"), "📈") +
-    `<div class="sav-figures">${fig(T("Total balance"), pln(end))}${n > 1 ? fig(T("Net change since {0}", monthName(x.months[0])), (end - start >= 0 ? "+" : "−") + pln(Math.abs(end - start)), end >= start ? "good" : "bad") : ""}
+    `<div class="sav-figures">${fig(only ? T("Balance") + forWhom : T("Total balance"), pln(end))}${n > 1 ? fig(T("Net change since {0}", monthName(x.months[base.findIndex(v => v > 0)] || x.months[0])), (end - start >= 0 ? "+" : "−") + pln(Math.abs(end - start)), end >= start ? "good" : "bad") : ""}
       ${sum(x.interest) ? `<div data-tip="${esc(T("Gross interest") + ": " + pln(x.grossTotal) + "\n" + T("Withholding tax (Belka, 19%)") + ": −" + pln(x.grossTotal - x.netTotal) + "\n" + T("Net interest (after tax)") + ": " + pln(x.netTotal))}"><span>${esc(T("Net interest (after tax)"))} ⓘ</span><b class="good">+${esc(pln(x.netTotal || sum(x.interest)))}</b></div>` : ""}${sum(x.fees) ? fig(T("Fees & charges"), "−" + pln(sum(x.fees)), "bad") : ""}
       ${AHEAD ? fig(T("Forecast in {0} months", AHEAD), pln(x.fut[AHEAD - 1])) : ""}
       <label class="sav-ahead"><span>${esc(T("Forecast"))}</span><select data-sav-ahead>${[[0, T("Off")], [1, T("1 month")], [3, T("{0} months", 3)], [6, T("{0} months", 6)]].map(([v, l]) => `<option value="${v}"${v === AHEAD ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label></div>` +
