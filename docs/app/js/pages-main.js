@@ -809,9 +809,7 @@ export const Portfolio = {
         <div class="item clickable" data-edit-holding="${x.Id}"><div><b>${esc(x.Name)}</b><span class="hint">${esc(T(x.Place))} · ${esc(x.Safe ? T("Safe") : T("Risky"))} · ${rate(currentRate(x))}</span>${promoBadge(x)}</div>
         <div class="right"><b>${amount(x.Amount, x.Currency)}</b>${currentRate(x) ? `<span class="hint">${esc(T("{0} / year", pln(Calc.toPln(x.Amount, x.Currency, s) * currentRate(x) / 100)))}</span>` : ""}${x.Deposit > 0 ? `<span class="hint primary">🔁 +${esc(pln(x.Deposit))} · ${esc(freqLabel(x.DepositFrequency || "Monthly"))}${x.DepositFrom ? " · " + esc(T("from {0}", x.DepositFrom)) : ""}</span>` : ""}</div>
         ${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("Nothing added yet."))))}
-      ${d.SavingsChecks?.length ? "" : card(heading(T("Import savings account statement"), "🏦") +
-        hint(T("The balance of a savings account comes from its own statement: import its CSV file and MoneyCompass sets the balance and the month-by-month history from the bank's figures – with the interest, the 19% tax, fees and the real rate.")) +
-        `<div class="buttons">${button("⬆ " + esc(T("Import savings account statement (CSV)…")) + (license.isPro ? "" : " 🔒"), "savings-check", "main")}</div>`)}
+      <!-- Importing a savings statement: the button in the page header ("Import savings account statement") -->
       ${savedChecksCard(d)}
       ${card(`<form id="hold">${heading(h ? T("Edit: {0}", h.Name) : T("Add an account"))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", "ING, Revolut, …")))}

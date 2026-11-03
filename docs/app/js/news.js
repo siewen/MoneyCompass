@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 77, date: "2026-11-03", items: {
+    en: ["📈 Nexo import now works like a bank savings statement: the balance at the end of every month since your first transaction, credits, debits, interest earned and fees & charges – in the Savings chart and as a statement analysis. The extra import card in Savings is gone – use the button at the top right."],
+    pl: ["📈 Import z Nexo działa teraz jak wyciąg z konta oszczędnościowego: saldo na koniec każdego miesiąca od pierwszej transakcji, wpływy, wypływy, zarobione odsetki oraz opłaty i prowizje – na wykresie w Oszczędnościach i jako analiza wyciągu. Dodatkowa karta importu w Oszczędnościach zniknęła – użyj przycisku w prawym górnym rogu."],
+    de: ["📈 Der Nexo-Import funktioniert jetzt wie ein Sparkontoauszug: Saldo zu jedem Monatsende seit der ersten Transaktion, Gutschriften, Belastungen, erhaltene Zinsen sowie Gebühren & Entgelte – im Diagramm der Ersparnisse und als Auszugsanalyse. Die zusätzliche Importkarte in den Ersparnissen ist weg – nutzen Sie den Knopf oben rechts."],
+    fr: ["📈 L'import Nexo fonctionne maintenant comme un relevé d'épargne : solde à chaque fin de mois depuis votre première transaction, crédits, débits, intérêts perçus et frais – dans le graphique d'Épargne et comme analyse de relevé. La carte d'import en double dans Épargne a disparu – utilisez le bouton en haut à droite."] } },
   { build: 76, date: "2026-11-03", items: {
     en: ["🏷️ Edit your own categories: change the name, icon or \"essential\" (✎) or delete them (🗑) – via \"Edit categories…\" next to the category, or at the bottom of every category list. A new name follows into all expenses, budgets, regular payments and learned shops."],
     pl: ["🏷️ Edytuj własne kategorie: zmień nazwę, ikonę lub „niezbędne” (✎) albo je usuń (🗑) – przez „Edytuj kategorie…” obok kategorii lub na dole każdej listy kategorii. Nowa nazwa przenosi się do wszystkich wydatków, budżetów, płatności cyklicznych i zapamiętanych sklepów."],

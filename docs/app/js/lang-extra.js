@@ -1159,7 +1159,9 @@ export const EXTRA = {
 "This category no longer exists.": "Diese Kategorie gibt es nicht mehr.",
 "Your own categories: change the name, icon or \"essential\" with ✎, or delete one with 🗑 (its expenses move to \"Other\"). The standard categories can't be changed.": "Ihre eigenen Kategorien: Name, Symbol oder „notwendig“ mit ✎ ändern oder mit 🗑 löschen (ihre Ausgaben gehen zu „Sonstiges“). Die Standardkategorien lassen sich nicht ändern.",
 "Edit": "Bearbeiten",
-"1 expense": "1 Ausgabe"
+"1 expense": "1 Ausgabe",
+"Only today's balance is known so far. Import the statement of your savings account (button at the top right) to see how the balance developed month by month.": "Bisher ist nur der heutige Saldo bekannt. Importieren Sie den Auszug Ihres Sparkontos (Knopf oben rechts), um zu sehen, wie sich der Saldo Monat für Monat entwickelt hat.",
+"The balance at the end of each month ({0} months) is saved too, so the Savings chart shows how it developed – valued with the prices in your file, in złoty at today's USD rate.": "Der Saldo zu jedem Monatsende ({0} Monate) wird ebenfalls gespeichert, damit das Diagramm in den Ersparnissen die Entwicklung zeigt – bewertet mit den Kursen aus Ihrer Datei, in Złoty zum heutigen USD-Kurs."
 },
 "fr": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "« {0} » ne fait pas partie de la version web gratuite. Téléchargez l'application Windows gratuite ou saisissez une clé de licence Pro dans votre profil (en haut à droite).",
@@ -2320,7 +2322,9 @@ export const EXTRA = {
 "This category no longer exists.": "Cette catégorie n'existe plus.",
 "Your own categories: change the name, icon or \"essential\" with ✎, or delete one with 🗑 (its expenses move to \"Other\"). The standard categories can't be changed.": "Vos propres catégories : modifiez le nom, l'icône ou « essentiel » avec ✎, ou supprimez-en une avec 🗑 (ses dépenses passent dans « Autre »). Les catégories standard ne peuvent pas être modifiées.",
 "Edit": "Modifier",
-"1 expense": "1 dépense"
+"1 expense": "1 dépense",
+"Only today's balance is known so far. Import the statement of your savings account (button at the top right) to see how the balance developed month by month.": "Seul le solde du jour est connu pour l'instant. Importez le relevé de votre compte d'épargne (bouton en haut à droite) pour voir l'évolution du solde mois par mois.",
+"The balance at the end of each month ({0} months) is saved too, so the Savings chart shows how it developed – valued with the prices in your file, in złoty at today's USD rate.": "Le solde de chaque fin de mois ({0} mois) est aussi enregistré, pour que le graphique d'Épargne montre son évolution – valorisé avec les prix de votre fichier, en zlotys au taux USD du jour."
 },
 "pl": {
 "\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).": "„{0}” nie jest dostępne w darmowej wersji internetowej. Pobierz darmową aplikację na Windows albo wpisz klucz licencji Pro w swoim profilu (prawy górny róg).",
@@ -3481,6 +3485,8 @@ export const EXTRA = {
 "This category no longer exists.": "Ta kategoria już nie istnieje.",
 "Your own categories: change the name, icon or \"essential\" with ✎, or delete one with 🗑 (its expenses move to \"Other\"). The standard categories can't be changed.": "Twoje własne kategorie: zmień nazwę, ikonę lub „niezbędne” przyciskiem ✎ albo usuń przyciskiem 🗑 (jej wydatki trafią do „Inne”). Kategorii standardowych nie można zmieniać.",
 "Edit": "Edytuj",
-"1 expense": "1 wydatek"
+"1 expense": "1 wydatek",
+"Only today's balance is known so far. Import the statement of your savings account (button at the top right) to see how the balance developed month by month.": "Na razie znane jest tylko dzisiejsze saldo. Zaimportuj wyciąg z konta oszczędnościowego (przycisk w prawym górnym rogu), aby zobaczyć, jak saldo zmieniało się miesiąc po miesiącu.",
+"The balance at the end of each month ({0} months) is saved too, so the Savings chart shows how it developed – valued with the prices in your file, in złoty at today's USD rate.": "Saldo na koniec każdego miesiąca ({0} mies.) też jest zapisywane, więc wykres w Oszczędnościach pokazuje, jak się zmieniało – wycenione według cen z Twojego pliku, w złotych po dzisiejszym kursie USD."
 }
 };
