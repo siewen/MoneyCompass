@@ -237,33 +237,31 @@ export function openOptions() {
         <div class="st-sl">${[[T("Language"), (LANGS.find(x => x[0] === lang()) || [0, lang()])[1]], [T("Currency"), s.Currency || "PLN"], [T("Security"), pinOn ? T("Protected") : T("No PIN")], [T("Automatic Backup"), bkOn ? T("Enabled") : T("Off")], [T("Modules"), modsOn === MODULES.length ? T("All Active") : modsOn + "/" + MODULES.length]].map(x => `<div>${ok}<span>${esc(x[0])}: ${esc(x[1])}</span></div>`).join("")}</div>
         <button class="btn main st-wide" data-action="adv-open">${ico("gear")} ${esc(T("Advanced Settings"))}</button></div>
     </div>
-    <details class="st-adv" id="st-adv"><summary>${ico("gear")} ${esc(T("Advanced Settings"))}</summary><div class="grid nw-sgrid">
-    ${card(heading(T("Layout")) + hint(T("Drag a card by its handle (⠿, top right) to move it, on any tab. Reset layout puts all cards back in their standard order.")) +
-      `<div class="buttons">${button(esc(T("Reset layout")), "reset-layout", "second")}</div>`)}
-    ${card(heading(T("Backup & restore")) + hint(T("Everything you enter is saved automatically, only in this browser on this device. Nothing is sent to the internet.")) +
-      hint(T("Your profile is one file with all your entries (income, expenses, emergency fund, saved offers, savings, exchange rates) and your language. Use it as a backup or to move MoneyCompass to another computer.")) +
-      hint(T("The file works in the Windows app too.")) +
-      hint(s.LastProfileSaved ? T("Last saved: {0}", fmtDate(s.LastProfileSaved) + " " + String(s.LastProfileSaved).slice(11, 16)) : T("Your profile has not been saved yet.")) +
-      check("askstart", T("Ask what to do when MoneyCompass starts"), s.AskOnStart) +
-      check("showguide", T("Show the step-by-step guide when MoneyCompass starts"), !s.GuideHidden) +
-      check("shownews", T("Show what's new after an update"), !s.NewsHidden) +
-      field(T("When I close MoneyCompass"), select("closechoice", [["", T("Ask every time")], ["with", T("Save profile and close")], ["without", T("Close without saving")]], s.CloseChoice === "none" ? "without" : s.CloseChoice || "")) +
-      hint("👤 " + T("Save or load your profile file: click your name → Profile.")) +
-      `<hr><h3>🛡️ ${esc(T("Automatic backup"))}</h3>` +
-      hint(T("MoneyCompass keeps a copy of your profile in a file on this computer and updates it by itself after every change. If the browser data is ever deleted, open the file with \"Load a profile…\". Choose a folder like Documents or OneDrive.")) +
-      `<p class="backup-line">${esc(backupLine())}</p>` +
-      hint("🔒 " + (fileProtected() ? T("The backup is encrypted with your file password.")
-        : T("The backup is encrypted, so it can't be read in Notepad. For full protection, also set a password for profile files below."))) +
-      (autoSupported() ? `<div class="buttons">${backupInfo().status === "off" ? button(esc(T("Choose where to keep it…") + (license.isPro ? "" : " 🔒")), "bk-on", "main")
-        : button(esc(T("Choose another file…")), "bk-on", "second") + button(esc(T("Turn off")), "bk-off", "second")}</div>` : "") +
-      `<hr><h3>🔒 ${esc(T("Password for profile files"))}</h3>` +
-      hint(fileProtected() ? T("On: profile files you save are encrypted (AES-256). They can only be opened with the password, in the web app.")
-        : T("Off: profile files are encrypted with MoneyCompass's own key, so they can't be read in Notepad – but anyone with MoneyCompass can open them. Set a password so that only you can.")) +
-      hint(T("The password is never saved and can't be recovered – if you forget it, protected files can't be opened. The Windows app can't open protected files.")) +
-      `<div class="buttons">${fileProtected() ? button(esc(T("Change password…")), "file-pw", "second") + button(esc(T("Turn off")), "file-pw-off", "second")
-        : button(esc(T("Protect with a password…") + (license.isPro ? "" : " 🔒")), "file-pw", "main")}</div>`)}
-    ${card(heading(T("Reset")) + hint(T("Delete all or only some of your entries: income, expenses, savings, saved offers, emergency fund settings or exchange rates. Your language and other options stay.")) +
-      button(esc(T("Choose what to delete…")), "delete", "danger"))}</div></details>
+    <details class="st-adv" id="st-adv"><summary>${ico("gear")} ${esc(T("Advanced Settings"))}</summary><div class="st-ag">
+      <div class="nw-card st-c">${hd("gear", T("General"))}
+        <label class="check"><input type="checkbox" name="askstart"${s.AskOnStart ? " checked" : ""}><span>${esc(T("Ask what to do when MoneyCompass starts"))}</span></label>
+        <label class="check"><input type="checkbox" name="showguide"${!s.GuideHidden ? " checked" : ""}><span>${esc(T("Show the step-by-step guide when MoneyCompass starts"))}</span></label>
+        <label class="check"><input type="checkbox" name="shownews"${!s.NewsHidden ? " checked" : ""}><span>${esc(T("Show what's new after an update"))}</span></label>
+        <label class="field"><span>${esc(T("When I close MoneyCompass"))}</span>${select("closechoice", [["", T("Ask every time")], ["with", T("Save profile and close")], ["without", T("Close without saving")]], s.CloseChoice === "none" ? "without" : s.CloseChoice || "")}</label>
+        <button class="btn second st-wide" data-action="reset-layout">${ico("list")} ${esc(T("Reset layout"))}</button>
+        <p class="hint">${esc(T("Cards you moved go back to their standard order."))}</p></div>
+      <div class="nw-card st-c">${hd("cloud", T("Automatic backup"))}
+        ${rowI("cloud", T("Status"), bkOn ? T("Enabled") : T("Off"), bkOn)}
+        <p class="backup-line">${esc(backupLine())}</p>
+        <p class="hint">🔒 ${esc(fileProtected() ? T("The backup is encrypted with your file password.") : T("The backup is encrypted, so it can't be read in Notepad."))}</p>
+        ${autoSupported() ? `<div class="st-btns">${backupInfo().status === "off" ? `<button class="btn main" data-action="bk-on">${ico("folder")} ${esc(T("Choose where to keep it…") + (license.isPro ? "" : " 🔒"))}</button>`
+          : `<button class="btn second" data-action="bk-on">${ico("folder")} ${esc(T("Choose another file…"))}</button><button class="btn second" data-action="bk-off">${esc(T("Turn off"))}</button>`}</div>` : ""}
+        <p class="hint">${esc(T("A copy of your profile is saved in a file on this computer after every change. Choose a folder like Documents or OneDrive."))}</p></div>
+      <div class="nw-card st-c">${hd("lock", T("Password for profile files"))}
+        ${rowI("lock", T("Status"), fileProtected() ? T("Protected") : T("Off"), fileProtected())}
+        <p class="hint">${esc(fileProtected() ? T("Profile files you save are encrypted (AES-256) and open only with the password.") : T("Set a password so that only you can open your profile files."))}</p>
+        <p class="hint">${esc(T("The password is never saved and can't be recovered. The Windows app can't open protected files."))}</p>
+        <div class="st-btns">${fileProtected() ? `<button class="btn second" data-action="file-pw">${esc(T("Change password…"))}</button><button class="btn second" data-action="file-pw-off">${esc(T("Turn off"))}</button>`
+          : `<button class="btn main" data-action="file-pw">${ico("lock")} ${esc(T("Protect with a password…") + (license.isPro ? "" : " 🔒"))}</button>`}</div></div>
+      <div class="nw-card st-c st-danger">${hd("shield", T("Reset"))}
+        <p class="hint">${esc(T("Delete all or only some of your entries. Your language and other options stay."))}</p>
+        <button class="btn danger st-wide" data-action="delete">${esc(T("Choose what to delete…"))}</button></div>
+    </div></details>
     <div class="nw-foot"><div></div><button class="btn second" data-close>✕ ${esc(T("Close"))}</button></div>`, { width: 1100, cls: "wide-popup nw-win nw-set", onClose: () => App.rebuild() });
   p.el.querySelector('[data-action="manage-sec"]').onclick = () => { p.close(); openProfile(); };
   p.el.querySelector('[data-action="make-backup"]').onclick = () => saveProfileFile();
