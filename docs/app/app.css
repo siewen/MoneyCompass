@@ -1605,4 +1605,4 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .goals-host .bp-flat, .bp-panel .goals-host > .grid { margin: 0; } .bp-flat .card { margin-bottom: 0 !important; background: transparent !important; border: 0 !important; padding: 0 !important; }
 .bp-pair > .goals-section, .bp-pair > .bp-panel { margin-top: 0 !important; } .bp-flat .nw-card .dz-stat, .bp-flat .nw-card .row { font-size: 14px; }
 .goals-host .nw-card { background: transparent !important; border: 0 !important; padding: 0 !important; box-shadow: none !important; }
-.bp-pair { grid-template-columns: 1fr !important; } .bp-goals-slot, .goals-section { min-width: 0; } .goals-section.bp-panel { margin: 0 !important; height: 100%; }
+

@@ -479,14 +479,16 @@ export const Budget = {
     // Savings goals: one card (summary + list), with "Add a goal" folded inside
     const sec = document.createElement("section"); sec.className = "nw-card dz bp-panel goals-section";
     sec.innerHTML = `<div class="nw-ch"><span class="rp-si i-res">${si(IC.flag, 24)}</span><h3>${esc(T("Savings goals"))}</h3></div><div class="goals-host bp-flat"></div>`;
-    el.querySelector(".bp-goals-slot").replaceWith(sec);
+    el.querySelector(".bp-pair").appendChild(sec);
     const gh = sec.querySelector(".goals-host"); Goals.render(gh);
     { const cs = [...gh.querySelectorAll(".nw-card")]; if (cs.length >= 3) {
-      const [c1, c2, c3] = cs; c1.querySelector(".nw-ch")?.remove(); c2.querySelector(".nw-ch")?.remove();
-      [...c2.children].forEach(x => c1.appendChild(x)); c2.remove();
+      const [c1, c2, c3] = cs; c1.remove(); c2.querySelector(".nw-ch")?.remove();
       const f3 = c3.querySelector(".nw-ch h3"), ttl = f3 ? f3.textContent : T("Add a goal"); c3.querySelector(".nw-ch")?.remove();
       const dt = document.createElement("details"); dt.className = "bl-add"; if (editGoal) dt.open = true;
-      dt.innerHTML = `<summary>＋ ${esc(ttl)}</summary>`; while (c3.firstChild) dt.appendChild(c3.firstChild); c1.appendChild(dt); c3.remove(); } }
+      dt.innerHTML = `<summary>＋ ${esc(ttl)}</summary>`; while (c3.firstChild) dt.appendChild(c3.firstChild); c2.appendChild(dt); c3.remove(); } }
+    { const gl = d.Goals.map(x => ({ t: x.Target, v: Math.min(goalSaved(x, d), x.Target) })), gt = gl.reduce((a, x) => a + x.t, 0), gs = gl.reduce((a, x) => a + x.v, 0);
+      el.querySelector(".bp-goals-slot").replaceWith(Object.assign(document.createElement("div"), { innerHTML: dcard("flag", "res", T("Savings goals"),
+        `<div class="bp-ov-f">${stat(T("Goal amount (zł)"), pln(gt))}${stat(T("Already saved"), pln(gs), "good")}${stat(T("To save per month for all goals"), pln(goalsPerMonth(d)))}</div>${gt > 0 ? progress(gs / gt, "var(--goals)") : `<p class="hint">${esc(T("No goals yet. Add your first one above."))}</p>`}`) }).firstElementChild); }
     const gg = gh.querySelector(".grid"); if (gg) gg.dataset.key = "web2:goals";
     el.querySelectorAll("[data-del-limit]").forEach(b => b.onclick = async () => {
       const cat = b.dataset.delLimit;
