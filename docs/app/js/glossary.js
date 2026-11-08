@@ -42,7 +42,7 @@ function open(term) {
 function decorate(root = document.body) {
   const names = new Map(Object.keys(G).map(k => [T(k).trim().toLowerCase(), k]));
   root.querySelectorAll("h2,h3,.kpi-t > span,.kpi-t small,.rp-st h3,.ov-lbl,th,.hl-lbl").forEach(el => {
-    if (el.closest(".nw-hd, .sc-win") || el.querySelector(".si-i") || el.closest(".si-i") || el.children.length > 1) return;
+    if (el.closest(".nw-hd, .sc-win, .dz .nw-ch") || el.querySelector(".si-i") || el.closest(".si-i") || el.children.length > 1) return;
     const k = names.get((el.textContent || "").trim().toLowerCase()); if (!k) return;
     if (el.parentElement?.querySelector(":scope > .si-i, :scope > * > .si-i")) return;
     el.insertAdjacentHTML("beforeend", " " + glossBtn(k));
