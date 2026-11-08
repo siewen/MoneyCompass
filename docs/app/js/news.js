@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 98, date: "2026-11-08", items: {
+    en: ["✨ About MoneyCompass is back in the user menu (below Help)."],
+    pl: ["✨ „About” wróciło do menu użytkownika."],
+    de: ["✨ „About“ ist wieder im Benutzermenü."],
+    fr: ["✨ « About » est de retour dans le menu utilisateur."] } },
   { build: 97, date: "2026-11-08", items: {
     en: ["✨ Supported banks in the Import window now show a bank icon."],
     pl: ["✨ Obsługiwane banki w oknie importu mają ikonę banku."],

@@ -178,6 +178,7 @@ function meMenu() {
     <button data-m="language">${mi('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>')}${esc(T("Language"))}</button>
     <button data-m="backup">${mi('<path d="M7 18a4.500 4.500 0 0 1-.5-9A6 6 0 0 1 18 10a4 4 0 0 1 0 8z"/><path d="M12 16v-5M9.500 13.500L12 11l2.500 2.500"/>')}${esc(T("Backup & Restore"))}</button>
     <button data-m="help">${mi('<circle cx="12" cy="12" r="9"/><path d="M9.500 9.500a2.500 2.500 0 1 1 3.500 2.300c-.7.400-1 .9-1 1.700M12 17h.01"/>')}${esc(T("Help"))}</button>
+    <button data-m="about">${mi('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.500h.01"/>')}${esc(T("About"))}</button>
     <hr>
     <button data-m="signout">${mi('<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M15 8l4 4-4 4M19 12H9"/>')}${esc(T("Sign Out"))}</button>`;
   document.body.append(shield, menu);
@@ -187,7 +188,7 @@ function meMenu() {
   const close = () => { shield.remove(); menu.remove(); };
   shield.onclick = close;
   document.addEventListener("keydown", function esc1(e) { if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc1); } });
-  const run = { profile: openProfile, subscription: openProfile, backup: openProfile, options: openOptions, help: openHelp, language: () => openLanguage(), accounts: () => App.go("portfolio"), categories: () => manageCategories(), signout: () => installed() ? closeApp() : lock() };
+  const run = { profile: openProfile, subscription: openProfile, backup: openProfile, options: openOptions, help: openHelp, about, language: () => openLanguage(), accounts: () => App.go("portfolio"), categories: () => manageCategories(), signout: () => installed() ? closeApp() : lock() };
   menu.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { close(); run[b.dataset.m](); });
   menu.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { close(); setLanguage(b.dataset.lang); });
 }
