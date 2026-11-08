@@ -1,5 +1,5 @@
 // Shared pieces of the redesigned About / Help / Profile windows.
-export const sv = (d, c = "") => `<svg class="nwi ${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+export const sv = (d, c = "") => `<svg class="nwi ${c}${d && (d === P.star || d === P.bulb || d === P.trophy) ? " gold-ic" : ""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 export const P = {
   check: '<path d="M5 12.500l4.500 4.500L19 7.500"/>',
   shield: '<path d="M12 3l8 3v6c0 4.500-3.300 7.800-8 9-4.700-1.200-8-4.500-8-9V6z"/><path d="M8.500 12l2.500 2.500 4.500-5"/>',

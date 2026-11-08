@@ -1,6 +1,7 @@
 // Shared top of the redesigned pages: title, four figures, a highlighted summary band and a bottom band.
 import { esc } from "./ui.js";
-export const si = (d, n = 26) => `<svg class="nwi" width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const GOLD = () => [IC.bulb, IC.star, IC.trophy];
+export const si = (d, n = 26) => `<svg class="nwi${GOLD().includes(d) ? " gold-ic" : ""}" width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 export const IC = {
   tag: '<path d="M2.500 12.500V4.500A1.500 1.500 0 014 3h8l9.500 9.500-8.500 8.500zM7.500 6.500a1.500 1.500 0 100 3 1.500 1.500 0 000-3z" fill-rule="evenodd" stroke="none"/>',
   palette: '<path fill-rule="evenodd" d="M12 3a9 9 0 100 18c1.100 0 1.800-.9 1.500-1.900-.3-1 .3-2.100 1.400-2.100H17a4 4 0 004-4c0-5-4-10-9-10zM7.500 11.500a1.400 1.400 0 110-2.800 1.400 1.400 0 010 2.800zm3-4a1.400 1.400 0 110-2.800 1.400 1.400 0 010 2.800zm5 0a1.400 1.400 0 110-2.800 1.400 1.400 0 010 2.800z" stroke="none"/>',

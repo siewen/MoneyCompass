@@ -1921,3 +1921,8 @@ button.dz-bhi { cursor: pointer; text-align: left; font: inherit; color: inherit
 .opt-ki svg,.opt-chip svg,.opt-oi svg,.opt-tag svg{fill:currentColor}
 .opt-ki svg [stroke],.opt-chip svg [stroke]{}
 .opt-k{text-align:left}.opt-k>div{text-align:left}
+/* bulbs, stars and cups: always yellow / gold */
+svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
+.sv-star svg, .ei-bulb svg { color: #FFC928 !important; }
+.nwi.gold-ic, .sv-star svg.gold-ic, .ei-bulb svg.gold-ic { fill: #FFC928 !important; filter: drop-shadow(0 0 7px rgba(255,201,40,.6)) !important; }
+.rp-si.i-save, .rp-si.i-res { }

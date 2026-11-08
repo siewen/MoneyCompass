@@ -18,7 +18,7 @@ export const headingTip = (text, tip) => `<h3>${esc(text)}${tip ? ` <span class=
 /** An ⓘ on its own, for lines that are not headings. */
 export const infoTip = tip => tip ? `<span class="i-tip" data-tip="${esc(tip)}" tabindex="0" role="button" aria-label="${esc(tip)}">ⓘ</span>` : "";
 // Line icons (same style as the menu)
-const SV = d => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const SV = d => `<svg class="${d.startsWith('<path d="M9 18h6M10 21h4"/>') ? "gold-ic" : ""}" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 export const ICONS = {
   bolt: SV('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'),
   trend: SV('<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>'),
