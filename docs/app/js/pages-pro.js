@@ -4,7 +4,7 @@ import {
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved, fromPln } from "./core.js";
 import { ico } from "./nw.js";
 import { pageHead, band, si, IC, ring } from "./page-head.js";
-import { budgetDash, loansDash, dcard, iconizeCards, stat } from "./dash.js";
+import { budgetDash, loansDash, dcard, iconizeCards, stat, PM } from "./dash.js";
 import { progress, hbars, savingsChart } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
@@ -469,41 +469,54 @@ export const Budget = {
     const bHead = pageHead({ icon: "wallet", title: T("Budget Plan"), sub: T("Plan spending, control expenses and maximize savings."),
       kpis: [{ l: T("Monthly Budget"), v: pln(bd.kpis.total), icon: "wallet", cls: "in" }, { l: T("Spent This Month"), v: pln(bd.kpis.spent), icon: "cart", cls: "src" }, { l: T("Remaining Budget"), v: pln(bd.kpis.left), icon: "check", cls: "in", vcls: bd.kpis.left < 0 ? "bad" : "" }, { l: T("Budget Health Score"), v: bd.kpis.score + " / 100", icon: "heart", cls: "in", hi: true }],
       btn: `<button class="btn main rp-gen" data-action="b-new">＋ ${esc(T("Create Budget"))}</button>` });
-    const chips = limits.map(b => { const sp = Calc.spentThisMonth(b.Category), pc = b.MonthlyLimit > 0 ? Math.round(sp / b.MonthlyLimit * 100) : 0;
-      return `<div class="bl-chip ${pc > 100 ? "bad" : pc > 80 ? "warn" : ""}"><span>${esc(categoryLabel(b.Category))}</span><b>${esc(pln(b.MonthlyLimit))}</b><button class="icon-btn danger" data-del-limit="${esc(b.Category)}" title="${esc(T("Delete"))}">✕</button></div>`; }).join("");
-    el.innerHTML = bHead + bd.html + `<div class="bp-pair"><section class="nw-card dz bp-panel"><div class="nw-ch"><span class="rp-si i-rank">${si(IC.wallet, 24)}</span><h3>${esc(T("Budget limits"))}</h3></div>
-      <div class="bp-flat"><div class="bl-sum">${stat(T("Your limits together"), pln(total))}${d.Goals.length ? stat(T("To set aside for savings goals"), pln(goalsPerMonth(d))) : ""}</div>
-      <div class="bl-chips">${chips || `<p class="hint">${esc(T("No limits yet. Set your first one above."))}</p>`}</div>
-      <form id="budget" class="bl-form"><div class="bl-row">${select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], categories()[0].Name)}${numInput("limit", "", T("Limit per month (zł)"))}${button("＋ " + T("Save limit"), "save-limit", "main")}</div></form>
-      ${binCard(["budget"])}</div></section></div>`;
-    // Savings goals: one card (summary + list), with "Add a goal" folded inside
-    const sec = document.createElement("section"); sec.className = "nw-card dz bp-panel goals-section";
-    sec.innerHTML = `<div class="nw-ch"><span class="rp-si i-res">${si(IC.flag, 24)}</span><h3>${esc(T("Savings goals"))}</h3></div><div class="goals-host bp-flat"></div>`;
-    el.querySelector(".bp-pair").appendChild(sec);
-    const gh = sec.querySelector(".goals-host"); Goals.render(gh);
-    { const cs = [...gh.querySelectorAll(".nw-card")]; if (cs.length >= 3) {
-      const [c1, c2, c3] = cs; c1.remove(); c2.querySelector(".nw-ch")?.remove();
-      const f3 = c3.querySelector(".nw-ch h3"), ttl = f3 ? f3.textContent : T("Add a goal"); c3.querySelector(".nw-ch")?.remove();
-      const dt = document.createElement("details"); dt.className = "bl-add"; if (editGoal) dt.open = true;
-      dt.innerHTML = `<summary>＋ ${esc(ttl)}</summary>`; while (c3.firstChild) dt.appendChild(c3.firstChild); c2.appendChild(dt); c3.remove(); } }
+    el.innerHTML = bHead + bd.html;
+    // Goals summary in the middle slot of the second row
     { const gl = d.Goals.map(x => ({ t: x.Target, v: Math.min(goalSaved(x, d), x.Target) })), gt = gl.reduce((a, x) => a + x.t, 0), gs = gl.reduce((a, x) => a + x.v, 0);
       el.querySelector(".bp-goals-slot").replaceWith(Object.assign(document.createElement("div"), { innerHTML: dcard("flag", "res", T("Savings goals"),
-        `<div class="bp-ov-f">${stat(T("Goal amount (zł)"), pln(gt))}${stat(T("Already saved"), pln(gs), "good")}${stat(T("To save per month for all goals"), pln(goalsPerMonth(d)))}</div>${gt > 0 ? progress(gs / gt, "var(--goals)") : `<p class="hint">${esc(T("No goals yet. Add your first one above."))}</p>`}`) }).firstElementChild); }
-    const gg = gh.querySelector(".grid"); if (gg) gg.dataset.key = "web2:goals";
-    el.querySelectorAll("[data-del-limit]").forEach(b => b.onclick = async () => {
-      const cat = b.dataset.delLimit;
-      if (await confirmBox(T("Delete limit?"), T(cat), T("Delete"), T("Cancel"), true)) { toBin("budget", d.Budgets.find(x => x.Category === cat)); d.Budgets = d.Budgets.filter(x => x.Category !== cat); save(); App.refresh(); }
-    });
-    const fm = el.querySelector("#budget");
-    el.querySelector('[data-action="b-new"]').onclick = () => { fm.scrollIntoView({ behavior: "smooth", block: "center" }); fm.querySelector('[name="limit"]')?.focus(); };
-    el.querySelector('[data-action="b-opt"]').onclick = () => App.openOptimize();
-    el.querySelector('[data-action="save-limit"]').onclick = () => {
-      const v = values(fm), lim = num(v.limit);
-      if (!(lim > 0)) { toast(T("Please enter a limit above 0."), "bad"); return; }
-      const ex = d.Budgets.find(b => b.Category === v.category);
-      if (ex) ex.MonthlyLimit = lim; else d.Budgets.push({ Category: v.category, MonthlyLimit: lim });
-      save(); toast(T("Saved.")); App.refresh();
+        `<div class="bp-ov-f">${stat(T("Goal amount (zł)"), pln(gt))}${stat(T("Already saved"), pln(gs), "good")}${stat(T("To save per month for all goals"), pln(goalsPerMonth(d)))}</div>${gt > 0 ? progress(gs / gt, "var(--goals)") : `<p class="hint">${esc(T("No goals yet. Add your first one above."))}</p>`}`,
+        { extra: PM("b-goals", T("Edit savings goals")) }) }).firstElementChild); }
+    // ± windows: edit, delete and add
+    const openLimits = () => {
+      const p = popup("", { width: 720, cls: "nw-win pm-win" });
+      const draw = () => {
+        const lim = D().Budgets.filter(b => b.MonthlyLimit > 0), tot = lim.reduce((a, b) => a + b.MonthlyLimit, 0);
+        p.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-rank">${si(IC.wallet, 24)}</span><h3>${esc(T("Budget limits"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
+          <div class="bl-sum">${stat(T("Your limits together"), pln(tot))}${D().Goals.length ? stat(T("To set aside for savings goals"), pln(goalsPerMonth(D()))) : ""}</div>
+          <div class="pm-list">${lim.map(b => `<div class="pm-row"><span class="pm-n">${esc(categoryLabel(b.Category))}</span><input type="text" inputmode="decimal" value="${esc(plain(b.MonthlyLimit))}" data-edit-limit="${esc(b.Category)}" aria-label="${esc(T("Limit per month (zł)"))}"><span class="pm-u">zł</span><button class="icon-btn danger" data-del-limit="${esc(b.Category)}" title="${esc(T("Delete"))}">🗑</button></div>`).join("") || `<p class="hint">${esc(T("No limits yet. Set your first one above."))}</p>`}</div>
+          <form id="budget" class="bl-form"><h4>＋ ${esc(T("Set a monthly limit"))}</h4><div class="bl-row">${select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], categories()[0].Name)}${numInput("limit", "", T("Limit per month (zł)"))}${button("＋ " + T("Save limit"), "save-limit", "main")}</div></form>`;
+        const dd = D(), done = () => { save(); App.refresh(); draw(); };
+        p.el.querySelectorAll("[data-edit-limit]").forEach(i => i.onchange = () => { const v = num(i.value), b = dd.Budgets.find(x => x.Category === i.dataset.editLimit); if (b && v > 0) { b.MonthlyLimit = v; toast(T("Saved.")); done(); } else { toast(T("Please enter a limit above 0."), "bad"); draw(); } });
+        p.el.querySelectorAll("[data-del-limit]").forEach(b => b.onclick = async () => { const cat = b.dataset.delLimit;
+          if (await confirmBox(T("Delete limit?"), T(cat), T("Delete"), T("Cancel"), true)) { toBin("budget", dd.Budgets.find(x => x.Category === cat)); dd.Budgets = dd.Budgets.filter(x => x.Category !== cat); done(); } });
+        p.el.querySelector('[data-action="save-limit"]').onclick = () => { const fm = p.el.querySelector("#budget"), v = values(fm), lim = num(v.limit);
+          if (!(lim > 0)) { toast(T("Please enter a limit above 0."), "bad"); return; }
+          const ex = dd.Budgets.find(b => b.Category === v.category); if (ex) ex.MonthlyLimit = lim; else dd.Budgets.push({ Category: v.category, MonthlyLimit: lim });
+          toast(T("Saved.")); done(); };
+      };
+      draw();
     };
+    const openGoals = () => {
+      const p = popup("", { width: 760, cls: "nw-win pm-win" }), orig = App.refresh; let busy = false;
+      const draw = () => {
+        if (busy) return; busy = true;
+        p.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC.flag, 24)}</span><h3>${esc(T("Savings goals"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="goals-host bp-flat"></div>`;
+        const gh = p.el.querySelector(".goals-host"); Goals.render(gh);
+        const cs = [...gh.querySelectorAll(".nw-card")];
+        if (cs.length >= 3) { const [c1, c2, c3] = cs; c1.querySelector(".nw-ch")?.remove(); c2.querySelector(".nw-ch")?.remove();
+          [...c2.children].forEach(x => c1.appendChild(x)); c2.remove();
+          const f3 = c3.querySelector(".nw-ch h3"), ttl = f3 ? f3.textContent : T("Add a goal"); c3.querySelector(".nw-ch")?.remove();
+          const dt = document.createElement("details"); dt.className = "bl-add"; dt.open = true;
+          dt.innerHTML = `<summary>＋ ${esc(ttl)}</summary>`; while (c3.firstChild) dt.appendChild(c3.firstChild); c1.appendChild(dt); c3.remove(); }
+        busy = false;
+      };
+      App.refresh = (...a) => { orig(...a); if (!p.closed) draw(); };
+      const close = p.close; p.close = (...a) => { App.refresh = orig; close(...a); };
+      draw();
+    };
+    el.querySelector('[data-action="b-limits"]')?.addEventListener("click", openLimits);
+    el.querySelector('[data-action="b-goals"]')?.addEventListener("click", openGoals);
+    el.querySelector('[data-action="b-new"]').onclick = openLimits;
+    el.querySelector('[data-action="b-opt"]').onclick = () => App.openOptimize();
   },
 };
 

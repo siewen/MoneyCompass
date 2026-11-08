@@ -1606,3 +1606,8 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .bp-pair > .goals-section, .bp-pair > .bp-panel { margin-top: 0 !important; } .bp-flat .nw-card .dz-stat, .bp-flat .nw-card .row { font-size: 14px; }
 .goals-host .nw-card { background: transparent !important; border: 0 !important; padding: 0 !important; box-shadow: none !important; }
 
+.pm-btn { margin-left: auto; width: 34px; height: 34px; border-radius: 10px; border: 1px solid rgba(52,232,168,.5); background: rgba(52,232,168,.1); color: #34E8A8; font-size: 20px; font-weight: 800; cursor: pointer; line-height: 1; transition: background .15s, box-shadow .15s; } .pm-btn:hover { background: rgba(52,232,168,.25); box-shadow: 0 0 12px rgba(52,232,168,.45); }
+.pm-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; } .pm-head h3 { margin: 0; flex: 1; font-size: 20px; } .pm-x { background: none; border: 0; color: #BFD3CB; font-size: 20px; cursor: pointer; }
+.pm-list { display: flex; flex-direction: column; gap: 8px; margin: 10px 0 18px; } .pm-row { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 8px 12px; } .pm-n { flex: 1; font-weight: 600; } .pm-row input { width: 130px; text-align: right; margin: 0; } .pm-u { color: #BFD3CB; }
+.bl-form h4 { margin: 4px 0 10px; color: #34E8A8; }
+.popup.pm-win { padding: 22px 24px 20px !important; } .pm-win .bp-flat .nw-card { padding: 0 !important; }
