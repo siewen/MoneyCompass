@@ -2,6 +2,7 @@
 import { esc } from "./ui.js";
 export const si = (d, n = 26) => `<svg class="nwi" width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 export const IC = {
+  flag: '<path d="M5 2h2v20H5zM8 3h12l-3 5 3 5H8z" stroke="none"/>',
   cart: '<path d="M2 3h3l.6 3H21l-2 9H8L5 4H2zM9 18a1.700 1.700 0 100 3.400A1.700 1.700 0 009 18zm9 0a1.700 1.700 0 100 3.400A1.700 1.700 0 0018 18z" stroke="none"/>',
   check: '<path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1.500 14.500l-4-4 1.400-1.400 2.600 2.600 5.600-5.600 1.400 1.400z" fill-rule="evenodd" stroke="none"/>',
   heart: '<path d="M12 21s-8-5.400-8-11a4.500 4.500 0 018-2.800A4.500 4.500 0 0120 10c0 5.600-8 11-8 11z" stroke="none"/><path d="M3 12h4l2-3 3 6 2-3h7" fill="none" stroke="#0A4A36" stroke-width="1.600"/>',
@@ -41,5 +42,5 @@ export function band(title, icon, figs, cls = "", extra = "") {
 /** Progress ring: pct 0-100, big text inside, small text under it. */
 export const ring = (pct, big, small = "", size = 150, col = "#2EDC9A") => {
   const r = 52, c = 2 * Math.PI * r, p = Math.max(0, Math.min(100, pct));
-  return `<div class="ring" style="width:${size}px;height:${size}px"><svg viewBox="0 0 120 120" width="${size}" height="${size}"><circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="11"/><circle cx="60" cy="60" r="${r}" fill="none" stroke="${col}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(c * p / 100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 60 60)" style="filter:drop-shadow(0 0 6px ${col})"/></svg><div class="ring-t"><b>${big}</b><small>${small}</small></div></div>`;
+  return `<div class="ring" style="width:${size}px;height:${size}px"><svg viewBox="0 0 120 120" width="${size}" height="${size}"><circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="11"/><circle cx="60" cy="60" r="${r}" fill="none" stroke="${col}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(c * p / 100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 60 60)" style="filter:drop-shadow(0 0 6px ${col})"/></svg><div class="ring-t"><b style="font-size:${Math.round(size * 0.2)}px">${big}</b><small>${small}</small></div></div>`;
 };

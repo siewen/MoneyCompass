@@ -1,5 +1,5 @@
 // Dashboard blocks for the redesigned pages (Budget Plan, Expenses, Emergency Fund, Loans & Debts), built like the "Emerald Balanced" mockups.
-import { T, State, Calc, ChartData, pln, rate, fmtDate, parseDate, today, addMonths, monthName, categoryLabel, categoryIcon, COLORS } from "./core.js";
+import { T, State, Calc, ChartData, pln, rate, fmtDate, parseDate, today, addMonths, monthName, categoryLabel, categoryIcon, COLORS, findCategory } from "./core.js";
 import { esc } from "./ui.js";
 import { si, IC, ring, band } from "./page-head.js";
 import { lineChart, colBars, donutList } from "./ov-charts.js";
@@ -47,3 +47,32 @@ export function budgetDash(d) {
   const perf = band(T("Budget Performance Projection"), "trend", [{ l: T("Current Spending"), v: pln(spent) }, { l: T("Projected Month-End Spending"), v: pln(proj) }, { l: T("Budget Limit"), v: pln(total) }, { l: T("Potential Monthly Savings"), v: pln(potential) }, { l: T("Projected Additional Savings in 12 Months"), v: "+" + pln(potential * 12), big: true, cls: "good" }], "rp-trend2");
   return { kpis: { total, spent, left, score }, html: `<div class="bp-row1">${ov}${fc}${insC}</div><div class="bp-row1 bp-r2">${catC}${distC}${nearC}</div>${impact}${perf}` };
 }
+
+// ------------------------------------------------------------------ Emergency Fund
+export function emergencyDash(d) {
+  const s = d.Settings, r = Calc.emergency(s), safe = Calc.portfolio(d).safe, sp = Calc.spending(d);
+  const income = Calc.totalIncome(d), exp = sp.monthsUsed ? sp.essential + sp.nonEssential : 0, avail = Math.max(0, income - exp);
+  const contrib = Math.floor(avail * 0.5 / 50) * 50, covered = r.monthly > 0 ? safe / r.monthly : 0, missing = Math.max(0, r.target - safe);
+  const pct = r.target > 0 ? Math.min(100, Math.round(safe / r.target * 100)) : 0, months = contrib > 0 ? Math.ceil(missing / contrib) : null;
+  const at = k => addMonths(today(), k), mon = dt => dt.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  const done = pct >= 100, est = done ? null : months != null ? at(months) : null;
+  const fcL = Array.from({ length: 7 }, (_, i) => at(i).toLocaleDateString(undefined, { month: "short" }));
+  const cur = fcL.map((_, i) => Math.min(r.target || Infinity, safe + contrib * i));
+  const fcC = dcard("trend", "res", T("Emergency Fund Forecast"), `<div class="dz-keys">${keys([["#22E39A", T("Current Plan")], ["#6FD6FF", T("Target Projection")]])}</div>${lineChart(fcL, [{ vals: Array(7).fill(r.target || 0), color: "#6FD6FF", dash: true }, { vals: cur, color: "#22E39A", dots: true }])}${est ? `<div class="bp-fc ok">${esc(T("Estimated completion: {0}", mon(est)))}</div>` : done ? `<div class="bp-fc ok">${esc(T("Target reached"))}</div>` : `<div class="bp-fc bad">${esc(T("Add savings or lower your costs to see a completion date"))}</div>`}`, { klass: "bp-fcc" });
+  const prog = dcard("shield", "res", T("Emergency Fund Progress"), `<div class="bp-ov-b">${ring(pct, pct + "%", "", 150, "#22E39A")}<div class="bp-ov-f">${stat(T("Current"), pln(safe))}${stat(T("Target"), r.target > 0 ? pln(r.target) : "–")}${stat(T("Remaining"), pln(missing), missing ? "warn" : "good")}</div></div><div class="dz-two">${stat(T("Estimated Completion"), est ? mon(est) : done ? T("Done") : "–")}${stat(T("Monthly Contribution"), pln(contrib))}</div><button class="btn main ex-opt" data-go="portfolio">${esc(T("Boost My Fund"))}</button>`, { klass: "bp-ovc" });
+  const ins = [r.target > 0 ? T("Emergency fund covers {0} months of expenses", covered.toFixed(1)) : T("Enter your costs below to see your target."), covered >= 3 ? T("Fund health rating: Good") : T("Fund health rating: Needs attention"), contrib > 0 ? T("Contribution pace is on track") : T("No monthly surplus to contribute yet"), T("Months you plan to cover: {0}", s.EmergencyMonths), T("Extra safety buffer: {0}%", s.BufferPercent ?? 0)];
+  const insC = dcard("sparkle", "res", T("AI Emergency Fund Insights"), list(ins) + `<button class="btn main ex-opt" data-action="em-opt">${esc(T("Optimize My Safety Net"))}</button>`);
+  const essCats = (ChartData.categories(d).all || []).filter(c => { const f = findCat(c.category); return f ? f.Essential : false; }), essTot = essCats.reduce((a, c) => a + c.perMonth, 0);
+  const essC = dcard("shield", "res", T("Monthly Essential Costs"), essCats.length ? donutList(essCats.map((c, i) => ({ label: T(c.category), value: c.perMonth, color: COLORS.cats[i % COLORS.cats.length], text: pln(c.perMonth) })), pln(essTot), T("/month"), t => pln(t)) : `<p class="hint">${esc(T("Add expenses to see your essential costs."))}</p>`);
+  const tm = ChartData.trend(d).slice(-5), histC = dcard("shield", "res", T("Contribution History"), `<small class="hint">${esc(T("Money left over each month"))}</small>${tm.length ? colBars(tm.map(m => m.month), tm.map(m => Math.max(0, Math.round(m.income - m.expenses)))) : ""}`);
+  const capC = dcard("pig", "res", T("Savings Capacity"), `<div class="ex-li"><span>${esc(T("Income"))}:</span><b>${esc(pln(income))}</b></div><div class="ex-li"><span>${esc(T("Expenses"))}:</span><b>${esc(pln(exp))}</b></div><div class="ex-li"><span>${esc(T("Available"))}:</span><b class="good">${esc(pln(avail))}</b></div><div class="dz-two">${stat(T("Recommended Contribution"), pln(contrib) + "/" + T("month"))}</div>`);
+  const yc = (s.YearlyCosts || 0), sc = [[T("Job Loss Coverage"), covered.toFixed(1) + " " + T("months"), covered >= 3], [T("Medical Emergency"), covered >= 1 ? T("Covered") : T("Not yet"), covered >= 1], [T("Home Repair"), safe >= Math.max(yc, r.monthly) && safe > 0 ? T("Covered") : T("Not yet"), safe >= Math.max(yc, r.monthly) && safe > 0], [T("Car Breakdown"), safe >= Math.max(yc, r.monthly) && safe > 0 ? T("Covered") : T("Not yet"), safe >= Math.max(yc, r.monthly) && safe > 0]];
+  const riskC = dcard("check", "res", T("Risk Scenarios"), sc.map(x => `<div class="ex-li">${x[2] ? TICK : WARN}<span>${esc(x[0])}</span><b class="${x[2] ? "good" : "warn"}">${esc(x[1])}</b></div>`).join(""));
+  const stepD = k => { const need = r.target * k; if (safe >= need) return [true, T("Reached")]; return [false, contrib > 0 ? mon(at(Math.ceil((need - safe) / contrib))) : "–"]; };
+  const first = ChartData.firstDate(d), steps = [[T("Started"), first ? mon(first) : "–", true], [T("25% Achieved"), ...stepD(0.25).reverse()], [T("50% Achieved"), ...stepD(0.5).reverse()], [T("Expected Completion"), est ? mon(est) : done ? T("Done") : "–", done]];
+  const tl = dcard("trend", "res", T("Emergency Fund Timeline"), `<div class="em-tl">${steps.map(x => `<div class="em-st${x[2] ? " done" : ""}"><i></i><b>${esc(x[0])}</b><small>${esc(x[1] === true ? "" : String(x[1]))}</small></div>`).join("")}</div>`, { klass: "em-tlc" });
+  const score = Math.min(100, Math.round(pct * 0.7 + Math.min(covered, 6) / 6 * 30)), lvl = score >= 75 ? T("Strong") : score >= 50 ? T("Fair") : T("Needs work");
+  const rd = dcard("trend", "res", T("Financial Readiness Score"), `<div class="bp-ov-b">${ring(score, score + "/100", "", 110, "#22E39A")}<div class="bp-ov-f">${stat(T("Emergency Fund"), lvl, score >= 75 ? "good" : "warn")}</div></div>`);
+  return { kpis: { safe, pct, covered, target: r.target, est, done }, html: `<div class="bp-row1">${prog}${fcC}${insC}</div><div class="em-r2">${essC}${histC}${capC}${riskC}</div><div class="em-r3">${tl}${rd}</div>` };
+}
+const findCat = name => findCategory(name);
