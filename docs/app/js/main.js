@@ -176,8 +176,6 @@ function meMenu() {
   menu.innerHTML = `<button data-m="profile">${mi('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.400 3.600-7 8-7s8 2.600 8 7"/>')}${esc(T("My Profile"))}</button>
     <button data-m="accounts">${mi('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M15 14h3"/>')}${esc(T("Accounts"))}</button>
     <button data-m="categories">${mi('<path d="M3 4h2l2.500 11h10l2-8H6.500"/><circle cx="9" cy="19.500" r="1.400"/><circle cx="17" cy="19.500" r="1.400"/>')}${esc(T("Categories"))}</button>
-    <button data-m="language">${mi('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>')}${esc(T("Language"))}</button>
-    <button data-m="backup">${mi('<path d="M7 18a4.500 4.500 0 0 1-.5-9A6 6 0 0 1 18 10a4 4 0 0 1 0 8z"/><path d="M12 16v-5M9.500 13.500L12 11l2.500 2.500"/>')}${esc(T("Backup & Restore"))}</button>
     <button data-m="help">${mi('<circle cx="12" cy="12" r="9"/><path d="M9.500 9.500a2.500 2.500 0 1 1 3.500 2.300c-.7.400-1 .9-1 1.700M12 17h.01"/>')}${esc(T("Help"))}</button>
     <button data-m="about">${mi('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.500h.01"/>')}${esc(T("About"))}</button>
     <hr>

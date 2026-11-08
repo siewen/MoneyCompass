@@ -1330,3 +1330,16 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .cl-cancel { background: none; border: 0; color: #34D399; font-weight: 700; font-size: 16px; cursor: pointer; margin-left: 10px; }
 .cl-note { display: flex; align-items: center; gap: 8px; margin: 18px 0 0; color: #A5B8B1; font-size: 14px; } .cl-note svg { width: 18px; height: 18px; color: #A5B8B1; } .cl-note b { color: #34D399; font-weight: 600; }
 @media (max-width: 600px) { .cl { flex-direction: column; } .cl-ic { width: 64px; height: 64px; } }
+
+.lg-list { display: grid; gap: 10px; margin: 20px 0 14px; } .lg-opt { display: flex; align-items: center; text-align: left; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.14); border-radius: 14px; padding: 14px 20px; color: #fff; cursor: pointer; font-size: 17px; } .lg-opt span { flex: 1; } .lg-opt small { display: none; color: #34D399; font-size: 14px; margin-top: 3px; } .lg-opt i { display: none; width: 28px; height: 28px; border-radius: 50%; background: #1FBF85; align-items: center; justify-content: center; } .lg-opt i svg { width: 16px; height: 16px; color: #04281D; stroke-width: 3; } .lg-opt.on { border: 2px solid #34D399; background: rgba(52,211,153,.07); box-shadow: 0 0 14px rgba(52,211,153,.25); } .lg-opt.on small, .lg-opt.on i { display: flex; } .lg-opt.on small { display: block; } .lg-win .cl-note { margin: 0 0 16px; }
+.nw-win .cl-ic .nwi { width: 44px; height: 44px; }
+
+/* Settings & Preferences */
+.nw-set .nw-sum { margin: 12px 16px 0; } .nw-st { display: flex; align-items: center; gap: 14px; } .nw-st b { display: block; font-size: 22px; color: #fff; }
+.nw-sgrid { padding: 12px 16px 0; margin: 0; }
+.nw-set .card { background: rgba(255,255,255,.035) !important; border: 1px solid rgba(255,255,255,.09) !important; border-radius: 12px; color: #E8F1EE; }
+.nw-set .card h3, .nw-set .card h2 { color: #fff; }
+.nw-set select, .nw-set input[type=text] { background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.16); color: #E8F1EE; border-radius: 10px; padding: 9px 12px; }
+.nw-set .btn.second { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.14); color: #E8F1EE; border-radius: 10px; }
+.nw-set .btn.main, .nw-set .btn.go { background: linear-gradient(180deg,#34D399,#10B981); color: #04281D; border: 0; border-radius: 10px; font-weight: 700; }
+.nw-set .hint { color: #A5B8B1; }

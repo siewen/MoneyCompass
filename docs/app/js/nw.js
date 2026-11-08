@@ -41,6 +41,7 @@ export const P = {
   down: '<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',
   up: '<path d="M12 16V5M7 9l5-5 5 5M5 20h14"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.500h.01"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
 };
 export const ico = (k, c = "") => sv(P[k], c);

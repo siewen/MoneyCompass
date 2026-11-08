@@ -196,7 +196,10 @@ export async function loadProfileFile() {
 
 export function openOptions() {
   const s = D().Settings;
-  const p = popup(`<h2 class="popup-title">⚙ ${esc(T("Settings"))}</h2><div class="grid">
+  const bkOn = backupInfo().status === "on", tl = (i, a, b, c = "") => `<div class="nw-card nw-st">${ico(i, "big")}<span><small>${esc(a)}</small><b>${esc(b)}</b></span></div>`;
+  const p = popup(`<div class="nw-hd"><span class="nw-hi">${ico("gear")}</span><h2>${esc(T("Settings & Preferences"))}</h2><button class="nw-x" data-close aria-label="Close">✕</button></div>
+    <div class="nw-g4 nw-sum">${tl("globe", T("Language"), (LANGS.find(x => x[0] === lang()) || [0, lang()])[1])}${tl("coins", T("Currency"), s.Currency || "PLN")}${tl("shield", T("Security"), hasPin() ? T("Protected") : T("No PIN"))}${tl("cloud", T("Backup"), bkOn ? T("Enabled") : T("Off"))}</div>
+    <div class="grid nw-sgrid">
     ${card(heading(T("Language")) + hint(T("Your data stays the same; only the texts change.")) + select("language", LANGS, lang()))}
     ${card(heading(T("Main currency")) + hint(T("All amounts are shown and entered in this currency. Changing it converts everything in this profile once, at today's NBP rate. Savings accounts and income in another currency keep their own currency.")) +
       select("maincur", [["PLN", "PLN – złoty"], ["EUR", "EUR – euro"], ["USD", "USD – dollar"]], s.Currency || "PLN"))}
@@ -239,7 +242,7 @@ export function openOptions() {
         : button(esc(T("Protect with a password…") + (license.isPro ? "" : " 🔒")), "file-pw", "main")}</div>`)}
     ${card(heading(T("Reset")) + hint(T("Delete all or only some of your entries: income, expenses, savings, saved offers, emergency fund settings or exchange rates. Your language and other options stay.")) +
       button(esc(T("Choose what to delete…")), "delete", "danger"))}
-    </div><div class="popup-buttons"><button class="btn main" data-close>${esc(T("Close"))}</button></div>`, { width: 980, cls: "wide-popup", onClose: () => App.rebuild() });
+    </div><div class="nw-foot"><div></div><button class="btn main" data-close>${esc(T("Close"))}</button></div>`, { width: 1100, cls: "wide-popup nw-win nw-set", onClose: () => App.rebuild() });
   const el = p.el;
   el.querySelector('select[name="maincur"]').onchange = async e => {
     const to = e.target.value, from = s.Currency || "PLN";
@@ -381,6 +384,14 @@ export function languageChips() {
   return `<div class="lang-chips">${LANGS.map(([c, n]) => `<button class="chip${c === lang() ? " on" : ""}" data-lang="${c}">${FLAGS[c] || ""} ${esc(n)}</button>`).join("")}</div>`;
 }
 export function openLanguage() {
-  const p = popup(`<h3>🌐 ${esc(T("Language"))}</h3>${hint(T("Your data stays the same; only the texts change."))}${languageChips()}`, { width: 360, cls: "lang-panel" });
-  p.el.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { p.close(); setLanguage(b.dataset.lang); });
+  let pick = lang();
+  const nm = (c, n) => c === "en" ? "English (United Kingdom)" : n;
+  const p = popup(`<button class="nw-x cl-x" data-close aria-label="Close">✕</button>
+    <div class="cl"><span class="cl-ic">${ico("globe")}</span><div><h2>${esc(T("Language"))}</h2>
+    <p>${esc(T("Choose the language used throughout MoneyCompass."))} ${esc(T("Your data stays the same; only the texts change."))}</p></div></div>
+    <div class="lg-list">${LANGS.map(([c, n]) => `<button class="lg-opt${c === pick ? " on" : ""}" data-lang="${c}"><span><b>${esc(nm(c, n))}</b><small>${esc(T("Current language"))}</small></span><i>${ico("check")}</i></button>`).join("")}</div>
+    <p class="cl-note">${ico("info")}${esc(T("Language changes are applied immediately across the application."))}</p>
+    <div class="cl-btns"><button class="btn main" data-apply>${esc(T("Apply language"))}</button><button class="btn second" data-close>${esc(T("Cancel"))}</button></div>`, { width: 600, cls: "nw-win cl-win lg-win" });
+  p.el.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { pick = b.dataset.lang; p.el.querySelectorAll("[data-lang]").forEach(x => x.classList.toggle("on", x === b)); });
+  p.el.querySelector("[data-apply]").onclick = () => { p.close(); setLanguage(pick); };
 }
