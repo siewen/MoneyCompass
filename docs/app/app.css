@@ -1462,3 +1462,12 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .cmp-calc { display: grid; gap: 14px; align-content: start; } .cmp-calc > .card { margin: 0; } .cmp-calc .card .drag, .cmp-calc .card [data-drag] { display: none; }
 .cmp-calc { display: grid; gap: 14px; align-content: start; } .cmp-calc > .card { margin: 0; }
 .cmp-calc .card .hint { display: block !important; color: #A5B8B1; } .cmp-calc form .hint { display: none !important; }
+/* Filled glossy icons like the mockups (big icons only) */
+:root[data-design] .top nav svg, :root[data-design] .top .tabs svg, .pg-ic svg, .kpi-ic svg, .rp-si svg, .nw-ch > svg, .nw-ch .nwi {
+  fill: currentColor; fill-opacity: .9; stroke: currentColor; stroke-width: 1.2; filter: drop-shadow(0 0 6px rgba(52,211,153,.45));
+}
+.pg-ic svg, .kpi-ic svg { stroke-width: 1; fill-opacity: 1; }
+:root[data-design] .top nav svg { filter: none; }
+:root[data-design] .top nav svg { fill-opacity: .28; stroke-width: 1.8; }
+#offer .hint { display: none !important; }
+.pg-ic svg { fill-opacity: .3; stroke-width: 1.6; }
