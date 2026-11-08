@@ -2,6 +2,7 @@
 import {
   T, State, save, Calc, Advisor, pln, rate, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addMonths, monthName,
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved, fromPln } from "./core.js";
+import { ico } from "./nw.js";
 import { progress, hbars, savingsChart } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
@@ -531,7 +532,7 @@ export async function openBankImport(fileObj = null, mode = "all") {
     state = { ...state, mine, digits, items, transfers, received, back, known, dup, foreign, ownIn, total: rows.length, skippedByDate: all.length - rows.length };
   };
 
-  const p = popup("", { width: 900, cls: "wide-popup" });
+  const p = popup("", { width: 1000, cls: "wide-popup nw-win nw-imp" });
   const draw = () => {
     compute();
     const { items, transfers, received, dup, foreign } = state;
@@ -563,20 +564,23 @@ export async function openBankImport(fileObj = null, mode = "all") {
         `<button class="chip${isMonth(m) ? " on" : ""}" data-range="${i}">${esc(monthName(m))}</button>`).join("")}</div>` +
       `<div class="two">${field(T("From"), dateInput("from", inputDate(from || first)))}${field(T("To"), dateInput("to", inputDate(to || last)))}</div>` +
       (state.skippedByDate ? hint(T("{0} transactions outside these dates are not imported.", state.skippedByDate)) : ""));
-    p.el.innerHTML = `<h2 class="popup-title">⬆ ${esc(T("Import bank statement"))}</h2>
-      ${hint(T("The bank statement (CSV) – yours or one you manage for someone – becomes expenses, sorted into categories."))}
-      <p class="hint">${esc(T("Current account statement."))} <a href="#" data-other-kind>${esc(T("This is a savings account statement →"))}</a></p>
-      <div class="seg import-mode" role="group" aria-label="${esc(T("What to import"))}">${[["all", "↕ " + T("Everything")], ["out", "↑ " + T("Outflows only")], ["in", "↓ " + T("Inflows only")]].map(([k, l]) =>
-        `<button class="seg-btn${mode === k ? " on" : ""}" data-mode="${k}">${esc(l)}</button>`).join("")}</div>
-      <div class="grid">
-      ${card(`<b>${esc(fileObj.name)}</b>` + hint(T("{0} – {1}, {2} rows.", file.bank || T("bank recognised from the columns"), "CSV", file.rows.length)) +
-        hint(file.bank ? T("Found automatically for {0}. Change them only if the preview looks wrong.", file.bank) : T("Found from the content of the file. Check that date, amount and description are right.")) +
-        button(esc(showColumns ? T("Hide columns") : T("Change columns")), "columns", "second small") +
-        (showColumns ? `<div class="two">${["Date", "Amount", "Debit", "Credit", "Description", "Counterparty", "Category", "Currency", "OwnAccount", "OtherAccount"].map(k => field(T(k === "Debit" ? "Amount" : k === "Credit" ? "Amount" : k === "Counterparty" ? "Name" : k === "OwnAccount" ? "Your account" : k === "OtherAccount" ? "Their account" : k) + (k === "Debit" ? " −" : k === "Credit" ? " +" : ""), select("col-" + k, colOptions, file.columns[k] ?? -1))).join("")}</div>` : "") +
-        hint(file.columns.OwnAccount >= 0 || file.columns.OtherAccount >= 0 || file.ownAccount
-          ? "ⓘ " + T("Account numbers found: {0}.", [file.columns.OwnAccount >= 0 ? T("Your account") + " = " + Csv.columnName(file, file.columns.OwnAccount) : file.ownAccount ? T("Your account") + " = " + file.ownAccount : "", file.columns.OtherAccount >= 0 ? T("Their account") + " = " + Csv.columnName(file, file.columns.OtherAccount) : ""].filter(Boolean).join(", "))
-          : "ⓘ " + T("No account numbers found in this file. If it has them, choose the columns with \"Change columns\".")) +
-        hint(T("The file is only read on this computer.")))}
+    const pv = [...items.map(i => ({ d: i.row.date, t: i.row.description, c: i.category, a: -i.pln, k: "exp" })), ...received.map(r => ({ d: parseDate(r.Date), t: r.Description, c: r.Kind === RECEIVED.salary ? T("Salary") : T("Income"), a: r.Amount, k: "inc" })), ...transfers.map(t => ({ d: t.row.date, t: t.row.description, c: T("Transfer"), a: -t.pln, k: "trf" }))].sort((x, y) => y.d - x.d).slice(0, 5);
+    const kindTag = { exp: [T("Expense"), "r"], inc: [T("Income"), "g"], trf: [T("Transfer"), "b"] };
+    const mt = (k, label, icon, on) => `<button class="seg-btn nw-it${on ? " on" : ""}" data-mode="${k}">${ico(icon)}<span>${esc(label)}</span></button>`;
+    p.el.innerHTML = `<div class="nw-hd"><span class="nw-hi">${ico("bank")}</span><h2>${esc(T("Import bank statement"))}</h2><button class="nw-x" data-close aria-label="Close">✕</button></div>
+      <div class="nw-itype"><div class="nw-itl"><span class="nw-ibig">${ico("bank")}</span><b>${esc(T("Import type"))}:</b></div><div class="nw-itbs">
+        ${mt("all", T("Complete Statement"), "check", mode === "all")}${mt("out", T("Expense Statement"), "wallet", mode === "out")}${mt("in", T("Income Statement"), "down", mode === "in")}
+        <button class="seg-btn nw-it" data-other-kind>${ico("coins")}<span>${esc(T("Savings Account Statement"))}</span></button></div></div>
+      <div class="nw-file nw-card"><span class="nw-fi">${ico("doc")}<em>CSV</em></span><div class="nw-fd"><small>${esc(T("Statement file"))}</small><b>${esc(fileObj.name)}</b>
+        <p><span>${esc(T("Detected bank"))}:</span><b>${esc(file.bank || T("bank recognised from the columns"))}</b></p><p><span>${esc(T("File format"))}:</span><b>CSV</b></p><p><span>${esc(T("Rows detected"))}:</span><b>${file.rows.length}</b></p></div>
+        <div class="nw-rec"><div class="nw-recs">${ico("check", "ring big")}<span><small>${esc(T("Recognition status"))}:</small><b>${esc(file.bank ? T("Automatically recognized") : T("Check the columns"))}</b></span></div>
+        <button class="nw-pill" data-action="columns">${esc(showColumns ? T("Hide columns") : T("Review columns"))}</button></div></div>
+      <p class="nw-note">${ico("info")}${esc(T("Statement recognized automatically. Adjust only if detected incorrectly."))}</p>
+      ${showColumns ? `<div class="nw-card nw-cols"><div class="two">${["Date", "Amount", "Debit", "Credit", "Description", "Counterparty", "Category", "Currency", "OwnAccount", "OtherAccount"].map(k => field(T(k === "Debit" ? "Amount" : k === "Credit" ? "Amount" : k === "Counterparty" ? "Name" : k === "OwnAccount" ? "Your account" : k === "OtherAccount" ? "Their account" : k) + (k === "Debit" ? " −" : k === "Credit" ? " +" : ""), select("col-" + k, colOptions, file.columns[k] ?? -1))).join("")}</div></div>` : ""}
+      <div class="nw-prev nw-card"><div class="nw-ch">${ico("bars")}<h3>${esc(T("Transaction preview"))} <small>(${esc(T("first {0} rows", pv.length))})</small></h3></div>
+        <table><tr><th>${esc(T("Date"))}</th><th>${esc(T("Description"))}</th><th>${esc(T("Category"))}</th><th>${esc(T("Amount"))}</th><th>${esc(T("Type"))}</th></tr>
+        ${pv.map(x => `<tr><td>${fmtDate(x.d)}</td><td>${esc(x.t || "–")}</td><td><span class="nw-cat">${esc(x.k === "exp" ? categoryLabel(x.c) : x.c)}</span></td><td>${x.a < 0 ? "−" : ""}${pln(Math.abs(x.a))}</td><td><span class="nw-ty ${kindTag[x.k][1]}">${esc(kindTag[x.k][0])}</span></td></tr>`).join("") || `<tr><td colspan="5" class="hint">${esc(T("Nothing new to add."))}</td></tr>`}</table></div>
+      <div class="grid nw-igrid">
       ${dateCard}
       ${card(heading(T("3. What will be added")) + lines.map(l => `<p>${esc(l)}</p>`).join("") +
         Object.entries(byCat).sort((a, b) => b[1].sum - a[1].sum).map(([c, v]) => row(`${categoryLabel(c)} (${v.n})`, pln(v.sum))).join(""))}
@@ -589,8 +593,7 @@ export async function openBankImport(fileObj = null, mode = "all") {
       ${transfers.length ? card(heading(T("Moved to your own accounts")) + hint(T("Not expenses and not income: money moved between your own accounts. Listed in Outflows, not counted as spending. A savings account's balance comes only from its own statement (Savings tab).")) +
         `<div class="list">${transfers.map(t => `<div class="item"><div><b>${esc(t.row.description || "–")}</b><span class="hint">${date(t.row)} · ${pln(t.pln)}${t.toSavings ? " · 🏦 " + esc(T("Savings")) : ""}</span></div></div>`).join("")}</div>`, "wide") : ""}
       </div>
-      <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button>
-      <button class="btn main" data-import ${anything ? "" : "disabled"}>${esc(!anything ? T("Import") : !items.length && !received.length && !transfers.length ? T("Add the bank details") : !received.length ? T("Import {0} expenses", items.length) : !items.length ? T("Import {0} payments received", received.length) : T("Import {0} expenses and {1} payments received", items.length, received.length))}</button></div>`;
+      <div class="nw-foot"><span class="nw-fsh">${ico("shield", "big")}</span><div><small>${esc(T("The file is only read on this computer."))}</small></div><button class="btn main" data-import ${anything ? "" : "disabled"}>${esc(!anything ? T("Import") : !items.length && !received.length && !transfers.length ? T("Add the bank details") : !received.length ? T("Import {0} expenses", items.length) : !items.length ? T("Import {0} payments received", received.length) : T("Import {0} expenses and {1} payments received", items.length, received.length))}</button><button class="btn second" data-close>${esc(T("Cancel"))}</button></div>`;
     p.el.querySelector('[data-action="columns"]').onclick = () => { showColumns = !showColumns; draw(); };
     p.el.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { mode = b.dataset.mode; draw(); });
     p.el.querySelectorAll("[data-range]").forEach(b => b.onclick = () => {
