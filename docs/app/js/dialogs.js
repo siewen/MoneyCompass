@@ -381,6 +381,6 @@ export function languageChips() {
   return `<div class="lang-chips">${LANGS.map(([c, n]) => `<button class="chip${c === lang() ? " on" : ""}" data-lang="${c}">${FLAGS[c] || ""} ${esc(n)}</button>`).join("")}</div>`;
 }
 export function openLanguage() {
-  const p = popup(`<h3>🌐 ${esc(T("Language"))}</h3>${hint(T("Your data stays the same; only the texts change."))}${languageChips()}`, { width: 320, anchor: "top-right", cls: "lang-panel" });
+  const p = popup(`<h3>🌐 ${esc(T("Language"))}</h3>${hint(T("Your data stays the same; only the texts change."))}${languageChips()}`, { width: 360, cls: "lang-panel" });
   p.el.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { p.close(); setLanguage(b.dataset.lang); });
 }
