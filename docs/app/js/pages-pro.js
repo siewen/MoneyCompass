@@ -302,7 +302,7 @@ export const Goals = {
 let editLoan = null;
 /** Chart at the top of Loans & debts: outstanding principal, principal repaid and interest paid (the lender's income),
  *  month by month over the whole term – the months from today on are a projection with today's rate and payment. */
-function loanChartCard(d) {
+function loanChartCard(d, bare = false) {
   const x = loanSchedule(d); if (!x || x.months.length < 2) return "";
   const hid = new Set(d.Settings.LoanChartHidden || []);
   const short = m => m.toLocaleDateString(lang(), { month: "short", year: "2-digit" });
@@ -319,6 +319,7 @@ function loanChartCard(d) {
   const run = d.Loans.filter(l => l.Remaining > 0), pl = run.map(l => [l, loanPlan(l)]);
   const nowBal = pl.reduce((s2, [, p]) => s2 + p.remainingNow, 0), nowInt = pl.reduce((s2, [, p]) => s2 + p.interestRepaid, 0);
   const nowPrin = pl.reduce((s2, [l, p]) => s2 + (l.Original > p.remainingNow ? l.Original - p.remainingNow : 0), 0);
+  if (bare) return card(heading(T("Repayment Projection")) + `<div class="wave-legend">${keys}</div>` + savingsChart(x.months.map(short), lines, [], axis, fmtV, hid, x.pastCount, ...(window.innerWidth < 700 ? [760, 230] : [1500, 190])), "wide fixed loan-chart-card");
   return card(heading(T("Loan repayment")) +
     `<div class="sav-figures">${fig(T("Outstanding principal"), pln(nowBal), "bad")}${nowPrin > 0 ? fig(T("Principal repaid to date"), pln(nowPrin), "good") : ""}
       ${fig(T("Interest paid to date (lender's income)"), pln(nowInt), "warn", T("Interest you have paid so far: what the bank has earned on your loans. Includes the interest you entered from your bank."))}
@@ -327,12 +328,16 @@ function loanChartCard(d) {
     `<div class="wave-legend">${keys}</div>` + savingsChart(x.months.map(short), lines, [], axis, fmtV, hid, x.pastCount, ...(window.innerWidth < 700 ? [760, 230] : [1500, 190])) +
     hint(T("Month by month for all your loans together. Up to today: from the payments since you entered each loan; from today on (shaded): a projection with today's rate and monthly payment. Click a name to show or hide it.")), "wide fixed loan-chart-card");
 }
+function loanFigures(d) {
+  const x = loanSchedule(d), run = d.Loans.filter(l => l.Remaining > 0), pl = run.map(l => [l, loanPlan(l)]);
+  return { bal: pl.reduce((a, [, p]) => a + p.remainingNow, 0), int: pl.reduce((a, [, p]) => a + p.interestRepaid, 0), prin: pl.reduce((a, [l, p]) => a + (l.Original > p.remainingNow ? l.Original - p.remainingNow : 0), 0), total: x ? x.totalInterest : 0, end: x && x.end ? monthName(x.end) : "–" };
+}
 /** Loans window: chart, loan list, add/edit form and overpayment – opened from the ± button and the plan buttons. */
 function openLoansWindow(focus) {
-  const p = popup("", { width: 1320, cls: "wide-popup nw-win pm-win" }), orig = App.refresh; let busy = false;
+  const p = popup("", { width: 1400, cls: "wide-popup nw-win pm-win" }), orig = App.refresh; let busy = false;
   const draw = (f) => {
     if (busy) return; busy = true;
-    p.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-table">${si(IC.bank, 24)}</span><h3>${esc(T("Loans & Debts"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="ln-host"></div>`;
+    p.el.innerHTML = `<button class="pm-x pm-x-abs" data-close aria-label="${esc(T("Close"))}">✕</button><div class="ln-host"></div>`;
     Loans.render(p.el.querySelector(".ln-host"), { manage: true });
     busy = false;
     if (f) setTimeout(() => { const t = p.el.querySelector(f); if (t) { t.scrollIntoView({ behavior: "smooth", block: "center" }); t.querySelector("input,select")?.focus(); } }, 120);
@@ -392,8 +397,8 @@ export const Loans = {
         <div class="two">${field(T("Amount paid towards the principal (zł)"), numInput("amount", "", T("e.g. {0}", "5000")))}${field(T("Date"), dateInput("date", inputDate(today())))}</div>
         ${field(T("After the overpayment"), select("mode", [["shorter", T("Shorten the loan term – same monthly payment")], ["lower", T("Reduce the monthly payment – same term")]], "shorter"))}
         ${field(T("Regular extra principal every month? (zł, calculation only)"), numInput("monthly", "", T("e.g. {0}", "200")))}
-        <div class="extra-result" id="extra-result"></div>
-        <div class="buttons">${button("✔ " + esc(T("Save the overpayment")), "save-extra", "main")}</div></form>`) : ""}
+        <div class="extra-result" id="extra-result" data-title="${esc(T("Projected Result"))}"></div>
+        <div class="buttons">${button("💾 " + esc(T("Save the overpayment")), "save-extra", "main")}</div></form>`) : ""}
       ${card(heading(T("Your debts")) + loanProgress(running.map(x => ({ ...x, Remaining: now(x) }))) +
         (running.some(x => loanPlan(x).interestRepaid > 0) ? row(T("Interest repaid"), pln(running.reduce((s, x) => s + loanPlan(x).interestRepaid, 0))) : "") +
         row(T("Remaining principal amount to be repaid"), pln(running.reduce((s, x) => s + now(x), 0))) +
@@ -403,7 +408,20 @@ export const Loans = {
         level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Outflows tab.")))}
       ${binCard(["loan"])}
     </div></details>`;
-    if (manage) { el.innerHTML = el.querySelector(".bp-manage .grid").outerHTML; }
+    if (manage) {
+      const lf = loanFigures(d), formHtml = el.querySelector("#loan").outerHTML, extraEl = el.querySelector("#extra"), extraHtml = extraEl ? extraEl.outerHTML : "";
+      const head = pageHead({ icon: "coins", title: T("Loans & Debts"), sub: T("Track your loans, manage debt and plan your repayments."),
+        kpis: [{ l: T("Outstanding Principal"), v: pln(lf.bal), icon: "wallet", cls: "in" }, { l: T("Principal Repaid"), v: pln(lf.prin), icon: "flag", cls: "in" }, { l: T("Interest Paid"), v: pln(lf.int), icon: "calx", cls: "src" }, { l: T("Total Credit Cost"), v: pln(lf.total), icon: "bars", cls: "src" }, { l: T("Debt-Free Date"), v: lf.end, icon: "cal", cls: "in", vcls: "good" }] });
+      const loanCards = d.Loans.map(x => { const pl = plans.get(x.Id) || loanPlan(x); return `<div class="ln-lc clickable" data-edit-loan="${x.Id}"><div class="ln-lh"><span class="rp-si i-table">${si(IC.bank, 22)}</span><b>${esc(x.Name)}</b><span class="ln-act">${esc(x.Remaining > 0 ? T("Active") : T("Paid off"))}</span><button class="icon-btn danger" data-del-loan="${x.Id}" title="${esc(T("Delete"))}">🗑</button></div>
+        <div class="ln-lg"><div><span>${esc(T("Remaining Balance"))}</span><b>${esc(pln(pl.remainingNow))}</b><span>${esc(T("Monthly Payment"))}</span><b>${esc(pln(x.MonthlyPayment))}</b><span>${esc(T("Interest Rate"))}</span><b>${esc(rate(x.RatePercent || 0))}</b>${x.PaidFrom ? `<span>${esc(T("Bank"))}</span><b>${esc(x.PaidFrom)}</b>` : ""}</div>
+        <div><span>${esc(T("Next Payment"))}</span><b>${pl.next ? esc(fmtDate(pl.next)) : "–"}</b><span>${esc(T("Remaining Payments"))}</span><b>${pl.never ? "∞" : esc(String(pl.needed ?? "–"))}</b></div></div>
+        <div class="ln-df"><span>${esc(T("Projected Debt-Free"))}:</span><b>${pl.never ? esc(T("never – see the warning")) : pl.end ? esc(monthName(pl.end)) : "–"}</b></div>${loanWarning(x)}</div>`; }).join("") || `<p class="hint">${esc(T("No loans – great! Add one above if you have any."))}</p>`;
+      el.innerHTML = head + loanChartCard(d, true) + `<div class="ln-row3"><div class="nw-card dz ln-add"><div class="nw-ch"><span class="rp-si i-res">${si(IC.plus, 22)}</span><h3>${esc(l ? T("Edit loan") : T("Add a loan"))}</h3></div>${formHtml}</div>
+        <div class="nw-card dz"><div class="nw-ch"><span class="rp-si i-table">${si(IC.table, 22)}</span><h3>${esc(T("Active Loans"))}</h3></div><div class="ln-lcs">${loanCards}</div></div>
+        <div class="nw-card dz ln-early"><div class="nw-ch"><span class="rp-si i-bulb">${si(IC.bolt || IC.sparkle, 22)}</span><h3>${esc(T("Early Repayment Strategy"))}</h3></div>${extraHtml || `<p class="hint">${esc(T("No active loans"))}</p>`}</div></div>`;
+      el.querySelector("#loan .nw-ch, #loan h3")?.remove();
+      const f2 = el.querySelector("#extra h3"); f2?.remove();
+    }
     else {
       el.querySelector(".bp-manage")?.remove();
       const open = (focus) => openLoansWindow(focus);
@@ -411,7 +429,8 @@ export const Loans = {
       el.querySelectorAll('[data-action="l-extra"]').forEach(b => b.onclick = () => open("#extra"));
       return;
     }
-    el.classList.add("bp-manage"); iconizeCards(el);
+    if (!manage) iconizeCards(el);
+    el.classList.add("ln-pop");
     const fm = el.querySelector("#loan");
     el.querySelector('[data-action="save-loan"]').onclick = () => {
       const v = values(fm), rem = num(v.remaining);
