@@ -329,7 +329,7 @@ function loanChartCard(d) {
 }
 /** Loans window: chart, loan list, add/edit form and overpayment – opened from the ± button and the plan buttons. */
 function openLoansWindow(focus) {
-  const p = popup("", { width: 1180, cls: "wide-popup nw-win pm-win" }), orig = App.refresh; let busy = false;
+  const p = popup("", { width: 1320, cls: "wide-popup nw-win pm-win" }), orig = App.refresh; let busy = false;
   const draw = (f) => {
     if (busy) return; busy = true;
     p.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-table">${si(IC.bank, 24)}</span><h3>${esc(T("Loans & Debts"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="ln-host"></div>`;
