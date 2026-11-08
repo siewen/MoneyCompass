@@ -2,6 +2,8 @@
 import { esc } from "./ui.js";
 export const si = (d, n = 26) => `<svg class="nwi" width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 export const IC = {
+  save: '<path d="M6 2h12a2 2 0 012 2v18l-8-5-8 5V4a2 2 0 012-2z" stroke="none"/>',
+  res: '<path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1.500 14.500l-4-4 1.400-1.400 2.600 2.600 5.600-5.600 1.400 1.400z" fill-rule="evenodd" stroke="none"/>',
   bulb: '<path d="M12 2a7 7 0 00-4 12.700V17h8v-2.300A7 7 0 0012 2zM9 19h6v1.500a1.500 1.500 0 01-1.500 1.500h-3A1.500 1.500 0 019 20.500z" stroke="none"/>',
   calc: '<path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm1 3v4h10V5zm1 6.500a1.200 1.200 0 100 2.400 1.200 1.200 0 000-2.400zm4 0a1.200 1.200 0 100 2.400 1.200 1.200 0 000-2.400zm4 0a1.200 1.200 0 100 2.400 1.200 1.200 0 000-2.400zM8 16a1.200 1.200 0 100 2.400A1.200 1.200 0 008 16zm4 0a1.200 1.200 0 100 2.400 1.200 1.200 0 000-2.400zm4 0a1.200 1.200 0 100 2.400 1.200 1.200 0 000-2.400z" stroke="none"/>',
   table: '<path d="M3 4h18v16H3zm2 4v3h4V8zm6 0v3h8V8zm-6 5v3h4v-3zm6 0v3h8v-3z" fill-rule="evenodd" stroke="none"/>',
