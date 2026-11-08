@@ -76,3 +76,31 @@ export function emergencyDash(d) {
   return { kpis: { safe, pct, covered, target: r.target, est, done }, html: `<div class="bp-row1">${prog}${fcC}${insC}</div><div class="em-r2">${essC}${histC}${capC}${riskC}</div><div class="em-r3">${tl}${rd}</div>` };
 }
 const findCat = name => findCategory(name);
+
+// ------------------------------------------------------------------ Loans & Debts
+import { loanPlan } from "./core.js";
+export function loansDash(d, debtFree) {
+  const running = d.Loans.filter(x => x.Remaining > 0), now = x => loanPlan(x).remainingNow;
+  const payments = Calc.loanPayments(d), income = Calc.totalIncome(d), share = income > 0 ? payments / income : 0;
+  const rem = running.reduce((a, x) => a + now(x), 0), orig = running.reduce((a, x) => a + (x.Original > 0 ? x.Original : now(x)), 0), paid = orig > 0 ? Math.max(0, Math.min(100, Math.round((1 - rem / orig) * 100))) : 0;
+  const dScore = !running.length ? 100 : income > 0 ? Math.max(0, Math.round(100 - share * 200)) : 50;
+  const sim = factor => { const b = running.map(x => now(x)), out = []; for (let m = 0; m <= 60; m++) { out.push(b.reduce((a, v) => a + v, 0)); running.forEach((x, i) => { b[i] = Math.max(0, b[i] * (1 + (x.RatePercent || 0) / 1200) - (x.MonthlyPayment || 0) * factor); }); if (!b.some(v => v > 0)) { out.push(0); break; } } return out; };
+  const cur = sim(1), acc = sim(1.2), len = Math.max(cur.length, acc.length), step = Math.max(1, Math.ceil(len / 8));
+  const idx = Array.from({ length: Math.ceil(len / step) }, (_, i) => i * step), at = k => addMonths(today(), k);
+  const labels = idx.map(k => at(k).toLocaleDateString(undefined, { month: "short", year: "2-digit" }));
+  const pick = arr => idx.map(k => k < arr.length ? arr[k] : 0);
+  const plan = dcard("save", "res", T("Debt Freedom Plan"), `<div class="bp-ov-b">${ring(paid, paid + "%", T("Debt Paid Off"), 150, "#22E39A")}<div class="bp-ov-f">${stat(T("Remaining Debt"), pln(rem))}${stat(T("Already Repaid"), pln(Math.max(0, orig - rem)), "good")}${stat(T("Total Original Debt"), pln(orig))}</div></div><button class="btn main ex-opt" data-action="l-extra">${esc(T("Accelerate My Payoff Plan"))} →</button>`, { klass: "bp-ovc" });
+  const fc = dcard("trend", "res", T("Debt Payoff Forecast"), `<div class="dz-keys">${keys([["#22E39A", T("Current Plan")], ["#3B9BFF", T("Accelerated Plan (+20% payment)")]])}</div>${running.length ? lineChart(labels, [{ vals: pick(cur), color: "#22E39A", dots: true }, { vals: pick(acc), color: "#3B9BFF", dots: true }]) : `<p class="hint">${esc(T("You have no active debts"))}</p>`}${running.length ? `<div class="bp-fc ok">${esc(T("Debt-Free"))}: ${esc(debtFree)}</div>` : ""}`, { klass: "bp-fcc" });
+  const ins = [running.length ? T("{0} active loans or debts", running.length) : T("You have no active debts"), income > 0 && running.length ? T("Loan payments take {0}% of your income", Math.round(share * 100)) : null, running.length ? T("Debt-free: {0}", debtFree) : null, T("Debt Score: {0} / 100", dScore)].filter(Boolean);
+  const insC = dcard("sparkle", "res", T("AI Debt Insights"), list(ins) + `<button class="btn main ex-opt" data-action="l-extra">${esc(T("Improve My Payoff Strategy"))} →</button>`);
+  const totRate = rem > 0 ? running.reduce((a, x) => a + (x.RatePercent || 0) * now(x), 0) / rem : 0;
+  const port = dcard("bank", "table", T("Loans Portfolio"), `<table class="ln-t"><thead><tr><th>${esc(T("Loan"))}</th><th>${esc(T("Remaining"))}</th><th>${esc(T("Interest Rate"))}</th></tr></thead><tbody>${running.map(x => `<tr><td>${esc(x.Name)}</td><td>${esc(pln(now(x)))}</td><td>${esc(rate(x.RatePercent || 0))}</td></tr>`).join("")}</tbody>${running.length ? `<tfoot><tr><td>${esc(T("Total"))}</td><td>${esc(pln(rem))}</td><td>${esc(rate(totRate))}</td></tr></tfoot>` : ""}</table>`);
+  const mp = dcard("calx", "table", T("Monthly Debt Payments"), running.map(x => `<div class="cr-row bp-row"><span class="cr-name">${esc(x.Name)}</span><span class="cr-bar"><i style="width:${payments ? Math.round(x.MonthlyPayment / payments * 100) : 0}%;background:#3B9BFF"></i></span><b>${esc(pln(x.MonthlyPayment))}</b></div>`).join("") || `<p class="hint">–</p>`);
+  const br = dcard("pie", "table", T("Debt Breakdown"), running.length ? donutList(running.map((x, i) => ({ label: x.Name, value: now(x), color: COLORS.cats[i % COLORS.cats.length], text: pln(now(x)) })), pln(rem), "", t => Math.round(t / Math.max(1, rem) * 100) + "%") : `<p class="hint">–</p>`);
+  const tm = ChartData.trend(d).slice(-2), surplus = income > 0 ? 1 - ((Calc.spending(d).essential + Calc.spending(d).nonEssential) / income) : 0, up = tm.length === 2 && (tm[1].income - tm[1].expenses) >= (tm[0].income - tm[0].expenses);
+  const lvl = dScore >= 75 ? T("Strong") : dScore >= 50 ? T("Fair") : T("Needs work");
+  const fs = dcard("shield", "res", T("Financial Strength Score"), `<div class="bp-ov-b">${ring(dScore, dScore + "", "/100", 110, "#22E39A")}<div class="bp-ov-f"><small>${esc(T("Status"))}:</small><b class="${dScore >= 75 ? "good" : "warn"}">${esc(lvl)}</b></div></div>${list([T("Savings Rate: {0}", surplus >= 0.2 ? T("Excellent") : surplus > 0 ? T("OK") : T("Low")), T("Debt Ratio: {0}", share < 0.3 ? T("Healthy") : T("High")), T("Growth Trend: {0}", up ? T("Positive") : T("Negative"))], i => (i === 0 && surplus <= 0) || (i === 1 && share >= 0.3) || (i === 2 && !up))}`);
+  const onTrack = !running.length || share < 0.4;
+  const bandH = `<div class="dz-band ln-band"><span class="rp-si i-res">${si(IC.check, 48)}</span><div class="dz-bt"><h3>${esc(onTrack ? T("Your debt freedom plan is on track!") : T("Your debt load is high – an accelerated plan can help."))}</h3><small>${esc(running.length ? T("With your current strategy, you could be debt-free by {0}.", debtFree) : T("You have no active debts."))}</small></div><div class="ln-bars">${idx.map((k, i) => `<i style="height:${Math.max(6, Math.round((1 - (pick(cur)[i] || 0) / Math.max(1, cur[0])) * 60) + 6)}px"></i>`).join("")}</div><button class="btn main rp-gen" data-action="l-extra">${esc(T("View Detailed Plan"))} →</button></div>`;
+  return { kpis: { rem, payments, dScore }, html: `<div class="bp-row1">${plan}${fc}${insC}</div><div class="em-r2">${port}${mp}${br}${fs}</div>${bandH}` };
+}

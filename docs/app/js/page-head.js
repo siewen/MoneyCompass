@@ -2,6 +2,7 @@
 import { esc } from "./ui.js";
 export const si = (d, n = 26) => `<svg class="nwi" width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 export const IC = {
+  gauge: '<path d="M12 3a10 10 0 100 20 10 10 0 000-20zm0 4a6 6 0 016 6h-2a4 4 0 00-8 0H6a6 6 0 016-6zm1 7.500l3.500-4.500 1.200 1-3.600 4.700a1.600 1.600 0 11-1.100-1.200z" fill-rule="evenodd" stroke="none"/>',
   flag: '<path d="M5 2h2v20H5zM8 3h12l-3 5 3 5H8z" stroke="none"/>',
   cart: '<path d="M2 3h3l.6 3H21l-2 9H8L5 4H2zM9 18a1.700 1.700 0 100 3.400A1.700 1.700 0 009 18zm9 0a1.700 1.700 0 100 3.400A1.700 1.700 0 0018 18z" stroke="none"/>',
   check: '<path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1.500 14.500l-4-4 1.400-1.400 2.600 2.600 5.600-5.600 1.400 1.400z" fill-rule="evenodd" stroke="none"/>',

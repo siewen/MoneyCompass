@@ -4,7 +4,7 @@ import {
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved, fromPln } from "./core.js";
 import { ico } from "./nw.js";
 import { pageHead, band, si, IC, ring } from "./page-head.js";
-import { budgetDash } from "./dash.js";
+import { budgetDash, loansDash } from "./dash.js";
 import { progress, hbars, savingsChart } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
@@ -342,17 +342,11 @@ export const Loans = {
     const plans = new Map(running.map(x => [x.Id, loanPlan(x)]));
     const ends = [...plans.values()];
     const debtFree = !running.length ? "–" : ends.some(p => p.never) ? T("never – see the warning") : monthName(new Date(Math.max(...ends.map(p => p.end.getTime()))));
-    const remTotal = running.reduce((a, x) => a + now(x), 0), origTotal = running.reduce((a, x) => a + (x.Original > 0 ? x.Original : now(x)), 0), paidOff = origTotal > 0 ? Math.max(0, Math.min(100, Math.round((1 - remTotal / origTotal) * 100))) : 0;
-    const dScore = !running.length ? 100 : income > 0 ? Math.max(0, Math.round(100 - share * 200)) : 50;
+    const ld = loansDash(d, debtFree);
     const lHead = pageHead({ icon: "bank", title: T("Loans & Debts"), sub: T("Track debts, reduce interest costs and accelerate your journey to financial freedom."),
-      kpis: [{ l: T("Total Debt Remaining"), v: pln(remTotal), icon: "coins", cls: "in" }, { l: T("Monthly Payments"), v: pln(payments), icon: "calx", cls: "src" }, { l: T("Debt-Free Date"), v: debtFree, icon: "trophy", cls: "next" }, { l: T("Debt Score"), v: dScore + " / 100", icon: "shield", cls: "in", hi: true }],
+      kpis: [{ l: T("Total Debt Remaining"), v: pln(ld.kpis.rem), icon: "coins", cls: "in" }, { l: T("Monthly Payments"), v: pln(ld.kpis.payments), icon: "calx", cls: "in" }, { l: T("Debt-Free Date"), v: debtFree, icon: "flag", cls: "in" }, { l: T("Debt Score"), v: ld.kpis.dScore + " / 100", icon: "gauge", cls: "in", hi: true }],
       btn: `<button class="btn main rp-gen" data-action="l-new">＋ ${esc(T("Add Loan"))}</button>` });
-    const tickL = `<span class="nw-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></span>`;
-    const lIns = [running.length ? T("{0} active loans or debts", running.length) : T("You have no active debts"), income > 0 && running.length ? T("Loan payments take {0}% of your income", Math.round(share * 100)) : null, running.length ? T("Debt-free: {0}", debtFree) : null, T("Debt Score: {0} / 100", dScore)].filter(Boolean);
-    const planCard = `<div class="nw-card bp-ov"><div class="nw-ch"><span class="rp-si i-res">${si(IC.save, 24)}</span><h3>${esc(T("Debt Freedom Plan"))}</h3></div><div class="bp-ov-b">${ring(paidOff, paidOff + "%", T("Debt Paid Off"), 150, "#22E39A")}<div class="bp-ov-f"><small>${esc(T("Remaining Debt"))}</small><b>${esc(pln(remTotal))}</b><small>${esc(T("Already Repaid"))}</small><b class="good">${esc(pln(Math.max(0, origTotal - remTotal)))}</b><small>${esc(T("Total Original Debt"))}</small><b>${esc(pln(origTotal))}</b></div></div><button class="btn main ex-opt" data-action="l-extra">${esc(T("Accelerate My Payoff Plan"))}</button></div>`;
-    const lInsCard = `<div class="nw-card bp-ins"><div class="nw-ch"><span class="rp-si i-bulb">${si(IC.bulb, 24)}</span><h3>${esc(T("AI Debt Insights"))}</h3></div><ul class="nw-ul">${lIns.map(x => `<li>${tickL}<span>${esc(x)}</span></li>`).join("")}</ul></div>`;
-    const mpCard = `<div class="nw-card bp-ins"><div class="nw-ch"><span class="rp-si i-table">${si(IC.calx, 24)}</span><h3>${esc(T("Monthly Debt Payments"))}</h3></div>${running.map(x => `<div class="cr-row bp-row"><span class="cr-name">${esc(x.Name)}</span><span class="cr-bar"><i style="width:${payments ? Math.round(x.MonthlyPayment / payments * 100) : 0}%;background:#3B9BFF"></i></span><b>${esc(pln(x.MonthlyPayment))}</b></div>`).join("") || `<p class="hint">–</p>`}</div>`;
-    el.innerHTML = lHead + `<div class="bp-row1">${planCard}${lInsCard}${mpCard}</div><div class="grid">
+    el.innerHTML = lHead + ld.html + `<details class="cal-fold bp-manage"><summary>⚙ ${esc(T("Manage loans and overpayments"))}</summary><div class="grid">
       ${loanChartCard(d)}
       ${card(heading(T("Your debts")) + loanProgress(running.map(x => ({ ...x, Remaining: now(x) }))) +
         (running.some(x => loanPlan(x).interestRepaid > 0) ? row(T("Interest repaid"), pln(running.reduce((s, x) => s + loanPlan(x).interestRepaid, 0))) : "") +
@@ -392,9 +386,9 @@ export const Loans = {
         ${hint(T("MoneyCompass works out the debt-free date from what is left, the monthly payment and the interest."))}
         <div class="buttons">${button(l ? T("Save changes") : T("Add"), "save-loan", "main")}${l ? button(T("Cancel"), "cancel-loan") : ""}</div></form>`)}
       ${binCard(["loan"])}
-    </div>`;
-    el.querySelector('[data-action="l-new"]').onclick = () => { const f = el.querySelector("#loan"); f.scrollIntoView({ behavior: "smooth", block: "center" }); f.querySelector('[name="name"]')?.focus(); };
-    el.querySelector('[data-action="l-extra"]').onclick = () => { const f = el.querySelector("#extra") || el.querySelector("#loan"); f.scrollIntoView({ behavior: "smooth", block: "center" }); };
+    </div></details>`;
+    el.querySelector('[data-action="l-new"]').onclick = () => { const dt = el.querySelector(".bp-manage"); if (dt) dt.open = true; const f = el.querySelector("#loan"); f.scrollIntoView({ behavior: "smooth", block: "center" }); f.querySelector('[name="name"]')?.focus(); };
+    el.querySelectorAll('[data-action="l-extra"]').forEach(b => b.onclick = () => { const dt = el.querySelector(".bp-manage"); if (dt) dt.open = true; const f = el.querySelector("#extra") || el.querySelector("#loan"); f.scrollIntoView({ behavior: "smooth", block: "center" }); });
     const fm = el.querySelector("#loan");
     el.querySelector('[data-action="save-loan"]').onclick = () => {
       const v = values(fm), rem = num(v.remaining);
