@@ -187,7 +187,7 @@ document.addEventListener("keydown", e => {
 export function categoryBox(icons, init = null) {
   return new Promise(resolve => {
     let icon = init?.icon || "📦";
-    const p = popup(`<div class="box-head"><span class="box-icon">🏷️</span><h2>${esc(init ? T("Edit category") : T("New category"))}</h2></div>
+    const p = popup(`<div class="box-head"><span class="box-icon">🏷️</span><h2>${esc(init && !init.isNew ? T("Edit category") : T("New category"))}</h2></div>
       ${field(T("Name of the category"), textInput("v", init?.name || "", T("e.g. {0}", T("Pets"))))}
       <div class="field"><span>${esc(T("Icon"))}</span><div class="icon-grid">${icons.map(i => `<button type="button" class="icon-pick${i === icon ? " on" : ""}" data-icon="${i}">${i}</button>`).join("")}</div></div>
       ${check("ess", T("Essential (must pay even in a crisis)"), !!init?.essential)}

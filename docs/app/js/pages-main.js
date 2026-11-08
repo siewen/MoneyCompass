@@ -778,15 +778,29 @@ function showCategory(name) {
 export async function manageCategories() {
   if (!(await requirePro(T("Own categories")))) return;
   const d = D();
-  const draw = () => `<h2 class="popup-title">${esc(T("Edit categories"))}</h2>
-    ${hint(T("Your own categories: change the name, icon or \"essential\" with ✎, or delete one with 🗑 (its expenses move to \"Other\"). The standard categories can't be changed."))}
-    <div class="list">${d.Categories.length ? d.Categories.map(c => `<div class="item"><div><b>${esc((c.Icon ? c.Icon + " " : "") + c.Name)}</b>
-      <span class="hint">${esc(c.Essential ? T("Essential") : T("Not essential"))} · ${esc((n => n === 1 ? T("1 expense") : T("{0} expenses", n))(d.Expenses.filter(e => e.Category === c.Name).length))}</span></div>
-      <div class="row-actions"><button class="icon-btn" data-edit-cat="${esc(c.Name)}" title="${esc(T("Edit"))}">✎</button>
-      <button class="icon-btn danger" data-del-cat="${esc(c.Name)}" title="${esc(T("Delete"))}">🗑</button></div></div>`).join("") : hint(T("No own categories yet."))}</div>
-    <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button><button class="btn main" data-add>＋ ${esc(T("New category"))}</button></div>`;
-  const p = popup(draw(), { width: 560, onClose: () => App.refresh() });
+  const EXAMPLES = [["🌴", "Vacation Fund"], ["🎓", "School Expenses"], ["🐾", "Pets"], ["🏡", "Home Renovation"]];
+  const draw = () => {
+    const sys = categories().filter(c => !c.Custom && c.Name !== OTHER).length, ess = d.Categories.filter(c => c.Essential).length;
+    const tile = (ic, l, v) => `<div class="kpi static"><span class="kpi-ic in">${si(IC[ic], 30)}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b>${v}</b></span></div>`;
+    const body = d.Categories.length ? `<div class="cm-list">${d.Categories.map(c => `<div class="cm-item"><span class="cm-ic">${esc(c.Icon || "📦")}</span><div><b>${esc(c.Name)}</b>
+        <small>${esc(c.Essential ? T("Essential") : T("Not essential"))} · ${esc((n => n === 1 ? T("1 expense") : T("{0} expenses", n))(d.Expenses.filter(e => e.Category === c.Name).length))}</small></div>
+        <div class="row-actions"><button class="icon-btn" data-edit-cat="${esc(c.Name)}" title="${esc(T("Edit"))}">✎</button><button class="icon-btn danger" data-del-cat="${esc(c.Name)}" title="${esc(T("Delete"))}">🗑</button></div></div>`).join("")}</div>` :
+      `<div class="cm-empty"><span class="cm-art">${si(IC.tag, 54)}</span><h3>${esc(T("No custom categories yet"))}</h3><p>${esc(T("Create your first category to better organize transactions and reports."))}</p></div>`;
+    return `<button class="pm-x pm-x-abs" data-close aria-label="${esc(T("Close"))}">✕</button>
+    <div class="pg-title cm-head"><span class="pg-ic">${si(IC.tag, 40)}</span><div><h2>${esc(T("Category Management"))}</h2><p>${esc(T("Create and manage your own categories."))}</p>
+      <small>${esc(T("Custom categories can be renamed, marked as essential, assigned an icon or removed at any time."))}<br>${esc(T("Standard system categories are protected and cannot be edited."))}</small></div></div>
+    <div class="cm-kpis">${tile("palette", T("Custom Categories"), d.Categories.length)}${tile("star", T("Essential Categories"), ess)}${tile("shield", T("System Categories"), sys)}</div>
+    <div class="nw-card cm-box">${body}<div class="cm-ex"><span>${esc(T("Popular examples:"))}</span>${EXAMPLES.map(x => `<button type="button" class="cm-chip" data-ex="${esc(x[1])}" data-exi="${x[0]}"><span>${x[0]}</span>${esc(T(x[1]))}</button>`).join("")}</div></div>
+    <div class="cm-foot"><button class="sv-btn cm-new" data-add>＋ ${esc(T("New Category"))}</button><button class="sv-btn ghost cm-close" data-close>${esc(T("Close"))}</button></div>`;
+  };
+  const p = popup(draw(), { width: 820, cls: "nw-win pm-win cm-win", onClose: () => App.refresh() });
   const bind = () => {
+    p.el.querySelectorAll("[data-ex]").forEach(b => b.onclick = async () => {
+      const got = await categoryBox(ICON_CHOICES, { isNew: true, name: T(b.dataset.ex), icon: b.dataset.exi }); if (!got) return;
+      const err = addCategory(got.name, got.essential, got.icon);
+      if (err) { toast(err, "bad"); return; }
+      toast(T("New category: {0}", got.name.trim())); p.el.innerHTML = draw(); bind();
+    });
     p.el.querySelector("[data-add]").onclick = async () => {
       const got = await categoryBox(ICON_CHOICES); if (!got) return;
       const err = addCategory(got.name, got.essential, got.icon);
