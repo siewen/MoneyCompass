@@ -834,16 +834,38 @@ function bindExpenseRows(root, after = () => App.refresh()) {
   });
 }
 function editExpense(e, after) {
-  const p = popup(`<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC.cart, 24)}</span><h3>${esc(T("Change expense"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
-    <form class="ee-form"><div class="ee-grid">
-      <div class="nw-card dz ee-c"><h4>${esc(T("Payment"))}</h4>
-        <div class="two">${field(T("Date"), dateInput("date", inputDate(parseDate(e.Date))))}${field(T("Amount (zł)"), numInput("amount", plain(e.Amount)))}</div>
-        ${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], e.Category))}</div>
-      <div class="nw-card dz ee-c"><h4>${esc(T("Details"))}</h4>
-        ${field(T("Description"), textInput("description", e.Description))}
-        ${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(repeatOn(e)), repeatOn(e)))}
-        ${check("essential", T("Essential (must pay even in a crisis)"), e.Essential)}</div></div></form>
-    <div class="ee-foot"><button class="sv-btn ghost" data-close>${esc(T("Cancel"))}</button><button class="sv-btn" data-save>✓ ${esc(T("Save"))}</button></div>`, { width: 820, cls: "nw-win pm-win" });
+  const sec = (n, t, sub, body) => `<section class="ee-s"><div class="ee-sh"><span class="ee-n">${n}</span><div><b>${esc(t)}</b><small>${esc(sub)}</small></div></div>${body}</section>`;
+  const rep0 = repeatOn(e), repOpts = REPEAT_OPTIONS(rep0);
+  const p = popup(`<div class="ee-hd"><span class="ee-hi">${si(IC.docs, 30)}</span><div><h2>${esc(T("Edit Expense"))}</h2><p>${esc(T("Update transaction details and budget classification."))}</p></div><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
+    <form class="ee-form">
+      ${sec(1, T("Transaction Information"), T("Basic details about this transaction."), `<div class="ee-r3">${field(T("Date"), dateInput("date", inputDate(parseDate(e.Date))))}${field(T("Amount (zł)"), numInput("amount", plain(e.Amount)))}${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], e.Category))}</div>`)}
+      ${sec(2, T("Classification"), T("Add a description and set the importance of this expense."), `<div class="ee-r2">${field(T("Description"), textInput("description", e.Description))}<div class="ee-imp"><label>${esc(T("Expense importance"))}</label><div class="ee-chips" data-ee-imp><button type="button" data-v="1">${si(IC.shield, 18)} ${esc(T("Essential"))}</button><button type="button" data-v="0">${esc(T("Not essential"))}</button></div><small>${esc(T("Essential: a payment you must make even in a crisis."))}</small></div></div><label class="ee-hid">${check("essential", "", e.Essential)}</label>`)}
+      ${sec(3, T("Recurrence"), T("How often does this expense occur?"), `<div class="ee-chips ee-rec" data-ee-rec>${repOpts.map(([v, l]) => `<button type="button" data-v="${esc(v)}">${esc(String(l).replace("🔁 ", ""))}</button>`).join("")}</div><div class="ee-hid">${select("repeat", repOpts, rep0)}</div>`)}
+      ${sec(4, T("Financial Impact Preview"), T("See how this expense affects your financial plan."), `<div class="ee-prev" data-ee-prev></div>`)}
+    </form>
+    <div class="ee-foot"><button class="sv-btn ghost" data-close>${esc(T("Cancel"))}</button><button class="sv-btn ee-del" data-del-exp>🗑 ${esc(T("Delete Expense"))}</button><button class="sv-btn" data-save>✓ ${esc(T("Save Changes"))}</button></div>`, { width: 980, cls: "nw-win pm-win ee-win" });
+  {
+    const root = p.el, ess = root.querySelector('[name="essential"]'), rep = root.querySelector('[name="repeat"]');
+    const paint = () => {
+      root.querySelectorAll("[data-ee-imp] button").forEach(b => b.classList.toggle("on", (b.dataset.v === "1") === ess.checked));
+      root.querySelectorAll("[data-ee-rec] button").forEach(b => b.classList.toggle("on", b.dataset.v === rep.value));
+      const amt = num(root.querySelector('[name="amount"]').value) || 0, cat = root.querySelector('[name="category"]').value;
+      const mon = rep.value ? Calc.monthlyPln({ Amount: amt, Currency: "PLN", Frequency: rep.value }, D().Settings) : 0;
+      const cell = (ic, l, v, sub) => `<div><span>${si(ic, 26)}</span><span><small>${esc(l)}</small><b>${esc(v)}</b><em>${esc(sub)}</em></span></div>`;
+      root.querySelector("[data-ee-prev]").innerHTML = cell(IC.house, T("Budget Category"), categoryLabel(cat).replace(/^\S+\s/, "") || categoryLabel(cat), ess.checked ? T("Part of your essential expenses") : T("Part of your not essential expenses")) +
+        cell(IC.bars, T("Monthly Impact"), rep.value ? pln(mon) : T("One-time"), rep.value ? T("On your monthly budget") : pln(amt)) +
+        cell(IC.calx, T("Annual Impact"), rep.value ? pln(mon * 12) : pln(amt), rep.value ? T("Total per year") : T("This year only")) +
+        cell(IC.trend, T("Forecast Classification"), ess.checked ? (rep.value ? T("Essential Recurring Expense") : T("Essential Expense")) : T("Flexible Expense"), ess.checked ? T("Included in Emergency Fund calculations") : T("Not part of the Emergency Fund"));
+    };
+    root.querySelectorAll("[data-ee-imp] button").forEach(b => b.onclick = () => { ess.checked = b.dataset.v === "1"; paint(); });
+    root.querySelectorAll("[data-ee-rec] button").forEach(b => b.onclick = () => { rep.value = b.dataset.v; paint(); });
+    root.querySelectorAll("input,select").forEach(x => x.addEventListener("input", paint)); root.querySelectorAll("select").forEach(x => x.addEventListener("change", paint));
+    root.querySelector("[data-del-exp]").onclick = async () => {
+      const d = D();
+      if (await confirmBox(T("Delete?"), `${e.Description || T(e.Category)} · ${pln(e.Amount)}`, T("Delete"), T("Cancel"), true)) { toBin("expense", e); d.Expenses = d.Expenses.filter(y => y !== e); save(); p.close(); after(); }
+    };
+    paint();
+  }
   p.el.querySelector("[data-save]").onclick = () => {
     const v = values(p.el), amt = num(v.amount);
     if (!(amt > 0)) { toast(T("Please enter an amount bigger than 0."), "bad"); return; }

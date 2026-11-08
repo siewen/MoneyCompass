@@ -199,7 +199,9 @@ const IKE = 28260, IKZE = 11304, IKZE_SELF = 16956, LIMITS_YEAR = 2026;
 const BOND_NAMES = { OTS: "3 months · fixed", ROR: "1 year · variable", DOR: "2 years · variable", TOS: "3 years · fixed", COI: "4 years · inflation-linked", EDO: "10 years · inflation-linked", ROS: "6 years · family bond (800+)", ROD: "12 years · family bond (800+)" };
 const TAB_NAMES = { income: "Inflows", expenses: "Outflows", emergency: "Emergency fund", portfolio: "Savings", savings: "Compare offers" };
 
+let optTab = "plan";
 export async function openOptimize() {
+  optTab = "plan";
   if (!(await requirePro(T("Optimize my finances")))) return;
   const p = popup("", { width: 1280, cls: "wide-popup nw-win nw-opt" });
   const draw = () => { p.el.innerHTML = optimizeHtml(); bind(); };
@@ -208,7 +210,10 @@ export async function openOptimize() {
     // Choose the type of a loan right here – the comparison appears at once
     p.el.querySelectorAll("[data-loan-kind]").forEach(s => { s.onclick = e => e.stopPropagation(); s.onchange = () => {
       const l = D().Loans.find(x => x.Id === s.dataset.loanKind); if (l) { l.Kind = s.value; save(); draw(); } }; });
-    p.el.querySelectorAll("[data-optscroll]").forEach(b => b.onclick = () => p.el.querySelector(".optimize-grid")?.scrollIntoView({ behavior: "smooth" }));
+    const showTab = k => { p.el.querySelectorAll("[data-optp]").forEach(x => x.hidden = x.dataset.optp !== k); p.el.querySelectorAll("[data-opttab]").forEach(x => x.classList.toggle("on", x.dataset.opttab === k)); optTab = k; };
+    p.el.querySelectorAll("[data-opttab]").forEach(b => b.onclick = () => showTab(b.dataset.opttab));
+    p.el.querySelectorAll("[data-optscroll]").forEach(b => b.onclick = () => showTab("plan"));
+    showTab(optTab);
     p.el.querySelector('[data-action="refresh-rates"]').onclick = () => Rates.refresh(true);
     p.el.querySelectorAll("[data-compare]").forEach(b => b.onclick = async () => {
       const [list, i] = b.dataset.compare.split(":");
@@ -228,7 +233,7 @@ const exampleAmount = () => { const s = Calc.portfolio(D()).safe; return s > 0 ?
 
 
 /** Top of the Optimize window: the "Financial Optimization Center" (KPIs, top opportunity, categories, overview, projected impact). */
-function optHero(d, advice, gain) {
+function optHero(d, advice, gain, parts) {
   const hc = healthCheck(d), score = hc.length ? Math.round(hc.filter(x => x.state === "good").length / hc.length * 100) : 0;
   const money = advice.filter(a => a.kind === "money" || a.kind === "tip"), quick = advice.filter(a => a.kind !== "warning");
   const mv = moves(d)[0], p = Calc.portfolio(d), inc = Calc.totalIncome(d), avg = Calc.spending(d), spend = avg.essential + avg.nonEssential;
@@ -250,9 +255,10 @@ function optHero(d, advice, gain) {
   const bar = (l, v) => `<div class="opt-b"><i style="height:${Math.max(4, v / maxB * 100)}%"></i><small>${esc(l)}</small><b>${esc(pln(v))}</b></div>`;
   const low = `<div class="opt-low"><div class="nw-card opt-ov"><h3>${esc(T("Your Financial Overview"))}</h3><small>${esc(T("Key figures from your data"))}</small><div class="opt-ovr">${ov("wallet", T("Total Income"), esc(pln(inc)), T("per month"))}${ov("cart", T("Total Expenses"), esc(avg.monthsUsed ? pln(spend) : "–"), T("per month"))}${ov("pig", T("Total Savings"), esc(pln(p.total)), T("all accounts"))}${ov("bank", T("Total Debt"), esc(pln(debt)), T("{0} loan(s)", d.Loans.filter(l => l.Remaining > 0).length))}${ov("shield", T("Emergency Fund"), esc(pln(p.safe)), em.target > 0 ? T("Target: {0}", pln(em.target)) : "")}</div></div>
     <div class="nw-card opt-imp"><h3>${esc(T("Projected Impact"))}</h3><small>${esc(T("Your potential financial improvement per year"))}</small><div class="opt-bars">${bar(T("Current"), 0)}${bar(T("Earn more"), quickSum)}${bar(T("All opportunities"), gain)}</div></div></div>`;
+  parts.cats = catRow; parts.low = low;
   return `<div class="opt-hero"><div class="opt-hd"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T("Financial Optimization Center"))}</h2><p>${esc(T("Discover the highest-impact actions to improve your financial future."))}</p></div></div>
     <div class="opt-kpis">${kp(T("Annual Improvement Potential"), esc(pln(gain)), T("Based on {0} opportunities", advice.length), "bars", "good")}${kp(T("Active Opportunities"), String(advice.length), T("Across all financial categories"), "bulb")}${kp(T("Quick Wins"), String(quick.length), T("Steps you can do today"), "bolt")}${kp(T("Optimization Score"), score + " / 100", score >= 80 ? T("Excellent! You're on the right track.") : T("Room to improve – see the steps below."), "gauge", "good")}</div>
-    ${hero}${catRow}${low}<h3 class="opt-more">${esc(T("All details"))}</h3></div>`;
+    ${hero}</div>`;
 }
 
 const RISK_LABEL = { low: "Low risk", mid: "Medium risk", high: "High risk" };
@@ -283,13 +289,9 @@ function optimizeHtml() {
   const bonds = BOND_CODES.filter(c => Rates.bond(c) !== undefined).map(c => `<div class="bond"><b>${c}</b><span>${esc(T(BOND_NAMES[c]))}</span><b class="good">${rate(Rates.bond(c))}</b></div>`).join("") || "–";
 
   // No window title: the button that opens it already says "Optimize my finances", and each card has its own heading
-  return optHero(d, advice, gain) + `<div class="grid optimize-grid">
-    ${(() => { const hc = healthCheck(d); if (!hc.length) return "";
-      const good = hc.filter(x => x.state === "good").length;
-      return card(headingTip(T("Financial health check"), T("Your numbers compared with common rules of thumb, e.g. the 50/30/20 rule: up to 50% of income for essentials, up to 30% for the rest, at least 20% saved.")) +
-        `<p class="hint">${esc(T("{0} of {1} in the green.", good, hc.length))}</p><div class="health">` +
-        hc.map(x => `<div class="h-row"><span class="h-dot ${x.state}"></span><span class="h-label">${esc(x.label)}</span><b class="h-val ${x.state === "good" ? "" : x.state}">${esc(x.value)}</b><span class="h-aim">${esc(T("aim: {0}", x.aim))}</span></div>`).join("") + "</div>");
-    })()}
+  const parts = {}; const hero = optHero(d, advice, gain, parts);
+  return hero + `<div class="opt-tabs" role="tablist">${[["plan", T("Action plan")], ["health", T("Health & overview")], ["accounts", T("Best accounts")], ["ways", T("Ways to save")], ["note", T("Please note")]].map(([k, l], n) => `<button type="button" class="opt-tab${n ? "" : " on"}" data-opttab="${k}">${esc(l)}</button>`).join("")}</div>
+  <div class="opt-panel" data-optp="plan">${parts.cats}<div class="grid optimize-grid">
     ${card(heading(T("Your personal plan"), "🧭") + `<p class="${gain > 0 ? "good big-text" : "hint"}">${esc(gain > 0 ? T("Following these steps could be worth about {0} per year.", pln(gain)) : T("Your personal plan, based on what you entered."))}</p>` +
       hint(T("Click a step to go to the right tab.")) +
       (advice.length ? "" : `<h3 class="good">✔ ${esc(T("Well done!"))}</h3><p>${esc(T("Your emergency fund is complete, you save at least 20% and your money is in good places. Check your offers again when promotions end."))}</p>`) +
@@ -297,8 +299,17 @@ function optimizeHtml() {
         ${a.benefit > 0 ? `<b class="${kind[a.kind][1]}">${esc(a.kind === "warning" ? T("Shortfall: about {0} per year", pln(a.benefit)) : T("Worth about {0} per year", pln(a.benefit)))}</b>` : ""}
         ${a.route ? `<span class="go-link">${esc(T("Go to {0} →", T(TAB_NAMES[a.route] || "Overview")))}</span>` : ""}</div>`).join(""))}
     ${moduleOn("loans") ? debtAdvice(d) : ""}
+  </div></div><div class="opt-panel" data-optp="health" hidden>${parts.low}<div class="grid optimize-grid">
+    ${(() => { const hc = healthCheck(d); if (!hc.length) return "";
+      const good = hc.filter(x => x.state === "good").length;
+      return card(headingTip(T("Financial health check"), T("Your numbers compared with common rules of thumb, e.g. the 50/30/20 rule: up to 50% of income for essentials, up to 30% for the rest, at least 20% saved.")) +
+        `<p class="hint">${esc(T("{0} of {1} in the green.", good, hc.length))}</p><div class="health">` +
+        hc.map(x => `<div class="h-row"><span class="h-dot ${x.state}"></span><span class="h-label">${esc(x.label)}</span><b class="h-val ${x.state === "good" ? "" : x.state}">${esc(x.value)}</b><span class="h-aim">${esc(T("aim: {0}", x.aim))}</span></div>`).join("") + "</div>");
+    })()}
+  </div></div><div class="opt-panel" data-optp="accounts" hidden><div class="grid optimize-grid">
     ${card(heading(T("Best savings accounts now"), "🏦") + hint(offersStatus) + offerRows(Rates.savings, "s") + `<a class="btn second" href="${SAVINGS_RANKING}" target="_blank" rel="noopener">${esc(T("Open the full ranking"))}</a>`)}
     ${card(heading(T("Best 12-month deposits now"), "🔒") + hint(offersStatus) + offerRows(Rates.deposits, "d") + `<a class="btn second" href="${DEPOSITS_RANKING}" target="_blank" rel="noopener">${esc(T("Open the full ranking"))}</a>`)}
+  </div></div><div class="opt-panel" data-optp="ways" hidden><div class="grid optimize-grid">
     ${card(heading(T("Ways to save money in Poland"), "🗺️") + hint(T("From the safest and most flexible to long-term. Rates change often – always check the current conditions.")) + `<p>📈 ${esc(status)}</p>` + button("⟳ " + esc(T("Refresh rates")), "refresh-rates"))}
     ${option("🏦", T("Savings account (konto oszczędnościowe)"), T("Pay in and take out any time. Banks pay the best rates as 3–6 month promotions for new money, then much less."),
       esc(ref ? T("NBP reference rate: {0}. The best promotions for new money are usually about 2–3 points higher for a few months; standard rates are often lower.", ref) : "–"),
@@ -314,8 +325,9 @@ function optimizeHtml() {
       esc(T("You pay 2% of your salary (0.5–4% possible), your employer at least 1.5%, and the State adds 250 zł once and 240 zł every year.")), ["mid", T("Medium – invested in funds")], T("Long-term"), T("Almost everyone who is employed"))}
     ${option("📊", T("Crypto savings"), T("Higher rates on stablecoins and crypto, often without time limits. But no state guarantee: if the platform fails, your money can be lost."),
       esc(T("Rates differ a lot between platforms and coins and change often – there is no guarantee.")), ["high", T("High – no BFG guarantee, prices can fall")], T("Usually same day"), T("Only money you can afford to lose"))}
+  </div></div><div class="opt-panel" data-optp="note" hidden><div class="grid optimize-grid">
     ${card(heading(T("Please note")) + hint(T("These suggestions are calculated from what you entered and are estimates. They are not financial, investment or tax advice.")) + `<p class="hint"><a href="../terms.html#${lang()}" target="_blank" rel="noopener">${esc(T("Terms of use"))}</a></p>`)}
-  </div><div class="nw-foot"><span class="nw-fsh">${ico("shield", "big")}</span><div><small>${esc(T("Your data is processed locally and remains private."))}</small></div><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
+  </div></div><div class="nw-foot"><span class="nw-fsh">${ico("shield", "big")}</span><div><small>${esc(T("Your data is processed locally and remains private."))}</small></div><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
 }
 
 // ================================================================= Savings goals
