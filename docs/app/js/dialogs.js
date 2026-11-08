@@ -29,7 +29,7 @@ export function openProfile() {
   const draw = () => {
     const l = license.current, pro = license.isPro;
     const list = profiles(), bk = backupInfo(), bkOn = bk.status === "on";
-    const ok = `<span class="nw-ok">${ico("check")}</span>`;
+    const ok = `<span class="nw-ok">✓</span>`;
     const tile = (i, a, b) => `<div class="nw-tile">${ico(i, "big")}<small>${esc(a)}</small><b>${esc(b)}</b></div>`;
     const bio = bioAvailable();
     p.el.innerHTML = `<div class="nw-hd"><span class="nw-hi">${ico("shield")}</span><h2>${esc(T("Profile & Security"))}</h2><button class="nw-x" data-close aria-label="Close">✕</button></div>
@@ -197,27 +197,49 @@ export async function loadProfileFile() {
 export function openOptions() {
   const s = D().Settings;
   const bkOn = backupInfo().status === "on", tl = (i, a, b, c = "") => `<div class="nw-card nw-st">${ico(i, "big")}<span><small>${esc(a)}</small><b>${esc(b)}</b></span></div>`;
+  const pinOn = hasPin(), bioNow = bioOn(), lockMin = +s.AutoLockMinutes || 0, ok = `<span class="nw-ok">${ico("check")}</span>`, warnI = `<span class="nw-wn">!</span>`;
+  const lastBk = backupInfo().at ? fmtDate(backupInfo().at) + " " + String(backupInfo().at).slice(11, 16) : "–";
+  const secOk = pinOn, modsOn = MODULES.filter(m => s.Modules.includes(m.code)).length;
+  const hd = (i, t, tip = "") => `<div class="st-h">${ico(i)}<h3>${esc(t)}</h3></div>`;
+  const rowI = (i, label, val, good = true) => `<div class="st-row">${ico(i)}<span class="st-l">${esc(label)}</span><span class="st-v ${good ? "good" : ""}">${good ? ok : ""}${esc(val)}</span></div>`;
+  const modI = { loans: "bank", budget: "pie", calendar: "cal" };
+  const tabs = App.tabList();
   const p = popup(`<div class="nw-hd"><span class="nw-hi">${ico("gear")}</span><h2>${esc(T("Settings & Preferences"))}</h2><button class="nw-x" data-close aria-label="Close">✕</button></div>
-    <div class="nw-g4 nw-sum">${tl("globe", T("Language"), (LANGS.find(x => x[0] === lang()) || [0, lang()])[1])}${tl("coins", T("Currency"), s.Currency || "PLN")}${tl("shield", T("Security"), hasPin() ? T("Protected") : T("No PIN"))}${tl("cloud", T("Backup"), bkOn ? T("Enabled") : T("Off"))}</div>
-    <div class="grid nw-sgrid">
-    ${card(heading(T("Language")) + hint(T("Your data stays the same; only the texts change.")) + select("language", LANGS, lang()))}
-    ${card(heading(T("Main currency")) + hint(T("All amounts are shown and entered in this currency. Changing it converts everything in this profile once, at today's NBP rate. Savings accounts and income in another currency keep their own currency.")) +
-      select("maincur", [["PLN", "PLN – złoty"], ["EUR", "EUR – euro"], ["USD", "USD – dollar"]], s.Currency || "PLN"))}
-    ${card(heading(T("Menu order")) + hint(T("Change the order of the pages in the menu. On a computer you can also drag a page in the menu.")) +
-      (license.isPro ? `<div class="list tab-order">${App.tabList().map((t, i, a) => `<div class="item"><span>${esc(t.title)}</span><span class="tab-arrows">
-        <button class="icon-btn" data-tab-up="${t.route}"${i === 0 ? " disabled" : ""} title="${esc(T("Up"))}">▲</button><button class="icon-btn" data-tab-down="${t.route}"${i === a.length - 1 ? " disabled" : ""} title="${esc(T("Down"))}">▼</button></span></div>`).join("")}</div>
-        <div class="buttons">${button(esc(T("Standard order")), "reset-tabs", "second small")}</div>`
-        : `<div class="buttons">${button(esc(T("Change the menu order")) + " 🔒", "tabs-pro", "second")}</div>`))}
+    <div class="nw-g4 nw-sum">${tl("globe", T("Language"), (LANGS.find(x => x[0] === lang()) || [0, lang()])[1])}${tl("coins", T("Currency"), s.Currency || "PLN")}${tl("shield", T("Security"), pinOn ? T("Protected") : T("No PIN"))}${tl("cloud", T("Backup"), bkOn ? T("Enabled") : T("Off"))}</div>
+    <div class="nw-g2 st-g">
+      <div class="nw-card st-c">${hd("globe", T("Language"))}${select("language", LANGS, lang())}<p class="hint">${esc(T("Your data stays the same; only the texts change."))}</p></div>
+      <div class="nw-card st-c">${hd("coins", T("Currency"))}${select("maincur", [["PLN", "PLN – złoty"], ["EUR", "EUR – euro"], ["USD", "USD – dollar"]], s.Currency || "PLN")}<p class="hint">${esc(T("Used throughout reports, charts and calculations."))}</p></div>
+    </div>
+    <div class="nw-g2 st-g">
+      <div class="nw-card st-c">${hd("shield", T("Security & Privacy"))}
+        <div class="st-row">${ico("lock")}<span class="st-l">${esc(T("Automatic lock"))}</span>${select("autolock", [[0, T("Off")], ...[1, 5, 10, 15, 30, 60].map(m => [m, T("After {0} minutes", m)])], lockMin)}</div>
+        ${rowI("shield", T("PIN Protection"), pinOn ? T("Enabled") : T("Not set"), pinOn)}
+        ${rowI("finger", T("Biometric unlock"), bioNow ? T("Enabled") : bioAvailable() ? T("Available") : T("Not available"), bioNow || bioAvailable())}
+        ${rowI("shield", T("Security Status"), pinOn ? T("Protected") : T("No PIN"), pinOn)}
+        <button class="btn second st-wide" data-action="manage-sec">${ico("shield")} ${esc(T("Manage Security"))}</button></div>
+      <div class="nw-card st-c">${hd("cloud", T("Backup & Restore"))}
+        ${rowI("cloud", T("Automatic Backup"), bkOn ? T("Enabled") : T("Off"), bkOn)}
+        ${rowI("clock", T("Last Backup"), lastBk, false)}
+        ${rowI("folder", T("Backup Location"), backupInfo().file || "–", false)}
+        <div class="st-btns"><button class="btn main" data-action="make-backup">${ico("download")} ${esc(T("Create Backup"))}</button><button class="btn second" data-action="restore-backup">${ico("up")} ${esc(T("Restore Backup"))}</button></div></div>
+    </div>
+    <div class="nw-card st-c st-mods">${hd("cube", T("Modules"))}<div class="st-mg">${MODULES.map(m => `<div class="st-mod"><span class="st-mi">${ico(modI[m.code] || "cube", "big")}</span><span class="st-mt"><b>${esc(T(m.name))}</b><small>${esc(T(m.description))}</small><em class="${s.Modules.includes(m.code) ? "good" : ""}">${esc(T("Status"))}: ${s.Modules.includes(m.code) ? T("Enabled") : T("Off")}</em></span><input type="checkbox" name="mod-${m.code}"${s.Modules.includes(m.code) ? " checked" : ""}${license.isPro ? "" : " disabled"}></div>`).join("")}</div>${license.isPro ? "" : `<p class="hint">${esc(T("Modules are part of MoneyCompass Pro. Enter your license key in your profile (click your name) to use them."))}</p>`}</div>
+    <div class="nw-g3 st-g st-b">
+      <div class="nw-card st-c">${hd("list", T("Navigation Order"))}
+        ${license.isPro ? `<div class="st-nav">${tabs.map((t, i, a) => `<div class="st-ni"><span class="st-n">${i + 1}</span><span class="st-nt">${esc(t.title)}</span><span class="tab-arrows"><button class="icon-btn" data-tab-up="${t.route}"${i === 0 ? " disabled" : ""} title="${esc(T("Up"))}">▲</button><button class="icon-btn" data-tab-down="${t.route}"${i === a.length - 1 ? " disabled" : ""} title="${esc(T("Down"))}">▼</button></span></div>`).join("")}</div>
+        <button class="btn second st-small" data-action="reset-tabs">${esc(T("Standard order"))}</button>` : `<button class="btn second" data-action="tabs-pro">${esc(T("Change the menu order"))} 🔒</button>`}</div>
+      <div class="nw-card st-c">${hd("trend", T("Financial Data Sources"))}
+        <label class="check"><input type="checkbox" name="online"${s.OnlineRates ? " checked" : ""}><span>${esc(T("Download current rates from the internet"))}</span></label>
+        ${[T("Exchange rates (NBP)"), T("NBP reference rate"), T("Treasury bond rates"), T("Market reference data")].map(x => `<div class="st-src">${ok}<span>${esc(x)}</span></div>`).join("")}
+        <p class="hint">${esc(T("Only public numbers are downloaded – your own data never leaves this device."))}</p></div>
+      <div class="nw-card st-c st-sys ${secOk ? "" : "warn"}">${hd("check", T("System Status"))}
+        <p>${esc(secOk ? T("MoneyCompass is configured correctly and all protection features are active.") : T("Set a PIN to protect your data."))}</p>
+        <div class="st-sl">${[[T("Language"), (LANGS.find(x => x[0] === lang()) || [0, lang()])[1]], [T("Currency"), s.Currency || "PLN"], [T("Security"), pinOn ? T("Protected") : T("No PIN")], [T("Automatic Backup"), bkOn ? T("Enabled") : T("Off")], [T("Modules"), modsOn === MODULES.length ? T("All Active") : modsOn + "/" + MODULES.length]].map(x => `<div>${ok}<span>${esc(x[0])}: ${esc(x[1])}</span></div>`).join("")}</div>
+        <button class="btn main st-wide" data-action="adv-open">${ico("gear")} ${esc(T("Advanced Settings"))}</button></div>
+    </div>
+    <details class="st-adv" id="st-adv"><summary>${ico("gear")} ${esc(T("Advanced Settings"))}</summary><div class="grid nw-sgrid">
     ${card(heading(T("Layout")) + hint(T("Drag a card by its handle (⠿, top right) to move it, on any tab. Reset layout puts all cards back in their standard order.")) +
       `<div class="buttons">${button(esc(T("Reset layout")), "reset-layout", "second")}</div>`)}
-    ${card(heading(T("Modules")) + hint(license.isPro ? T("Switch on the modules you want. Each one adds its own tab; the tabs appear when you close Settings. Your entries stay saved when you switch a module off.")
-        : T("Modules are part of MoneyCompass Pro. Enter your license key in your profile (click your name) to use them.")) +
-      MODULES.map(m => `<label class="check"><input type="checkbox" name="mod-${m.code}"${s.Modules.includes(m.code) ? " checked" : ""}${license.isPro ? "" : " disabled"}><span><b>${esc(T(m.name))}</b>${m.beta ? ` <span class="beta-tag">${esc(T("In development"))}</span>` : ""}<br><span class="hint">${esc(T(m.description))}</span></span></label>`).join(""))}
-    ${card(heading(T("Current rates")) + check("online", T("Download current rates from the internet"), s.OnlineRates) +
-      hint(T("Exchange rates and the reference rate from NBP (Narodowy Bank Polski), treasury bond rates from the Ministry of Finance. Only public numbers are downloaded – your own data never leaves this device.")))}
-    ${card(heading("🔒 " + T("Automatic lock")) + hint(T("After this time without using MoneyCompass the screen locks, so nobody else sees your finances. With a PIN (set it in your profile: click your name) the PIN is needed to open it again.")) +
-      select("autolock", [[0, T("Off")], ...[1, 5, 10, 15, 30, 60].map(m => [m, T("After {0} minutes", m)])], +s.AutoLockMinutes || 0) +
-      hint(hasPin() ? T("This profile has a PIN.") : T("This profile has no PIN yet.")))}
     ${card(heading(T("Backup & restore")) + hint(T("Everything you enter is saved automatically, only in this browser on this device. Nothing is sent to the internet.")) +
       hint(T("Your profile is one file with all your entries (income, expenses, emergency fund, saved offers, savings, exchange rates) and your language. Use it as a backup or to move MoneyCompass to another computer.")) +
       hint(T("The file works in the Windows app too.")) +
@@ -241,8 +263,12 @@ export function openOptions() {
       `<div class="buttons">${fileProtected() ? button(esc(T("Change password…")), "file-pw", "second") + button(esc(T("Turn off")), "file-pw-off", "second")
         : button(esc(T("Protect with a password…") + (license.isPro ? "" : " 🔒")), "file-pw", "main")}</div>`)}
     ${card(heading(T("Reset")) + hint(T("Delete all or only some of your entries: income, expenses, savings, saved offers, emergency fund settings or exchange rates. Your language and other options stay.")) +
-      button(esc(T("Choose what to delete…")), "delete", "danger"))}
-    </div><div class="nw-foot"><div></div><button class="btn main" data-close>${esc(T("Close"))}</button></div>`, { width: 1100, cls: "wide-popup nw-win nw-set", onClose: () => App.rebuild() });
+      button(esc(T("Choose what to delete…")), "delete", "danger"))}</div></details>
+    <div class="nw-foot"><div></div><button class="btn second" data-close>✕ ${esc(T("Close"))}</button></div>`, { width: 1100, cls: "wide-popup nw-win nw-set", onClose: () => App.rebuild() });
+  p.el.querySelector('[data-action="manage-sec"]').onclick = () => { p.close(); openProfile(); };
+  p.el.querySelector('[data-action="make-backup"]').onclick = () => saveProfileFile();
+  p.el.querySelector('[data-action="restore-backup"]').onclick = async () => { if (await loadProfileFile()) p.close(); };
+  p.el.querySelector('[data-action="adv-open"]').onclick = () => { const d = p.el.querySelector("#st-adv"); d.open = true; d.scrollIntoView({ behavior: "smooth", block: "start" }); };
   const el = p.el;
   el.querySelector('select[name="maincur"]').onchange = async e => {
     const to = e.target.value, from = s.Currency || "PLN";
