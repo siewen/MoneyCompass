@@ -2105,3 +2105,6 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .gl-i{margin-left:6px;vertical-align:middle}
 .gl-body{display:grid;gap:12px}.gl-r b{display:block;color:var(--accent,#34d399);font-size:13px;margin-bottom:2px}.gl-r p{margin:0;font-size:15px;line-height:1.5}
 .od-sl{font-size:12px;opacity:.7;margin-left:4px}
+.cal-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
+.cal-panel[hidden]{display:none}
+.cal-main .cal-cell{min-height:66px}

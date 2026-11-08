@@ -15,7 +15,7 @@ import { toBin } from "./core.js";
 const D = () => State.data;
 const KINDS = [["expense", "Payment"], ["saving", "Transfer to savings"]];
 const RANGES = [1, 3, 6, 12];
-let range = 3, shown = null, editId = null, selectedDay = null, allPast = false;
+let calTab = "fc", range = 3, shown = null, editId = null, selectedDay = null, allPast = false;
 const folded = new Map();   // month → open (true) or closed (false), as you left it; all months start closed
 const mkey = ms => ms.getFullYear() * 12 + ms.getMonth();
 
@@ -204,7 +204,7 @@ export const Calendar = {
     const start = monthStart(today());
     // The calendar starts with the oldest month of your data (typed in or imported) and goes into the future
     const first = firstMonth(d);
-    if (!shown || shown < first) shown = first;
+    if (!shown) shown = start; if (shown < first) shown = first;
     const end = addDays(addMonths(start, range), -1);
     const all = events(d, today(), end);
     const sums = t => all.filter(e => e.type === t).reduce((s, e) => s + e.amount, 0);
@@ -320,11 +320,12 @@ export const Calendar = {
     if (si2 >= 0) { suggHtml = `<details class="cal-fold"><summary>💡 ${esc(T("Suggestions from your expenses"))} (${sugg.length})</summary>${regInner.slice(si2 + suggMark.length)}</details>`; regInner = regInner.slice(0, si2); }
     const mergedReg = `<section class="card cal-reg-card"><div class="nw-ch"><span class="rp-si i-rep">${si(IC.repeat, 24)}</span><h3>${esc(T("Regular Payments"))}</h3></div><details class="cal-fold"${r ? " open data-edit" : ""}><summary>＋ ${esc(T("Add a regular payment"))}</summary>${stripCard(formCard)}</details><div class="cal-reg-list">${regInner}</div>${suggHtml}</section>`;
     el.innerHTML = calHead + `<div class="cal-top"><div class="cal-main">${calCard}</div><div class="cal-side">${evCard}</div></div>
-    <div class="cal-mid">${chartCard}<div class="cal-reg">${mergedReg}</div></div>
-    <div class="grid">
-      ${monthsCard}
-      ${binCard(["recurring"])}
-    </div>` + calBand;
+    <div class="cal-tabs" role="tablist">${[["fc", T("Cashflow Forecast")], ["reg", T("Regular Payments")], ["mon", T("Month by month")]].map(([k, l]) => `<button type="button" class="opt-tab${calTab === k ? " on" : ""}" data-caltab="${k}">${esc(l)}</button>`).join("")}</div>
+    <div class="cal-panel" data-calp="fc"${calTab === "fc" ? "" : " hidden"}>${chartCard}</div>
+    <div class="cal-panel" data-calp="reg"${calTab === "reg" ? "" : " hidden"}><div class="cal-reg">${mergedReg}</div></div>
+    <div class="cal-panel" data-calp="mon"${calTab === "mon" ? "" : " hidden"}><div class="grid">${monthsCard}${binCard(["recurring"])}</div></div>` + calBand;
+    const setTab = k => { calTab = k; el.querySelectorAll("[data-caltab]").forEach(x => x.classList.toggle("on", x.dataset.caltab === k)); el.querySelectorAll("[data-calp]").forEach(x => x.hidden = x.dataset.calp !== k); };
+    el.querySelectorAll("[data-caltab]").forEach(b => b.onclick = () => setTab(b.dataset.caltab));
 
     el.querySelectorAll("details.cal-month").forEach(x => x.addEventListener("toggle", () => folded.set(+x.dataset.m, x.open)));
     el.querySelectorAll("[data-past]").forEach(b => b.onclick = () => { allPast = b.dataset.past === "1"; App.refresh(); });
@@ -332,7 +333,7 @@ export const Calendar = {
     el.querySelectorAll("[data-month]").forEach(b => b.onclick = () => { shown = b.dataset.month === "now" ? start : addMonths(shown, +b.dataset.month); selectedDay = null; App.refresh(); });
     el.querySelectorAll("[data-day]").forEach(b => b.onclick = () => { selectedDay = +b.dataset.day === selectedDay ? null : +b.dataset.day; App.refresh(); });
     const fm = el.querySelector("#rec");
-    el.querySelector('[data-action="sched"]').onclick = () => { const d = el.querySelector(".cal-reg-card details"); if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "center" }); const n = fm.querySelector('[name="name"]'); if (n) n.focus(); } };
+    el.querySelector('[data-action="sched"]').onclick = () => { setTab("reg"); const d = el.querySelector(".cal-reg-card details"); if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "center" }); const n = fm.querySelector('[name="name"]'); if (n) n.focus(); } };
     fm.kind.onchange = () => { fm.category.disabled = fm.kind.value === "saving"; };
     fm.category.disabled = fm.kind.value === "saving";
     el.querySelector('[data-action="save-rec"]').onclick = () => {
