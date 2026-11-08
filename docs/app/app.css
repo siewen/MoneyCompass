@@ -1858,3 +1858,23 @@ button.dz-bhi { cursor: pointer; text-align: left; font: inherit; color: inherit
 .ovs .ovh-huge{font-size:30px}.ovr4>.nw-card{overflow:hidden}
 .ovs .sv-btn{width:auto;justify-self:start}
 .ovo-btn{width:auto}
+.ovkp .delta small{display:none}
+.ovkp .kpi-ic{background:transparent!important;box-shadow:none!important;color:#2EDC9A}
+.ovkp .kpi-ic svg{width:34px;height:34px}
+.ovkp .kpi-t{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px}.ovkp .kpi-l{flex-basis:100%}
+.ovr4 .ni-fh{flex-wrap:nowrap}.ovr4 .ni-fh h3{font-size:16px;white-space:nowrap}
+.ni-sel{padding:5px 8px;font-size:13px}
+.ovo{grid-template-columns:1.2fr 1.3fr 1fr auto auto!important}
+.ovo-bars{display:flex;align-items:flex-end;gap:6px;height:64px;margin-right:18px;opacity:.55}
+.ovo-bars i{width:12px;background:linear-gradient(#2EDC9A,rgba(46,220,154,.1));border-radius:3px 3px 0 0}
+.ovb-r{flex-wrap:nowrap}.ovb-sp{min-width:90px}
+.ovr3 .ovb-b{position:absolute;right:16px;bottom:14px;margin:0}.ovr3>.nw-card{position:relative}
+@media(max-width:1200px){.ovo{grid-template-columns:1fr 1fr!important}.ovo-bars{display:none}}
+.ovkp .delta{display:inline-block!important;white-space:nowrap}
+.ovkp .kpi-t b{white-space:nowrap}
+.ovo h3{white-space:nowrap;font-size:18px}
+.ovr3 .ovb-b{position:static!important;align-self:flex-start;margin-top:6px;padding:6px 14px;font-size:12px;width:auto}
+.ovr3 .ni-fh + .ovb-r{margin-bottom:0}
+.ovkp .kpi-t b{font-size:24px}.ovkp .kpi{gap:12px}.ovkp .kpi-t{gap:2px 8px}
+.ovkp .kpi-t{flex-direction:row!important;flex-wrap:wrap;align-items:baseline}
+.ovkp .kpi-l{flex:0 0 100%}
