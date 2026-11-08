@@ -8,6 +8,7 @@ import { App, requirePro } from "./app.js";
 import { monthBars, donut, savingsChart } from "./charts.js";
 import { savingsData } from "./savings-check.js";
 import { ovTrend } from "./ov-charts.js";
+import { IC } from "./page-head.js";
 
 const D = () => State.data;
 const round = v => Math.round(v * 100) / 100;
@@ -245,13 +246,13 @@ export const Reports = {
     const pl = k => ({ summary: 0 }[k]);
     el.innerHTML = `<div class="pg-title"><span class="pg-ic">${si('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>', 34)}</span><div><h2>${esc(T("Financial Report"))}</h2><p>${esc(T("Analyze financial performance and generate professional reports."))}</p></div>
         <button class="btn main rp-gen" data-f="pdf">${esc(T("Generate Report"))}</button></div>
-      <div class="ov-kpis">${kp(T("Total Income"), pln(inflow), si('<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/>', 26), "in")}${kp(T("Total Expenses"), pln(outflow), si('<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h3"/>', 26), "out")}${kp(T("Net Balance"), pln(inflow - outflow), si('<path d="M4 17l6-6 4 4 6-8M15 7h5v5"/>', 26), "left")}${kp(T("Savings Rate"), rateTxt, si('<circle cx="12" cy="12" r="9"/><path d="M12 3v9h9"/>', 26), "rate")}</div>
-      <div class="rp-sum nw-card"><span class="rp-si">${si('<path d="M5 20V12M12 20V6M19 20V10"/>', 36)}</span><div class="rp-st"><h3>${esc(T("Financial Summary"))}</h3><small>${esc(fmtDate(r.from))} – ${esc(fmtDate(r.to))}</small></div>
+      <div class="ov-kpis">${kp(T("Total Income"), pln(inflow), si('<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/>', 26), "in")}${kp(T("Total Expenses"), pln(outflow), si('<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h3"/>', 26), "out")}${kp(T("Net Balance"), pln(inflow - outflow), si(IC.trend, 26), "left")}${kp(T("Savings Rate"), rateTxt, si('<circle cx="12" cy="12" r="9"/><path d="M12 3v9h9"/>', 26), "rate")}</div>
+      <div class="rp-sum nw-card"><span class="rp-si">${si(IC.bars, 44)}</span><div class="rp-st"><h3>${esc(T("Financial Summary"))}</h3><small>${esc(fmtDate(r.from))} – ${esc(fmtDate(r.to))}</small></div>
         <div><small>${esc(T("Inflows"))}</small><b class="good">${esc(pln(inflow))}</b></div><div><small>${esc(T("Outflows"))}</small><b>${esc(pln(outflow))}</b></div>
         <div class="rp-net"><small>${esc(T("Net Savings"))}</small><b>${esc(pln(inflow - outflow))}</b></div><div><small>${esc(T("Largest Expense"))}</small><b>${esc(big ? T(big[0]) : "–")}</b></div><div><small>${esc(T("Financial Health"))}</small><b class="good">${esc(health)}</b></div>
         <button class="btn main" data-f="pdf">${esc(T("Generate Report"))} →</button></div>
       <div class="rp-row">
-        <div class="nw-card rp-prev"><div class="nw-ch"><h3>${esc(T("Report Preview"))}</h3><span class="rp-leg"><i style="background:#35D399"></i>${esc(T("Inflows"))} <i style="background:#3B82F6"></i>${esc(T("Outflows"))}</span></div>${months.length ? ovTrend(months) : `<p class="hint">${esc(T("Nothing for this period."))}</p>`}</div>
+        <div class="nw-card rp-prev"><div class="nw-ch"><h3>${esc(T("Report Preview"))}</h3><span class="rp-leg"><i style="background:#22E39A"></i>${esc(T("Income"))} <i style="background:#FF4D5E"></i>${esc(T("Expenses"))} <i style="background:#3B9BFF"></i>${esc(T("Savings"))}</span></div>${months.length ? ovTrend(months, ["#22E39A", "#FF4D5E", "#3B9BFF"]) : `<p class="hint">${esc(T("Nothing for this period."))}</p>`}</div>
         <div class="nw-card"><div class="nw-ch"><h3>${esc(T("Report Insights"))}</h3></div><ul class="nw-ul">${insights.map(x => `<li>${okc}<span>${esc(x)}</span></li>`).join("") || `<li class="hint">–</li>`}</ul></div>
         <div class="nw-card"><div class="nw-ch"><h3>${esc(T("Period Selection"))}</h3></div><div class="rp-per">${PERIODS.map(([k, l]) => `<button class="rp-radio${o.period === k ? " on" : ""}" data-period="${k}"><i></i>${esc(T(l))}</button>`).join("")}</div>
           ${o.period === "custom" ? `<div class="two"><label class="field"><span>${esc(T("From"))}</span><input type="date" name="rfrom" value="${isoDate(r.from).slice(0, 10)}"></label>
@@ -265,7 +266,7 @@ export const Reports = {
         <div class="nw-card"><div class="nw-ch"><h3>${esc(T("Export Formats"))}</h3></div><div class="rp-fmt">
           <button data-f="xlsx" class="fx"><b>X</b>${esc(T("Excel (.xlsx)"))}</button><button data-f="pdf" class="fp"><b>PDF</b>${esc(T("PDF"))}</button><button data-f="doc" class="fw"><b>W</b>${esc(T("Word (.docx)"))}</button></div>
           <p class="hint">${esc(T("Each export is a new file with date and time, so older reports are kept."))}</p></div></div>
-      <div class="rp-trend"><span class="rp-si">${si('<path d="M5 20V12M12 20V6M19 20V10"/>', 44)}</span><div class="rp-tt"><h3>${esc(T("Financial Performance Trends"))}</h3></div>
+      <div class="rp-trend"><span class="rp-si">${si(IC.bars, 54)}</span><div class="rp-tt"><h3>${esc(T("Financial Performance Trends"))}</h3></div>
         <div><small>${esc(T("Inflows"))}</small><b>${esc(pln(inflow))}</b></div><div><small>${esc(T("Outflows"))}</small><b>${esc(pln(outflow))}</b></div><div><small>${esc(T("Balance"))}</small><b>${esc(pln(inflow - outflow))}</b></div><div><small>${esc(T("Savings Rate"))}</small><b>${esc(rateTxt)}</b></div></div>
       <div class="grid">
       ${card(heading(T("Monthly totals"), "📈") + (() => { const m = all.find(x => x[0] === "monthly")[2];

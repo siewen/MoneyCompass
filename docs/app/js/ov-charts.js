@@ -31,7 +31,8 @@ export function ovBars(months) {
 }
 
 /** Lines with dots: income, expenses and what is left over (dashed). */
-export function ovTrend(months) {
+export function ovTrend(months, col) {
+  const cIn = col ? col[0] : C_IN, cOut = col ? col[1] : C_OUT, cLeft = col ? col[2] : C_LEFT, dashLeft = !col;
   const left = months.map(m => m.income - m.expenses);
   const hi = Math.max(1, ...months.flatMap(m => [m.income, m.expenses])), lo = Math.min(0, ...left);
   const max = niceMax(hi), min = lo < 0 ? -niceMax(-lo) : 0;
@@ -41,7 +42,7 @@ export function ovTrend(months) {
     return `<polyline points="${pts.join(" ")}" fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"${dash ? ' stroke-dasharray="5 4"' : ""}/>` +
       (dots ? vals.map((v, i) => `<circle cx="${f.x(i).toFixed(1)}" cy="${f.y(v).toFixed(1)}" r="3.4" fill="${c}"><title>${esc(months[i].month)}: ${spaced(v)}</title></circle>`).join("") : "");
   };
-  return `<svg class="oc" viewBox="0 0 ${W} ${H}" role="img">${f.g}${line(months.map(m => m.income), C_IN, false, true)}${line(months.map(m => m.expenses), C_OUT, false, true)}${line(left, C_LEFT, true, false)}</svg>`;
+  return `<svg class="oc" viewBox="0 0 ${W} ${H}" role="img">${f.g}${line(months.map(m => m.income), cIn, false, true)}${line(months.map(m => m.expenses), cOut, false, true)}${line(left, cLeft, dashLeft, !!col)}</svg>`;
 }
 
 /** A small donut with its legend on the right: colour, name, share. */
