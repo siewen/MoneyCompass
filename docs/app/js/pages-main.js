@@ -4,7 +4,7 @@ import {
   today, addDays, addMonths, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
   addCategory, removeCategory, updateCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
   matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText, mainCur, currentName } from "./core.js";
-import { pageHead, band, si, IC } from "./page-head.js";
+import { pageHead, band, si, IC, ring } from "./page-head.js";
 import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
 import { ovBars, ovTrend, donutList, legendKeys, ovForecast, spark, C_IN, C_OUT, C_LEFT } from "./ov-charts.js";
 import { NEW_CAT } from "./ui.js";
@@ -818,7 +818,16 @@ export const Emergency = {
     else if (!d.Holdings.length) status = hint(T("Add your safe savings in the Savings tab to see how much of this target you already have."));
     else if (safe >= r.target) status = `<p class="good">${esc(T("Your safe money ({0}) fully covers this target.", pln(safe)))}</p>`;
     else status = progress(safe / r.target, safe / r.target >= 0.5 ? "#F59E0B" : "#DC2626") + `<p class="warn">${esc(T("Your safe money ({0}) covers {1}% of this target. Still missing: {2}.", pln(safe), Math.round(safe / r.target * 100), pln(r.target - safe)))}</p>`;
-    el.innerHTML = `<div class="grid">
+    const pct = r.target > 0 ? Math.min(100, Math.round(safe / r.target * 100)) : 0, covered = r.monthly > 0 ? safe / r.monthly : 0, missing = Math.max(0, r.target - safe);
+    const eHead = pageHead({ icon: "shield", title: T("Emergency Fund"), sub: T("Build financial security and protect yourself against unexpected events."),
+      kpis: [{ l: T("Emergency Fund Balance"), v: pln(safe), icon: "coins", cls: "in" }, { l: T("Fund Completion"), v: pct + "%", icon: "up", cls: "src" }, { l: T("Months Covered"), v: covered.toFixed(1), icon: "calx", cls: "next" }, { l: T("Target"), v: r.target > 0 ? pln(r.target) : "–", icon: "trophy", cls: "in", hi: true }],
+      btn: `<button class="btn main rp-gen" data-go="portfolio">＋ ${esc(T("Add Contribution"))}</button>` });
+    const tick = `<span class="nw-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></span>`;
+    const eIns = [r.target > 0 ? T("Emergency fund covers {0} months of expenses", covered.toFixed(1)) : T("Enter your costs below to see your target."), pct >= 100 ? T("Your target is fully covered") : r.target > 0 ? T("Still missing: {0}", pln(missing)) : null, T("Months you plan to cover: {0}", s.EmergencyMonths), T("Extra safety buffer: {0}%", s.BufferPercent ?? 0)].filter(Boolean);
+    const progCard = `<div class="nw-card bp-ov"><div class="nw-ch"><span class="rp-si i-res">${si(IC.save, 24)}</span><h3>${esc(T("Emergency Fund Progress"))}</h3></div><div class="bp-ov-b">${ring(pct, pct + "%", "", 150, "#22E39A")}<div class="bp-ov-f"><small>${esc(T("Current"))}</small><b>${esc(pln(safe))}</b><small>${esc(T("Target"))}</small><b>${esc(r.target > 0 ? pln(r.target) : "–")}</b><small>${esc(T("Remaining"))}</small><b class="${missing ? "warn" : "good"}">${esc(pln(missing))}</b></div></div><button class="btn main ex-opt" data-go="portfolio">${esc(T("Boost My Fund"))}</button></div>`;
+    const eInsCard = `<div class="nw-card bp-ins"><div class="nw-ch"><span class="rp-si i-bulb">${si(IC.bulb, 24)}</span><h3>${esc(T("AI Emergency Fund Insights"))}</h3></div><ul class="nw-ul">${eIns.map(x => `<li>${tick}<span>${esc(x)}</span></li>`).join("")}</ul></div>`;
+    const riskCard = `<div class="nw-card bp-ins"><div class="nw-ch"><span class="rp-si i-res">${si(IC.res, 24)}</span><h3>${esc(T("Risk Scenarios"))}</h3></div><div class="ex-li"><span>${esc(T("Job Loss Coverage"))}</span><b>${covered.toFixed(1)} ${esc(T("months"))}</b></div><div class="ex-li"><span>${esc(T("3 months (with buffer)"))}</span><b class="${safe >= r.three && r.three > 0 ? "good" : ""}">${safe >= r.three && r.three > 0 ? esc(T("Covered")) : esc(pln(r.three))}</b></div><div class="ex-li"><span>${esc(T("6 months (with buffer)"))}</span><b class="${safe >= r.six && r.six > 0 ? "good" : ""}">${safe >= r.six && r.six > 0 ? esc(T("Covered")) : esc(pln(r.six))}</b></div></div>`;
+    el.innerHTML = eHead + `<div class="bp-row1">${progCard}${eInsCard}${riskCard}</div><div class="grid">
       ${card(heading(T("Result")) + row(T("Monthly need (incl. yearly costs / 12)"), pln(r.monthly)) + row(T("3 months (with buffer)"), pln(r.three)) +
         row(T("6 months (with buffer)"), pln(r.six)) + row(T("Your target"), pln(r.target), "big") + status)}
       ${card(heading(T("Where to keep it")) + `<p>${esc(T("In a Polish bank savings account, in złoty: protected by the BFG up to €100,000 and available the same day. Not in crypto, and not in a long fixed deposit (lokata), because breaking it early usually loses the interest."))}</p>`)}

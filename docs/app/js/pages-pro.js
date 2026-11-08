@@ -3,7 +3,7 @@ import {
   T, State, save, Calc, Advisor, pln, rate, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addMonths, monthName,
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved, fromPln } from "./core.js";
 import { ico } from "./nw.js";
-import { pageHead, band, si, IC } from "./page-head.js";
+import { pageHead, band, si, IC, ring } from "./page-head.js";
 import { progress, hbars, savingsChart } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
@@ -341,7 +341,17 @@ export const Loans = {
     const plans = new Map(running.map(x => [x.Id, loanPlan(x)]));
     const ends = [...plans.values()];
     const debtFree = !running.length ? "–" : ends.some(p => p.never) ? T("never – see the warning") : monthName(new Date(Math.max(...ends.map(p => p.end.getTime()))));
-    el.innerHTML = `<div class="grid">
+    const remTotal = running.reduce((a, x) => a + now(x), 0), origTotal = running.reduce((a, x) => a + (x.Original > 0 ? x.Original : now(x)), 0), paidOff = origTotal > 0 ? Math.max(0, Math.min(100, Math.round((1 - remTotal / origTotal) * 100))) : 0;
+    const dScore = !running.length ? 100 : income > 0 ? Math.max(0, Math.round(100 - share * 200)) : 50;
+    const lHead = pageHead({ icon: "bank", title: T("Loans & Debts"), sub: T("Track debts, reduce interest costs and accelerate your journey to financial freedom."),
+      kpis: [{ l: T("Total Debt Remaining"), v: pln(remTotal), icon: "coins", cls: "in" }, { l: T("Monthly Payments"), v: pln(payments), icon: "calx", cls: "src" }, { l: T("Debt-Free Date"), v: debtFree, icon: "trophy", cls: "next" }, { l: T("Debt Score"), v: dScore + " / 100", icon: "shield", cls: "in", hi: true }],
+      btn: `<button class="btn main rp-gen" data-action="l-new">＋ ${esc(T("Add Loan"))}</button>` });
+    const tickL = `<span class="nw-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></span>`;
+    const lIns = [running.length ? T("{0} active loans or debts", running.length) : T("You have no active debts"), income > 0 && running.length ? T("Loan payments take {0}% of your income", Math.round(share * 100)) : null, running.length ? T("Debt-free: {0}", debtFree) : null, T("Debt Score: {0} / 100", dScore)].filter(Boolean);
+    const planCard = `<div class="nw-card bp-ov"><div class="nw-ch"><span class="rp-si i-res">${si(IC.save, 24)}</span><h3>${esc(T("Debt Freedom Plan"))}</h3></div><div class="bp-ov-b">${ring(paidOff, paidOff + "%", T("Debt Paid Off"), 150, "#22E39A")}<div class="bp-ov-f"><small>${esc(T("Remaining Debt"))}</small><b>${esc(pln(remTotal))}</b><small>${esc(T("Already Repaid"))}</small><b class="good">${esc(pln(Math.max(0, origTotal - remTotal)))}</b><small>${esc(T("Total Original Debt"))}</small><b>${esc(pln(origTotal))}</b></div></div><button class="btn main ex-opt" data-action="l-extra">${esc(T("Accelerate My Payoff Plan"))}</button></div>`;
+    const lInsCard = `<div class="nw-card bp-ins"><div class="nw-ch"><span class="rp-si i-bulb">${si(IC.bulb, 24)}</span><h3>${esc(T("AI Debt Insights"))}</h3></div><ul class="nw-ul">${lIns.map(x => `<li>${tickL}<span>${esc(x)}</span></li>`).join("")}</ul></div>`;
+    const mpCard = `<div class="nw-card bp-ins"><div class="nw-ch"><span class="rp-si i-table">${si(IC.calx, 24)}</span><h3>${esc(T("Monthly Debt Payments"))}</h3></div>${running.map(x => `<div class="cr-row bp-row"><span class="cr-name">${esc(x.Name)}</span><span class="cr-bar"><i style="width:${payments ? Math.round(x.MonthlyPayment / payments * 100) : 0}%;background:#3B9BFF"></i></span><b>${esc(pln(x.MonthlyPayment))}</b></div>`).join("") || `<p class="hint">–</p>`}</div>`;
+    el.innerHTML = lHead + `<div class="bp-row1">${planCard}${lInsCard}${mpCard}</div><div class="grid">
       ${loanChartCard(d)}
       ${card(heading(T("Your debts")) + loanProgress(running.map(x => ({ ...x, Remaining: now(x) }))) +
         (running.some(x => loanPlan(x).interestRepaid > 0) ? row(T("Interest repaid"), pln(running.reduce((s, x) => s + loanPlan(x).interestRepaid, 0))) : "") +
@@ -382,6 +392,8 @@ export const Loans = {
         <div class="buttons">${button(l ? T("Save changes") : T("Add"), "save-loan", "main")}${l ? button(T("Cancel"), "cancel-loan") : ""}</div></form>`)}
       ${binCard(["loan"])}
     </div>`;
+    el.querySelector('[data-action="l-new"]').onclick = () => { const f = el.querySelector("#loan"); f.scrollIntoView({ behavior: "smooth", block: "center" }); f.querySelector('[name="name"]')?.focus(); };
+    el.querySelector('[data-action="l-extra"]').onclick = () => { const f = el.querySelector("#extra") || el.querySelector("#loan"); f.scrollIntoView({ behavior: "smooth", block: "center" }); };
     const fm = el.querySelector("#loan");
     el.querySelector('[data-action="save-loan"]').onclick = () => {
       const v = values(fm), rem = num(v.remaining);
@@ -457,7 +469,21 @@ export const Budget = {
     const d = D();
     const limits = d.Budgets.filter(b => b.MonthlyLimit > 0);
     const total = limits.reduce((s, b) => s + b.MonthlyLimit, 0), spent = limits.reduce((s, b) => s + Calc.spentThisMonth(b.Category), 0);
-    el.innerHTML = `<div class="grid">
+    const rows = limits.map(b => ({ c: b.Category, lim: b.MonthlyLimit, sp: Calc.spentThisMonth(b.Category) })).map(x => ({ ...x, pc: x.lim ? x.sp / x.lim * 100 : 0 }));
+    const score = Math.max(0, Math.round(100 - rows.filter(x => x.pc > 80 && x.pc <= 100).length * 10 - rows.filter(x => x.pc > 100).length * 25));
+    const usage = total ? Math.round(spent / total * 100) : 0, left = total - spent;
+    const bcol = pc => pc > 100 ? "#FF4D5E" : pc > 80 ? "#FFB020" : "#22E39A";
+    const bHead = pageHead({ icon: "wallet", title: T("Budget Plan"), sub: T("Plan spending, control expenses and maximize savings."),
+      kpis: [{ l: T("Monthly Budget"), v: pln(total), icon: "coins", cls: "in" }, { l: T("Spent This Month"), v: pln(spent), icon: "cart", cls: "out" }, { l: T("Remaining Budget"), v: pln(left), icon: "up", cls: "in", vcls: left < 0 ? "bad" : "" }, { l: T("Budget Health Score"), v: score + " / 100", icon: "pig", cls: "blue", hi: true }],
+      btn: `<button class="btn main rp-gen" data-action="b-new">＋ ${esc(T("Create Budget"))}</button>` });
+    const ovCard = `<div class="nw-card bp-ov"><div class="nw-ch"><h3>${esc(T("Budget Overview"))}</h3></div><div class="bp-ov-b">${ring(usage, usage + "%", T("Budget Usage"), 150, bcol(usage))}<div class="bp-ov-f"><small>${esc(T("Budget Limit"))}</small><b>${esc(pln(total))}</b><small>${esc(T("Spent"))}</small><b>${esc(pln(spent))}</b><small>${esc(T("Remaining"))}</small><b class="${left < 0 ? "bad" : "good"}">${esc(pln(left))}</b></div></div><div class="bp-st ${usage > 100 ? "bad" : usage > 80 ? "warn" : "ok"}">${esc(usage > 100 ? T("Over budget") : usage > 80 ? T("Almost used") : T("On Track"))}</div><button class="btn main ex-opt" data-action="b-opt">${esc(T("Optimize My Budget"))}</button></div>`;
+    const catRows = rows.map(x => `<div class="cr-row bp-row"><span class="cr-name">${esc(categoryLabel(x.c))}</span><span class="cr-bar"><i style="width:${Math.min(100, x.pc)}%;background:${bcol(x.pc)}"></i></span><span>${esc(pln(x.sp))} / ${esc(pln(x.lim))}</span></div>`).join("") || `<p class="hint">${esc(T("No limits yet. Set your first one below."))}</p>`;
+    const catCardB = `<div class="nw-card bp-cat"><div class="nw-ch"><span class="rp-si i-rank">${si(IC.bars, 24)}</span><h3>${esc(T("Budget Categories"))}</h3></div>${catRows}</div>`;
+    const near = rows.filter(x => x.pc >= 60).sort((a, b) => b.pc - a.pc).slice(0, 5);
+    const nearCard = `<div class="nw-card bp-near"><div class="nw-ch"><span class="rp-si i-bulb">${si(IC.bulb, 24)}</span><h3>${esc(T("Categories Near Limit"))}</h3></div>${near.map(x => `<div class="cr-row bp-row"><span class="cr-name">${esc(categoryLabel(x.c))}</span><span class="cr-bar"><i style="width:${Math.min(100, x.pc)}%;background:${bcol(x.pc)}"></i></span><b>${Math.round(x.pc)}%</b></div>`).join("") || `<p class="hint">${esc(T("No category is close to its limit."))}</p>`}</div>`;
+    const bIns = [rows.length ? T("{0} categories have a limit", rows.length) : null, rows.filter(x => x.pc > 100).length ? T("{0} categories are over the limit", rows.filter(x => x.pc > 100).length) : T("No category is over its limit"), total ? T("{0}% of your budget is used", usage) : null, d.Goals.length ? T("To set aside for savings goals: {0}", pln(goalsPerMonth(d))) : null, T("Budget Health Score: {0} / 100", score)].filter(Boolean);
+    const insCardB = `<div class="nw-card bp-ins"><div class="nw-ch"><span class="rp-si i-bulb">${si(IC.bulb, 24)}</span><h3>${esc(T("AI Budget Insights"))}</h3></div><ul class="nw-ul">${bIns.map(x => `<li><span class="nw-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></span><span>${esc(x)}</span></li>`).join("")}</ul></div>`;
+    el.innerHTML = bHead + `<div class="bp-row1">${ovCard}${catCardB}${insCardB}</div><div class="bp-row2">${nearCard}</div><div class="grid">
       ${card(heading(monthName(today())) + row(T("Spent in categories with a limit"), pln(spent)) + row(T("Your limits together"), pln(total)) +
         row(T("Left this month"), pln(total - spent), total - spent < 0 ? "bad" : "good") +
         (d.Goals.length ? row(T("To set aside for savings goals"), pln(goalsPerMonth(d))) : ""))}
@@ -483,6 +509,8 @@ export const Budget = {
       b.querySelector("b").after(del);
     });
     const fm = el.querySelector("#budget");
+    el.querySelector('[data-action="b-new"]').onclick = () => { fm.scrollIntoView({ behavior: "smooth", block: "center" }); fm.querySelector('[name="limit"]')?.focus(); };
+    el.querySelector('[data-action="b-opt"]').onclick = () => App.openOptimize();
     el.querySelector('[data-action="save-limit"]').onclick = () => {
       const v = values(fm), lim = num(v.limit);
       if (!(lim > 0)) { toast(T("Please enter a limit above 0."), "bad"); return; }

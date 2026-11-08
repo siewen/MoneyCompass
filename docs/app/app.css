@@ -1541,3 +1541,12 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .ex-li small { min-width: 54px; text-align: right; } .ex-prev { border: 1.5px solid #19E0A0; background: linear-gradient(120deg, rgba(10,90,66,.7), rgba(8,40,34,.9)); box-shadow: 0 0 20px rgba(25,224,160,.3); } .ex-prev .ex-big { font-size: 40px; color: #fff; }
 .ex-card .nw-ch .rp-si svg, .ex-form .nw-ch .rp-si svg { width: 24px; height: 24px; } .ex-form .nw-ch { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; } .ex-form .nw-ch h3 { margin: 0; font-size: 17px; color: #fff; }
 .rp-si.i-bulb ~ h3 { }
+/* Budget Plan */
+.bp-row1 { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 14px; margin: 14px 0; align-items: stretch; } .bp-row2 { margin: 14px 0; } .bp-row1 .nw-card, .bp-row2 .nw-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09); border-radius: 14px; padding: 14px 16px; }
+.bp-row1 .nw-ch, .bp-row2 .nw-ch { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; } .bp-row1 .nw-ch h3, .bp-row2 .nw-ch h3 { margin: 0; font-size: 17px; color: #fff; } .bp-row1 .rp-si svg, .bp-row2 .rp-si svg { width: 24px; height: 24px; }
+.ring { position: relative; flex: none; } .ring-t { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; } .ring-t b { font-size: 30px; color: #fff; } .ring-t small { color: #C9D8D2; font-size: 12px; }
+.bp-ov-b { display: flex; align-items: center; gap: 20px; } .bp-ov-f small { display: block; color: #C9D8D2; margin-top: 8px; } .bp-ov-f b { font-size: 22px; color: #fff; } .bp-ov-f b.good { color: #2EF0A8; } .bp-ov-f b.bad { color: #FF6B7A; }
+.bp-st { display: inline-block; margin: 12px 0; padding: 4px 14px; border-radius: 999px; font-weight: 700; background: rgba(34,227,154,.15); color: #2EF0A8; } .bp-st.warn { background: rgba(255,176,32,.15); color: #FFB020; } .bp-st.bad { background: rgba(255,77,94,.15); color: #FF6B7A; }
+.bp-row { grid-template-columns: 1.1fr 1.6fr auto !important; margin: 12px 0; }
+@media (max-width: 1000px) { .bp-row1 { grid-template-columns: 1fr; } }
+.bp-ov-f b.warn { color: #FFB020; }

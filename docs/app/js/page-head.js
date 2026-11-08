@@ -2,6 +2,7 @@
 import { esc } from "./ui.js";
 export const si = (d, n = 26) => `<svg class="nwi" width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 export const IC = {
+  shield: '<path d="M12 2l8 3v6c0 5-3.400 9.300-8 11-4.600-1.700-8-6-8-11V5zm-1.500 14l6-6-1.400-1.400-4.600 4.600-2-2L7.100 12.600z" fill-rule="evenodd" stroke="none"/>',
   plus: '<path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 5v4h4v2h-4v4h-2v-4H7v-2h4V7z" fill-rule="evenodd" stroke="none"/>',
   repeat: '<path d="M12 4V1L7 5l5 4V6a6 6 0 016 6c0 1-.3 2-.8 2.900l1.500 1.500A8 8 0 0012 4zm-6.700 3.600A8 8 0 0012 20v3l5-4-5-4v3a6 6 0 01-6-6c0-1 .3-2 .8-2.900z" stroke="none"/>',
   eye: '<path d="M12 5C6.500 5 2.700 9 1.500 12c1.200 3 5 7 10.500 7s9.300-4 10.500-7C21.300 9 17.500 5 12 5zm0 11a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z" fill-rule="evenodd" stroke="none"/>',
@@ -29,3 +30,9 @@ export function band(title, icon, figs, cls = "", extra = "") {
   return `<div class="rp-sum nw-card ${cls}"><span class="rp-si i-${icon}">${si(IC[icon] || IC.bars, 44)}</span><div class="rp-st"><h3>${esc(title)}</h3></div>
     ${figs.map(f => `<div class="${f.big ? "rp-net" : ""}"><small>${esc(f.l)}</small><b class="${f.cls || ""}">${esc(f.v)}</b></div>`).join("")}${extra}</div>`;
 }
+
+/** Progress ring: pct 0-100, big text inside, small text under it. */
+export const ring = (pct, big, small = "", size = 150, col = "#2EDC9A") => {
+  const r = 52, c = 2 * Math.PI * r, p = Math.max(0, Math.min(100, pct));
+  return `<div class="ring" style="width:${size}px;height:${size}px"><svg viewBox="0 0 120 120" width="${size}" height="${size}"><circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="11"/><circle cx="60" cy="60" r="${r}" fill="none" stroke="${col}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(c * p / 100).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 60 60)" style="filter:drop-shadow(0 0 6px ${col})"/></svg><div class="ring-t"><b>${big}</b><small>${small}</small></div></div>`;
+};
