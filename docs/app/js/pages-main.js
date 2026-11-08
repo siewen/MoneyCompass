@@ -5,8 +5,9 @@ import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, addMonths, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
   addCategory, removeCategory, updateCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
-  matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText, mainCur, currentName } from "./core.js";
+  matchKey, lang, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText, mainCur, currentName } from "./core.js";
 import { pageHead, band, si, IC, ring } from "./page-head.js";
+const LOC = () => ({ en: "en-GB", de: "de-DE", fr: "fr-FR", pl: "pl-PL" })[lang()] || "en-GB";
 import { emergencyDash, iconizeCards, dcard, PM } from "./dash.js";
 import { lineChart } from "./ov-charts.js";
 import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
@@ -204,7 +205,7 @@ export const Overview = {
     const nwPrev = hk.length >= 2 ? hk[hk.length - 2].v : null;
     const nwCh = nwPrev && Math.abs(nwPrev) > 0 ? (netWorth - nwPrev) / Math.abs(nwPrev) * 100 : null;
     const chTag = (v, suf = "%") => v === null ? "" : `<em class="ovh-d ${v >= 0 ? "up" : "down"}">${v >= 0 ? "↑" : "↓"} ${v >= 0 ? "+" : "−"}${Math.abs(Math.round(v * 10) / 10).toString().replace(".", ",")}${suf}</em>`;
-    const mlab = k => new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(new Date(+k.slice(0, 4), +k.slice(5, 7) - 1, 1));
+    const mlab = k => new Intl.DateTimeFormat(LOC(), { month: "short", year: "numeric" }).format(new Date(+k.slice(0, 4), +k.slice(5, 7) - 1, 1));
     const nwChart = hk.length >= 2 ? lineChart(hk.map(x => mlab(x.k)), [{ vals: hk.map(x => Math.round(x.v)), color: "#2EDC9A", dots: true, area: true }], { w: 1300, h: 150 }) : `<p class="hint">${esc(T("Add income and expenses of at least two months to see your net worth over time."))}</p>`;
     const emTone = emF >= 1 ? T("Complete") : emF >= .5 ? T("On track") : T("Building up");
     const health = `<div class="nw-card ovh"><div class="ni-fh"><span class="rp-si i-res">${si(IC.bars, 26)}</span><h3>${esc(T("Financial Health Overview"))}</h3></div>
@@ -371,8 +372,8 @@ export const Income = {
     const doneM = trend.filter(m => !m.current && (m.income > 0 || m.expenses > 0));
     const lastM = doneM[doneM.length - 1], prevM = doneM[doneM.length - 2];
     const active = d.Incomes.filter(i => i.Active && i.Frequency !== ONE_TIME);
-    const fmtShort = dt => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(dt);
-    const futureM = Array.from({ length: 6 }, (_, k) => { const st = addMonths(monthStart(today()), k + 1); return { month: new Intl.DateTimeFormat("en-GB", { month: "short" }).format(st), value: Calc.upcoming(d, st, addDays(addMonths(st, 1), -1)).reduce((x, p) => x + p.amount, 0) }; });
+    const fmtShort = dt => new Intl.DateTimeFormat(LOC(), { day: "numeric", month: "short" }).format(dt);
+    const futureM = Array.from({ length: 6 }, (_, k) => { const st = addMonths(monthStart(today()), k + 1); return { month: new Intl.DateTimeFormat(LOC(), { month: "short" }).format(st), value: Calc.upcoming(d, st, addDays(addMonths(st, 1), -1)).reduce((x, p) => x + p.amount, 0) }; });
     const shares = active.map(i => Calc.monthlyPln(i, s)), totalShare = shares.reduce((x, y) => x + y, 0), maxShare = totalShare > 0 ? Math.max(...shares) / totalShare : 0;
     const iconFor = i => ic(i.Type === "Salary" ? '<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>' : i.Type === "Investments" ? '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>' : '<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/>', 22);
     const kpi = (label, value, icon, cls, extra) => `<div class="kpi static"><span class="kpi-ic ${cls}">${icon}</span><span class="kpi-t"><span class="kpi-l">${esc(label)}</span><b>${value}</b>${extra || ""}</span></div>`;
@@ -433,7 +434,7 @@ export const Income = {
     const stab = active.length ? Math.round(Math.min(100, 50 + 30 * (1 - maxShare) + (!avg.monthsUsed || left >= 0 ? 20 : 0))) : 0, stabL = !active.length ? "–" : stab >= 80 ? T("Strong") : stab >= 60 ? T("Good") : T("Fair");
     const growth = avg.monthsUsed ? Math.max(0, left) : 0, annual = inc.monthlyTotal * 12 + inc.oneTimeThisYear;
     const nM = incRange, mLabels = [], mRec = [], mAll = [];
-    for (let k = 0; k < nM; k++) { const st = addMonths(monthStart(today()), k), en = addDays(addMonths(st, 1), -1), pays = Calc.upcoming(d, k === 0 ? today() : st, en); mLabels.push(new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(st)); mAll.push(Math.round(pays.reduce((x, y) => x + y.amount, 0))); mRec.push(Math.round(inc.monthlyTotal)); }
+    for (let k = 0; k < nM; k++) { const st = addMonths(monthStart(today()), k), en = addDays(addMonths(st, 1), -1), pays = Calc.upcoming(d, k === 0 ? today() : st, en); mLabels.push(new Intl.DateTimeFormat(LOC(), { month: "short", year: "numeric" }).format(st)); mAll.push(Math.round(pays.reduce((x, y) => x + y.amount, 0))); mRec.push(Math.round(inc.monthlyTotal)); }
     const stepL = Math.ceil(nM / 6), thin = mLabels.map((l, i) => i % stepL === 0 ? l : "");
     const head = pageHead({ icon: "trend", title: T("Income Intelligence"), sub: T("Manage recurring income, forecast future cash flow and optimize financial growth."),
       kpis: [{ l: T("Monthly Income"), v: pln(inc.monthlyTotal), icon: "wallet", cls: "in" }, { l: T("Income Stability"), v: stabL, icon: "shield", cls: "src" }, { l: T("Next Payment"), v: up[0] ? fmtDate(up[0].date) : "–", icon: "cal", cls: "next" }, { l: T("Income Growth Potential"), v: pln(growth), icon: "trend", cls: "rate" }] });
