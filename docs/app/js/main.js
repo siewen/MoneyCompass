@@ -1,6 +1,7 @@
 // MoneyCompass web: the window, the tabs and starting up.
 import { store, T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed, summary, fmtDate, changedSinceFile, LANGS, duePromos } from "./core.js";
 import { esc, popup, toast } from "./ui.js";
+import { Calc, pln, restoreFromBin, binLabel, categoryLabel, today, addDays } from "./core.js";
 import { startLock, lock, hasPin } from "./lock.js";
 import { startBackup, drawBackupBar, backupProfileChanged, backupInfo } from "./backup.js";
 import { smartImport, openImportCenter } from "./import.js";
@@ -146,23 +147,41 @@ function addTransaction() {
   const go = () => { const f = document.getElementById("expense-form"); if (f) { f.scrollIntoView({ block: "center" }); f.querySelector("input,select")?.focus(); } };
   if (current === "expenses") go(); else { App.go("expenses"); setTimeout(go, 400); }
 }
-/** The bell: what needs your attention (ended promotions, a backup that is not running). */
+/** The bell: what needs your attention (ended promotions, backup, budget limits, payments due) – plus news and what was deleted. */
+const BIN_KIND = { expense: "Expenses", income: "Income", received: "Imported inflows", holding: "Savings", offer: "Compare offers", goal: "Savings goals", loan: "Loans & debts", budget: "Budget limit", recurring: "Regular payments" };
 function notices() {
   const out = [], d = State.data;
-  for (const x of duePromos(d)) out.push(x.p.ended ? T("The promotion at {0} ended on {1}", x.h.Name, fmtDate(x.p.end)) : T("The promotion at {0} ends in {1} days", x.h.Name, x.p.daysLeft));
+  for (const x of duePromos(d)) out.push({ i: "⏰", t: x.p.ended ? T("The promotion at {0} ended on {1}", x.h.Name, fmtDate(x.p.end)) : T("The promotion at {0} ends in {1} days", x.h.Name, x.p.daysLeft), go: "portfolio" });
   const b = backupInfo();
-  if (license.isPro && (b.status === "paused" || b.status === "error")) out.push(T(b.status === "paused" ? "Automatic backup is waiting for your browser's permission." : "The automatic backup could not be written."));
+  if (license.isPro && (b.status === "paused" || b.status === "error")) out.push({ i: "🛡️", t: T(b.status === "paused" ? "Automatic backup is waiting for your browser's permission." : "The automatic backup could not be written."), act: "options" });
+  if (moduleOn("budget")) for (const bu of (d.Budgets || []).filter(x => x.MonthlyLimit > 0)) {
+    const pc = Math.round(Calc.spentThisMonth(bu.Category) / bu.MonthlyLimit * 100);
+    if (pc >= 100) out.push({ i: "🔴", t: T("{0} is over its monthly limit ({1}%)", categoryLabel(bu.Category), pc), go: "budget" });
+    else if (pc >= 80) out.push({ i: "🟠", t: T("{0} has used {1}% of its monthly limit", categoryLabel(bu.Category), pc), go: "budget" });
+  }
+  if (moduleOn("calendar")) for (const r of (d.Recurring || []).filter(r => r.Active !== false && r.Kind !== "saving" && r.Amount > 0)) {
+    const n = Calc.nextPayment(r, today()); if (n && n <= addDays(today(), 7)) out.push({ i: "📅", t: T("{0}: {1} due on {2}", r.Name || categoryLabel(r.Category), pln(r.Amount), fmtDate(n)), go: "calendar" });
+  }
+  if (hasNews(false)) out.push({ i: "✨", t: T("New in MoneyCompass – tap to see what's new"), act: "news" });
   return out;
 }
 function bellMenu() {
   if (document.querySelector(".bell-menu")) { document.querySelectorAll(".bell-menu, .me-shield").forEach(x => x.remove()); return; }
-  const r = document.querySelector(".tb-bell").getBoundingClientRect(), list = notices();
+  const r = document.querySelector(".tb-bell").getBoundingClientRect(), list = notices(), del = (State.data.Deleted || []).slice(0, 5);
   const shield = document.createElement("div"); shield.className = "help-shield me-shield";
   const menu = document.createElement("div"); menu.className = "tab-menu data-menu bell-menu";
-  menu.innerHTML = list.length ? list.map(t => `<p>${esc(t)}</p>`).join("") : `<p>${esc(T("You're all caught up."))}</p>`;
+  const when = x => { const m = Math.round((Date.now() - new Date(x.DeletedAt)) / 60000); return m < 1 ? T("just now") : m < 60 ? T("{0} min ago", m) : m < 1440 ? T("{0} h ago", Math.round(m / 60)) : fmtDate(x.DeletedAt.slice(0, 10)); };
+  menu.innerHTML = `<h4>${esc(T("Needs your attention"))}</h4>` + (list.length ? list.map((n, k) => `<button class="bn-row" data-n="${k}"><span>${n.i}</span><span>${esc(n.t)}</span></button>`).join("") : `<p>${esc(T("You're all caught up."))}</p>`)
+    + `<h4>${esc(T("Recently deleted"))}</h4>` + (del.length ? del.map(x => `<div class="bn-row del"><span>🗑</span><span><b>${esc(binLabel(x).name)}</b><small>${esc(T(BIN_KIND[x.Kind] || x.Kind))} · ${esc(when(x))}</small></span><button class="bn-undo" data-undo="${x.Id}">${esc(T("Restore"))}</button></div>`).join("") : `<p class="bn-none">${esc(T("Nothing deleted recently."))}</p>`)
+    + `<button class="bn-row bn-news" data-n="news"><span>✨</span><span>${esc(T("What's new"))} · build ${WEB_BUILD}</span></button>`;
   document.body.append(shield, menu);
-  menu.style.top = (r.bottom + 8) + "px"; menu.style.left = Math.max(8, Math.min(r.right - 280, window.innerWidth - 288)) + "px";
-  shield.onclick = () => { shield.remove(); menu.remove(); };
+  menu.style.top = (r.bottom + 8) + "px"; menu.style.left = Math.max(8, Math.min(r.right - 340, window.innerWidth - 348)) + "px";
+  updateBell();
+  const close = () => { shield.remove(); menu.remove(); updateBell(); };
+  shield.onclick = close;
+  menu.querySelectorAll("[data-n]").forEach(b => b.onclick = () => { const n = b.dataset.n === "news" ? { act: "news" } : list[+b.dataset.n]; close();
+    if (n.go) App.go(n.go); else if (n.act === "options") openOptions(); else if (n.act === "news") openNews(true); });
+  menu.querySelectorAll("[data-undo]").forEach(b => b.onclick = () => { const e = restoreFromBin(b.dataset.undo); if (e) { toast(T("Restored: {0}.", binLabel(e).name)); App.refresh(); } close(); updateBell(); });
 }
 function updateBell() { const n = document.getElementById("bell-n"); if (!n) return; const c = notices().length; n.hidden = !c; n.textContent = c; }
 
