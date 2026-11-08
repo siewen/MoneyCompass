@@ -1,4 +1,5 @@
 // MoneyCompass Pro: Compare offers, Optimize my finances, Goals, Loans, Budget, bank import.
+import { infoBtn as scoreInfoBtn } from "./score-info.js";
 import {
   T, State, save, Calc, Advisor, pln, rate, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addMonths, monthName,
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved, fromPln } from "./core.js";
@@ -251,16 +252,16 @@ const exampleAmount = () => { const s = Calc.portfolio(D()).safe; return s > 0 ?
 function optHero(d, advice, gain, parts) {
   const hc = healthCheck(d), score = hc.length ? Math.round(hc.filter(x => x.state === "good").length / hc.length * 100) : 0;
   const money = advice.filter(a => a.kind === "money" || a.kind === "tip"), quick = advice.filter(a => a.kind !== "warning");
-  const mv = moves(d)[0], p = Calc.portfolio(d), inc = Calc.totalIncome(d), avg = Calc.spending(d), spend = avg.essential + avg.nonEssential;
+  const mv = moves(d)[0], isDep = !!mv && Rates.deposits.includes(mv.o), p = Calc.portfolio(d), inc = Calc.totalIncome(d), avg = Calc.spending(d), spend = avg.essential + avg.nonEssential;
   const debt = d.Loans.reduce((x, l) => x + (l.Remaining > 0 ? loanPlan(l).remainingNow : 0), 0), em = Calc.emergency(d.Settings);
-  const kp = (l, v, sub, icon, cls = "") => `<div class="nw-card opt-k"><span class="opt-ki">${si(IC[icon], 30)}</span><div><small>${esc(l)}</small><b class="${cls}">${v}</b><em>${esc(sub)}</em></div></div>`;
+  const kp = (l, v, sub, icon, cls = "") => `<div class="nw-card opt-k"><span class="opt-ki">${si(IC[icon], 30)}</span><div><small>${l.includes("<button") ? l : esc(l)}</small><b class="${cls}">${v}</b><em>${esc(sub)}</em></div></div>`;
   const top = mv ? { title: T("Move Savings to a Better Account"), text: T("Your money can work harder. Move your savings to an account with a higher interest rate and earn about {0} more per year with little effort.", pln(mv.gain)), gain: mv.gain, from: mv.h.Name, to: mv.o.Bank, amount: Calc.toPln(mv.h.Amount, mv.h.Currency, d.Settings), url: Rates.link(mv.o) }
     : advice[0] ? { title: advice[0].title, text: advice[0].text, gain: advice[0].benefit || 0, route: advice[0].route } : null;
   const chip = (icon, l, v, cls = "") => `<div class="opt-chip"><span>${si(IC[icon], 22)}</span><div><small>${esc(l)}</small><b class="${cls}">${esc(v)}</b></div></div>`;
   const hero = top ? `<div class="nw-card opt-top"><div class="opt-tag"><span class="rp-si i-res">${si(IC.trophy, 22)}</span><b>${esc(T("Top Opportunity"))}</b><span class="em-pill">${esc(T("Priority #1"))}</span></div>
     <h2>${esc(top.title)}</h2><p>${esc(top.text)}</p>
     ${mv ? `<div class="opt-move"><div><small>${esc(T("Move"))}</small><b>${esc(pln(top.amount))}</b></div><span class="opt-arr">→</span><div><small>${esc(T("From"))}</small><b>${esc(top.from)}</b></div><div class="dv"><small>${esc(T("To"))}</small><b>${esc(top.to)}</b></div></div>` : ""}
-    <div class="opt-chips">${chip("trend", T("Additional Annual Profit"), top.gain > 0 ? "+" + pln(top.gain) : "–", "good")}${mv ? chip("shield", T("Risk"), T("Very Low")) + chip("cal", T("Time Required"), T("A few minutes")) + chip("check", T("Difficulty"), T("Easy")) : ""}
+    <div class="opt-chips">${chip("trend", T("Additional Annual Profit"), top.gain > 0 ? "+" + pln(top.gain) : "–", "good")}${mv ? chip("shield", T("Risk"), top.amount > 100000 * 4.2 ? T("Low") : T("Very Low")) + chip("cal", T("Time Required"), isDep ? T("About 15 minutes") : T("A few minutes")) + chip("check", T("Difficulty"), isDep ? T("Moderate") : T("Easy")) : ""}
       ${mv ? `<button class="sv-btn opt-go" data-od-top="1">${esc(T("Details"))} →</button>` : top.route ? `<button class="sv-btn opt-go" data-route="${top.route}">${esc(T("Go to {0} →", T(TAB_NAMES[top.route] || "Overview")))}</button>` : ""}</div></div>` : "";
   const cats = [["warning", T("Risks & warnings"), "warn"], ["safety", T("Safety net"), "shield"], ["money", T("Earn more"), "coins"], ["tip", T("Smart tips"), "bulb"], ["insight", T("Insights"), "bars"]]
     .map(([k, name, icon]) => ({ k, name, icon, list: advice.filter(a => a.kind === k) })).filter(c => c.list.length);
@@ -272,7 +273,7 @@ function optHero(d, advice, gain, parts) {
     <div class="nw-card opt-imp"><h3>${esc(T("Projected Impact"))}</h3><small>${esc(T("Your potential financial improvement per year"))}</small><div class="opt-bars">${bar(T("Current"), 0)}${bar(T("Earn more"), quickSum)}${bar(T("All opportunities"), gain)}</div></div></div>`;
   parts.cats = catRow; parts.low = low;
   return `<div class="opt-hero"><div class="opt-hd"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T("Financial Optimization Center"))}</h2><p>${esc(T("Discover the highest-impact actions to improve your financial future."))}</p></div></div>
-    <div class="opt-kpis">${kp(T("Annual Improvement Potential"), esc(pln(gain)), T("Based on {0} opportunities", advice.length), "bars", "good")}${kp(T("Active Opportunities"), String(advice.length), T("Across all financial categories"), "bulb")}${kp(T("Quick Wins"), String(quick.length), T("Steps you can do today"), "bolt")}${kp(T("Optimization Score"), score + " / 100", score >= 80 ? T("Excellent! You're on the right track.") : T("Room to improve – see the steps below."), "gauge", "good")}</div>
+    <div class="opt-kpis">${kp(T("Annual Improvement Potential"), esc(pln(gain)), T("Based on {0} opportunities", advice.length), "bars", "good")}${kp(T("Active Opportunities"), String(advice.length), T("Across all financial categories"), "bulb")}${kp(T("Quick Wins"), String(quick.length), T("Steps you can do today"), "bolt")}${kp(T("Optimization Score") + scoreInfoBtn(T("Optimization Score"), score + " / 100", hc.map(x => ({ label: x.label, state: x.state, detail: x.value + " · " + T("Goal: {0}", x.aim) })), T("The share of the checks below that are green. Each check compares your own numbers with a common rule of thumb.")), score + " / 100", score >= 80 ? T("Excellent! You're on the right track.") : T("Room to improve – see the steps below."), "gauge", "good")}</div>
     ${hero}</div>`;
 }
 

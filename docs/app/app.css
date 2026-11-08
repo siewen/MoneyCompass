@@ -2045,3 +2045,13 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .wn-item li i{flex:none;width:18px;height:18px;margin-top:2px;color:#F5B83D}.wn-item li i .nwi{width:18px;height:18px;color:#F5B83D}
 .wn-ft{gap:16px}.wn-ft .check{margin:0}
 .wn-note{padding:0 28px 18px;margin:0}
+/* score info (i) button and window */
+.si-i{width:18px;height:18px;border-radius:50%;border:1.5px solid #F5B83D;background:transparent;color:#F5B83D;font:700 11px/1 Georgia,serif;font-style:italic;cursor:pointer;margin-left:6px;padding:0;vertical-align:middle;display:inline-grid;place-items:center}
+.si-i:hover{background:#F5B83D;color:#1b1400}
+.sc-win .nw-hd{padding:20px 24px 6px}.sc-body{padding:8px 24px 6px;display:grid;gap:12px}
+.sc-total{display:flex;align-items:baseline;gap:12px}.sc-total b{font-size:40px;color:#2EDC9A}
+.sc-row{display:grid;gap:5px;padding:10px 0;border-top:1px solid rgba(255,255,255,.08)}
+.sc-t{display:flex;justify-content:space-between;font-size:15px}.sc-t span{color:#2EDC9A;font-weight:700}
+.sc-t .sc-warn{color:#F5B83D}.sc-t .sc-bad{color:#F2777A}
+.sc-bar{height:8px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden}.sc-bar i{display:block;height:100%;background:linear-gradient(90deg,#2EDC9A,#19b97d)}
+.sc-row small{color:#9fb0ab}
