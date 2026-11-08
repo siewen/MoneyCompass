@@ -1820,3 +1820,41 @@ button.dz-bhi { cursor: pointer; text-align: left; font: inherit; color: inherit
 .ni-src .sv-ar,.ni-alloc .sv-ar{gap:14px}
 .inc-pop{max-height:78vh;overflow:auto}
 @media(max-width:1100px){.ni-fb,.ni-r2,.ni-r3{grid-template-columns:1fr}.ni-fr{border-left:0;padding-left:0}}
+
+/* ---- Financial Dashboard (ov*) ---- */
+.ovh{padding:16px 18px}
+.ovh-row{display:grid;grid-template-columns:1fr 1fr 1.3fr 1fr 1fr .9fr;gap:0;align-items:start}
+.ovh-row>div{display:grid;gap:4px;padding:0 18px;align-content:start}
+.ovh-row>div:first-child{padding-left:0}
+.ovh-row small{color:#9fb0ab;font-size:12px}
+.ovh-big{font-size:26px;line-height:1.15}
+.ovh-big.good,.good.ovh-big{color:#2EDC9A}
+.ovh-huge{font-size:40px;line-height:1.1}
+.ovh-d{font-style:normal;font-weight:700}.ovh-d.up{color:#2EDC9A}.ovh-d.down{color:#F2777A}
+.dv{border-left:1px solid rgba(255,255,255,.1)}
+.ovh-emr{display:flex;align-items:center;gap:12px}.ovh-emr span{display:grid;gap:2px}
+.ovh-ws{justify-items:center}
+.ovh-ch{margin-top:12px}.ovh-ch svg{width:100%;height:auto;max-height:160px}
+.ovr4{display:grid;grid-template-columns:1.25fr 1.2fr .75fr .75fr;gap:14px}
+.ovr3{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:14px}
+.ovr4>.nw-card,.ovr3>.nw-card{margin:0;min-width:0}
+.ovs{display:grid;gap:8px;align-content:start;cursor:pointer}
+.ovs small{color:#9fb0ab}
+.ni-sel{margin-left:auto;background:rgba(255,255,255,.06);color:inherit;border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:6px 10px}
+.ovo{display:grid;grid-template-columns:1.2fr 1.2fr 1fr auto;gap:0;align-items:center;padding:14px 18px;background:linear-gradient(90deg,rgba(46,220,154,.12),rgba(46,220,154,.03))}
+.ovo>div{display:flex;gap:14px;align-items:center;padding:0 18px}.ovo>div:first-child{padding-left:0}
+.ovo>div>div{display:grid;gap:3px}.ovo h3{margin:0}.ovo small{color:#9fb0ab}.ovo small.good{color:#2EDC9A}
+.ovo-c{display:grid!important;gap:3px}
+.ovo-btn{white-space:nowrap}
+.ovb-r{display:flex;align-items:center;gap:0;flex-wrap:wrap}
+.ovb-r>div{display:grid;gap:4px;padding:0 18px}.ovb-r>div:first-child{padding-left:0}
+.ovb-r small{color:#9fb0ab}
+.ovb-sp{flex:1;min-width:80px}.ovb-sp svg{width:100%;height:46px}
+.ovb-b{margin-top:8px}
+.ovb-st{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.ovb-st small{color:#9fb0ab;display:block}.ovb-st .ovh-big{font-size:20px}
+@media(max-width:1200px){.ovh-row{grid-template-columns:1fr 1fr 1fr}.ovh-row>div{padding:8px 12px}.ovr4,.ovr3,.ovo{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.ovr4,.ovr3,.ovo,.ovh-row{grid-template-columns:1fr}.dv{border-left:0}}
+.ni-sel{width:auto!important;flex:none}
+.ovs .ovh-huge{font-size:30px}.ovr4>.nw-card{overflow:hidden}
+.ovs .sv-btn{width:auto;justify-self:start}
+.ovo-btn{width:auto}

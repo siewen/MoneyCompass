@@ -35,6 +35,8 @@ const ic = (d, s = 22) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" f
 
 // ================================================================= Overview
 
+let ovRange = 6;
+const rate2 = v => (Math.round(v * 100) / 100).toString().replace(".", ",") + "%";
 export const Overview = {
   route: "overview", title: "Overview",
   render(el) {
@@ -182,7 +184,57 @@ export const Overview = {
           : hint(T("No offers saved yet. Add them in the Compare offers tab, or with the Compare button in Optimize my finances."))) +
         (best ? `<hr><p class="good">🏦 ${esc(T("Best rate right now: {0} – {1} ({2}).", best.Bank, best.Name || best.Bank, rate(best.Rate)))}</p>` : ""), "link\" data-go=\"savings"));
     }
-    el.innerHTML = hero + warn + kpis + `<div class="ov-grid">${g.join("")}</div><div class="grid">${x.join("")}</div>`;
+    // ---------- Financial Dashboard (design mockup) ----------
+    const loansAll = d.Loans.map(l => ({ ...l, Remaining: loanPlan(l).remainingNow })).filter(l => l.Remaining > 0);
+    const debt = loansAll.reduce((x, y) => x + y.Remaining, 0), netWorth = p.total - debt;
+    const svRate = both ? left / income : 0, emF = target > 0 ? p.safe / target : 0;
+    const wealth = Math.round(40 * Math.min(1, emF) + 30 * Math.min(1, Math.max(0, svRate) / 0.2) + 30 * (debt <= 0 ? 1 : income > 0 ? Math.max(0, 1 - debt / (income * 12)) : 0));
+    const wl = wealth >= 80 ? T("Excellent") : wealth >= 60 ? T("Good") : wealth >= 40 ? T("Fair") : T("Needs attention");
+    const kp = (l, v, ic2, cls, dl) => `<div class="kpi static"><span class="kpi-ic ${cls}">${si(IC[ic2])}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b>${v}</b>${dl || ""}</span></div>`;
+    const head = `<div class="pg-title"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T("Financial Dashboard"))}</h2><p>${esc(T("Your complete financial overview and personalized insights."))}</p></div></div>
+      <div class="ov-kpis">${kp(T("Income per Month"), esc(pln(income)), "wallet", "in", dIn)}${kp(T("Spending per Month"), esc(avg.monthsUsed ? pln(spending) : "–"), "cart", "out", dOut)}${kp(T("Monthly Surplus"), esc(both ? pln(left) : "–"), "pig", "left", dLeft)}${kp(T("Savings Rate"), esc(both ? savingsRateText(left, income) : "–"), "percent", "rate", dRate)}</div>`;
+    const hk = hist.map(([k, v]) => ({ k, v: v - debt })), nwPrev = hk.length >= 2 ? hk[hk.length - 2].v : null;
+    const nwCh = nwPrev && Math.abs(nwPrev) > 0 ? (netWorth - nwPrev) / Math.abs(nwPrev) * 100 : null;
+    const chTag = (v, suf = "%") => v === null ? "" : `<em class="ovh-d ${v >= 0 ? "up" : "down"}">${v >= 0 ? "↑" : "↓"} ${v >= 0 ? "+" : "−"}${Math.abs(Math.round(v * 10) / 10).toString().replace(".", ",")}${suf}</em>`;
+    const mlab = k => new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(new Date(+k.slice(0, 4), +k.slice(5, 7) - 1, 1));
+    const nwChart = hk.length >= 2 ? lineChart(hk.map(x => mlab(x.k)), [{ vals: hk.map(x => Math.round(x.v)), color: "#2EDC9A", dots: true, area: true }], { w: 1300, h: 150 }) : `<p class="hint">${esc(T("Your net worth history appears here after your savings were recorded in two different months."))}</p>`;
+    const emTone = emF >= 1 ? T("Complete") : emF >= .5 ? T("On track") : T("Building up");
+    const health = `<div class="nw-card ovh"><div class="ni-fh"><span class="rp-si i-res">${si(IC.bars, 26)}</span><h3>${esc(T("Financial Health Overview"))}</h3></div>
+      <div class="ovh-row"><div><small>${esc(T("Net Worth"))}</small><b class="ovh-big">${esc(pln(netWorth))}</b>${chTag(nwCh)}<small>${esc(T("vs. last month"))}</small></div>
+        <div class="dv"><small>${esc(T("Monthly Surplus"))}</small><b class="ovh-big">${esc(both ? pln(left) : "–")}</b>${last && prevM ? chTag((last.income - last.expenses) - (prevM.income - prevM.expenses) > 0 || true ? ((prevM.income - prevM.expenses) ? ((last.income - last.expenses) - (prevM.income - prevM.expenses)) / Math.abs(prevM.income - prevM.expenses) * 100 : null) : null) : ""}</div>
+        <div class="dv ovh-em"><small>${esc(T("Emergency Fund"))}</small><div class="ovh-emr">${ring(emF * 100, Math.round(Math.min(100, emF * 100)) + "%", "", 76)}<span><b>${esc(pln(p.safe))}</b><small>${esc(target > 0 ? T("Target: {0}", pln(target)) : T("No target set"))}</small></span></div></div>
+        <div class="dv"><small>${esc(T("Debt Position"))}</small><b class="ovh-big">${esc(pln(debt))}</b><small>${esc(debt > 0 ? T("{0} loan(s)", loansAll.length) : T("Debt-free"))}</small></div>
+        <div class="dv"><small>${esc(T("Savings Rate"))}</small><b class="ovh-big">${esc(both ? savingsRateText(left, income) : "–")}</b>${have2 && last.income > 0 && prevM.income > 0 ? chTag(((last.income - last.expenses) / last.income - (prevM.income - prevM.expenses) / prevM.income) * 100, " pp") : ""}</div>
+        <div class="dv ovh-ws"><small>${esc(T("Wealth Score"))}</small>${ring(wealth, String(wealth), "/100", 84)}</div></div>
+      <div class="ovh-ch">${nwChart}</div></div>`;
+    const ovN = ovRange, mN = months.slice(-ovN);
+    const incExp = `<div class="nw-card dz ovc"><div class="ni-fh"><span class="rp-si i-res">${si(IC.bars, 24)}</span><h3>${esc(T("Income vs Expenses"))}</h3><select class="ni-sel" data-ovr>${[3, 6, 12].map(n => `<option value="${n}"${n === ovN ? " selected" : ""}>${n} ${esc(T("Months"))}</option>`).join("")}</select></div>${legendKeys([{ color: C_IN, label: T("Income") }, { color: C_OUT, label: T("Expenses") }])}${showTrend ? ovBars(mN) : hint(T("Add income and expenses to see this chart."))}</div>`;
+    const catCard = `<div class="nw-card dz ovc">${`<div class="ni-fh"><span class="rp-si i-res">${si(IC.pie, 24)}</span><h3>${esc(T("Expense Categories"))}</h3></div>`}${cats.slices.length ? donutList(cats.slices.slice(0, 6), pln(cats.total), T("/ month"), v => ChartData.share(v, cats.total)) : hint(T("Add expenses to see where your money goes."))}</div>`;
+    const efCard = `<div class="nw-card dz ovc ovs" data-go="emergency"><div class="ni-fh"><span class="rp-si i-res">${si(IC.shield, 24)}</span><h3>${esc(T("Emergency Fund"))}</h3></div>${target > 0 ? `<b class="ovh-huge">${Math.round(Math.min(100, emF * 100))}%</b><b>${esc(pln(p.safe))} <small>/ ${esc(pln(target))}</small></b>${progress(Math.min(1, emF), "#2EDC9A")}<small>${esc(emF >= 1 ? T("Goal reached") : emF >= .5 ? T("On track to meet your goal") : T("Still building up"))}</small>` : `<p class="hint">${esc(T("Set your emergency fund target in the Emergency Fund tab."))}</p>`}</div>`;
+    const lnCard = `<div class="nw-card dz ovc ovs"><div class="ni-fh"><span class="rp-si i-res">${si(IC.wallet, 24)}</span><h3>${esc(T("Loans & Debts"))}</h3></div><b class="ovh-huge">${esc(pln(debt))}</b><small>${esc(T("Total Debt"))}</small><button class="sv-btn ghost" data-go="loans">${esc(T("View Details"))} →</button></div>`;
+    const mv = moves(d)[0], gainM = mv ? mv.gain / 12 : 0;
+    const optBand = `<div class="nw-card ovo"><div class="ovo-a"><span class="rp-si i-res">${si(IC.bulb, 34)}</span><div><h3>${esc(T("Optimization Opportunities"))}</h3><small>${esc(T("Additional Return Available"))}</small><b class="ovh-big good">${mv ? "+" + esc(pln(gainM)) + "/" + esc(T("month")) : "–"}</b></div></div>
+      <div class="ovo-b dv"><span class="rp-si i-res">${si(IC.trend, 34)}</span><div><small>${esc(T("Best Opportunity"))}</small><b>${esc(mv ? T("Move savings to {0}", mv.o.Bank) : top ? top.title : T("No suggestion right now"))}</b>${mv ? `<small class="good">${esc(T("Potential: +{0}/month", pln(gainM)))}</small>` : ""}</div></div>
+      <div class="ovo-c dv"><small>${esc(T("Expected Improvement"))}</small><b class="ovh-big good">${mv && p.total > 0 ? "+" + Math.round(mv.gain / p.total * 100 * 10) / 10 + "%" : "–"}</b></div>
+      <button class="sv-btn ovo-btn" data-action="optimize">${esc(T("View Opportunity"))} →</button></div>`;
+    const bestO = Rates.bestOffer();
+    const cmpCard = `<div class="nw-card dz ovc"><div class="ni-fh"><span class="rp-si i-res">${si(IC.bank, 24)}</span><h3>${esc(T("Compare Offers"))}</h3><button class="pm-btn" data-action="ov-cmp" title="${esc(T("Your saved offers"))}">±</button></div><div class="ovb-r"><div><small>${esc(T("Best Available Offer"))}</small><b class="ovh-big">${bestO ? esc(rate2(bestO.Rate)) + " p.a." : "–"}</b></div><div class="dv"><small>${esc(T("Additional Annual Profit"))}</small><b class="ovh-big good">${mv ? "+" + esc(pln(mv.gain)) : "–"}</b></div></div><button class="sv-btn ghost ovb-b" data-go="savings">${esc(T("Compare Now"))} →</button></div>`;
+    const svVals = hist.map(x => x[1]), svCh = svVals.length >= 2 && svVals[0] > 0 ? (svVals[svVals.length - 1] - svVals[0]) / svVals[0] * 100 : null;
+    const savCard = `<div class="nw-card dz ovc"><div class="ni-fh"><span class="rp-si i-res">${si(IC.pig, 24)}</span><h3>${esc(T("Your Savings"))}</h3><button class="pm-btn" data-action="ov-sav" title="${esc(T("Details"))}">±</button></div><div class="ovb-r"><div><small>${esc(T("Total Savings"))}</small><b class="ovh-big">${esc(pln(p.total))}</b></div><div class="dv"><small>${esc(T("Growth"))}</small><b class="ovh-big good">${svCh === null ? "–" : (svCh >= 0 ? "+" : "−") + Math.abs(Math.round(svCh * 10) / 10).toString().replace(".", ",") + "%"}</b></div><div class="ovb-sp">${spark(svVals, "#2EDC9A")}</div></div></div>`;
+    const riskPct = p.total > 0 ? p.risky / p.total : 0, risk = riskPct < .1 ? T("Low") : riskPct < .3 ? T("Medium") : T("High");
+    const statCard = `<div class="nw-card dz ovc"><div class="ni-fh"><span class="rp-si i-res">${si(IC.check, 24)}</span><h3>${esc(T("Financial Status"))}</h3><button class="pm-btn" data-action="ov-more" title="${esc(T("All details"))}">±</button></div><div class="ovb-st"><div><small>${esc(T("Wealth Score"))}</small><b class="ovh-big">${wealth} / 100</b></div><div><small>${esc(T("Emergency Fund"))}</small><b class="ovh-big good">${esc(target > 0 ? emTone : "–")}</b></div><div><small>${esc(T("Debt Health"))}</small><b class="ovh-big good">${esc(debt <= 0 ? T("Good") : income > 0 && debt / (income * 12) < .5 ? T("Good") : T("Watch"))}</b></div><div><small>${esc(T("Investment Risk"))}</small><b class="ovh-big good">${esc(risk)}</b></div></div></div>`;
+    el.innerHTML = `<div class="ni-page">${head}${warn}${health}<div class="ovr4">${incExp}${catCard}${efCard}${lnCard}</div>${optBand}<div class="ovr3">${cmpCard}${savCard}${statCard}</div></div>`;
+    el.querySelector("[data-ovr]")?.addEventListener("change", e => { ovRange = +e.target.value; App.refresh(); });
+    const openOv = (title, html) => {
+      const pp = popup("", { width: 1100, cls: "nw-win pm-win" }), orig = App.refresh;
+      pp.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC.bars, 24)}</span><h3>${esc(title)}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="inc-pop">${html}</div>`;
+      App.refresh = (...a) => { orig(...a); pp.close(); };
+      const close = pp.close; pp.close = (...a) => { App.refresh = orig; close(...a); };
+      pp.el.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", ev => { if (ev.target.closest("button,a,input,select") && ev.target.closest("button,a,input,select") !== b) return; const r = b.dataset.go; pp.close(); if (r) App.go(r); }));
+    };
+    el.querySelector('[data-action="ov-more"]')?.addEventListener("click", () => openOv(T("All details"), `<div class="ov-grid">${g.join("")}</div><div class="grid">${x.join("")}</div>`));
+    el.querySelector('[data-action="ov-sav"]')?.addEventListener("click", () => openOv(T("Your Savings"), `<div class="grid">${x.filter(c => /savings-card/.test(c)).join("")}</div>`));
+    el.querySelector('[data-action="ov-cmp"]')?.addEventListener("click", () => openOv(T("Compare Offers"), `<div class="grid">${x.filter(c => !/savings-card|next-card/.test(c)).join("")}</div>`));
     el.querySelectorAll("[data-savview]").forEach(b => b.onclick = ev => {
       ev.stopPropagation(); d.Settings.SavingsView = b.dataset.savview || null; save(); App.refresh();
     });
