@@ -9,6 +9,7 @@ import { openSavingsCheck } from "./savings-check.js";
 import { App, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
 import { WEB_VERSION, WEB_BUILD, WEB_DATE } from "./version.js";
+import { ico } from "./nw.js";
 import { openGuide, shouldShowGuide } from "./guide.js";
 import { hasNews, openNews } from "./news.js";
 import { Overview, Income, Expenses, Emergency, Portfolio, bindBin, setSearch, manageCategories } from "./pages-main.js";
@@ -403,14 +404,15 @@ async function closeApp() {
   if (!license.isPro) return finishClose(false);   // the demo keeps no backups: nothing to save before closing
   if (choice === "with") { if (await saveProfileFile()) return savedThenClose(); return; }
   if (choice === "without" || choice === "none") return finishClose(false);
-  const p = popup(`<div class="box-head"><span class="box-icon">💾</span><h2>${esc(T("Save your profile before closing?"))}</h2></div>
-    <p class="hint">${esc(T("Your entries are always kept in this browser. The profile is an extra copy, for example as a backup."))}</p>
-    <div class="box-buttons">
-      <button class="btn go" data-c="with">💾 ${esc(T("Save profile and close"))}</button>
-      <button class="btn second" data-c="without">${esc(T("Close without saving"))}</button>
-      <button class="btn second" data-c="cancel">${esc(T("Cancel"))}</button></div>
-    <label class="check"><input type="checkbox" name="remember"><span>${esc(T("Remember my choice"))}</span></label>
-    <p class="hint">${esc(T("You can change this later in Settings → Backup & restore."))}</p>`, { width: 440, cls: "box" });
+  const p = popup(`<button class="nw-x cl-x" data-c="cancel" aria-label="Close">✕</button>
+    <div class="cl"><span class="cl-ic">${ico("save")}</span><div><h2>${esc(T("Save your data before closing?"))}</h2>
+    <p>${esc(T("Your financial data is already stored locally."))}</p>
+    <p>${esc(T("Saving a profile creates a backup that can be restored later or transferred to another device."))}</p></div></div>
+    <label class="cl-rem"><input type="checkbox" name="remember"><i></i><span>${esc(T("Remember my choice"))}</span></label>
+    <div class="cl-btns"><button class="btn main" data-c="with">${ico("save")}${esc(T("Save Backup and Close"))}</button>
+      <button class="btn second" data-c="without">${esc(T("Close Without Saving"))}</button>
+      <button class="cl-cancel" data-c="cancel">${esc(T("Cancel"))}</button></div>
+    <p class="cl-note">${ico("info")}${esc(T("You can change this later in:"))} <b>${esc(T("Settings → Backup & restore"))}</b></p>`, { width: 640, cls: "nw-win cl-win" });
   p.el.querySelectorAll("[data-c]").forEach(b => b.onclick = () => {
     const c = b.dataset.c;
     p.close();
