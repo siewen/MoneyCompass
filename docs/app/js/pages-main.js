@@ -5,7 +5,7 @@ import {
   addCategory, removeCategory, updateCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
   matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText, mainCur, currentName } from "./core.js";
 import { pageHead, band, si, IC, ring } from "./page-head.js";
-import { emergencyDash, iconizeCards, dcard } from "./dash.js";
+import { emergencyDash, iconizeCards, dcard, PM } from "./dash.js";
 import { lineChart } from "./ov-charts.js";
 import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
 import { ovBars, ovTrend, donutList, legendKeys, ovForecast, spark, C_IN, C_OUT, C_LEFT } from "./ov-charts.js";
@@ -487,6 +487,7 @@ export async function offerSalary(r) {
 
 let showAllMonths = false;
 const flt = { cat: "", text: "", ess: "", rep: false, min: "", max: "", days: "" };   // filter of "Your expenses"
+let lastEx = { hist: "", side: "" };
 export const Expenses = {
   route: "expenses", title: "Outflows",
   render(el) {
@@ -570,7 +571,7 @@ export const Expenses = {
       kpis: [{ l: T("Monthly Spending"), v: monthly ? pln(monthly) : "–", icon: "wallet", cls: "in" }, { l: T("Average Daily Spending"), v: monthly ? pln(monthly / 30) : "–", icon: "cal", cls: "src" },
         { l: T("Largest Category"), v: sorted0[0] ? categoryLabel(sorted0[0].category) : "–", sub: sorted0[0] ? pln(sorted0[0].perMonth) : "", icon: "star", cls: "left" }, { l: T("Savings Opportunity"), v: pln(saveM) + "/" + T("month"), vcls: "good", icon: "pig", cls: "rate" }] });
     const bdAll = (cats.all || []).map((c, n) => ({ label: categoryLabel(c.category), value: c.perMonth, color: COLORS.cats[n % COLORS.cats.length], sh: ChartData.share(c.perMonth, cats.total) }));
-    const breakCard = dcard("pie", "res", T("Spending Breakdown"), bdAll.length ? `<div class="sv-ar ei-br">${donut(bdAll, pln(cats.total), T("/month"), 150)}<ul class="sv-al">${bdAll.slice(0, 7).map(x => `<li data-cat="${esc(x.label)}"><i style="background:${x.color}"></i><span>${esc(x.label)}</span><b>${esc(String(x.sh).includes("%") ? x.sh : x.sh + "%")}</b></li>`).join("")}</ul></div>` : `<p class="hint">${esc(T("Add expenses to see where your money goes."))}</p>`, { klass: "ei-break" });
+    const breakCard = dcard("pie", "res", T("Spending Breakdown"), bdAll.length ? `<div class="sv-ar ei-br">${donut(bdAll, pln(cats.total), T("/month"), 150)}<ul class="sv-al">${bdAll.slice(0, 7).map(x => `<li data-cat="${esc(x.label)}"><i style="background:${x.color}"></i><span>${esc(x.label)}</span><b>${esc(String(x.sh).includes("%") ? x.sh : x.sh + "%")}</b></li>`).join("")}</ul></div>` : `<p class="hint">${esc(T("Add expenses to see where your money goes."))}</p>`, { klass: "ei-break", extra: PM("ex-more", T("Monthly average and transfers")) });
     const trendC = dcard("trend", "res", T("Monthly Spending Trend"), `<span class="sv-leg"><i style="background:#2EDC9A"></i>${esc(T("Current Month"))}<i style="background:#3B9BFF"></i>${esc(T("Previous Month"))}<i style="background:#F5A623"></i>${esc(T("3-Month Average"))}</span>` +
       lineChart(dayL, [{ vals: avg3, color: "#F5A623", dash: true }, { vals: prev, color: "#3B9BFF" }, { vals: cur, color: "#2EDC9A", dots: false }], { w: 560, h: 190 }), { klass: "ei-trend" });
     const fcLine = Array.from({ length: dim }, (_, i) => Math.round(proj * (i + 1) / dim));
@@ -578,13 +579,13 @@ export const Expenses = {
       lineChart(Array(dim).fill(""), [{ vals: fcLine, color: "#2EDC9A", area: true }].concat(budgetLim ? [{ vals: Array(dim).fill(budgetLim), color: "#FFB020", dash: true }] : []), { w: 420, h: 150 }) + `<span class="sv-leg"><i style="background:#2EDC9A"></i>${esc(T("Trend Projection"))}</span>`, { klass: "ei-fc" });
     const lastM = monthSum(-1), prevM = monthSum(-2), downUp = lastM && prevM ? (lastM < prevM ? T("Spending is trending downward.") : T("Spending is trending upward.")) : null;
     const insights = [sorted0[0] ? T("Largest category remains stable.") : null, downUp, otherCount ? T("{0} transactions remain uncategorized.", otherCount) : null, budgetLim ? T("Budget remains within acceptable range.") : null, saveM > 0 ? T("Monthly savings opportunity identified.") : null].filter(Boolean);
-    const insC = dcard("sparkle", "res", T("AI Spending Insights"), `<ul class="nw-ul">${insights.map(x => `<li>${okE}<span>${esc(x)}</span></li>`).join("") || `<li class="hint">–</li>`}</ul>`, { klass: "ei-ins" });
+    const insC = dcard("sparkle", "res", T("AI Spending Insights"), `<ul class="nw-ul">${insights.map(x => `<li>${okE}<span>${esc(x)}</span></li>`).join("") || `<li class="hint">–</li>`}</ul>` + (otherCount >= 2 ? `<button class="ex-sortbtn" data-action="sort-other">🏷 ${esc(T("{0} outflows are in \"Other\" – sort them by shop in one go →", otherCount))}</button>` : ""), { klass: "ei-ins" });
     const chg = c => { const a = monthSum(-1, c), b2 = monthSum(-2, c); if (!(b2 > 0)) return `<span class="ei-ch">–</span>`; const v = Math.round((a - b2) / b2 * 100); return `<span class="ei-ch ${v > 0 ? "up" : v < 0 ? "dn" : ""}">${v > 0 ? "↑ +" : v < 0 ? "↓ " : "↔ "}${v}%</span>`; };
     const anaC = dcard("bars", "res", T("Category Analysis"), `<table class="sv-t ei-t"><thead><tr><th>${esc(T("Category"))}</th><th>${esc(T("Amount"))}</th><th>${esc(T("Change"))}</th></tr></thead><tbody>${sorted0.slice(0, 5).map(c => `<tr><td>${esc(categoryLabel(c.category))}</td><td><b>${esc(pln(c.perMonth))}</b></td><td>${chg(c.category)}</td></tr>`).join("") || `<tr><td colspan="3" class="hint">–</td></tr>`}</tbody></table>`, { klass: "ei-ana" });
     const reps0 = d.Expenses.filter(e => e.Repeat), seenR = new Set(), bills = reps0.filter(e => { const k = e.Description || e.Category; if (seenR.has(k)) return false; seenR.add(k); return true; }).map(e => ({ e, due: Calc.nextPayment({ Date: e.Date, Frequency: e.Repeat }, today()) || e.Date })).sort((x, y) => parseDate(x.due) - parseDate(y.due)).slice(0, 4);
     const billC = dcard("calx", "res", T("Upcoming Bills"), `<table class="sv-t ei-t"><thead><tr><th>${esc(T("Due Date"))}</th><th>${esc(T("Bill"))}</th><th>${esc(T("Amount"))}</th></tr></thead><tbody>${bills.map(x => `<tr><td>${esc(fmtDate(x.due))}</td><td>${esc(x.e.Description || T(x.e.Category))}</td><td><b>${esc(pln(x.e.Amount))}</b></td></tr>`).join("") || `<tr><td colspan="3" class="hint">${esc(T("Mark an expense with 🔁 to see it here."))}</td></tr>`}</tbody></table>`, { klass: "ei-bills" });
     const recent = [...d.Expenses].sort((x, y) => parseDate(y.Date) - parseDate(x.Date)).slice(0, 3);
-    const recC = `<div class="nw-card dz ei-rec"><div class="nw-ch"><h3>${esc(T("Recent Expenses"))}</h3></div>${recent.map(e => `<div class="ei-rr"><span>${esc(categoryIcon(e.Category) || "🧾")}</span><small>${esc(fmtDate(e.Date))}</small><b>${esc(e.Description || T(e.Category))}</b><em>${esc(T(e.Category))}</em><b>${esc(pln(e.Amount))}</b></div>`).join("") || `<p class="hint">–</p>`}</div>`;
+    const recC = `<div class="nw-card dz ei-rec"><div class="nw-ch"><h3>${esc(T("Recent Expenses"))}</h3>${PM("ex-hist", T("Outflow history"))}</div>${recent.map(e => `<div class="ei-rr"><span>${esc(categoryIcon(e.Category) || "🧾")}</span><small>${esc(fmtDate(e.Date))}</small><b>${esc(e.Description || T(e.Category))}</b><em>${esc(T(e.Category))}</em><b>${esc(pln(e.Amount))}</b></div>`).join("") || `<p class="hint">–</p>`}</div>`;
     const topCats = sorted0.slice(0, 6);
     const quickC = `<div class="nw-card dz ei-quick"><div class="ei-qa"><h3>${esc(T("Quick Category Access"))}</h3><div class="ex-chips">${topCats.map(c => `<button class="ex-chip" data-quick="${esc(c.category)}">${esc(categoryLabel(c.category))}</button>`).join("") || `<p class="hint">–</p>`}</div></div>
       <div class="ei-ae"><h3>${esc(T("Add Expense"))}</h3><small>${esc(T("Date"))}</small>${dateInput("qdate", inputDate(today()))}<button class="sv-btn ei-add" data-action="ex-add">＋ ${esc(T("Add Expense"))}</button></div></div>`;
@@ -592,13 +593,8 @@ export const Expenses = {
     const hs = Math.max(0, Math.min(100, Math.round(100 - share * 60 - Math.min(10, otherCount) - (over ? 10 : 0)))), unn = share < 0.25 ? T("Low") : share < 0.45 ? T("Medium") : T("High");
     const healthC = `<div class="nw-card dz ei-health"><div class="nw-ch"><h3>${esc(T("Expense Health Score"))}</h3></div><div class="ei-hb">${ring(hs, String(hs), "/ 100", 110, "#22E39A")}<div class="ei-hl"><p>${okE}<span><small>${esc(T("Unnecessary Spending"))}</small><b class="good">${esc(unn)}</b></span></p><p>${okE}<span><small>${esc(T("Budget Compliance"))}</small><b class="good">${esc(over ? T("Over limit") : T("Healthy"))}</b></span></p><p>${okE}<span><small>${esc(T("Potential Additional Savings"))}</small><b class="good">${esc(pln(saveM))}/${esc(T("month"))}</b></span></p></div></div></div>`;
     const msg = `<div class="nw-card ei-msg">${okE}<span>${esc(saveM > 0 ? T("Your spending remains under control and opportunities exist to improve monthly savings.") : T("Add your expenses to get personal savings opportunities."))}</span></div>`;
-    el.innerHTML = `<div class="ei-page">` + expHead2 + optBand + `<div class="ei-r1">${breakCard}${trendC}${fcC}</div><div class="ei-r2">${insC}${anaC}${billC}</div><div class="ei-r3">${recC}${quickC}${healthC}</div>${msg}</div>${tipC}
-    <div class="grid">
-      ${avgCard}
-      ${histCard}
-      ${movedCard(d)}
-      ${binCard(["expense"])}
-    </div>`;
+    el.innerHTML = `<div class="ei-page">` + expHead2 + optBand + `<div class="ei-r1">${breakCard}${trendC}${fcC}</div><div class="ei-r2">${insC}${anaC}${billC}</div><div class="ei-r3">${recC}${quickC}${healthC}</div>${msg}</div>`;
+    lastEx = { hist: histCard + binCard(["expense"]), side: avgCard + movedCard(d) };
     const openAdd = (cat, date) => {
       const cat1 = findCategory(cat) || cat0;
       const pp = popup("", { width: 580, cls: "nw-win pm-win" });
@@ -624,23 +620,33 @@ export const Expenses = {
     el.querySelectorAll("[data-quick]").forEach(b => b.onclick = () => openAdd(b.dataset.quick, el.querySelector('[name="qdate"]')?.value));
     el.querySelectorAll('[data-action="ex-optimize"]').forEach(b => b.addEventListener("click", () => App.openOptimize()));
     el.querySelector('[data-action="sort-other"]')?.addEventListener("click", () => sortOther(() => App.refresh()));
-    const olderBtn = el.querySelector('[data-action="older"]');
+    const bindHist = root => {
+    const olderBtn = root.querySelector('[data-action="older"]');
     if (olderBtn) olderBtn.onclick = () => { showAllMonths = true; App.refresh(); };
     // Filter: re-draw the list, and keep typing in the search box
-    const ft = el.querySelector('[name="f-text"]');
+    const ft = root.querySelector('[name="f-text"]');
     if (ft) {
       let timer;
       ft.oninput = () => { clearTimeout(timer); timer = setTimeout(() => { flt.text = ft.value; App.refresh();
         // the cards are laid out again just after drawing, so put the cursor back a moment later
         setTimeout(() => { const n = document.querySelector('[name="f-text"]'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 30); }, 350); };
-      el.querySelector('[name="f-cat"]').onchange = e => { flt.cat = e.target.value; App.refresh(); };
-      el.querySelector('[name="f-ess"]').onchange = e => { flt.ess = e.target.value; App.refresh(); };
-      el.querySelector('[name="f-rep"]').onchange = e => { flt.rep = e.target.checked; App.refresh(); };
-      el.querySelector('[name="f-days"]').onchange = e => { flt.days = e.target.value; App.refresh(); };
-      ["min", "max"].forEach(k => { el.querySelector(`[name="f-${k}"]`).onchange = e => { flt[k] = e.target.value.trim(); App.refresh(); }; });
-      const clr = el.querySelector('[data-action="f-clear"]'); if (clr) clr.onclick = () => { Object.assign(flt, { cat: "", text: "", ess: "", rep: false, min: "", max: "", days: "" }); App.refresh(); };
+      root.querySelector('[name="f-cat"]').onchange = e => { flt.cat = e.target.value; App.refresh(); };
+      root.querySelector('[name="f-ess"]').onchange = e => { flt.ess = e.target.value; App.refresh(); };
+      root.querySelector('[name="f-rep"]').onchange = e => { flt.rep = e.target.checked; App.refresh(); };
+      root.querySelector('[name="f-days"]').onchange = e => { flt.days = e.target.value; App.refresh(); };
+      ["min", "max"].forEach(k => { root.querySelector(`[name="f-${k}"]`).onchange = e => { flt[k] = e.target.value.trim(); App.refresh(); }; });
+      const clr = root.querySelector('[data-action="f-clear"]'); if (clr) clr.onclick = () => { Object.assign(flt, { cat: "", text: "", ess: "", rep: false, min: "", max: "", days: "" }); App.refresh(); };
     }
-    el.querySelectorAll(".legend-row[data-cat]").forEach(r => r.onclick = () => showCategory(r.dataset.cat));
+    };
+    const openWin = (title, icon, key, wide) => {
+      const pp = popup("", { width: wide, cls: "nw-win pm-win" }), orig = App.refresh;
+      const draw = () => { pp.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC[icon], 24)}</span><h3>${esc(title)}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="grid bp-flat ex-pop">${lastEx[key]}</div>`; bindHist(pp.el); bindExpenseRows(pp.el); bindBin(pp.el); };
+      App.refresh = (...a) => { orig(...a); if (!pp.closed) draw(); };
+      const close = pp.close; pp.close = (...a) => { App.refresh = orig; close(...a); };
+      draw();
+    };
+    el.querySelector('[data-action="ex-hist"]')?.addEventListener("click", () => openWin(T("Outflow history"), "table", "hist", 1000));
+    el.querySelector('[data-action="ex-more"]')?.addEventListener("click", () => openWin(T("Monthly average and transfers"), "calx", "side", 860));
     bindExpenseRows(el);
   },
 };
