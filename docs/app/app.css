@@ -2115,3 +2115,13 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .ovr4>.nw-card{min-width:0}
 .ovc .ovh-huge{font-size:clamp(20px,2vw,32px)}
 .ovc{position:relative}.ovc .spark{position:absolute;right:14px;bottom:16px;top:auto;width:80px;height:26px}
+.sv-op{grid-template-columns:44px minmax(0,1.3fr) minmax(0,1fr) minmax(132px,auto) !important;gap:10px !important;padding-right:10px !important}
+.sv-opg b{font-size:clamp(18px,1.6vw,26px) !important;white-space:nowrap}
+.sv-btn{min-width:0 !important;padding:7px 12px}
+.sv-hn{min-width:0}.sv-hn small{white-space:normal}
+.sv-h{grid-template-columns:44px minmax(0,1fr) auto auto auto !important}
+.sv-hv{white-space:nowrap}
+.sv-hold .sv-hi{display:none}
+.sv-h{grid-template-columns:minmax(0,1fr) auto auto auto !important}
+.sv-hv{font-size:.88rem !important}.sv-hr{min-width:44px !important}
+.sv-hn b{overflow-wrap:break-word}
