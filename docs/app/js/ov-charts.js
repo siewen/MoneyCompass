@@ -8,11 +8,12 @@ const niceMax = v => { if (!(v > 0)) return 1; const p = 10 ** Math.floor(Math.l
 let W = 520, H = 240; const L = 58, R = 8, TOP = 10, B = 30;
 
 /** Axis, grid lines and month names; returns the svg start, and a y() to place values. */
+const compactAx = v => { const a = Math.abs(v), sg = v < 0 ? "−" : ""; return a >= 1e6 ? sg + (Math.round(a / 1e5) / 10).toString().replace(".", ",") + "M" : a >= 1000 ? sg + Math.round(a / 1000) + "k" : String(Math.round(v)); };
 function frame(months, min, max) {
   const n = months.length, inner = W - L - R, h = H - TOP - B, step = (max - min) / 4;
   const y = v => TOP + h - (v - min) / (max - min) * h;
   let g = "";
-  for (let i = 0; i <= 4; i++) { const v = min + step * i; g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(255,255,255,.08)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" class="oc-ax">${spaced(v)}</text>`; }
+  for (let i = 0; i <= 4; i++) { const v = min + step * i; g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(255,255,255,.08)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" class="oc-ax">${max >= 100000 ? compactAx(v) : spaced(v)}</text>`; }
   const x = i => L + inner * (i + .5) / n;
   const lab = months.map((m, i) => `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" class="oc-ax${m.current ? " cur" : ""}">${esc((/^(\d{4}|\w{3} \d{4})$/.test(m.month) ? m.month : m.month.slice(0, 3)) + (m.current ? "*" : ""))}</text>`).join("");
   return { g: g + lab, x, y, inner, n };
