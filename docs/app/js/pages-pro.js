@@ -479,7 +479,7 @@ export const Budget = {
     // Savings goals: one card (summary + list), with "Add a goal" folded inside
     const sec = document.createElement("section"); sec.className = "nw-card dz bp-panel goals-section";
     sec.innerHTML = `<div class="nw-ch"><span class="rp-si i-res">${si(IC.flag, 24)}</span><h3>${esc(T("Savings goals"))}</h3></div><div class="goals-host bp-flat"></div>`;
-    el.querySelector(".bp-pair").appendChild(sec);
+    el.querySelector(".bp-goals-slot").replaceWith(sec);
     const gh = sec.querySelector(".goals-host"); Goals.render(gh);
     { const cs = [...gh.querySelectorAll(".nw-card")]; if (cs.length >= 3) {
       const [c1, c2, c3] = cs; c1.querySelector(".nw-ch")?.remove(); c2.querySelector(".nw-ch")?.remove();
