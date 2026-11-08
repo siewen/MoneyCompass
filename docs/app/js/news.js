@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 86, date: "2026-11-08", items: {
+    en: ["✨ New look for the Overview: new compass logo, a fixed side menu with Reports and Settings, a top bar with search, Import, Export and your profile, a greeting, and income, spending, left over and savings rate with the change against the previous month."],
+    pl: ["✨ Nowy wygląd Przeglądu: nowe logo, stałe menu boczne, pasek wyszukiwania, powitanie i zmiana względem poprzedniego miesiąca."],
+    de: ["✨ Neues Aussehen der Übersicht: neues Logo, festes Seitenmenü, Suchleiste, Begrüßung und Veränderung zum Vormonat."],
+    fr: ["✨ Nouveau look de l'aperçu : nouveau logo, menu latéral fixe, barre de recherche, accueil et variation par rapport au mois précédent."] } },
   { build: 85, date: "2026-11-03", items: {
     en: ["🛡️ Automatic backup: clearer message after a browser restart. The backup stays on – the browser only asks once for permission. Choose \"Allow on every visit\" and it won't ask again."],
     pl: ["🛡️ Automatyczna kopia: jaśniejszy komunikat po ponownym uruchomieniu przeglądarki. Kopia pozostaje włączona – przeglądarka tylko raz prosi o zgodę. Wybierz „Zezwalaj przy każdej wizycie”, a nie zapyta ponownie."],

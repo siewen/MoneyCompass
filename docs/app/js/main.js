@@ -11,7 +11,7 @@ import { Rates } from "./rates.js";
 import { WEB_VERSION, WEB_BUILD, WEB_DATE } from "./version.js";
 import { openGuide, shouldShowGuide } from "./guide.js";
 import { hasNews, openNews } from "./news.js";
-import { Overview, Income, Expenses, Emergency, Portfolio, bindBin } from "./pages-main.js";
+import { Overview, Income, Expenses, Emergency, Portfolio, bindBin, setSearch } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
 import { Calendar } from "./calendar.js";
 import { promoReminder } from "./advice.js";
@@ -61,7 +61,7 @@ const TAB_ICON = {
 /** MoneyCompass has one design: Emerald (dark green, side menu on wide screens, bottom bar on phones). */
 const beta = () => "emerald";
 /** Side menu: "auto" folds to icons and opens when the mouse is on it, "pinned" stays open. */
-const side = () => { try { return localStorage.getItem("mc-side") || "auto"; } catch { return "auto"; } };
+const side = () => { try { return localStorage.getItem("mc-side") || "pinned"; } catch { return "auto"; } };
 function toggleSide() {
   const v = side() === "pinned" ? "auto" : "pinned";
   try { localStorage.setItem("mc-side", v); } catch { /* private window */ }
@@ -85,18 +85,24 @@ function buildShell() {
   document.title = "MoneyCompass";
   const list = tabs();
   if (!list.some(t => t.route === current)) current = "overview";
+  // Sidebar like the mockup: the pages, then a line with Reports and Settings at the bottom
+  const NAMES = { income: "Income", expenses: "Expenses", emergency: "Emergency Fund", portfolio: "My Savings", loans: "Loans & Debts", budget: "Budget Plan", savings: "Compare Offers" };
+  const tabBtn = t => `<button class="tab${t.route === "reports" ? " tab-reports" : ""}" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}"><span class="ti">${TAB_ICON[t.route] || ""}</span><span class="tl">${esc(lang() === "en" && NAMES[t.route] || T(t.title))}${t.route === "investments" ? ` <span class="beta-tag">${esc(T("Beta"))}</span>` : ""}</span></button>`;
+  const main = list.filter(t => t.route !== "reports"), foot = list.filter(t => t.route === "reports");
   document.getElementById("app").innerHTML = `
     <header class="top">
       <button class="side-toggle" data-act="side" title="${esc(T(side() === "pinned" ? "Fold the menu (it opens when you point at it)" : "Keep the menu open"))}">${side() === "pinned" ? "‹" : "›"}</button>
-      <a class="brand" href="../index.html" title="MoneyCompass"><img src="../logo.svg" alt=""><span>MoneyCompass</span></a>
-      <button class="import-btn" data-act="import" title="${esc(T("Import a bank statement (CSV) – current or savings account. You can also drop the file onto the app."))}"><span class="ii">⬆</span><span class="il">${esc(T("Import"))}${license.isPro ? "" : " 🔒"}</span></button>
-      <nav class="tabs" id="tabs">${list.map(t => `<button class="tab" data-tab="${t.route}" style="--accent:${ACCENT[t.route]}"><span class="ti">${TAB_ICON[t.route] || ""}</span><span class="tl">${esc(T(t.title))}${t.route === "investments" ? ` <span class="beta-tag">${esc(T("Beta"))}</span>` : ""}</span></button>`).join("")}</nav>
-      <div class="actions">
-        <button class="me-row profile-btn" data-act="me" title="${esc(T("Profile: {0}", currentName()))}">${avatar(34)}
-          <span class="me-text"><b>${esc(currentName())}</b><small class="me-badge ${license.isPro ? "pro" : "demo"}">${esc(license.isPro ? "Pro" : T("Demo"))}</small></span>
-          <span class="me-more" aria-hidden="true">⋯</span></button>
-      </div>
+      <a class="brand" href="../index.html" title="MoneyCompass"><img src="brand.svg" alt=""><span class="bt"><span class="bn"><i>Money</i><b>Compass</b></span><small>PLAN TODAY. LIVE BRIGHTER.</small></span></a>
+      <nav class="tabs" id="tabs">${main.map(tabBtn).join("")}<div class="side-card"><span class="sc-ic">${I('<path d="M12 21V9"/><path d="M12 9c0-3 2-5 5-5 0 3-2 5-5 5z"/><path d="M12 13c0-2.5-1.7-4-4.5-4 0 2.5 1.700 4 4.500 4z"/>')}</span><b>${esc(T("Small steps. Bigger tomorrows."))}</b><small>${esc(T("Every step you take today builds a brighter future."))}</small></div>${foot.map(tabBtn).join("")}<button class="tab tab-settings" data-act="options" style="--accent:#9AA9A4"><span class="ti">${I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.100-1.500 1.700 1.700 0 0 0-1.800.3l-.1.1a2 2 0 1 1-2.800-2.800l.1-.1a1.700 1.700 0 0 0 .3-1.800 1.700 1.700 0 0 0-1.500-1H3a2 2 0 1 1 0-4h.1a1.700 1.700 0 0 0 1.500-1.100 1.700 1.700 0 0 0-.3-1.800l-.1-.1a2 2 0 1 1 2.800-2.800l.1.1a1.700 1.700 0 0 0 1.800.3H9a1.700 1.700 0 0 0 1-1.500V3a2 2 0 1 1 4 0v.1a1.700 1.700 0 0 0 1 1.500 1.700 1.700 0 0 0 1.800-.3l.1-.1a2 2 0 1 1 2.800 2.800l-.1.1a1.700 1.700 0 0 0-.3 1.800V9a1.700 1.700 0 0 0 1.500 1H21a2 2 0 1 1 0 4h-.1a1.700 1.700 0 0 0-1.500 1z"/>')}</span><span class="tl">${esc(T("Settings"))}</span></button></nav>
     </header>
+    <div class="topbar">
+      <label class="tb-search"><span aria-hidden="true">🔍</span><input type="search" id="tb-search" placeholder="${esc(T("Search transactions, categories, goals…"))}" autocomplete="off"></label>
+      <button class="tb-btn" data-act="import" title="${esc(T("Import a bank statement (CSV) – current or savings account. You can also drop the file onto the app."))}"><span aria-hidden="true">⬆</span><span class="tb-l">${esc(T("Import"))}${license.isPro ? "" : " 🔒"}</span></button>
+      <button class="tb-btn" data-act="export" title="${esc(T("Export"))}"><span aria-hidden="true">⬇</span><span class="tb-l">${esc(T("Export"))}</span></button>
+      <button class="me-row profile-btn" data-act="me" title="${esc(T("Profile: {0}", currentName()))}">${avatar(36)}
+        <span class="me-text"><b>${esc(currentName())}</b><small class="me-badge ${license.isPro ? "pro" : "demo"}">${esc(license.isPro ? T("Pro plan") : T("Demo"))}</small></span>
+        <span class="me-more" aria-hidden="true">⌄</span></button>
+    </div>
     ${license.isPro ? "" : `<div class="free-bar">${esc(T("Free web version."))} <a href="${DOWNLOAD_URL}" target="_blank" rel="noopener">${esc(T("Download the Windows app"))}</a> · <a href="#" data-act="profile">${esc(T("Enter license key"))}</a></div>`}
     <div id="backup-bar" class="backup-bar" hidden></div>
     <div class="page-head"><h1 id="page-title"></h1><button class="btn main small head-import" id="head-import" hidden></button></div>
@@ -112,8 +118,10 @@ function buildShell() {
     b.addEventListener("dragleave", () => b.classList.remove("drop-tab"));
     b.addEventListener("drop", e => { const r = e.dataTransfer.getData("text/mc-tab"); b.classList.remove("drop-tab"); if (r) { e.preventDefault(); e.stopPropagation(); moveTab(r, b.dataset.tab); } });
   });
-  const acts = { import: () => openImportCenter(), delete: openDelete, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide, me: meMenu };
+  const acts = { import: () => openImportCenter(), options: () => openOptions(), delete: openDelete, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide, me: meMenu };
   document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
+  const sb = document.getElementById("tb-search");
+  if (sb) sb.onkeydown = e => { if (e.key !== "Enter" || !sb.value.trim()) return; setSearch(sb.value.trim()); if (current === "expenses") App.refresh(); else App.go("expenses"); sb.blur(); };
   setupHelpButton();
   // Another profile now? Read its backup state; otherwise only draw the bar again
   if (shellProfile !== State.id) { shellProfile = State.id; backupProfileChanged(); } else drawBackupBar(saveProfileFile);

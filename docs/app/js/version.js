@@ -1,4 +1,4 @@
 // The web version. Raised with every published change of the web app.
 export const WEB_VERSION = "2.0";
-export const WEB_BUILD = 85;
-export const WEB_DATE = "2026-11-03T19:00";
+export const WEB_BUILD = 86;
+export const WEB_DATE = "2026-11-08T12:00";

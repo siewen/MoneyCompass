@@ -3,7 +3,7 @@ import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, addMonths, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
   addCategory, removeCategory, updateCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
-  matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText, mainCur } from "./core.js";
+  matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText, mainCur, currentName } from "./core.js";
 import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
 import { NEW_CAT } from "./ui.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON, ICONS, headingTip, categoryBox, infoTip } from "./ui.js";
@@ -14,9 +14,19 @@ import { loanWarning } from "./pages-pro.js";
 import { openSavingsCheck, savedChecksCard, bindSavedChecks, savingsChartCard, bindSavingsChart, savingsData } from "./savings-check.js";
 
 const D = () => State.data;
-const tile = (label, value, route, colors, cls = "", tip = "") =>
+const tile = (label, value, route, colors, cls = "", tip = "", delta = "") =>
   `<button class="tile" data-go="${route}"${tip ? ` data-tip="${esc(tip)}"` : ""} style="--t1:${colors[0]};--t2:${colors[1]};--t3:${colors[2]};--t4:${colors[3]}">
-     <span>${esc(label)}</span><b class="${cls}">${value}</b></button>`;
+     <span>${esc(label)}</span><b class="${cls}">${value}</b>${delta}</button>`;
+/** Search from the top bar: opens Outflows with the word in its search box. */
+export function setSearch(text) { flt.text = text; }
+/** "▲ 4.2% vs previous month": the last finished month against the one before. up = is more of it good? */
+function deltaTag(cur, prev, upIsGood = true) {
+  if (cur === null || prev === null || !(Math.abs(prev) > 0)) return "";
+  const pct = (cur - prev) / Math.abs(prev) * 100;
+  if (!isFinite(pct)) return "";
+  const good = pct === 0 ? true : (pct > 0) === upIsGood;
+  return `<em class="delta ${good ? "good" : "bad"}">${pct >= 0 ? "▲" : "▼"} ${Math.abs(pct).toFixed(1).replace(".", ",")}% <small>${esc(T("vs previous month"))}</small></em>`;
+}
 
 // ================================================================= Overview
 
@@ -79,12 +89,21 @@ export const Overview = {
       })()}<span class="mb-label">${esc(T("Balance per month"))}</span></div>` : "";
     const growthLine = growth !== null && hist.length >= 2 ? `<p class="${growth >= 0 ? "good" : "bad"}">${growth >= 0 ? "▲" : "▼"} ${esc(T("Your savings since {0}: {1}{2}", fmtMonthKey(hist[0][0]), growth >= 0 ? "+" : "−", pln(Math.abs(growth))))}</p>` : "";
 
+    const prevM = done[done.length - 2];
+    const dIn = last && prevM ? deltaTag(last.income, prevM.income) : "", dOut = last && prevM ? deltaTag(last.expenses, prevM.expenses, false) : "";
+    const dLeft = last && prevM ? deltaTag(last.income - last.expenses, prevM.income - prevM.expenses) : "";
+    const dRate = last && prevM && last.income > 0 && prevM.income > 0 ? deltaTag((last.income - last.expenses) / last.income * 100, (prevM.income - prevM.expenses) / prevM.income * 100) : "";
+    const hr = new Date().getHours(), first = (currentName() || "").trim().split(/\s+/)[0] || "";
+    const hello = hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
     const parts = [];
+    parts.push(`<div class="ov-hero fixed"><div class="ov-hi"><h2>${esc(T(hello))}${first ? ", " + esc(first) : ""}!</h2><p>${esc(T("Here's your financial overview for {0}", monthName(today())))}</p></div>
+      <div class="ov-quote"><span class="oq-ic">${ICONS.bulb}</span><span><b>${esc(T("Discipline today."))}</b> <b class="hl">${esc(T("Freedom tomorrow."))}</b></span></div>
+      <button class="btn main ov-opt" data-action="optimize">${esc(T("Optimize My Savings"))} <span aria-hidden="true">→</span></button></div>`);
     parts.push(`<div class="tiles">
-      ${tile(T("Inflows per month"), pln(income), "income", ["#1E5FB0", "#60A5FA", "#EAF2FC", "#2A78D6"], "", tipIncome)}
-      ${tile(T("Outflows per month"), avg.monthsUsed ? pln(spending) : "–", "expenses", ["#C2410C", "#FB923C", "#FDF0E9", "#EB6834"], "", tipSpending)}
-      ${tile(T("Balance per month"), both ? pln(left) : "–", "income", ["#0E7C55", "#34D399", "#E7F7F0", "#1BAF7A"], both && left < 0 ? "bad" : "", T("Inflows minus outflows: what you can save each month."))}
-      ${tile(T("Savings rate"), both ? savingsRateText(left, income) : "–", "portfolio", ["#7E22CE", "#C084FC", "#F5EDFD", "#A855F7"], both && left < 0 ? "bad" : "", T("The part of your income you keep. A good aim is 10–20% or more."))}
+      ${tile(T("Income"), pln(income), "income", ["#1E5FB0", "#60A5FA", "#EAF2FC", "#2A78D6"], "", tipIncome, dIn)}
+      ${tile(T("Spending"), avg.monthsUsed ? pln(spending) : "–", "expenses", ["#C2410C", "#FB923C", "#FDF0E9", "#EB6834"], "", tipSpending, dOut)}
+      ${tile(T("Left over"), both ? pln(left) : "–", "income", ["#0E7C55", "#34D399", "#E7F7F0", "#1BAF7A"], both && left < 0 ? "bad" : "", T("Inflows minus outflows: what you can save each month."), dLeft)}
+      ${tile(T("Savings rate"), both ? savingsRateText(left, income) : "–", "portfolio", ["#7E22CE", "#C084FC", "#F5EDFD", "#A855F7"], both && left < 0 ? "bad" : "", T("The part of your income you keep. A good aim is 10–20% or more."), dRate)}
     </div>`);
     const sw = shortDataWarning(d);
     if (sw) parts.push(`<div class="tip warn-tip short-data">${sw.replace(/<\/?p[^>]*>/g, "")} ${esc(T("Import or enter at least one whole month."))}</div>`);
@@ -95,8 +114,8 @@ export const Overview = {
     if (due) sugg.push({ ic: "clock", cls: "warn", go: "portfolio", text: due.p.ended ? T("The promotion at {0} ended on {1} – see where to move the money", due.h.Name, fmtDate(due.p.end)) : T("The promotion at {0} ends in {1} days – see where to move the money", due.h.Name, due.p.daysLeft) });
     else { const m = moves(d)[0]; if (m) sugg.push({ ic: "trend", go: "portfolio", text: T("Your savings could earn about {0} more at {1} – see Savings", pln(m.gain), m.o.Bank) }); }
     if (top) sugg.push({ ic: "bulb", go: top.route || "", text: T("Best next step: {0}", top.title) });
-    parts.push(card(`<div class="next-list">${sugg.map(x => `<button class="next-item ${x.cls || ""}" data-go="${x.go}">${ICONS[x.ic]}<span>${esc(x.text)}</span>${x.go ? "<i>→</i>" : ""}</button>`).join("")}</div>
-      <button class="btn main next-opt" data-action="optimize">${ICONS.bolt}<span>${esc(T("Optimize my finances"))}</span></button>`, "fixed next-card" + (sugg.length ? "" : " no-sugg")));
+    if (sugg.length) parts.push(card(`<div class="next-list">${sugg.map(x => `<button class="next-item ${x.cls || ""}" data-go="${x.go}">${ICONS[x.ic]}<span>${esc(x.text)}</span>${x.go ? "<i>→</i>" : ""}</button>`).join("")}</div>
+      `, "fixed next-card" + (sugg.length ? "" : " no-sugg")));
 
     const pin = Calc.periodIncome(d);
     // Like the banks show it: balance of inflows and outflows, with a green/red split bar
@@ -108,11 +127,12 @@ export const Overview = {
     const cur = months.find(m => m.current);
     const fd = ChartData.firstDate(d);
     const waveOn = showTrend && months.length >= 2;
-    if (!waveOn) parts.push(card(headingTip(T("Inflows and outflows by month"), T("Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered or imported.")) +
-      (fd ? `<p class="period-line">${esc(T("From {0} to {1} · {2} months", fmtDate(fd), fmtDate(today()), months.length))}</p>` : "") +
-      (showTrend ? monthBars(months, axis, pln, [T("Inflows"), T("Outflows")]) + legend([
-        { color: "#2E9E5B", label: T("Inflows"), text: pln(months.reduce((s, m) => s + m.income, 0) / Math.max(1, months.length)) + " " + T("avg.") },
-        { color: "#C81E26", label: T("Outflows"), text: pln(months.reduce((s, m) => s + m.expenses, 0) / Math.max(1, months.length)) + " " + T("avg.") },
+    // Income vs Expenses: the last 6 months as bars (the trend lines with savings are in the next card)
+    const m6 = months.slice(-6);
+    parts.push(card(headingTip(T("Income vs Expenses"), T("Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered or imported.")) +
+      (showTrend ? monthBars(m6, axis, pln, [T("Income"), T("Expenses")]) + legend([
+        { color: "#2E9E5B", label: T("Income"), text: pln(m6.reduce((s, m) => s + m.income, 0) / Math.max(1, m6.length)) + " " + T("avg.") },
+        { color: "#C81E26", label: T("Expenses"), text: pln(m6.reduce((s, m) => s + m.expenses, 0) / Math.max(1, m6.length)) + " " + T("avg.") },
       ]) + (Calc.coverage(d).partial ? hint(T("Months with only part of the data show what was entered, not a whole month.")) : "") + (cur ? `<p class="hint planned-note"><span class="planned-swatch"></span>${esc(T("{0} is not finished: income as planned from your income sources, expenses entered so far.", monthName(cur.start)))}</p>` : "")
       : hint(T("Add income and expenses to see this chart."))), "link\" data-go=\"expenses"));
     // Wave lines: inflows, outflows, saved (inflows − outflows) and, with the module, loan payments – month by month
@@ -136,15 +156,20 @@ export const Overview = {
       const waveTip = [realSavings ? T("Savings balance = what was on your savings accounts at the end of each month. Click a name to show or hide its line.") : T("Saved = inflows minus outflows in that month. Click a name to show or hide its line."),
         T("Inflows as received (salary and extra income) – where nothing was imported, as planned from your income sources. Outflows as entered or imported."),
         cur ? "* " + T("{0} is not finished: income as planned from your income sources, expenses entered so far.", monthName(cur.start)) : ""].filter(Boolean).join("\n\n");
-      parts.push(card(`<div class="wave-head">${headingTip(T("Inflows and outflows by month"), waveTip)}${fd ? `<span class="hint">${esc(T("From {0} to {1} · {2} months", fmtDate(fd), fmtDate(today()), months.length))}</span>` : ""}</div><div class="wave-legend">${ser.map(s => `<button class="wave-key${hid.has(s.key) ? " off" : ""}" data-wave="${s.key}" style="--c:${s.color}"><i></i>${esc(s.label)}<small>${esc(s.balance ? T("now {0}", pln(lastOf(s))) : T("avg. {0}", pln(avgOf(s))))}</small></button>`).join("")}</div>` +
+      parts.push(card(`<div class="wave-head">${headingTip(T("Monthly Trend"), waveTip)}${fd ? `<span class="hint">${esc(T("From {0} to {1} · {2} months", fmtDate(fd), fmtDate(today()), months.length))}</span>` : ""}</div><div class="wave-legend">${ser.map(s => `<button class="wave-key${hid.has(s.key) ? " off" : ""}" data-wave="${s.key}" style="--c:${s.color}"><i></i>${esc(s.label)}<small>${esc(s.balance ? T("now {0}", pln(lastOf(s))) : T("avg. {0}", pln(avgOf(s))))}</small></button>`).join("")}</div>` +
         waveChart(months.map(m => m.month + (m.current ? " *" : "")), ser, axis, pln, hid)));
     }
-    parts.push(card(headingTip(T("Outflows by category"), basisText(d)) +
+    if (both) {
+      const slices = [{ label: T("Essential"), value: avg.essential, color: "#8B7CF6", text: pln(avg.essential) }, { label: T("Not essential"), value: avg.nonEssential, color: "#F28B6B", text: pln(avg.nonEssential) }, { label: T("Left over"), value: Math.max(0, left), color: "#4FC59B", text: pln(Math.max(0, left)) }];
+      parts.push(card(headingTip(T("Savings Breakdown"), T("How your monthly income is split: essential costs, other spending and what you keep.")) +
+        `<div class="chart-row">${donut(slices, savingsRateText(left, income), T("Savings rate"))}${legend(slices.map(x => ({ ...x, share: ChartData.share(x.value, Math.max(1, income)) })))}</div>`, "link\" data-go=\"portfolio"));
+    }
+    parts.push(card(headingTip(T("Expense Categories"), basisText(d)) +
       (cats.slices.length ? `<div class="chart-row">${donut(cats.slices, pln(cats.total), T("per month"))}${legend(cats.slices.map(s => ({ color: s.color, label: (s.icon ? s.icon + " " : "") + s.label, text: s.text, share: ChartData.share(s.value, cats.total) })))}</div>`
         : hint(T("Add expenses to see where your money goes."))), "link\" data-go=\"expenses"));
     parts.push(card(`<div class="link" data-go="portfolio">${headingTip(T("Your savings"), headTip)}${state ? `<span class="status-chip ${state}">${esc(state === "good" ? T("Growing") : state === "warn" ? T("Slow") : T("Shrinking"))}</span>` : ""}
       ${headline}${bars}${growthLine}${p.total > 0 ? savingsFacts(d, p) : hint(T("Add your savings in the Savings tab to see this chart."))}</div>
-      <hr><div class="link" data-go="emergency">${heading(T("Emergency fund"))}${emergency}</div>`, "savings-card status-" + (state || "none") + " em-" + emState));
+      <hr><div class="link" data-go="emergency">${heading(T("Emergency Fund"))}${emergency}</div>`, "savings-card status-" + (state || "none") + " em-" + emState));
 
     if (moduleOn("loans")) {
       // What is left today: worked out from the monthly payments made since you entered the loan
@@ -159,7 +184,7 @@ export const Overview = {
       const ring = [...items, ...(paid > 0 ? [{ label: T("Principal repaid"), value: paid, color: COLORS.leftOver, text: pln(paid) }] : []),
         ...(intPaid > 0 ? [{ label: T("Interest paid (lender's income)"), value: intPaid, color: "#F59E0B", text: pln(intPaid) }] : [])];
       const borrowed = total + paid;
-      parts.push(card(heading(T("Loans & debts")) + (loans.length
+      parts.push(card(heading(T("Loans & Debts")) + (loans.length
         ? `<div class="chart-row">${donut(ring, pln(total), T("Remaining principal"))}${legend(ring.map(s => ({ ...s, share: ChartData.share(s.value, borrowed + intPaid) })))}</div>` +
           (intPaid > 0 ? row(T("Interest paid to date (lender's income)"), pln(intPaid), "out") : "") +
           (intAll > 0 ? row(T("Total cost of credit (all interest)"), pln(intAll)) : "") +
@@ -169,13 +194,13 @@ export const Overview = {
     }
     if (moduleOn("budget") && d.Goals.length) {
       const goals = [...d.Goals].sort((a, b) => parseDate(a.TargetDate) - parseDate(b.TargetDate)).map(g => ({ ...g, Saved: goalSaved(g, d) }));
-      parts.push(card(heading(T("Savings goals")) + (goals.length ? goals.map(g => {
+      parts.push(card(heading(T("Savings Goals")) + (goals.length ? goals.map(g => {
         const f = g.Target > 0 ? g.Saved / g.Target : 0, done = g.Target > 0 && g.Saved >= g.Target;
         return `<div class="bar-item"><b>${esc(g.Name)}</b>${progress(f, done ? COLORS.leftOver : "var(--goals)")}<span class="hint">${esc(done ? T("Goal reached – well done!")
           : T("{0} of {1} ({2}%) · by {3}", pln(Math.min(g.Saved, g.Target)), pln(g.Target), Math.round(Math.min(100, f * 100)), fmtDate(g.TargetDate)))}</span></div>`;
       }).join("") : ""), "link\" data-go=\"budget"));
     }
-    if (moduleOn("budget")) parts.push(card(heading(T("Budget plan")) + hint(monthName(today())) + budgetBars(), "link\" data-go=\"budget"));
+    if (moduleOn("budget")) parts.push(card(heading(T("Budget Plan")) + hint(monthName(today())) + budgetBars(), "link\" data-go=\"budget"));
     if (license.isPro) {
       const ranked = d.Offers.map(o => ({ o, r: Calc.savings(o) })).filter(x => x.o.Amount > 0).sort((a, b) => b.r.net - a.r.net).slice(0, 4);
       const best = Rates.bestOffer();
@@ -184,6 +209,7 @@ export const Overview = {
           : hint(T("No offers saved yet. Add them in the Compare offers tab, or with the Compare button in Optimize my finances."))) +
         (best ? `<hr><p class="good">🏦 ${esc(T("Best rate right now: {0} – {1} ({2}).", best.Bank, best.Name || best.Bank, rate(best.Rate)))}</p>` : ""), "link\" data-go=\"savings"));
     }
+    parts.push(`<div class="card ov-peak fixed"><svg viewBox="0 0 400 160" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="pk1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2F6F5C"/><stop offset="1" stop-color="#14231F"/></linearGradient><linearGradient id="pk2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1F4A3E"/><stop offset="1" stop-color="#101A17"/></linearGradient></defs><path d="M0 160V96l60-48 44 36 70-70 80 82 50-40 96 70v74z" fill="url(#pk1)"/><path d="M0 160v-40l70-30 60 34 80-52 90 60 100-36v64z" fill="url(#pk2)"/><path d="M174 14l-22 22 14 6 8-8 10 10 12-14z" fill="#E8F3EF" opacity=".85"/></svg><p><b>${esc(T("The best time to start was yesterday."))}</b><br>${esc(T("The next best time is today."))}</p></div>`);
     el.innerHTML = `<div class="grid">${parts.join("")}</div>`;
     el.querySelectorAll("[data-savview]").forEach(b => b.onclick = ev => {
       ev.stopPropagation(); d.Settings.SavingsView = b.dataset.savview || null; save(); App.refresh();
