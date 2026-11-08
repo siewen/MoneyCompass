@@ -500,6 +500,7 @@ function render() {
     if (x.dataset.go) App.go(x.dataset.go);
   }));
   el.querySelectorAll('[data-action="optimize"]').forEach(b => b.onclick = openOptimize);
+  el.querySelectorAll("[data-open-opt]").forEach(b => b.onclick = e => { e.stopPropagation(); openOptimize(); });
   el.querySelectorAll('[data-action="export"]').forEach(b => b.onclick = openExport);
   window.scrollTo(0, y);
   if (lastSaveFailed()) toast(T("Could not save in this browser. Save your profile to a file to keep your data."), "bad");

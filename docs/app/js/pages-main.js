@@ -1,5 +1,6 @@
 // The free tabs: Overview, Inflows, Outflows, Emergency fund, Savings (with Savings goals for Pro).
 import { infoBtn as scoreInfoBtn } from "./score-info.js";
+import { goAttr } from "./page-head.js";
 import {
   T, State, save, Calc, Advisor, ChartData, COLORS, pln, rate, amount, num, plain, fmtDate, parseDate, isoDate, inputDate,
   today, addDays, addMonths, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
@@ -191,7 +192,7 @@ export const Overview = {
     const svRate = both ? left / income : 0, emF = target > 0 ? p.safe / target : 0;
     const wealth = Math.round(40 * Math.min(1, emF) + 30 * Math.min(1, Math.max(0, svRate) / 0.2) + 30 * (debt <= 0 ? 1 : income > 0 ? Math.max(0, 1 - debt / (income * 12)) : 0));
     const wl = wealth >= 80 ? T("Excellent") : wealth >= 60 ? T("Good") : wealth >= 40 ? T("Fair") : T("Needs attention");
-    const kp = (l, v, ic2, cls, dl) => `<div class="kpi static"><span class="kpi-ic ${cls}">${si(IC[ic2])}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b>${v}</b>${dl || ""}</span></div>`;
+    const kp = (l, v, ic2, cls, dl) => { const g = goAttr(l); return `<div class="kpi static${g ? " clk" : ""}"${g}><span class="kpi-ic ${cls}">${si(IC[ic2])}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b>${v}</b>${dl || ""}</span></div>`; };
     const head = `<div class="pg-title"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T("Financial Dashboard"))}</h2><p>${esc(T("Your complete financial overview and personalized insights."))}</p></div></div>
       <div class="ov-kpis ovkp">${kp(T("Income per Month"), esc(pln(income)), "wallet", "in", dIn)}${kp(T("Spending per Month"), esc(avg.monthsUsed ? pln(spending) : "–"), "cart", "out", dOut)}${kp(T("Monthly Surplus"), esc(both ? pln(left) : "–"), "pig", "left", dLeft)}${kp(T("Savings Rate"), esc(both ? savingsRateText(left, income) : "–"), "percent", "rate", dRate)}</div>`;
     let hk = hist.map(([k, v]) => ({ k, v: v - debt }));
@@ -207,11 +208,11 @@ export const Overview = {
     const nwChart = hk.length >= 2 ? lineChart(hk.map(x => mlab(x.k)), [{ vals: hk.map(x => Math.round(x.v)), color: "#2EDC9A", dots: true, area: true }], { w: 1300, h: 150 }) : `<p class="hint">${esc(T("Add income and expenses of at least two months to see your net worth over time."))}</p>`;
     const emTone = emF >= 1 ? T("Complete") : emF >= .5 ? T("On track") : T("Building up");
     const health = `<div class="nw-card ovh"><div class="ni-fh"><span class="rp-si i-res">${si(IC.bars, 26)}</span><h3>${esc(T("Financial Health Overview"))}</h3></div>
-      <div class="ovh-row"><div><small>${esc(T("Net Worth"))}</small><b class="ovh-big" style="font-size:${Math.min(26, Math.floor(230 / (pln(netWorth).length * 0.66)))}px;white-space:nowrap">${esc(pln(netWorth))}</b>${chTag(nwCh)}<small>${esc(T("vs. last month"))}</small></div>
-        <div class="dv"><small>${esc(T("Monthly Surplus"))}</small><b class="ovh-big">${esc(both ? pln(left) : "–")}</b>${last && prevM ? chTag((last.income - last.expenses) - (prevM.income - prevM.expenses) > 0 || true ? ((prevM.income - prevM.expenses) ? ((last.income - last.expenses) - (prevM.income - prevM.expenses)) / Math.abs(prevM.income - prevM.expenses) * 100 : null) : null) : ""}</div>
-        <div class="dv ovh-em"><small>${esc(T("Emergency Fund"))}</small><div class="ovh-emr">${ring(emF * 100, Math.round(Math.min(100, emF * 100)) + "%", "", 76)}<span><b>${esc(pln(p.safe))}</b><small>${esc(target > 0 ? T("Target: {0}", pln(target)) : T("No target set"))}</small></span></div></div>
-        <div class="dv"><small>${esc(T("Debt Position"))}</small><b class="ovh-big">${esc(pln(debt))}</b><small>${esc(debt > 0 ? T("{0} loan(s)", loansAll.length) : T("Debt-free"))}</small></div>
-        <div class="dv"><small>${esc(T("Savings Rate"))}</small><b class="ovh-big">${esc(both ? savingsRateText(left, income) : "–")}</b>${have2 && last.income > 0 && prevM.income > 0 ? chTag(((last.income - last.expenses) / last.income - (prevM.income - prevM.expenses) / prevM.income) * 100, " pp") : ""}</div>
+      <div class="ovh-row"><div class="clk" data-go="portfolio"><small>${esc(T("Net Worth"))}</small><b class="ovh-big" style="font-size:${Math.min(26, Math.floor(230 / (pln(netWorth).length * 0.66)))}px;white-space:nowrap">${esc(pln(netWorth))}</b>${chTag(nwCh)}<small>${esc(T("vs. last month"))}</small></div>
+        <div class="dv clk" data-go="expenses"><small>${esc(T("Monthly Surplus"))}</small><b class="ovh-big">${esc(both ? pln(left) : "–")}</b>${last && prevM ? chTag((last.income - last.expenses) - (prevM.income - prevM.expenses) > 0 || true ? ((prevM.income - prevM.expenses) ? ((last.income - last.expenses) - (prevM.income - prevM.expenses)) / Math.abs(prevM.income - prevM.expenses) * 100 : null) : null) : ""}</div>
+        <div class="dv ovh-em clk" data-go="emergency"><small>${esc(T("Emergency Fund"))}</small><div class="ovh-emr">${ring(emF * 100, Math.round(Math.min(100, emF * 100)) + "%", "", 76)}<span><b>${esc(pln(p.safe))}</b><small>${esc(target > 0 ? T("Target: {0}", pln(target)) : T("No target set"))}</small></span></div></div>
+        <div class="dv clk" data-go="loans"><small>${esc(T("Debt Position"))}</small><b class="ovh-big">${esc(pln(debt))}</b><small>${esc(debt > 0 ? T("{0} loan(s)", loansAll.length) : T("Debt-free"))}</small></div>
+        <div class="dv clk" data-go="portfolio"><small>${esc(T("Savings Rate"))}</small><b class="ovh-big">${esc(both ? savingsRateText(left, income) : "–")}</b>${have2 && last.income > 0 && prevM.income > 0 ? chTag(((last.income - last.expenses) / last.income - (prevM.income - prevM.expenses) / prevM.income) * 100, " pp") : ""}</div>
         <div class="dv ovh-ws"><small>${esc(T("Wealth Score"))}${scoreInfoBtn(T("Wealth Score"), wealth + " / 100", [
           { label: T("Emergency fund"), points: 40 * Math.min(1, emF), max: 40, detail: T("{0}% of your emergency-fund target is saved.", Math.round(emF * 100)) },
           { label: T("Savings rate"), points: 30 * Math.min(1, Math.max(0, svRate) / 0.2), max: 30, detail: T("You keep {0}% of your income. Full points from 20%.", Math.round(svRate * 100)) },

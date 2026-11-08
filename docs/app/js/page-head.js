@@ -1,5 +1,7 @@
 // Shared top of the redesigned pages: title, four figures, a highlighted summary band and a bottom band.
 import { esc } from "./ui.js";
+import { T } from "./core.js";
+import { App } from "./app.js";
 const GOLD = () => [IC.bulb, IC.star, IC.trophy];
 export const si = (d, n = 26) => `<svg class="nwi${GOLD().includes(d) ? " gold-ic" : ""}" width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 export const IC = {
@@ -36,9 +38,24 @@ export const IC = {
   cal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>', wallet: '<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18M16 15h2"/>',
   star: '<path d="M12 3l2.800 5.800 6.200.9-4.500 4.400 1 6.200L12 17.300 6.500 20.300l1-6.200L3 9.700l6.200-.9z"/>', pie: '<path d="M12 3a9 9 0 109 9h-9z"/>',
 };
+
+/** Where a click on a figure card leads ("#opt" = the Optimize window). Keys are the English card labels. */
+const KGO = { "Income per Month": "income", "Spending per Month": "expenses", "Monthly Surplus": "budget", "Savings Rate": "portfolio",
+  "Next Payment": "calendar", "Income Growth Potential": "#opt", "Potential Savings": "#opt", "Savings Opportunity": "#opt", "Potential Monthly Savings": "#opt", "Spending 20% less there saves": "#opt",
+  "Emergency Fund Balance": "portfolio", "Months Covered": "expenses", "Annual Interest Projection": "savings", "Savings Health Score": "#opt", "Potential Extra Profit": "#opt", "Additional Profit": "#opt",
+  "Monthly Payments": "calendar", "Spent This Month": "expenses", "Planned Savings": "portfolio", "Upcoming Income": "income", "Upcoming Expenses": "expenses", "Scheduled Savings Transfers": "portfolio",
+  "Debt Score": "#opt", "Budget Health Score": "#opt", "Best Offer Return": "#opt", "Best Current Offer": "#opt" };
+let rev = null, revLang = "";
+export function goAttr(label, here = "") {
+  const k = (document.documentElement.lang || "") + T("Overview");
+  if (!rev || revLang !== k) { rev = {}; revLang = k; for (const [en, r] of Object.entries(KGO)) rev[T(en)] = r; }
+  const r = rev[label]; if (!r || r === here) return "";
+  if (r === "#opt") return ' data-open-opt="1"';
+  return App.tabList().some(t => t.route === r) ? ` data-go="${r}"` : "";
+}
 export function pageHead({ icon, title, sub, btn = "", kpis = [] }) {
   return `<div class="pg-title"><span class="pg-ic">${si(IC[icon] || IC.bars, 34)}</span><div><h2>${esc(title)}</h2><p>${esc(sub)}</p></div>${btn}</div>
-    <div class="ov-kpis">${kpis.map(k => `<div class="kpi static${k.hi ? " hi" : ""}"><span class="kpi-ic ${k.cls || "in"}">${si(IC[k.icon] || IC.bars)}</span><span class="kpi-t"><span class="kpi-l">${esc(k.l)}</span><b class="${k.vcls || ""}">${esc(k.v)}</b>${k.sub ? `<small class="kpi-sub">${esc(k.sub)}</small>` : ""}</span></div>`).join("")}</div>`;
+    <div class="ov-kpis">${kpis.map(k => { const g = goAttr(k.l, window.__curRoute); return `<div class="kpi static${k.hi ? " hi" : ""}${g ? " clk" : ""}"${g}><span class="kpi-ic ${k.cls || "in"}">${si(IC[k.icon] || IC.bars)}</span><span class="kpi-t"><span class="kpi-l">${esc(k.l)}</span><b class="${k.vcls || ""}">${esc(k.v)}</b>${k.sub ? `<small class="kpi-sub">${esc(k.sub)}</small>` : ""}</span></div>`; }).join("")}</div>`;
 }
 /** A glowing band: title (with icon) and a row of label/value figures. */
 export function band(title, icon, figs, cls = "", extra = "") {
