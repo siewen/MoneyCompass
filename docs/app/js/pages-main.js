@@ -280,6 +280,7 @@ const CURRENCIES = ["PLN", "USD", "EUR"];
 const KINDS = [[RECEIVED.income, "Extra income (this month)"], [RECEIVED.salary, "Salary (regular pay)"], [RECEIVED.none, "Not income"]];
 let editIncome = null;
 
+let incRange = 6, incDraft = null, incWin = null, lastInc = { src: "", add: "", imp: "" };
 export const Income = {
   route: "income", title: "Inflows",
   render(el) {
@@ -298,7 +299,7 @@ export const Income = {
         : T("If you save everything left over, your emergency fund ({0}) is complete in about {1} month(s).", pln(target), Math.ceil((target - safe) / Math.max(1, left)));
     }
     const e = editIncome ? d.Incomes.find(x => x.Id === editIncome) : null;
-    const f = e || { Name: "", Type: "Salary", Amount: "", Currency: mainCur(), Frequency: "Monthly", Date: isoDate(today()), Active: true };
+    const f = e || { Name: incDraft?.Name || "", Type: "Salary", Amount: "", Currency: mainCur(), Frequency: incDraft?.Frequency || "Monthly", Date: isoDate(today()), Active: true };
     const up = Calc.upcoming(d, today(), addDays(today(), 60));
     const dayText = dt => { const n = Math.round((dt - today()) / 86400000); return n === 0 ? T("today") : n === 1 ? T("tomorrow") : T("in {0} days", n); };
 
@@ -364,8 +365,47 @@ export const Income = {
     const npCard = card(`<div class="oc-head"><h3>${ic('<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/>', 22)} ${esc(T("Next Payments"))}</h3></div>` + (up.length ? up.slice(0, 5).map(p => `<div class="np-row"><span>${iconFor(p.source)}${esc(p.source.Name)}</span><b>${pln(p.amount)}</b><small>${esc(fmtDate(p.date))}</small></div>`).join("") : hint(T("No payments expected in this period."))), "ov-card");
     const impCard = card(`<div class="oc-head"><h3>${ic('<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>', 22)} ${esc(T("Imported Statements"))}</h3></div>` + hint(T("Money that came into your account, from your bank imports. Choose for each payment how it counts: Extra income – only in that month. Salary – your regular pay, counted every month through Your income sources. Not income – transfers between your own accounts.")) +
       (d.Received.length ? importedList(d) : hint(T("Nothing imported yet."))), "ov-card");
-    el.innerHTML = `<div class="pg-title"><span class="pg-ic">${ic('<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><circle cx="16.5" cy="15" r="1.2"/>', 34)}</span><div><h2>${esc(T("Income Management"))}</h2><p>${esc(T("Manage all income sources and plan future cash flow."))}</p></div></div>
-      ${kpis}<div class="inc-grid r2">${srcCard}${aiCard}${fcCard}</div><div class="inc-grid r3">${addCard}${tlCard}</div><div class="inc-grid r4">${npCard}${impCard}</div><div class="grid">${binCard(["income", "received"])}</div>`;
+    // ---------- Income Intelligence (design mockup) ----------
+    const okI = `<span class="nw-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></span>`;
+    const stab = active.length ? Math.round(Math.min(100, 50 + 30 * (1 - maxShare) + (!avg.monthsUsed || left >= 0 ? 20 : 0))) : 0, stabL = !active.length ? "–" : stab >= 80 ? T("Strong") : stab >= 60 ? T("Good") : T("Fair");
+    const growth = avg.monthsUsed ? Math.max(0, left) : 0, annual = inc.monthlyTotal * 12 + inc.oneTimeThisYear;
+    const nM = incRange, mLabels = [], mRec = [], mAll = [];
+    for (let k = 0; k < nM; k++) { const st = addMonths(monthStart(today()), k), en = addDays(addMonths(st, 1), -1), pays = Calc.upcoming(d, k === 0 ? today() : st, en); mLabels.push(new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(st)); mAll.push(Math.round(pays.reduce((x, y) => x + y.amount, 0))); mRec.push(Math.round(inc.monthlyTotal)); }
+    const stepL = Math.ceil(nM / 6), thin = mLabels.map((l, i) => i % stepL === 0 ? l : "");
+    const head = pageHead({ icon: "trend", title: T("Income Intelligence"), sub: T("Manage recurring income, forecast future cash flow and optimize financial growth."),
+      kpis: [{ l: T("Monthly Income"), v: pln(inc.monthlyTotal), icon: "wallet", cls: "in" }, { l: T("Income Stability"), v: stabL, icon: "shield", cls: "src" }, { l: T("Next Payment"), v: up[0] ? fmtDate(up[0].date) : "–", icon: "cal", cls: "next" }, { l: T("Income Growth Potential"), v: pln(growth), icon: "trend", cls: "rate" }] });
+    const fcBand = `<div class="nw-card ni-fc"><div class="ni-fh"><span class="rp-si i-res">${si(IC.bars, 26)}</span><h3>${esc(T("Income Forecast"))}</h3><span class="sv-tabs ni-tabs">${[3, 6, 12].map(n => `<button type="button" data-incr="${n}" class="${n === nM ? "on" : ""}">${n} ${esc(T("Months"))}</button>`).join("")}</span><span class="em-pill ni-pill">${okI} ${esc(left >= 0 || !avg.monthsUsed ? T("Healthy Cash Flow") : T("Check your spending"))}</span></div>
+      <div class="ni-fb"><div class="ni-ch"><span class="sv-leg"><i style="background:#2EDC9A"></i>${esc(T("Monthly Income"))}<i style="background:#3B9BFF"></i>${esc(T("Projected Income"))}</span>${lineChart(thin, [{ vals: mRec, color: "#2EDC9A", dots: true, area: true }, { vals: mAll, color: "#3B9BFF", dash: true, dots: true }], { w: 720, h: 200 })}</div>
+        <div class="ni-fr"><small>${esc(T("Annual Income Projection"))}</small><b class="ni-big">${esc(pln(annual))}</b><em>${esc(T("EXPECTED CASH FLOW"))}</em>
+          <div class="ni-fs"><div><small>${esc(T("Monthly Surplus"))}</small><b>${esc(avg.monthsUsed ? pln(left) : "–")}</b></div><div><small>${esc(T("Expected Annual Surplus"))}</small><b>${esc(avg.monthsUsed ? pln(left * 12) : "–")}</b></div><div><small>${esc(T("Savings Potential"))}</small><b class="good">${esc(pln(growth))}/${esc(T("month"))}</b></div></div>
+          <button class="sv-btn ni-opt" data-action="optimize">${si(IC.trend, 18)} ${esc(T("Optimize My Income"))}</button></div></div></div>`;
+    const pal = ["#2EDC9A", "#3B9BFF", "#8B5CF6", "#9AA7B2", "#F5A623", "#C98FA0"], srcItems = active.map((i, n) => ({ n: i.Name, v: shares[n], c: pal[n % pal.length] })).filter(x => x.v > 0);
+    const srcDash = dcard("bank", "res", T("Income Sources"), `<div class="sv-ar">${donut(srcItems.map(x => ({ label: x.n, value: x.v, color: x.c })), pln(inc.monthlyTotal), T("/ month"), 130)}<ul class="sv-al">${srcItems.map(x => `<li><i style="background:${x.c}"></i><span>${esc(x.n)}</span><b>${totalShare > 0 ? Math.round(x.v / totalShare * 100) : 0}%</b></li>`).join("") || `<li class="hint">${esc(T("No income added yet."))}</li>`}</ul></div>`, { klass: "ni-src", extra: PM("inc-src", T("Edit income sources")) });
+    const tlDash = dcard("calx", "res", T("Income Timeline"), `<div class="ni-tl">${up.slice(0, 3).map(x => `<div class="ni-tr"><i></i><small>${esc(fmtDate(x.date))}</small><b>${esc(x.source.Name)}</b><em>+${esc(pln(x.amount))}</em></div>`).join("") || `<p class="hint">–</p>`}</div>`, { klass: "ni-tlc" });
+    const insDash = dcard("bulb", "res", T("Income Insights"), `<ul class="nw-ul">${[stab >= 80 ? T("Income stability score excellent.") : T("Income stability score: {0}/100", stab), up.length ? T("Upcoming payments detected.") : null, annual > 0 ? T("Annual income forecast available.") : null, growth > 0 ? T("Savings capacity remains strong.") : null, up.length ? T("No payment gaps expected.") : null].filter(Boolean).map(x => `<li>${okI}<span>${esc(x)}</span></li>`).join("") || `<li class="hint">–</li>`}</ul>`, { klass: "ni-ins" });
+    const salDet = d.Received.some(r => r.Kind === RECEIVED.salary);
+    const impDash = `<div class="nw-card dz ni-imp"><div class="nw-ch"><span class="rp-si i-res">${si(IC.docs, 24)}</span><h3>${esc(T("Imported Income Analysis"))}</h3></div><div class="ni-ib"><span class="ni-tick">${okI}</span><div><b>${esc(salDet ? T("Recurring salary payments detected") : d.Received.length ? T("Imported payments: {0}", d.Received.length) : T("No bank statement imported yet"))}</b><small>${esc(salDet ? T("Your employment income is recognized and shows a stable trend.") : T("Import a bank statement (Import button, top right) to detect your income automatically."))}</small></div>
+      <span class="ni-bars"><i style="height:30%"></i><i style="height:45%"></i><i style="height:40%"></i><i style="height:62%"></i><i style="height:78%"></i><i style="height:100%"></i></span></div><button class="sv-btn ghost ni-vd" data-action="inc-imp">${esc(T("View Details"))}</button></div>`;
+    const alloc = [[T("Essential costs"), avg.essential, "#2EDC9A"], [T("Not essential"), avg.nonEssential, "#3B9BFF"], [T("Savings"), Math.max(0, left), "#F5A623"]].filter(x => x[1] > 0);
+    const allocTot = alloc.reduce((x, y) => x + y[1], 0);
+    const allocDash = dcard("pie", "res", T("Income Allocation"), `<div class="sv-ar">${donut(alloc.map(x => ({ label: x[0], value: x[1], color: x[2] })), "", "", 120)}<ul class="sv-al">${alloc.map(x => `<li><i style="background:${x[2]}"></i><span>${esc(x[0])}</span><b>${Math.round(x[1] / allocTot * 100)}%</b></li>`).join("") || `<li class="hint">${esc(T("Add expenses in the Outflows tab to see how your income is used."))}</li>`}</ul></div>`, { klass: "ni-alloc" });
+    const addDash = `<div class="nw-card dz ni-add"><div class="nw-ch"><span class="rp-si i-res">${si(IC.plus, 24)}</span><h3>${esc(T("Add Income Source"))}</h3></div><div class="two">${field(T("Income Name"), textInput("qname", "", T("e.g. {0}", T("Salary, side job"))))}${field(T("Type"), select("qtype", [["Monthly", T("Recurring")], [ONE_TIME, T("One-time")]], "Monthly"))}</div><button class="sv-btn ni-addb" data-action="inc-add">＋ ${esc(T("Add Income Source"))}</button></div>`;
+    const botBand = `<div class="nw-card rp-sum ni-bot"><div class="sv-b1"><span class="rp-si i-res">${si(IC.heart, 38)}</span><div><small>${esc(T("Income Health Score"))}</small><b>${stab} / 100</b></div></div><div class="sv-b1 dv"><span class="rp-si i-res">${si(IC.shield, 32)}</span><div><small>${esc(T("Income Stability"))}</small><b>${esc(stab >= 80 ? T("Excellent") : stabL)}</b></div></div><div class="sv-b1 dv"><span class="rp-si i-res">${si(IC.bars, 30)}</span><div><small>${esc(T("Annual Projection"))}</small><b>${esc(pln(annual))}</b></div></div><div class="sv-b1 dv"><span class="rp-si i-res">${si(IC.pig, 32)}</span><div><small>${esc(T("Savings Potential"))}</small><b>${esc(pln(growth))}/${esc(T("month"))}</b></div></div><div class="ni-bm">${okI}<span>${esc(T("Your income remains stable and provides strong opportunities for long-term savings growth."))}</span></div></div>`;
+    lastInc = { src: srcCard + binCard(["income", "received"]), add: addCard, imp: impCard };
+    el.innerHTML = `<div class="ni-page">${head}${fcBand}<div class="ni-r2">${srcDash}${tlDash}${insDash}</div><div class="ni-r3">${impDash}${allocDash}${addDash}</div>${botBand}</div>`;
+    el.querySelectorAll("[data-incr]").forEach(b => b.onclick = () => { incRange = +b.dataset.incr; App.refresh(); });
+    const openInc = (key, title, icon, width) => {
+      const pp = popup("", { width, cls: "nw-win pm-win" }), orig = App.refresh; incWin = pp;
+      const draw = () => { pp.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC[icon], 24)}</span><h3>${esc(title)}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="grid bp-flat inc-pop">${lastInc[key]}</div>`; if (key === "add") bindAdd(pp.el); if (key === "src") { bindSrc(pp.el); bindBin(pp.el); } if (key === "imp") bindRec(pp.el); };
+      App.refresh = (...a) => { orig(...a); if (key === "add") pp.close(); else if (!pp.closed) draw(); };
+      const close = pp.close; pp.close = (...a) => { App.refresh = orig; incWin = null; close(...a); };
+      draw();
+    };
+    el.querySelector('[data-action="inc-src"]')?.addEventListener("click", () => openInc("src", T("Income Sources"), "bank", 760));
+    el.querySelector('[data-action="inc-imp"]')?.addEventListener("click", () => openInc("imp", T("Imported Statements"), "docs", 900));
+    el.querySelector('[data-action="inc-add"]')?.addEventListener("click", () => { incDraft = { Name: el.querySelector('[name="qname"]').value.trim(), Frequency: el.querySelector('[name="qtype"]').value }; editIncome = null; App.refresh(); openInc("add", T("Add Income"), "plus", 1000); });
+    const bindEdit = id => { incWin?.close(); editIncome = id; App.refresh(); openInc("add", T("Edit income"), "plus", 1000); };
+    const bindAdd = el => {
     el.querySelectorAll("[data-freq]").forEach(b => b.onclick = () => { const fq = el.querySelector('#income-form [name="frequency"]'); fq.value = b.dataset.freq; fq.dispatchEvent(new Event("change")); el.querySelectorAll("[data-freq]").forEach(x => x.classList.toggle("on", x === b)); });
     el.querySelector('#income-form [name="amount"]').addEventListener("input", ev => { el.querySelector("#inc-prev").textContent = pln(num(ev.target.value) || 0); });
 
@@ -391,12 +431,14 @@ export const Income = {
     el.querySelector('[data-action="save-income"]').onclick = () => saveIncome(form);
     const cancel = el.querySelector('[data-action="cancel-income"]');
     if (cancel) cancel.onclick = () => { editIncome = null; App.refresh(); };
+    };
+    const bindSrc = el => {
     el.querySelectorAll("[data-active-income]").forEach(c => c.onchange = () => {
       const i = d.Incomes.find(y => y.Id === c.dataset.activeIncome); i.Active = c.checked; save(); App.refresh();
     });
     el.querySelectorAll("[data-edit-income]").forEach(x => x.onclick = ev => {
       if (ev.target.closest("[data-del-income], .switch")) return;
-      editIncome = x.dataset.editIncome; App.refresh(); window.scrollTo({ top: 0, behavior: "smooth" });
+      bindEdit(x.dataset.editIncome);
     });
     el.querySelectorAll("[data-del-income]").forEach(b => b.onclick = async () => {
       const i = d.Incomes.find(x => x.Id === b.dataset.delIncome);
@@ -404,6 +446,8 @@ export const Income = {
         toBin("income", i); d.Incomes = d.Incomes.filter(x => x !== i); if (editIncome === i.Id) editIncome = null; save(); App.refresh();
       }
     });
+    };
+    const bindRec = el => {
     el.querySelectorAll('select[name^="kind-"]').forEach(sel => sel.onchange = async () => {
       const r = d.Received.find(x => x.Id === sel.name.slice(5));
       r.Kind = sel.value; save();
@@ -425,6 +469,7 @@ export const Income = {
         toBin("received", d.Received.find(x => x.Id === b.dataset.delReceived)); d.Received = d.Received.filter(x => x.Id !== b.dataset.delReceived); save(); App.refresh();
       }
     });
+    };
   },
 };
 /** Imported inflows, month by month: the newest month open, older ones folded – so a long import stays short.
