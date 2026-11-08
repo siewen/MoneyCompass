@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 93, date: "2026-11-08", items: {
+    en: ["✨ Profile picture placeholder now in emerald green, matching the design."],
+    pl: ["✨ Awatar profilu w kolorze szmaragdowym."],
+    de: ["✨ Profil-Avatar jetzt in Smaragdgrün."],
+    fr: ["✨ L'avatar du profil est maintenant vert émeraude."] } },
   { build: 92, date: "2026-11-08", items: {
     en: ["✨ User menu redesigned (My Profile, Accounts, Categories, Language, Backup & Restore, Help, Sign Out). In the installed app, Sign Out closes MoneyCompass again."],
     pl: ["✨ Nowe menu użytkownika. W zainstalowanej aplikacji „Sign Out” zamyka MoneyCompass."],

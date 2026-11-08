@@ -18,7 +18,7 @@ export const avatarColor = name => COLORS_AVATAR[[...name].reduce((s, c) => s + 
 export function avatar(size = 36) {
   const pic = picture(), name = currentName();
   return pic ? `<img class="avatar" src="${pic}" alt="" style="width:${size}px;height:${size}px">`
-    : `<span class="avatar" style="width:${size}px;height:${size}px;background:${avatarColor(name)};font-size:${size * 0.4}px">${esc(initials(name))}</span>`;
+    : `<span class="avatar" style="width:${size}px;height:${size}px;background:linear-gradient(135deg,#34D399,#0F8F66);color:#06231A;font-weight:700;font-size:${size * 0.4}px">${esc(initials(name))}</span>`;
 }
 
 // ================================================================= Profile (name, picture, license, profiles)
