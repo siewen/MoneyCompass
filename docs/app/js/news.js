@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 89, date: "2026-11-08", items: {
+    en: ["✨ Import, Export, notifications and the user menu now sit at the far right of the top bar; Settings is at the very bottom of the side menu."],
+    pl: ["✨ Import, Eksport i menu użytkownika po prawej; Ustawienia na dole menu."],
+    de: ["✨ Import, Export und Benutzermenü rechts; Einstellungen ganz unten."],
+    fr: ["✨ Import, Export et menu utilisateur à droite ; Paramètres tout en bas."] } },
   { build: 88, date: "2026-11-08", items: {
     en: ["✨ New side menu (bigger icons, Savings Goals, private-data note) and a new user menu: My Profile, Accounts, Categories, Preferences, Language, Subscription, Backup & Restore, Help, Sign Out."],
     pl: ["✨ Nowe menu boczne i nowe menu użytkownika."],

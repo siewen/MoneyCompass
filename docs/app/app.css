@@ -1108,3 +1108,6 @@ svg.oc { width: 100%; height: auto; display: block; margin-top: 4px; } .oc-ax { 
 .me-menu .mi { display: inline-flex; width: 22px; color: #B7C7E6; } .me-menu .mi svg { width: 20px; height: 20px; }
 .me-menu .mi-arrow { margin-left: auto; color: var(--muted); font-size: 18px; }
 .me-menu hr { border: 0; border-top: 1px solid var(--border); margin: 6px 4px; }
+
+.topbar .tb-btn:first-of-type { margin-left: auto; }
+.tab-settings { margin-top: 6px; }
