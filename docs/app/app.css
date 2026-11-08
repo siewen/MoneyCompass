@@ -1229,3 +1229,31 @@ svg.oc { width: 100%; height: auto; display: block; margin-top: 4px; } .oc-ax { 
 .ii-banks span { font-size: 15px; letter-spacing: .01em; }
 
 .ii-banks span { display: inline-flex; align-items: center; gap: 8px; } .ii-banks span svg { color: #28D69A; }
+
+/* Import window: compact, fits one screen */
+.import-dlg { max-height: 96vh; overflow: auto; max-width: 860px !important; }
+.ii { padding: 12px 16px 10px; }
+.ii-head { gap: 10px; } .ii-head h2 { font-size: 19px; } .ii-head p { font-size: 12.5px; margin-top: 2px; } .ii-hic svg { width: 30px; height: 30px; }
+.ii-drop { margin: 8px 0; padding: 10px 12px; gap: 4px; border-radius: 12px; } .ii-cloud svg { width: 40px; height: 40px; } .ii-drop b { font-size: 17px; } .ii-or { font-size: 12px; }
+.ii-choose { padding: 7px 28px !important; font-size: 14px; } .ii-drop small { font-size: 12px; }
+.ii-box { padding: 8px 10px; border-radius: 12px; } .ii-box h3 { font-size: 14px; margin-bottom: 6px; gap: 6px; } .ii-box h3 svg { width: 20px; height: 20px; }
+.ii-cols, .ii-cols2 { gap: 8px; } .ii-cols2 { margin-top: 8px; } .ii-three { gap: 8px; }
+.ii-card { padding: 8px 6px; gap: 4px; } .ii-card b { font-size: 13px; } .ii-card small { font-size: 11px; line-height: 1.25; }
+.ii-ico { width: 40px; height: 40px; box-shadow: 0 0 14px currentColor; } .ii-ico svg { width: 24px; height: 24px; }
+.ii-chips { gap: 3px; } .ii-chips em { font-size: 11px; padding: 1px 10px; } .ii-chips em i { width: 13px; height: 13px; font-size: 9px; }
+.ii-check { width: 18px; height: 18px; font-size: 11px; top: 6px; right: 6px; }
+.ii-banks { gap: 5px 6px; } .ii-banks span { padding: 4px 9px; font-size: 12px; gap: 5px; } .ii-banks span svg { width: 15px; height: 15px; }
+.ii-bfoot { margin-top: 6px; } .ii-bfoot small, .ii-bfoot em { font-size: 11px; } .ii-bfoot em { padding: 2px 9px; }
+.ii-sec { gap: 4px; } .ii-sec li { font-size: 12px; gap: 7px; } .ii-sec i { width: 16px; height: 16px; font-size: 9px; }
+.ii-priv { padding: 4px 8px; font-size: 10px; } .ii-priv svg { width: 18px; height: 18px; }
+.ii-foot { margin-top: 8px; padding: 6px 10px; gap: 8px; } .ii-ready { font-size: 12.5px; gap: 8px; } .ii-ready svg { width: 22px; height: 22px; }
+.ii-foot .btn { padding: 8px 18px !important; font-size: 13.5px; }
+.import-dlg { max-width: 820px !important; }
+.ii { padding: 10px 14px 8px; }
+.ii-drop { padding: 6px 10px; margin: 6px 0; gap: 2px; } .ii-cloud svg { width: 30px; height: 30px; } .ii-drop b { font-size: 15px; } .ii-or { display: none; } .ii-drop small { font-size: 11px; }
+.ii-choose { padding: 5px 24px !important; font-size: 13px; }
+.ii-cols { grid-template-columns: 2.2fr 1fr; } .ii-box h3 { font-size: 13px; white-space: nowrap; }
+.ii-card { padding: 6px 5px; gap: 3px; } .ii-card small { font-size: 10.5px; } .ii-ico { width: 34px; height: 34px; } .ii-ico svg { width: 20px; height: 20px; }
+.ii-banks span { padding: 3px 8px; font-size: 11.5px; } .ii-bfoot small { display: none; }
+.ii-sec { gap: 3px; } .ii-sec li { font-size: 11.5px; }
+.ii-cols2 { margin-top: 6px; } .ii-foot { margin-top: 6px; padding: 5px 10px; }

@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 99, date: "2026-11-08", items: {
+    en: ["✨ The Import window is smaller: it fits on one screen without scrolling."],
+    pl: ["✨ Okno importu jest mniejsze i mieści się na ekranie bez przewijania."],
+    de: ["✨ Das Import-Fenster ist kleiner und passt ohne Scrollen auf den Bildschirm."],
+    fr: ["✨ La fenêtre d'import est plus petite et tient sur l'écran sans défilement."] } },
   { build: 98, date: "2026-11-08", items: {
     en: ["✨ About MoneyCompass is back in the user menu (below Help)."],
     pl: ["✨ „About” wróciło do menu użytkownika."],
