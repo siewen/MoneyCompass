@@ -516,7 +516,7 @@ export const Budget = {
     el.querySelector('[data-action="b-limits"]')?.addEventListener("click", openLimits);
     el.querySelector('[data-action="b-goals"]')?.addEventListener("click", openGoals);
     el.querySelector('[data-action="b-new"]').onclick = openLimits;
-    el.querySelector('[data-action="b-opt"]').onclick = () => App.openOptimize();
+    el.querySelectorAll('[data-action="b-opt"],[data-action="b-opt2"]').forEach(b => b.onclick = () => App.openOptimize());
   },
 };
 
