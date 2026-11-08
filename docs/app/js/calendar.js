@@ -313,7 +313,12 @@ export const Calendar = {
       <div class="chips">${RANGES.map(n => `<button class="chip${n === range ? " on" : ""}" data-range="${n}">${esc(monthsLabel(n))}</button>`).join("")}</div>
       <div class="cal-chart-body">${trendMonths.length ? ovTrend(trendMonths) : ""}<div class="cal-chart-side"><div><small>${esc(T("Expected Income"))}</small><b class="good">${esc(pln(inSum))}</b></div><div><small>${esc(T("Expected Expenses"))}</small><b>${esc(pln(outSum + saveSum))}</b></div><div><small>${esc(T("Net Cashflow"))}</small><b class="${netCf < 0 ? "bad" : "good"}">${esc((netCf >= 0 ? "+" : "−") + pln(Math.abs(netCf)))}</b></div></div></div></div>`;
     const stripCard = h => h.slice(h.indexOf(">") + 1, h.lastIndexOf("</section>"));
-    const mergedReg = `<section class="card cal-reg-card"><div class="nw-ch"><span class="rp-si i-rep">${si(IC.repeat, 24)}</span><h3>${esc(T("Regular Payments"))}</h3></div>${stripCard(formCard)}<hr>${stripCard(regCard).replace(heading(T("Regular payments")), "")}</section>`;
+    const suggMark = `<hr><h3>💡 ${esc(T("Suggestions from your expenses"))}</h3>`;
+    let regInner = stripCard(regCard).replace(heading(T("Regular payments")), "");
+    let suggHtml = "";
+    const si2 = regInner.indexOf(suggMark);
+    if (si2 >= 0) { suggHtml = `<details class="cal-fold"><summary>💡 ${esc(T("Suggestions from your expenses"))} (${sugg.length})</summary>${regInner.slice(si2 + suggMark.length)}</details>`; regInner = regInner.slice(0, si2); }
+    const mergedReg = `<section class="card cal-reg-card"><div class="nw-ch"><span class="rp-si i-rep">${si(IC.repeat, 24)}</span><h3>${esc(T("Regular Payments"))}</h3></div><details class="cal-fold"${r ? " open data-edit" : ""}><summary>＋ ${esc(T("Add a regular payment"))}</summary>${stripCard(formCard)}</details><div class="cal-reg-list">${regInner}</div>${suggHtml}</section>`;
     el.innerHTML = calHead + `<div class="cal-top"><div class="cal-main">${calCard}</div><div class="cal-side">${evCard}</div></div>
     <div class="cal-mid">${chartCard}<div class="cal-reg">${mergedReg}</div></div>
     <div class="grid">

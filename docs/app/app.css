@@ -1525,3 +1525,6 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .cal-reg-card { background: rgba(255,255,255,.04) !important; border: 1px solid rgba(255,255,255,.09) !important; border-radius: 14px !important; } .cal-reg-card .nw-ch { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; } .cal-reg-card .nw-ch h3 { margin: 0; font-size: 17px; color: #fff; } .cal-reg-card .rp-si svg { width: 24px; height: 24px; }
 .cal-reg-card form > h3 { font-size: 15px; color: #CFE3DB; margin: 6px 0; } .cal-reg-card > hr { border: 0; border-top: 1px solid rgba(255,255,255,.12); margin: 14px 0; }
 .cal-mid { align-items: start; }
+.cal-fold { border: 1px solid rgba(255,255,255,.12); border-radius: 12px; margin: 8px 0; padding: 0 12px; background: rgba(0,0,0,.15); } .cal-fold > summary { cursor: pointer; padding: 10px 0; font-weight: 700; color: #2EF0A8; list-style: none; } .cal-fold > summary::-webkit-details-marker { display: none; } .cal-fold[open] > summary { border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 8px; }
+.cal-fold:not([data-edit]) form > h3 { display: none; }
+.cal-reg-list { max-height: 360px; overflow-y: auto; padding-right: 4px; }
