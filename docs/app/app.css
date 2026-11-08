@@ -1521,3 +1521,7 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .rp-fmt .fx b.ff { background: #1E8E4E; } .rp-fmt .fp b.ff { background: #E5383B; font-size: 11px; } .rp-fmt .fw b.ff { background: #2B6CD6; }
 .rp-fmt .fx { border-color: #1FBF85 !important; } .rp-fmt .fp { border-color: #E5555A !important; } .rp-fmt .fw { border-color: #3B82F6 !important; }
 .drag-handle { display: none !important; }
+.rp-si.i-rep svg { fill: #4C9BFF; stroke: none; filter: drop-shadow(0 0 8px rgba(76,155,255,.6)); }
+.cal-reg-card { background: rgba(255,255,255,.04) !important; border: 1px solid rgba(255,255,255,.09) !important; border-radius: 14px !important; } .cal-reg-card .nw-ch { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; } .cal-reg-card .nw-ch h3 { margin: 0; font-size: 17px; color: #fff; } .cal-reg-card .rp-si svg { width: 24px; height: 24px; }
+.cal-reg-card form > h3 { font-size: 15px; color: #CFE3DB; margin: 6px 0; } .cal-reg-card > hr { border: 0; border-top: 1px solid rgba(255,255,255,.12); margin: 14px 0; }
+.cal-mid { align-items: start; }

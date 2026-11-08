@@ -299,7 +299,7 @@ export const Calendar = {
         ${field(T("Final payment (optional)"), `<input type="date" name="end" value="${f.EndDate ? inputDate(parseDate(f.EndDate)) : ""}">`)}</div>
         ${hint(T("For payments that end, such as a contract: enter the final payment date and it stops counting after that. You can also switch a payment off in the list below."))}
         <div class="buttons">${button(r ? T("Save changes") : T("Add"), "save-rec", "main")}${r ? button(T("Cancel"), "cancel-rec") : ""}</div></form>`);
-    const monthsCard = card(heading(T("Month by month")) + `<div class="chips past-chips"><button class="chip${allPast ? "" : " on"}" data-past="0">🔁 ${esc(T("Recurring only"))}</button><button class="chip${allPast ? " on" : ""}" data-past="1">${esc(T("All transactions"))}</button></div>` +
+    const monthsCard = card(`<div class="nw-ch"><span class="rp-si i-table">${si(IC.table, 24)}</span><h3>${esc(T("Month by month"))}</h3></div>` + `<div class="chips past-chips"><button class="chip${allPast ? "" : " on"}" data-past="0">🔁 ${esc(T("Recurring only"))}</button><button class="chip${allPast ? " on" : ""}" data-past="1">${esc(T("All transactions"))}</button></div>` +
         hint(allPast ? T("Past months show every transaction from your entries and bank imports.") : T("Past months show recurring items only: expenses marked 🔁, salary, recurring income and transfers to savings. Mark an expense with 🔁 in the Outflows tab to include it.")) + pastMonths.map(m => `<details class="cal-month past" data-m="${mkey(m.ms)}"${folded.get(mkey(m.ms)) ? " open" : ""}><summary class="cal-month-head"><span class="m-name"><b>${esc(monthName(m.ms))}</b> <small class="hint">· ${esc(T("actual"))}</small></span>
         <span><span class="good">+${pln(m.inn)}</span> · <span class="bad">−${pln(m.out)}</span>${m.sav ? ` · <span class="primary">${pln(m.sav)}</span>` : ""} · <b class="${m.inn - m.out - m.sav >= 0 ? "good" : "bad"}">${pln(m.inn - m.out - m.sav)}</b></span></summary>
         <div class="list">${m.ev.map(evRow).join("") || hint(T("Nothing in this month."))}</div></details>`).join("") + months.map(m => `<details class="cal-month" data-m="${mkey(m.ms)}"${folded.get(mkey(m.ms)) ? " open" : ""}><summary class="cal-month-head"><span class="m-name"><b>${esc(monthName(m.ms))}</b></span>
@@ -312,10 +312,11 @@ export const Calendar = {
     const chartCard = `<div class="nw-card cal-chart"><div class="nw-ch"><span class="rp-si">${si(IC.trend, 22)}</span><h3>${esc(T("Cashflow Forecast"))}</h3><span class="rp-leg"><i style="background:#35D399"></i>${esc(T("Income"))} <i style="background:#3B82F6"></i>${esc(T("Expenses"))}</span></div>
       <div class="chips">${RANGES.map(n => `<button class="chip${n === range ? " on" : ""}" data-range="${n}">${esc(monthsLabel(n))}</button>`).join("")}</div>
       <div class="cal-chart-body">${trendMonths.length ? ovTrend(trendMonths) : ""}<div class="cal-chart-side"><div><small>${esc(T("Expected Income"))}</small><b class="good">${esc(pln(inSum))}</b></div><div><small>${esc(T("Expected Expenses"))}</small><b>${esc(pln(outSum + saveSum))}</b></div><div><small>${esc(T("Net Cashflow"))}</small><b class="${netCf < 0 ? "bad" : "good"}">${esc((netCf >= 0 ? "+" : "−") + pln(Math.abs(netCf)))}</b></div></div></div></div>`;
+    const stripCard = h => h.slice(h.indexOf(">") + 1, h.lastIndexOf("</section>"));
+    const mergedReg = `<section class="card cal-reg-card"><div class="nw-ch"><span class="rp-si i-rep">${si(IC.repeat, 24)}</span><h3>${esc(T("Regular Payments"))}</h3></div>${stripCard(formCard)}<hr>${stripCard(regCard).replace(heading(T("Regular payments")), "")}</section>`;
     el.innerHTML = calHead + `<div class="cal-top"><div class="cal-main">${calCard}</div><div class="cal-side">${evCard}</div></div>
-    <div class="cal-mid">${chartCard}<div class="cal-reg">${regCard}</div></div>
+    <div class="cal-mid">${chartCard}<div class="cal-reg">${mergedReg}</div></div>
     <div class="grid">
-      ${formCard}
       ${monthsCard}
       ${binCard(["recurring"])}
     </div>` + calBand;
