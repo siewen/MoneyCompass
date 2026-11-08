@@ -1227,3 +1227,5 @@ svg.oc { width: 100%; height: auto; display: block; margin-top: 4px; } .oc-ax { 
 .ii-priv { margin-left: auto; display: inline-flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 12px; border-radius: 10px; background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.3); font-size: 11px; font-weight: 500; color: #CFE0DA; }
 .ii-sec i { background: #28D69A; color: #0D161B; font-weight: 800; }
 .ii-banks span { font-size: 15px; letter-spacing: .01em; }
+
+.ii-banks span { display: inline-flex; align-items: center; gap: 8px; } .ii-banks span svg { color: #28D69A; }

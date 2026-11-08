@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 97, date: "2026-11-08", items: {
+    en: ["✨ Supported banks in the Import window now show a bank icon."],
+    pl: ["✨ Obsługiwane banki w oknie importu mają ikonę banku."],
+    de: ["✨ Unterstützte Banken im Import-Fenster zeigen ein Bank-Symbol."],
+    fr: ["✨ Les banques prises en charge affichent une icône de banque."] } },
   { build: 96, date: "2026-11-08", items: {
     en: ["✨ Import window closer to the design: solid glowing icons, chips with icons and a Privacy Protected badge."],
     pl: ["✨ Okno importu bliższe projektowi: pełne ikony, znaczniki z ikonami i plakietka prywatności."],
