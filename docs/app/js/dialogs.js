@@ -381,19 +381,23 @@ export function openHelp(guide = false) {
     ["Security & backups", "PIN, fingerprint/face unlock, automatic lock, an automatic encrypted backup and encrypted profile files."], ["Menu order", "Put the tabs in your own order."],
     ["Modules", "Loans & Debts, Budget Plan and Calendar: switch them on in Settings → Modules. Each adds its own tab; savings goals are in the Budget Plan."],
     ["Reports", "Reports as Excel, PDF or Word."], ["Profiles", "Separate data for each person or household."]];
+  const navs = [["start", "check", "Getting started"], ["tabs", "book", "The tabs"], ["pro", "star", "MoneyCompass Pro"], ["data", "shield", "Your data & backup"], ["note", "info", "Please note"]];
+  const panels = {
+    start: `<div class="hp-g2">${steps.map((x, i) => `<div class="hp-step"><b>${i + 1}</b><p>${esc(T(x))}</p></div>`).join("")}</div>` + hint(T("Numbers can be typed with a dot or a comma: 1234.50 or 1234,50.")),
+    tabs: `<div class="hp-g3">${tabs.map(t => `<div class="hp-tile"><b>${esc(T(t[0]))}</b><span>${esc(T(t[1]))}</span></div>`).join("")}</div>` + hint(T("Loans & Debts, Budget Plan (with savings goals) and Calendar are modules: switch them on in Settings → Modules.")),
+    pro: `<p class="hp-p">${esc(T("The free version has all the basics. A license key unlocks:"))}</p><div class="hp-g3">${pro.map(x => `<div class="hp-tile"><b>${esc(T(x[0]))}</b><span>${esc(T(x[1]))}</span></div>`).join("")}</div>` + hint(T("To unlock: click your name → Profile & license, paste your key under Activation and press Activate.")),
+    data: `<div class="hp-g2"><div class="hp-tile big"><b>${esc(T("Your data & backup"))}</b><span>${esc(T("Everything you enter is saved automatically, only in this browser on this device. Nothing is sent to the internet."))}</span><small>${esc(T("Clearing your browser data deletes your entries. With Pro, turn on the automatic encrypted backup (Settings) or save your profile (click your name → Profile). Loading a profile is free. The Windows app opens these files from version 2.1."))}</small></div>
+      <div class="hp-tile big"><b>${esc(T("Windows app"))}</b><span>${esc(T("The free Windows app has more than the free web version: reports and several profiles. From version 2.1 it also opens the encrypted profile files of the web app."))}</span><a class="sv-btn hp-dl" href="${DOWNLOAD_URL}" target="_blank" rel="noopener">⬇ ${esc(T("Download for Windows"))}</a></div></div>`,
+    note: `<div class="hp-tile big"><b>${esc(T("Please note"))}</b><span>${esc(T("MoneyCompass helps you keep an overview. All results are estimates based on what you enter. They are not financial, investment or tax advice. Interest rates and offers change - always check the bank's own terms."))}</span><small>${esc(T("© {0} MoneyCompass. All rights reserved.", new Date().getFullYear()))}</small><span><a href="../privacy.html#${lang()}" target="_blank">${esc(T("Privacy policy"))}</a> · <a href="../terms.html#${lang()}" target="_blank">${esc(T("Terms of use"))}</a></span></div>`
+  };
   const p = popup(`<div class="nw-hd"><span class="nw-hi">${ico("book")}</span><div><h2>${esc(T("Help"))}</h2><p class="nw-sub">${esc(T("Everything you need to get started and get the most from MoneyCompass."))}</p></div><button class="nw-x" data-close aria-label="Close">✕</button></div>
-    <div class="hp-grid">
-      ${sec("check", "Getting started", `<ol class="hp-steps">${steps.map(x => `<li>${esc(T(x))}</li>`).join("")}</ol>` + hint(T("Numbers can be typed with a dot or a comma: 1234.50 or 1234,50.")))}
-      ${sec("book", "The tabs", tabs.map(t => `<div class="hp-t"><b>${esc(T(t[0]))}</b><span>${esc(T(t[1]))}</span></div>`).join("") + hint(T("Loans & Debts, Budget Plan (with savings goals) and Calendar are modules: switch them on in Settings → Modules.")))}
-      ${sec("star", "MoneyCompass Pro", `<p class="hp-p">${esc(T("The free version has all the basics. A license key unlocks:"))}</p><ul class="hp-pro">${pro.map(x => `<li><b>${esc(T(x[0]))}</b><span>${esc(T(x[1]))}</span></li>`).join("")}</ul>` + hint(T("To unlock: click your name → Profile & license, paste your key under Activation and press Activate.")))}
-      <div class="hp-col">
-        ${sec("shield", "Your data & backup", `<p class="hp-p">${esc(T("Everything you enter is saved automatically, only in this browser on this device. Nothing is sent to the internet."))}</p>` + hint(T("Clearing your browser data deletes your entries. With Pro, turn on the automatic encrypted backup (Settings) or save your profile (click your name → Profile). Loading a profile is free. The Windows app opens these files from version 2.1.")))}
-        ${sec("cube", "Windows app", `<p class="hp-p">${esc(T("The free Windows app has more than the free web version: reports and several profiles. From version 2.1 it also opens the encrypted profile files of the web app."))}</p><a class="sv-btn hp-dl" href="${DOWNLOAD_URL}" target="_blank" rel="noopener">⬇ ${esc(T("Download for Windows"))}</a>`)}
-        ${sec("info", "Please note", hint(T("MoneyCompass helps you keep an overview. All results are estimates based on what you enter. They are not financial, investment or tax advice. Interest rates and offers change - always check the bank's own terms.")) +
-          hint(T("© {0} MoneyCompass. All rights reserved.", new Date().getFullYear())) + `<p class="hp-p"><a href="../privacy.html#${lang()}" target="_blank">${esc(T("Privacy policy"))}</a> · <a href="../terms.html#${lang()}" target="_blank">${esc(T("Terms of use"))}</a></p>`)}
-      </div>
-    </div>
-    <div class="nw-ft"><span></span><button class="btn main" data-close>${esc(T("Close"))}</button></div>`, { width: 1180, cls: "nw-win hp-win" });
+    <div class="hp-body"><nav class="hp-nav">${navs.map(([k, i, n], j) => `<button type="button" class="hp-n${j === 0 ? " on" : ""}" data-hp="${k}"><span>${ico(i)}</span>${esc(T(n))}</button>`).join("")}</nav>
+      <div class="hp-panels">${navs.map(([k, i, n], j) => `<section class="hp-pane" data-hpp="${k}"${j ? " hidden" : ""}><h3>${esc(T(n))}</h3>${panels[k]}</section>`).join("")}</div></div>
+    <div class="nw-ft"><span></span><button class="btn main" data-close>${esc(T("Close"))}</button></div>`, { width: 1260, cls: "nw-win hp-win" });
+  p.el.querySelectorAll("[data-hp]").forEach(b => b.onclick = () => {
+    p.el.querySelectorAll("[data-hp]").forEach(x => x.classList.toggle("on", x === b));
+    p.el.querySelectorAll("[data-hpp]").forEach(x => x.hidden = x.dataset.hpp !== b.dataset.hp);
+  });
 }
 
 // ================================================================= Export (Pro on the web)
