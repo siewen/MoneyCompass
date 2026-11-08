@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 94, date: "2026-11-08", items: {
+    en: ["✨ The user menu is now compact."],
+    pl: ["✨ Menu użytkownika jest teraz mniejsze."],
+    de: ["✨ Das Benutzermenü ist jetzt kompakter."],
+    fr: ["✨ Le menu utilisateur est maintenant plus compact."] } },
   { build: 93, date: "2026-11-08", items: {
     en: ["✨ Profile picture placeholder now in emerald green, matching the design."],
     pl: ["✨ Awatar profilu w kolorze szmaragdowym."],

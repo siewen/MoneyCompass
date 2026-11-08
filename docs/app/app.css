@@ -1118,3 +1118,8 @@ svg.oc { width: 100%; height: auto; display: block; margin-top: 4px; } .oc-ax { 
 .me-menu hr { border-top: 1px solid rgba(150,180,230,.18); margin: 8px 10px; }
 .me-badge.pro { background: rgba(52,211,153,.18); color: #34F0A8; box-shadow: 0 0 14px rgba(52,211,153,.25); padding: 3px 14px; font-size: 13px; border-radius: 999px; }
 .topbar .me-more { color: #8FB4F0; }
+
+.me-menu { width: 175px !important; padding: 6px !important; border-radius: 12px !important; }
+.me-menu button { gap: 10px; padding: 7px 9px !important; font-size: 13px; }
+.me-menu .mi { width: 18px; } .me-menu .mi svg { width: 18px; height: 18px; }
+.me-menu hr { margin: 5px 6px; }
