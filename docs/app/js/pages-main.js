@@ -908,7 +908,7 @@ export const Portfolio = {
     const holdCard = dcard("bank", "res", T("Accounts & Holdings"), (d.Holdings.length ? `<div class="sv-hl">${hv.map(({ x, pl, r: rr }) => `<div class="sv-h" data-edit-holding="${x.Id}"><span class="sv-hi">${si(x.Place === "Cash" ? IC.coins || IC.bank : IC.bank, 26)}</span>
         <div class="sv-hn"><b>${esc(x.Name)}</b><small>${esc(T("Annual Return: {0}", pln(pl * rr / 100)))}</small>${promoBadge(x)}</div>
         <div class="sv-hv">${amount(x.Amount, x.Currency)}</div><div class="sv-hr">${esc(rate(rr))}</div>
-        <span class="sv-hx">${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></span></div>`).join("")}</div>` : hint(T("Nothing added yet."))), { klass: "sv-hold" });
+        <span class="sv-hx">${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></span></div>`).join("")}</div>` : hint(T("Nothing added yet."))), { klass: "sv-hold", extra: `<button class="pm-btn" data-action="sv-checks" title="${esc(T("Statement analyses"))}" aria-label="${esc(T("Statement analyses"))}">±</button>` });
     const risk = x => x.Safe ? T("Low") : T("High");
     const perfCard = `<div class="nw-card dz sv-perf"><div class="nw-ch"><span class="rp-si i-res">${si(IC.trend, 22)}</span><h3>${esc(T("Performance Analysis"))}</h3></div><table class="sv-t"><thead><tr><th>${esc(T("Institution"))}</th><th>${esc(T("Balance"))}</th><th>${esc(T("Yield"))}</th><th>${esc(T("Annual Return"))}</th><th>${esc(T("Risk Profile"))}</th></tr></thead><tbody>${hv.map(({ x, pl, r: rr }) =>
       `<tr><td>${esc(x.Name)}</td><td>${esc(pln(pl))}</td><td>${esc(rate(rr))}</td><td>${esc(pln(pl * rr / 100))}</td><td><span class="sv-risk ${x.Safe ? "low" : "high"}">${esc(risk(x))}</span></td></tr>`).join("") || `<tr><td colspan="5" class="hint">–</td></tr>`}</tbody></table></div>`;
@@ -939,7 +939,14 @@ export const Portfolio = {
       <div class="sv-b1 dv"><span class="rp-si i-res">${si(IC.trend, 34)}</span><div><small>${esc(T("Projected Annual Return"))}</small><b>${esc(pln(p.yearly + potential))}</b></div></div>
       <div class="sv-msg"><span class="rp-si i-res">${si(IC.check, 34)}</span><span>${esc(mv.length ? T("Your savings portfolio is healthy and multiple opportunities exist to improve annual returns.") : T("Your savings portfolio is healthy."))}</span></div></div>`;
     el.innerHTML = `<div class="sv-page">` + head + optBand + `<div class="sv-main"><div class="sv-left"><div class="sv-r1">${perfChart}${holdCard}</div><div class="sv-r2">${perfCard}${allocCard}${fxCard}</div></div>${addCard}</div>` + bot +
-      `<div class="grid">${savedChecksCard(d)}${binCard(["holding"])}</div>` + (p.missing ? hint(T("Some items are in USD or EUR but the exchange rate is empty, so they count as 0 zł. Enter the rates below."), "bad") : "") + `</div>`;
+      `<div class="grid">${binCard(["holding"])}</div>` + (p.missing ? hint(T("Some items are in USD or EUR but the exchange rate is empty, so they count as 0 zł. Enter the rates below."), "bad") : "") + `</div>`;
+    el.querySelector('[data-action="sv-checks"]')?.addEventListener("click", () => {
+      const pp = popup("", { width: 720, cls: "nw-win pm-win" }), orig = App.refresh;
+      const draw = () => { pp.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC.docs, 24)}</span><h3>${esc(T("Statement analyses"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="bp-flat sv-sc">${savedChecksCard(State.data) || hint(T("No statement analyses yet. Import a savings account statement (Import button, top right)."))}</div>`; bindSavedChecks(pp.el, State.data); };
+      App.refresh = (...a) => { orig(...a); if (!pp.closed) draw(); };
+      const close = pp.close; pp.close = (...a) => { App.refresh = orig; close(...a); };
+      draw();
+    });
     el.querySelectorAll("[data-svr]").forEach(b => b.onclick = () => { svRange = +b.dataset.svr; App.refresh(); });
     bindAdvice(el, d);
     el.querySelector('[data-action="savings-check"]')?.addEventListener("click", () => openSavingsCheck());

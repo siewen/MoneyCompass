@@ -1717,3 +1717,4 @@ button.dz-bhi { cursor: pointer; text-align: left; font: inherit; color: inherit
 .sv-add { display: flex; flex-direction: column; } .sv-add form { display: flex; flex-direction: column; gap: 4px; flex: 1; } .sv-add .buttons { margin-top: auto; padding-top: 8px; } .sv-add .field { margin: 0 0 4px; } .sv-add label { font-size: .8rem; } .sv-more summary { cursor: pointer; font-size: .8rem; color: #2EDC9A; padding: 6px 0; }
 .sv-bot { grid-template-columns: 1.1fr 1fr 1.15fr 1.15fr 1.6fr; padding: 12px 18px; } .sv-b1.dv { border-left: 1px solid rgba(255,255,255,.12); padding-left: 18px; } .sv-b1 b { font-size: 1.3rem; }
 @media (max-width: 1250px) { .sv-main { grid-template-columns: 1fr; } .sv-r1, .sv-r2 { grid-template-columns: 1fr; } .sv-bot { grid-template-columns: 1fr 1fr; } }
+.sv-sc .check-item, .sv-sc details { margin-top: 8px; }
