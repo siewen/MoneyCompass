@@ -71,3 +71,26 @@ export const spark = (vals, color) => {
   const pts = vals.map((v, i) => `${(i / (vals.length - 1) * 100).toFixed(1)},${(30 - (v - mn) / r * 26 - 2).toFixed(1)}`).join(" ");
   return `<svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`;
 };
+
+/** Generic line chart: labels on x, any number of series {vals, color, dash, dots, area}. */
+export function lineChart(labels, series, opt = {}) {
+  const all = series.flatMap(s => s.vals.filter(v => v != null));
+  const hi = Math.max(1, ...all), lo = Math.min(0, ...all);
+  const max = niceMax(hi), min = lo < 0 ? -niceMax(-lo) : 0;
+  const f = frame(labels.map(m => ({ month: String(m) })), min, max);
+  const mk = s => {
+    const pts = s.vals.map((v, i) => v == null ? null : [f.x(i), f.y(v), v]).filter(Boolean);
+    if (!pts.length) return "";
+    const pl = pts.map(a => a[0].toFixed(1) + "," + a[1].toFixed(1)).join(" ");
+    const area = s.area && pts.length > 1 ? `<path d="M${pts[0][0].toFixed(1)},${f.y(0)} L${pl.replace(/ /g, " L")} L${pts[pts.length - 1][0].toFixed(1)},${f.y(0)}z" fill="${s.color}" fill-opacity=".16"/>` : "";
+    return area + `<polyline points="${pl}" fill="none" stroke="${s.color}" stroke-width="2.4" stroke-linejoin="round"${s.dash ? ' stroke-dasharray="6 4"' : ""} style="filter:drop-shadow(0 0 4px ${s.color})"/>` +
+      (s.dots ? pts.map(a => `<circle cx="${a[0].toFixed(1)}" cy="${a[1].toFixed(1)}" r="3.6" fill="${s.color}"><title>${spaced(a[2])}</title></circle>`).join("") : "");
+  };
+  return `<svg class="oc" viewBox="0 0 ${W} ${H}" role="img">${f.g}${series.map(mk).join("")}</svg>`;
+}
+
+/** Single-series columns with the value above each bar. */
+export function colBars(labels, vals, color = "#22E39A") {
+  const max = niceMax(Math.max(1, ...vals)), f = frame(labels.map(m => ({ month: String(m) })), 0, max), bw = Math.min(34, f.inner / f.n / 1.8);
+  return `<svg class="oc" viewBox="0 0 ${W} ${H}" role="img">${f.g}${vals.map((v, i) => v > 0 ? `<rect x="${f.x(i) - bw / 2}" y="${f.y(v)}" width="${bw}" height="${f.y(0) - f.y(v)}" rx="4" fill="${color}" style="filter:drop-shadow(0 0 5px ${color})"/><text x="${f.x(i)}" y="${f.y(v) - 5}" text-anchor="middle" class="oc-ax" fill="#fff">${spaced(v)}</text>` : "").join("")}</svg>`;
+}

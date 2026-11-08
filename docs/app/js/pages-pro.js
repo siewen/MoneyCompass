@@ -4,6 +4,7 @@ import {
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved, fromPln } from "./core.js";
 import { ico } from "./nw.js";
 import { pageHead, band, si, IC, ring } from "./page-head.js";
+import { budgetDash } from "./dash.js";
 import { progress, hbars, savingsChart } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
@@ -469,21 +470,11 @@ export const Budget = {
     const d = D();
     const limits = d.Budgets.filter(b => b.MonthlyLimit > 0);
     const total = limits.reduce((s, b) => s + b.MonthlyLimit, 0), spent = limits.reduce((s, b) => s + Calc.spentThisMonth(b.Category), 0);
-    const rows = limits.map(b => ({ c: b.Category, lim: b.MonthlyLimit, sp: Calc.spentThisMonth(b.Category) })).map(x => ({ ...x, pc: x.lim ? x.sp / x.lim * 100 : 0 }));
-    const score = Math.max(0, Math.round(100 - rows.filter(x => x.pc > 80 && x.pc <= 100).length * 10 - rows.filter(x => x.pc > 100).length * 25));
-    const usage = total ? Math.round(spent / total * 100) : 0, left = total - spent;
-    const bcol = pc => pc > 100 ? "#FF4D5E" : pc > 80 ? "#FFB020" : "#22E39A";
+    const bd = budgetDash(d);
     const bHead = pageHead({ icon: "wallet", title: T("Budget Plan"), sub: T("Plan spending, control expenses and maximize savings."),
-      kpis: [{ l: T("Monthly Budget"), v: pln(total), icon: "coins", cls: "in" }, { l: T("Spent This Month"), v: pln(spent), icon: "cart", cls: "out" }, { l: T("Remaining Budget"), v: pln(left), icon: "up", cls: "in", vcls: left < 0 ? "bad" : "" }, { l: T("Budget Health Score"), v: score + " / 100", icon: "pig", cls: "blue", hi: true }],
+      kpis: [{ l: T("Monthly Budget"), v: pln(bd.kpis.total), icon: "wallet", cls: "in" }, { l: T("Spent This Month"), v: pln(bd.kpis.spent), icon: "cart", cls: "src" }, { l: T("Remaining Budget"), v: pln(bd.kpis.left), icon: "check", cls: "in", vcls: bd.kpis.left < 0 ? "bad" : "" }, { l: T("Budget Health Score"), v: bd.kpis.score + " / 100", icon: "heart", cls: "in", hi: true }],
       btn: `<button class="btn main rp-gen" data-action="b-new">＋ ${esc(T("Create Budget"))}</button>` });
-    const ovCard = `<div class="nw-card bp-ov"><div class="nw-ch"><h3>${esc(T("Budget Overview"))}</h3></div><div class="bp-ov-b">${ring(usage, usage + "%", T("Budget Usage"), 150, bcol(usage))}<div class="bp-ov-f"><small>${esc(T("Budget Limit"))}</small><b>${esc(pln(total))}</b><small>${esc(T("Spent"))}</small><b>${esc(pln(spent))}</b><small>${esc(T("Remaining"))}</small><b class="${left < 0 ? "bad" : "good"}">${esc(pln(left))}</b></div></div><div class="bp-st ${usage > 100 ? "bad" : usage > 80 ? "warn" : "ok"}">${esc(usage > 100 ? T("Over budget") : usage > 80 ? T("Almost used") : T("On Track"))}</div><button class="btn main ex-opt" data-action="b-opt">${esc(T("Optimize My Budget"))}</button></div>`;
-    const catRows = rows.map(x => `<div class="cr-row bp-row"><span class="cr-name">${esc(categoryLabel(x.c))}</span><span class="cr-bar"><i style="width:${Math.min(100, x.pc)}%;background:${bcol(x.pc)}"></i></span><span>${esc(pln(x.sp))} / ${esc(pln(x.lim))}</span></div>`).join("") || `<p class="hint">${esc(T("No limits yet. Set your first one below."))}</p>`;
-    const catCardB = `<div class="nw-card bp-cat"><div class="nw-ch"><span class="rp-si i-rank">${si(IC.bars, 24)}</span><h3>${esc(T("Budget Categories"))}</h3></div>${catRows}</div>`;
-    const near = rows.filter(x => x.pc >= 60).sort((a, b) => b.pc - a.pc).slice(0, 5);
-    const nearCard = `<div class="nw-card bp-near"><div class="nw-ch"><span class="rp-si i-bulb">${si(IC.bulb, 24)}</span><h3>${esc(T("Categories Near Limit"))}</h3></div>${near.map(x => `<div class="cr-row bp-row"><span class="cr-name">${esc(categoryLabel(x.c))}</span><span class="cr-bar"><i style="width:${Math.min(100, x.pc)}%;background:${bcol(x.pc)}"></i></span><b>${Math.round(x.pc)}%</b></div>`).join("") || `<p class="hint">${esc(T("No category is close to its limit."))}</p>`}</div>`;
-    const bIns = [rows.length ? T("{0} categories have a limit", rows.length) : null, rows.filter(x => x.pc > 100).length ? T("{0} categories are over the limit", rows.filter(x => x.pc > 100).length) : T("No category is over its limit"), total ? T("{0}% of your budget is used", usage) : null, d.Goals.length ? T("To set aside for savings goals: {0}", pln(goalsPerMonth(d))) : null, T("Budget Health Score: {0} / 100", score)].filter(Boolean);
-    const insCardB = `<div class="nw-card bp-ins"><div class="nw-ch"><span class="rp-si i-bulb">${si(IC.bulb, 24)}</span><h3>${esc(T("AI Budget Insights"))}</h3></div><ul class="nw-ul">${bIns.map(x => `<li><span class="nw-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></span><span>${esc(x)}</span></li>`).join("")}</ul></div>`;
-    el.innerHTML = bHead + `<div class="bp-row1">${ovCard}${catCardB}${insCardB}</div><div class="bp-row2">${nearCard}</div><div class="grid">
+    el.innerHTML = bHead + bd.html + `<details class="cal-fold bp-manage"><summary>⚙ ${esc(T("Manage limits"))}</summary><div class="grid">
       ${card(heading(monthName(today())) + row(T("Spent in categories with a limit"), pln(spent)) + row(T("Your limits together"), pln(total)) +
         row(T("Left this month"), pln(total - spent), total - spent < 0 ? "bad" : "good") +
         (d.Goals.length ? row(T("To set aside for savings goals"), pln(goalsPerMonth(d))) : ""))}
@@ -494,7 +485,7 @@ export const Budget = {
         ${field(T("Limit per month (zł)"), numInput("limit", "", T("e.g. {0}", "800")))}
         ${button(T("Save limit"), "save-limit", "main")}</form>`)}
       ${binCard(["budget"])}
-    </div>`;
+    </div></details>`;
     // Savings goals: part of the budget plan (how much to set aside each month), with their own cards
     const sec = document.createElement("section"); sec.className = "goals-section";
     sec.innerHTML = `<h2 class="section-title">🎯 ${esc(T("Savings goals"))}</h2><div class="goals-host"></div>`;
@@ -509,7 +500,7 @@ export const Budget = {
       b.querySelector("b").after(del);
     });
     const fm = el.querySelector("#budget");
-    el.querySelector('[data-action="b-new"]').onclick = () => { fm.scrollIntoView({ behavior: "smooth", block: "center" }); fm.querySelector('[name="limit"]')?.focus(); };
+    el.querySelector('[data-action="b-new"]').onclick = () => { const dt = fm.closest("details"); if (dt) dt.open = true; fm.scrollIntoView({ behavior: "smooth", block: "center" }); fm.querySelector('[name="limit"]')?.focus(); };
     el.querySelector('[data-action="b-opt"]').onclick = () => App.openOptimize();
     el.querySelector('[data-action="save-limit"]').onclick = () => {
       const v = values(fm), lim = num(v.limit);

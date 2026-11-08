@@ -2,6 +2,13 @@
 import { esc } from "./ui.js";
 export const si = (d, n = 26) => `<svg class="nwi" width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 export const IC = {
+  cart: '<path d="M2 3h3l.6 3H21l-2 9H8L5 4H2zM9 18a1.700 1.700 0 100 3.400A1.700 1.700 0 009 18zm9 0a1.700 1.700 0 100 3.400A1.700 1.700 0 0018 18z" stroke="none"/>',
+  check: '<path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1.500 14.500l-4-4 1.400-1.400 2.600 2.600 5.600-5.600 1.400 1.400z" fill-rule="evenodd" stroke="none"/>',
+  heart: '<path d="M12 21s-8-5.400-8-11a4.500 4.500 0 018-2.800A4.500 4.500 0 0120 10c0 5.600-8 11-8 11z" stroke="none"/><path d="M3 12h4l2-3 3 6 2-3h7" fill="none" stroke="#0A4A36" stroke-width="1.600"/>',
+  sparkle: '<path d="M10 2l2.200 6.300L18.500 10.500 12.200 12.700 10 19l-2.200-6.300L1.500 10.500 7.800 8.300zM19 14l1.100 2.900L23 18l-2.900 1.100L19 22l-1.100-2.900L15 18l2.900-1.100z" stroke="none"/>',
+  warn: '<path d="M12 2L1 21h22zM11 9h2v6h-2zm0 8h2v2h-2z" fill-rule="evenodd" stroke="none"/>',
+  leaf: '<path d="M12 22V12M12 12C12 7 8 4 3 4c0 5 3 8 9 8zM12 14c0-4 3-7 9-7 0 5-3 8-9 8z" stroke="none"/><path d="M11 12h2v10h-2z" stroke="none"/>',
+  pie: '<path d="M11 2v10h10A10 10 0 0011 2zM9 4.200A10 10 0 1019.800 14H9z" stroke="none"/>',
   shield: '<path d="M12 2l8 3v6c0 5-3.400 9.300-8 11-4.600-1.700-8-6-8-11V5zm-1.500 14l6-6-1.400-1.400-4.600 4.600-2-2L7.100 12.600z" fill-rule="evenodd" stroke="none"/>',
   plus: '<path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 5v4h4v2h-4v4h-2v-4H7v-2h4V7z" fill-rule="evenodd" stroke="none"/>',
   repeat: '<path d="M12 4V1L7 5l5 4V6a6 6 0 016 6c0 1-.3 2-.8 2.900l1.500 1.500A8 8 0 0012 4zm-6.700 3.600A8 8 0 0012 20v3l5-4-5-4v3a6 6 0 01-6-6c0-1 .3-2 .8-2.900z" stroke="none"/>',
