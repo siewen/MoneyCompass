@@ -342,9 +342,9 @@ function openLoansWindow(focus) {
     Loans.render(p.el.querySelector(".ln-host"), { manage: true });
     busy = false;
     // Fit the window to the screen: shrink until no scrolling is needed
-    const host = p.el.querySelector(".ln-host"), avail = window.innerHeight - 40; let z = 1;
+    const host = p.el.querySelector(".ln-host"), avail = (window.innerHeight - 40) * 0.85; let z = 1;
     host.style.zoom = 1;
-    for (let i = 0; i < 4 && z > 0.5; i++) { const h = host.getBoundingClientRect().height; if (h <= avail) break; z = Math.max(0.5, z * avail / h * 0.99); host.style.zoom = z; }
+    for (let i = 0; i < 4 && z > 0.4; i++) { const h = host.getBoundingClientRect().height; if (h <= avail) break; z = Math.max(0.4, z * avail / h * 0.99); host.style.zoom = z; }
     p.el.style.maxHeight = "none"; p.el.style.overflow = "hidden";
     if (f) setTimeout(() => { const t = p.el.querySelector(f); if (t) { t.scrollIntoView({ behavior: "smooth", block: "center" }); t.querySelector("input,select")?.focus(); } }, 120);
   };
