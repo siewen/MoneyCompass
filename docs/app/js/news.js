@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 100, date: "2026-11-08", items: {
+    en: ["✨ The Import window is a little bigger again."],
+    pl: ["✨ Okno importu jest nieco większe."],
+    de: ["✨ Das Import-Fenster ist etwas größer."],
+    fr: ["✨ La fenêtre d'import est un peu plus grande."] } },
   { build: 99, date: "2026-11-08", items: {
     en: ["✨ The Import window is smaller: it fits on one screen without scrolling."],
     pl: ["✨ Okno importu jest mniejsze i mieści się na ekranie bez przewijania."],

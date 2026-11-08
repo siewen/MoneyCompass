@@ -1257,3 +1257,12 @@ svg.oc { width: 100%; height: auto; display: block; margin-top: 4px; } .oc-ax { 
 .ii-banks span { padding: 3px 8px; font-size: 11.5px; } .ii-bfoot small { display: none; }
 .ii-sec { gap: 3px; } .ii-sec li { font-size: 11.5px; }
 .ii-cols2 { margin-top: 6px; } .ii-foot { margin-top: 6px; padding: 5px 10px; }
+/* Import window: a little bigger */
+.import-dlg { max-width: 900px !important; }
+.ii { padding: 14px 18px 12px; } .ii-head h2 { font-size: 21px; } .ii-head p { font-size: 13.5px; }
+.ii-drop { padding: 12px 12px; margin: 8px 0; gap: 4px; } .ii-cloud svg { width: 40px; height: 40px; } .ii-drop b { font-size: 17px; } .ii-drop small { font-size: 12px; } .ii-choose { padding: 7px 28px !important; font-size: 14px; }
+.ii-box { padding: 10px 12px; } .ii-box h3 { font-size: 14.5px; margin-bottom: 8px; }
+.ii-card { padding: 9px 7px; gap: 4px; } .ii-card b { font-size: 14px; } .ii-card small { font-size: 11.5px; } .ii-ico { width: 40px; height: 40px; } .ii-ico svg { width: 24px; height: 24px; }
+.ii-chips em { font-size: 11.5px; padding: 2px 11px; }
+.ii-banks span { padding: 4px 10px; font-size: 12.5px; } .ii-sec li { font-size: 12.5px; } .ii-sec { gap: 5px; }
+.ii-cols2 { margin-top: 8px; } .ii-foot { margin-top: 8px; padding: 7px 12px; } .ii-foot .btn { padding: 9px 20px !important; font-size: 14px; }
