@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 90, date: "2026-11-08", items: {
+    en: ["✨ The installed app and home-screen icon now use the new compass logo."],
+    pl: ["✨ Ikona zainstalowanej aplikacji używa nowego logo."],
+    de: ["✨ Das Symbol der installierten App nutzt jetzt das neue Logo."],
+    fr: ["✨ L'icône de l'application installée utilise le nouveau logo."] } },
   { build: 89, date: "2026-11-08", items: {
     en: ["✨ Import, Export, notifications and the user menu now sit at the far right of the top bar; Settings is at the very bottom of the side menu."],
     pl: ["✨ Import, Eksport i menu użytkownika po prawej; Ustawienia na dole menu."],
