@@ -2,6 +2,10 @@
 import { esc } from "./ui.js";
 export const si = (d, n = 26) => `<svg class="nwi" width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 export const IC = {
+  eye: '<path d="M12 5C6.500 5 2.700 9 1.500 12c1.200 3 5 7 10.500 7s9.300-4 10.500-7C21.300 9 17.500 5 12 5zm0 11a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z" fill-rule="evenodd" stroke="none"/>',
+  calx: '<path d="M7 2h2v2h6V2h2v2h2a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2h2zM5 9v11h14V9zm2 2h3v3H7z" fill-rule="evenodd" stroke="none"/>',
+  docs: '<path d="M6 2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm7 1.500V9h5.500zM8 13h8v1.500H8zm0 3.500h8V18H8z" fill-rule="evenodd" stroke="none"/>',
+  dl: '<path d="M11 3h2v9l3-3 1.400 1.400L12 16l-5.400-5.600L8 9l3 3zM4 18h16v3H4z" stroke="none"/>',
   save: '<path d="M6 2h12a2 2 0 012 2v18l-8-5-8 5V4a2 2 0 012-2z" stroke="none"/>',
   res: '<path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1.500 14.500l-4-4 1.400-1.400 2.600 2.600 5.600-5.600 1.400 1.400z" fill-rule="evenodd" stroke="none"/>',
   bulb: '<path d="M12 2a7 7 0 00-4 12.700V17h8v-2.300A7 7 0 0012 2zM9 19h6v1.500a1.500 1.500 0 01-1.500 1.500h-3A1.500 1.500 0 019 20.500z" stroke="none"/>',

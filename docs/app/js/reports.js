@@ -252,24 +252,24 @@ export const Reports = {
         <div class="rp-net"><small>${esc(T("Net Savings"))}</small><b>${esc(pln(inflow - outflow))}</b></div><div><small>${esc(T("Largest Expense"))}</small><b>${esc(big ? T(big[0]) : "–")}</b></div><div><small>${esc(T("Financial Health"))}</small><b class="good">${esc(health)}</b></div>
         <button class="btn main" data-f="pdf">${esc(T("Generate Report"))} →</button></div>
       <div class="rp-row">
-        <div class="nw-card rp-prev"><div class="nw-ch"><h3>${esc(T("Report Preview"))}</h3><span class="rp-leg"><i style="background:#22E39A"></i>${esc(T("Income"))} <i style="background:#FF4D5E"></i>${esc(T("Expenses"))} <i style="background:#3B9BFF"></i>${esc(T("Savings"))}</span></div>${months.length ? ovTrend(months, ["#22E39A", "#FF4D5E", "#3B9BFF"]) : `<p class="hint">${esc(T("Nothing for this period."))}</p>`}</div>
-        <div class="nw-card"><div class="nw-ch"><h3>${esc(T("Report Insights"))}</h3></div><ul class="nw-ul">${insights.map(x => `<li>${okc}<span>${esc(x)}</span></li>`).join("") || `<li class="hint">–</li>`}</ul></div>
-        <div class="nw-card"><div class="nw-ch"><h3>${esc(T("Period Selection"))}</h3></div><div class="rp-per">${PERIODS.map(([k, l]) => `<button class="rp-radio${o.period === k ? " on" : ""}" data-period="${k}"><i></i>${esc(T(l))}</button>`).join("")}</div>
+        <div class="nw-card rp-prev"><div class="nw-ch"><span class="rp-si i-table">${si(IC.eye, 24)}</span><h3>${esc(T("Report Preview"))}</h3><span class="rp-leg"><i style="background:#22E39A"></i>${esc(T("Income"))} <i style="background:#FF4D5E"></i>${esc(T("Expenses"))} <i style="background:#3B9BFF"></i>${esc(T("Savings"))}</span></div>${months.length ? ovTrend(months, ["#22E39A", "#FF4D5E", "#3B9BFF"]) : `<p class="hint">${esc(T("Nothing for this period."))}</p>`}</div>
+        <div class="nw-card"><div class="nw-ch"><span class="rp-si i-bulb">${si(IC.bulb, 24)}</span><h3>${esc(T("Report Insights"))}</h3></div><ul class="nw-ul">${insights.map(x => `<li>${okc}<span>${esc(x)}</span></li>`).join("") || `<li class="hint">–</li>`}</ul></div>
+        <div class="nw-card"><div class="nw-ch"><span class="rp-si i-table">${si(IC.calx, 24)}</span><h3>${esc(T("Period Selection"))}</h3></div><div class="rp-per">${PERIODS.map(([k, l]) => `<button class="rp-radio${o.period === k ? " on" : ""}" data-period="${k}"><i></i>${esc(T(l))}</button>`).join("")}</div>
           ${o.period === "custom" ? `<div class="two"><label class="field"><span>${esc(T("From"))}</span><input type="date" name="rfrom" value="${isoDate(r.from).slice(0, 10)}"></label>
           <label class="field"><span>${esc(T("To"))}</span><input type="date" name="rto" value="${isoDate(r.to).slice(0, 10)}"></label></div>` : ""}</div></div>
       <div class="rp-row2">
-        <div class="nw-card"><div class="nw-ch"><h3>${esc(T("Report Contents"))}</h3></div>
+        <div class="nw-card"><div class="nw-ch"><span class="rp-si i-table">${si(IC.docs, 24)}</span><h3>${esc(T("Report Contents"))}</h3></div>
         <div class="rp-parts">${(() => { const n = reportCharts(r).filter(c => !o.skip.includes(c.part)).length;
           return `<label class="check${n ? "" : " off"}"><input type="checkbox" data-part="charts"${!o.skip.includes("charts") && n ? " checked" : ""}${n ? "" : " disabled"}><span><em>${esc(T("With diagrams (PDF and Word)"))}</em><small class="hint">${n || "–"}</small></span></label>`; })()}${all.map(([k, title, rows]) => { const n = rows.length - 1, empty = n < 1;
           return `<label class="check${empty ? " off" : ""}"><input type="checkbox" data-part="${k}"${!o.skip.includes(k) && !empty ? " checked" : ""}${empty ? " disabled" : ""}><span><em>${esc(title)}</em><small class="hint">${empty ? "–" : n}</small></span></label>`; }).join("")}</div>
         <div class="buttons"><button class="btn second small" data-all="1">${esc(T("All"))}</button><button class="btn second small" data-all="0">${esc(T("None"))}</button></div></div>
-        <div class="nw-card"><div class="nw-ch"><h3>${esc(T("Export Formats"))}</h3></div><div class="rp-fmt">
-          <button data-f="xlsx" class="fx"><b>X</b>${esc(T("Excel (.xlsx)"))}</button><button data-f="pdf" class="fp"><b>PDF</b>${esc(T("PDF"))}</button><button data-f="doc" class="fw"><b>W</b>${esc(T("Word (.docx)"))}</button></div>
+        <div class="nw-card"><div class="nw-ch"><span class="rp-si i-table">${si(IC.dl, 24)}</span><h3>${esc(T("Export Formats"))}</h3></div><div class="rp-fmt">
+          <button data-f="xlsx" class="fx"><b class="ff">X</b>${esc(T("Excel (.xlsx)"))}</button><button data-f="pdf" class="fp"><b class="ff">PDF</b>${esc(T("PDF"))}</button><button data-f="doc" class="fw"><b class="ff">W</b>${esc(T("Word (.docx)"))}</button></div>
           <p class="hint">${esc(T("Each export is a new file with date and time, so older reports are kept."))}</p></div></div>
       <div class="rp-trend"><span class="rp-si">${si(IC.bars, 54)}</span><div class="rp-tt"><h3>${esc(T("Financial Performance Trends"))}</h3></div>
         <div><small>${esc(T("Inflows"))}</small><b>${esc(pln(inflow))}</b></div><div><small>${esc(T("Outflows"))}</small><b>${esc(pln(outflow))}</b></div><div><small>${esc(T("Balance"))}</small><b>${esc(pln(inflow - outflow))}</b></div><div><small>${esc(T("Savings Rate"))}</small><b>${esc(rateTxt)}</b></div></div>
       <div class="grid">
-      ${card(heading(T("Monthly totals"), "📈") + (() => { const m = all.find(x => x[0] === "monthly")[2];
+      ${card(`<div class="nw-ch"><span class="rp-si i-table">${si(IC.table, 24)}</span><h3>${esc(T("Monthly totals"))}</h3></div>` + (() => { const m = all.find(x => x[0] === "monthly")[2];
         return m.length > 1 ? `<table class="rate-table"><thead><tr>${m[0].map(h => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${m.slice(1).reverse().map(x => `<tr><td>${esc(x[0])}</td><td>${pln(x[1])}</td><td>${pln(x[2])}</td><td class="${x[3] < 0 ? "bad" : "good"}">${pln(x[3])}</td></tr>`).join("")}</tbody></table>` : hint(T("No data in this period."));
       })(), "wide")}
     </div>`;

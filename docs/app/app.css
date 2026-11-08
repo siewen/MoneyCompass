@@ -1515,3 +1515,8 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .rp-si.i-save svg { fill: #FFD23F; stroke: none; filter: drop-shadow(0 0 8px rgba(255,210,63,.6)); }
 .rp-si.i-res svg { fill: #2EDC9A; stroke: none; filter: drop-shadow(0 0 8px rgba(46,220,154,.6)); }
 .cmp-calc > .card .nw-ch { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; } .cmp-calc > .card .nw-ch h3 { margin: 0; font-size: 17px; color: #fff; } .cmp-calc > .card .rp-si svg { width: 24px; height: 24px; }
+.rp-card-ic, #page .nw-ch .rp-si svg { width: 24px; height: 24px; }
+.rp-fmt button { flex-direction: row !important; justify-content: center; gap: 12px; padding: 12px 8px; font-size: 15px; }
+.rp-fmt button b.ff { display: grid; place-items: center; min-width: 34px; height: 30px; padding: 0 5px; border-radius: 6px; font-size: 14px; font-weight: 800; color: #fff; }
+.rp-fmt .fx b.ff { background: #1E8E4E; } .rp-fmt .fp b.ff { background: #E5383B; font-size: 11px; } .rp-fmt .fw b.ff { background: #2B6CD6; }
+.rp-fmt .fx { border-color: #1FBF85 !important; } .rp-fmt .fp { border-color: #E5555A !important; } .rp-fmt .fw { border-color: #3B82F6 !important; }
