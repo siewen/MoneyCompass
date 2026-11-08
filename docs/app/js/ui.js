@@ -186,21 +186,47 @@ document.addEventListener("keydown", e => {
 /** New category (or edit one: pass { name, icon, essential }): name, icon and essential. Resolves to { name, icon, essential } or null. */
 export function categoryBox(icons, init = null) {
   return new Promise(resolve => {
-    let icon = init?.icon || "📦";
-    const p = popup(`<div class="box-head"><span class="box-icon">🏷️</span><h2>${esc(init && !init.isNew ? T("Edit category") : T("New category"))}</h2></div>
-      ${field(T("Name of the category"), textInput("v", init?.name || "", T("e.g. {0}", T("Pets"))))}
-      <div class="field"><span>${esc(T("Icon"))}</span><div class="icon-grid">${icons.map(i => `<button type="button" class="icon-pick${i === icon ? " on" : ""}" data-icon="${i}">${i}</button>`).join("")}</div></div>
-      ${check("ess", T("Essential (must pay even in a crisis)"), !!init?.essential)}
-      <div class="box-buttons"><button class="btn main" data-r="1">${esc(init ? T("Save changes") : T("Add category"))}</button><button class="btn second" data-r="0">${esc(T("Cancel"))}</button></div>`,
-      { width: 460, cls: "box", onClose: r => resolve(r) });
-    const input = p.el.querySelector('input[name="v"]');
-    p.el.querySelectorAll("[data-icon]").forEach(b => b.onclick = () => {
-      icon = b.dataset.icon; p.el.querySelectorAll("[data-icon]").forEach(x => x.classList.toggle("on", x === b));
-    });
-    const done = ok => p.close(ok ? { name: input.value, icon, essential: p.el.querySelector('input[name="ess"]').checked } : null);
+    let icon = init?.icon || "📦", ess = !!init?.essential;
+    const FREQ = ["🏠", "🛒", "🚗", "🍽️", "🎓", "💊", "🐾", "✈️", "🎁", "🎬", "🏋️"].filter(i => icons.includes(i) || true);
+    if (!FREQ.includes(icon)) FREQ[FREQ.length - 1] = icon;
+    const editing = init && !init.isNew;
+    const tick = `<span class="cb-tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></span>`;
+    const pick = i => `<button type="button" class="cb-ic${i === icon ? " on" : ""}" data-icon="${i}">${i}</button>`;
+    const p = popup(`<button class="pm-x pm-x-abs" data-r="0" aria-label="${esc(T("Close"))}">✕</button>
+      <div class="pg-title cb-head"><span class="pg-ic"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 12.500V4.500A1.500 1.500 0 014.500 3h8l8.500 8.500-9 9z"/><circle cx="8" cy="8" r="1.400"/></svg></span>
+        <div><h2>${esc(editing ? T("Edit Category") : T("Create Category"))}</h2><p>${esc(T("Create a custom category to organize your transactions, budgets and reports."))}</p></div></div>
+      <div class="nw-card cb-prev"><b>${esc(T("Category Preview"))}</b><div class="cb-pv"><span class="cb-pi" data-pi>${icon}</span><div class="cb-pn"><b data-pn>${esc(init?.name || T("Category name"))}</b><small>${esc(T("Custom Category"))}</small></div><span class="cb-opt" data-po>${esc(ess ? T("Essential") : T("Optional"))}</span></div></div>
+      <h3 class="cb-h">${esc(T("Category Name"))}</h3>${textInput("v", init?.name || "", T("e.g. {0}", T("Pets")))}<small class="cb-sub">${esc(T("Choose a short and descriptive category name."))}</small>
+      <h3 class="cb-h">${esc(T("Choose an Icon"))}</h3>
+      <div class="cb-tabs"><span class="cb-tab">★ ${esc(T("Frequently Used"))}</span><button type="button" class="cb-more" data-more>${esc(T("More Icons"))} ⌄</button></div>
+      <div class="cb-grid" data-grid>${FREQ.map(pick).join("")}<button type="button" class="cb-ic cb-dots" data-more>⋯</button></div>
+      <div class="cb-grid cb-all" data-all hidden>${icons.map(pick).join("")}</div>
+      <h3 class="cb-h">${esc(T("Category Priority"))}</h3>
+      <div class="cb-pri"><button type="button" class="cb-pc${ess ? " on" : ""}" data-pri="1"><span class="cb-pico">🛡️</span><div><b>${esc(T("Essential Category"))}</b><small>${esc(T("Must be paid even during financial difficulties."))}</small><small>${esc(T("Examples: Rent, Utilities, Insurance, Loan Payments"))}</small></div><i class="cb-rad">${tick}</i></button>
+        <button type="button" class="cb-pc${ess ? "" : " on"}" data-pri="0"><span class="cb-pico">⭐</span><div><b>${esc(T("Optional Category"))}</b><small>${esc(T("Can be reduced or postponed."))}</small><small>${esc(T("Examples: Entertainment, Travel, Shopping"))}</small></div><i class="cb-rad">${tick}</i></button></div>
+      <input type="checkbox" name="ess" hidden${ess ? " checked" : ""}>
+      <div class="cb-use"><span class="cb-i">i</span><div><b>${esc(T("Category Usage"))}</b><small>${esc(T("This category will be available in:"))}</small><div class="cb-ul">${[T("Expenses"), T("Budget Plan"), T("Savings Goals"), T("Reports")].map(x => `${tick}<span>${esc(x)}</span>`).join("")}</div></div></div>
+      <div class="cb-foot"><button class="sv-btn cb-ok" data-r="1">✓ ${esc(editing ? T("Save changes") : T("Create Category"))}</button><button class="sv-btn ghost cb-cancel" data-r="0">${esc(T("Cancel"))}</button></div>`,
+      { width: 860, cls: "nw-win pm-win cb-win", onClose: r => resolve(r) });
+    const input = p.el.querySelector('input[name="v"]'), chk = p.el.querySelector('input[name="ess"]');
+    const sync = () => {
+      p.el.querySelector("[data-pi]").textContent = icon; p.el.querySelector("[data-pn]").textContent = input.value.trim() || T("Category name");
+      p.el.querySelector("[data-po]").textContent = ess ? T("Essential") : T("Optional"); chk.checked = ess;
+      p.el.querySelectorAll("[data-icon]").forEach(x => x.classList.toggle("on", x.dataset.icon === icon));
+      p.el.querySelectorAll("[data-pri]").forEach(x => x.classList.toggle("on", (x.dataset.pri === "1") === ess));
+    };
+    p.el.querySelectorAll("[data-icon]").forEach(b => b.onclick = () => { icon = b.dataset.icon; sync(); });
+    p.el.querySelectorAll("[data-pri]").forEach(b => b.onclick = () => { ess = b.dataset.pri === "1"; sync(); });
+    p.el.querySelectorAll("[data-more]").forEach(b => b.onclick = () => { const all = p.el.querySelector("[data-all]"); all.hidden = !all.hidden; fit(); });
+    input.addEventListener("input", sync);
+    const done = ok => p.close(ok ? { name: input.value, icon, essential: ess } : null);
     p.el.querySelectorAll("[data-r]").forEach(b => b.onclick = () => done(b.dataset.r === "1"));
     input.addEventListener("keydown", e => { if (e.key === "Enter") done(true); });
-    setTimeout(() => input.focus(), 50);
+    const fit = () => {
+      p.el.style.maxHeight = "none"; p.el.style.overflow = "hidden"; p.el.style.zoom = 1; let z = 1; const avail = window.innerHeight * 0.95 - 20;
+      for (let i = 0; i < 4 && z > 0.5; i++) { const h = p.el.getBoundingClientRect().height; if (h <= avail) break; z = Math.max(0.5, z * avail / h * 0.99); p.el.style.zoom = z; }
+    };
+    fit(); setTimeout(() => input.focus(), 50);
   });
 }
 
