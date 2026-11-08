@@ -1459,3 +1459,6 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .cmp-calc .card { height: auto !important; } .cmp-calc { align-self: start; }
 .cmp-ctl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 6px; } .cmp-ctl label { display: grid; gap: 4px; font-size: 13px; color: #C9D8D2; } .cmp-ctl input { background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.16); color: #E8F1EE; border-radius: 999px; padding: 6px 12px; }
 .ct-sub { display: block; color: #A5B8B1; font-size: 12px; } .cmp-table td:last-child { white-space: nowrap; text-align: right; } .cmp-table .nw-pill { padding: 3px 12px; font-size: 12.5px; }
+.cmp-calc { display: grid; gap: 14px; align-content: start; } .cmp-calc > .card { margin: 0; } .cmp-calc .card .drag, .cmp-calc .card [data-drag] { display: none; }
+.cmp-calc { display: grid; gap: 14px; align-content: start; } .cmp-calc > .card { margin: 0; }
+.cmp-calc .card .hint { display: block !important; color: #A5B8B1; } .cmp-calc form .hint { display: none !important; }

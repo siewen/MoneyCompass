@@ -74,7 +74,7 @@ export const Savings = {
     const savedCard = card(heading(T("Comparison")) + hint(T("Best offer on top. Tap an offer to load it into the form.")) + (ranked.length ? `<div class="list">${ranked.map((x, i) => `
         <div class="item clickable${i === 0 ? " best" : ""}" data-load="${x.o.Id}"><div><b>${i === 0 ? "🏆 " : ""}${esc(x.o.Name)}</b><span class="hint">${esc(T("{0} · {1} for {2} days{3}, then {4} · over {5} days", pln(x.o.Amount), rate(x.o.PromoRate), x.o.PromoDays, x.o.PromoLimit > 0 ? " (" + T("up to {0}", pln(x.o.PromoLimit)) + ")" : "", rate(x.o.StandardRate), x.o.PeriodDays))}</span></div>
         <div class="right"><b class="good">${pln(x.r.net)}</b><span class="hint">${rate(x.r.effective)}</span></div><button class="icon-btn danger" data-del-offer="${x.o.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No saved offers yet."))));
-    const formCard = card(`<form id="offer">${heading(T("Savings offer"))}
+    const formCard = card(`<form id="offer">${heading(T("Savings Offer Calculator"))}
         ${d.Holdings.length ? field(T("Fill in from Savings"), select("from-holding", [["", T("Choose…")], ...d.Holdings.map(h => [h.Id, `${h.Name} · ${pln(Calc.toPln(h.Amount, h.Currency, d.Settings))} · ${rate(h.RatePercent || 0)}`])], "")) +
           hint(T("Compare what your savings earn now with other offers.")) : ""}
         ${field(T("Name"), textInput("Name", f.Name, T("e.g. {0}", "Bank X – konto oszczędnościowe")))}
@@ -101,10 +101,8 @@ export const Savings = {
       <p class="hint">${esc(T("Bank offers last updated: {0}", checkedText))}</p><table><thead><tr><th>${esc(T("Bank"))}</th><th>${esc(T("Promotional Rate"))}</th><th>${esc(T("Effective Annual Yield"))}</th><th>${esc(T("Expected Profit"))}</th><th></th></tr></thead><tbody>${bankRows.slice(0, 8).map((x, i) => `<tr><td>${i === 0 ? "🏆 " : ""}${esc(x.o.Bank)}${x.o.Name ? `<small class="ct-sub">${esc(x.o.Name)}</small>` : ""}</td><td>${esc(rate(x.o.Rate))}</td><td>${esc(rate(x.r.effective))}</td><td><b>${esc(pln(x.r.net))}</b></td><td><a class="nw-pill" href="${esc(Rates.link(x.o))}" target="_blank" rel="noopener">${esc(T("Open offer"))}</a> <button class="nw-pill" data-bank="${i}">＋ ${esc(T("Compare"))}</button></td></tr>`).join("")}</tbody></table></div>`;
     const bestCard = `<div class="nw-card cmp-best"><div class="nw-ch"><span class="rp-si">${si(IC.trend, 22)}</span><h3>${esc(T("Best Opportunity Summary"))}</h3></div><div class="cb-body"><div><small>${esc(T("Current Selection"))}:</small><b>${esc(bestBank ? bestBank.o.Bank : "–")}</b>
       <p><span>${esc(T("Expected Profit"))}:</span><em>${esc(pln(bestNet))}</em></p><p><span>${esc(T("Average Competitor"))}:</span><b>${esc(pln(avgNet))}</b></p></div><div class="cb-box"><small>${esc(T("Additional Earnings"))}:</small><b>${esc(pln(extra))}</b></div></div></div>`;
-    el.innerHTML = topHead + `<div class="cmp-grid">${rankCard}${insCard}<div class="cmp-calc">${formCard}</div>${tableCard}${bestCard}</div>
+    el.innerHTML = topHead + `<div class="cmp-grid">${rankCard}${insCard}<div class="cmp-calc">${formCard}${resultCard}${savedCard}</div>${tableCard}${bestCard}</div>
     <div class="grid">
-      ${savedCard}
-      ${resultCard}
       ${binCard(["offer"])}
     </div>` + bottomBand;
     const fm = el.querySelector("#offer");
