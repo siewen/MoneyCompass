@@ -1532,3 +1532,12 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .rp-si.i-cal svg { fill: #2EDC9A; stroke: none; } .cal-title { margin-bottom: 8px; } .cal-title h3 { margin: 0; font-size: 18px; color: #fff; } .cal-title svg { width: 24px; height: 24px; }
 .cal-chart-side > div { position: relative; padding-left: 22px; } .cal-chart-side > div::before { content: ""; position: absolute; left: 0; top: 8px; width: 12px; height: 12px; border-radius: 50%; background: #22E39A; box-shadow: 0 0 8px currentColor; color: #22E39A; } .cal-chart-side .cs-out::before { background: #FF4D5E; color: #FF4D5E; } .cal-chart-side .cs-net::before { background: #3B9BFF; color: #3B9BFF; }
 .cal-main > .card, .cal-reg-card { background: rgba(255,255,255,.04) !important; border: 1px solid rgba(255,255,255,.09) !important; border-radius: 14px !important; } .rp-si.i-cal svg { fill: #4C9BFF; }
+/* Expenses like the mockup */
+.kpi.static .kpi-ic.src svg { fill: #4DB8F0; stroke: #0B3A5A; filter: drop-shadow(0 0 8px rgba(77,184,240,.6)); }
+.kpi.static .kpi-ic.next svg { fill: #B26BFF; stroke: #3A1466; filter: drop-shadow(0 0 8px rgba(178,107,255,.6)); }
+.ex-row1, .ex-row2 { align-items: stretch !important; } .ex-row1 > .ex-card, .ex-row2 > .ex-card, .ex-row1 > .card, .ex-form .card { height: 100% !important; box-sizing: border-box; } .ex-form { display: flex; } .ex-form .card { width: 100%; }
+.ex-row3 { margin: 14px 0; } .ex-chips { display: flex; flex-wrap: wrap; gap: 10px; } .ex-chip { background: rgba(46,220,154,.1); border: 1px solid rgba(46,220,154,.35); color: #EAF8F2; padding: 9px 16px; border-radius: 12px; cursor: pointer; font-weight: 600; } .ex-chip:hover { background: rgba(46,220,154,.25); }
+.ex-opt { background: linear-gradient(180deg,#34E8A8,#12C98A) !important; color: #04281D !important; box-shadow: 0 0 16px rgba(46,240,168,.45); border: 0; }
+.ex-li small { min-width: 54px; text-align: right; } .ex-prev { border: 1.5px solid #19E0A0; background: linear-gradient(120deg, rgba(10,90,66,.7), rgba(8,40,34,.9)); box-shadow: 0 0 20px rgba(25,224,160,.3); } .ex-prev .ex-big { font-size: 40px; color: #fff; }
+.ex-card .nw-ch .rp-si svg, .ex-form .nw-ch .rp-si svg { width: 24px; height: 24px; } .ex-form .nw-ch { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; } .ex-form .nw-ch h3 { margin: 0; font-size: 17px; color: #fff; }
+.rp-si.i-bulb ~ h3 { }
