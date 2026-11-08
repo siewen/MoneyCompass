@@ -198,7 +198,7 @@ async function exportWord() {
   const doc = new X.Document({ creator: "MoneyCompass", title: T("MoneyCompass report"), styles: { default: { document: { run: { font: "Segoe UI" } } } }, sections: [{ children: body }] });
   download(`MoneyCompass-report-${stamp()}.docx`, await X.Packer.toBlob(doc));
 }
-async function exportAs(f) {
+export async function exportAs(f) {
   if (!(await requirePro(T("Reports")))) return;
   if (!chosen().length) { toast(T("Choose at least one part of the report."), "bad"); return; }
   try {
@@ -256,3 +256,9 @@ export const Reports = {
     el.querySelectorAll("[data-f]").forEach(b => b.onclick = () => exportAs(b.dataset.f));
   },
 };
+
+/** Used by the Export window: set period, parts and dates of the report. */
+export function setReportOptions({ period, skip, from, to }) {
+  const o = opts(); o.period = period; o.skip = skip; if (from) o.from = from; if (to) o.to = to; save();
+}
+export const reportKeys = () => reportSections().map(x => x[0]);

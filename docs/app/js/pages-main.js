@@ -5,7 +5,7 @@ import {
   addCategory, removeCategory, updateCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
   matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText, mainCur, currentName } from "./core.js";
 import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
-import { ovBars, ovTrend, donutList, legendKeys, C_IN, C_OUT, C_LEFT } from "./ov-charts.js";
+import { ovBars, ovTrend, donutList, legendKeys, ovForecast, spark, C_IN, C_OUT, C_LEFT } from "./ov-charts.js";
 import { NEW_CAT } from "./ui.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, toast, ICON, ICONS, headingTip, categoryBox, infoTip } from "./ui.js";
 import { App, requirePro } from "./app.js";
@@ -299,53 +299,72 @@ export const Income = {
     const up = Calc.upcoming(d, today(), addDays(today(), 60));
     const dayText = dt => { const n = Math.round((dt - today()) / 86400000); return n === 0 ? T("today") : n === 1 ? T("tomorrow") : T("in {0} days", n); };
 
-    el.innerHTML = `<div class="grid">
-      ${card(heading(T("Summary (PLN)")) +
-        row(T("Regular income per month"), pln(inc.monthlyTotal)) +
-        row(T("Regular income per year"), pln(inc.monthlyTotal * 12)) +
-        row(T("One-time income in {0}", today().getFullYear()), pln(inc.oneTimeThisYear)) +
-        (extra > 0 ? row(T("Extra income received this month (bank import)"), pln(extra)) : "") +
-        row(T("Average outflows per month (Outflows tab)"), avg.monthsUsed ? pln(spending) : esc(T("no data yet"))) +
-        row(T("Balance per month"), avg.monthsUsed ? pln(left) : "–", avg.monthsUsed && left < 0 ? "bad" : "good") +
-        row(T("Savings rate"), avg.monthsUsed && inc.monthlyTotal > 0 ? savingsRateText(left, inc.monthlyTotal) : "–", avg.monthsUsed && left < 0 ? "bad" : "") +
-        hint(message) + (inc.missing ? hint(T("Some income is in USD or EUR but the exchange rate is empty, so it counts as 0 zł. Enter the rates in the Savings tab."), "bad") : ""))}
-      ${card(heading(T("Your income sources")) + hint(T("Tap a source to edit it. Switch off 'Active' for income that has stopped but you want to keep in the list.")) +
-        (d.Incomes.length ? `<div class="list">${d.Incomes.map(i => {
-          const next = Calc.nextIncome(i, today()), sp = Calc.incomeSpan(i);
-          const info = i.Frequency === ONE_TIME ? `${T("one-time")} · ${T("on {0}", fmtDate(i.Date))}` : `${freqLabel(i.Frequency)} · ${next ? T("next {0}", fmtDate(next)) : T("ended")}${sp.start ? " · " + T("since {0}", fmtDate(sp.start)) : ""}${sp.end ? " · " + T("until {0}", fmtDate(sp.end)) : ""}`;
-          return `<div class="item clickable${i.Active ? "" : " off"}" data-edit-income="${i.Id}"><div><b>${esc(i.Name)}</b><span class="hint">${esc(T(i.Type))} · ${esc(info)}${i.Active ? "" : " · " + esc(T("not active"))}</span></div>
-            <div class="right"><b>${amount(i.Amount, i.Currency)}</b>${i.Frequency !== ONE_TIME ? `<span class="hint">${esc(T("{0} / month", pln(Calc.monthlyPln(i, s))))}</span>` : ""}${i.Gross > 0 ? `<span class="hint">${esc(T("gross {0}", pln(i.Gross)))}</span>` : ""}</div>
-            <label class="switch" title="${esc(T("Active (count it in the totals)"))}"><input type="checkbox" data-active-income="${i.Id}"${i.Active ? " checked" : ""}><span></span></label>
-            <button class="icon-btn danger" data-del-income="${i.Id}" title="${esc(T("Delete"))}">🗑</button></div>`;
-        }).join("")}</div>` : hint(T("No income added yet."))))}
-      ${card(heading(T("Next payments (next {0} days)", 60)) + (up.length ? `<div class="list">${up.slice(0, 20).map(p => `
-          <div class="item"><div><b>${esc(p.source.Name)}</b><span class="hint">${fmtDate(p.date)} · ${esc(dayText(p.date))}</span></div><b class="good">${pln(p.amount)}</b></div>`).join("")}</div>`
-        : hint(T("No payments expected in this period."))))}
-      ${card(`<form id="income-form">${heading(e ? T("Edit: {0}", e.Name) : T("Add income"))}
+    // ---- Income Management layout ----
+    const trend = ChartData.trend(d), pastM = trend.slice(-6);
+    const doneM = trend.filter(m => !m.current && (m.income > 0 || m.expenses > 0));
+    const lastM = doneM[doneM.length - 1], prevM = doneM[doneM.length - 2];
+    const active = d.Incomes.filter(i => i.Active && i.Frequency !== ONE_TIME);
+    const fmtShort = dt => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(dt);
+    const futureM = Array.from({ length: 6 }, (_, k) => { const st = addMonths(monthStart(today()), k + 1); return { month: new Intl.DateTimeFormat("en-GB", { month: "short" }).format(st), value: Calc.upcoming(d, st, addDays(addMonths(st, 1), -1)).reduce((x, p) => x + p.amount, 0) }; });
+    const shares = active.map(i => Calc.monthlyPln(i, s)), totalShare = shares.reduce((x, y) => x + y, 0), maxShare = totalShare > 0 ? Math.max(...shares) / totalShare : 0;
+    const iconFor = i => ic(i.Type === "Salary" ? '<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>' : i.Type === "Investments" ? '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>' : '<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/>', 22);
+    const kpi = (label, value, icon, cls, extra) => `<div class="kpi static"><span class="kpi-ic ${cls}">${icon}</span><span class="kpi-t"><span class="kpi-l">${esc(label)}</span><b>${value}</b>${extra || ""}</span></div>`;
+    const incPast = pastM.map(m => m.income);
+    const kpis = `<div class="ov-kpis">
+      ${kpi(T("Monthly Income"), pln(inc.monthlyTotal), ic('<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>', 26), "in", (lastM && prevM ? deltaTag(lastM.income, prevM.income) : "") + spark(incPast, "#34D399"))}
+      ${kpi(T("Active Sources"), String(active.length), ic('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.500 2.400 6.500 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.700 0 4.500 1.800 4.500 4.500"/>', 26), "src", `<small class="kpi-sub">${esc(T("active recurring income streams"))}</small>`)}
+      ${kpi(T("Next Payment"), up[0] ? esc(fmtDate(up[0].date)) : "–", ic('<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4M8 14h2M12 14h2"/>', 26), "next", up[0] ? `<small class="kpi-sub">${esc(up[0].source.Name)} · ${esc(dayText(up[0].date))}</small>` : "")}
+      ${kpi(T("Savings Potential"), avg.monthsUsed ? pln(left) : "–", ic('<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>', 26), "rate", (lastM && prevM ? deltaTag(lastM.income - lastM.expenses, prevM.income - prevM.expenses) : "") + spark(pastM.map(m => m.income - m.expenses), "#34D399"))}
+    </div>`;
+    const srcCard = card(`<div class="oc-head"><h3>${ic('<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>', 22)} ${esc(T("Income Sources"))}</h3></div>` +
+      (d.Incomes.length ? `<div class="is-head"><span>${esc(T("Name"))}</span><span>${esc(T("Amount"))}</span><span>${esc(T("Frequency"))}</span><span>${esc(T("Status"))}</span><span></span></div>` + d.Incomes.map(i => `
+        <div class="is-row clickable${i.Active ? "" : " off"}" data-edit-income="${i.Id}"><span class="is-n">${iconFor(i)}<b>${esc(i.Name)}</b></span><b>${amount(i.Amount, i.Currency)}</b><span>${esc(i.Frequency === ONE_TIME ? T("one-time") : freqLabel(i.Frequency))}</span>
+          <label class="switch" title="${esc(T("Active (count it in the totals)"))}"><input type="checkbox" data-active-income="${i.Id}"${i.Active ? " checked" : ""}><span></span></label>
+          <button class="icon-btn danger" data-del-income="${i.Id}" title="${esc(T("Delete"))}">🗑</button></div>`).join("") : hint(T("No income added yet."))), "ov-card");
+    const insights = [
+      T("Active income sources: {0}", active.length),
+      T("Income diversification score: {0}/100", Math.round((1 - maxShare) * 100)),
+      T("Upcoming payments expected: {0}", up.length),
+      T("Estimated annual income: {0}", pln(inc.monthlyTotal * 12 + inc.oneTimeThisYear)),
+      avg.monthsUsed && inc.monthlyTotal > 0 ? T("You keep {0} of your income", savingsRateText(left, inc.monthlyTotal)) : T("Add expenses to see your savings rate"),
+    ];
+    const aiCard = card(`<div class="oc-head"><h3>${ic('<path d="M12 3l1.800 5.200L19 10l-5.200 1.800L12 17l-1.800-5.200L5 10l5.200-1.800z"/><path d="M19 15l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>', 24)} ${esc(T("Income Insights"))}</h3></div><ul class="ai-list">${insights.map(t => `<li><i>✓</i>${esc(t)}</li>`).join("")}</ul>
+      <button class="btn main ai-btn" data-action="optimize">${esc(T("Optimize My Income"))} →</button>`, "ov-card ai-card");
+    const fcCard = card(`<div class="oc-head"><h3>${ic('<rect x="4" y="11" width="4" height="9" rx="1"/><rect x="10" y="5" width="4" height="15" rx="1"/><rect x="16" y="13" width="4" height="7" rx="1"/>', 22)} ${esc(T("Income Forecast"))}</h3>${legendKeys([{ color: C_IN, label: T("Income") }, { color: C_OUT, label: T("Projected") }])}</div>` +
+      (pastM.length || futureM.some(x => x.value > 0) ? ovForecast(pastM.map(m => ({ month: m.month, value: m.income })), futureM) : hint(T("Add income to see the forecast."))), "ov-card");
+    const preview = plain(f.Amount) || "0";
+    const addCard = card(`<form id="income-form" class="inc-form">
+      <div class="inc-fields"><h3 class="inc-h">${ic('<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>', 24)} ${esc(e ? T("Edit: {0}", e.Name) : T("Add Income"))}</h3>
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("Salary, side job"))))}
-        <div class="two">${field(T("Type"), select("type", INCOME_TYPES.map(t => [t, T(t)]), f.Type))}
-        ${field(T("Currency"), select("currency", CURRENCIES, f.Currency))}</div>
+        ${field(T("Type"), select("type", INCOME_TYPES.map(t => [t, T(t)]), f.Type))}
+        ${field(T("Currency"), select("currency", CURRENCIES, f.Currency))}
         <div class="gross-box"${f.Type === "Salary" && f.Currency === "PLN" ? "" : " hidden"}>
           <div class="cat-row">${field(T("Gross salary per month (brutto, optional)"), numInput("gross", plain(f.Gross), T("e.g. {0}", "10000")))}
           ${button("→ " + esc(T("Calculate net")), "calc-net", "second small")}</div>
-          <p class="hint">${esc(T("Estimate for an employment contract (umowa o pracę) in Poland: social and health insurance and income tax. Bonuses, a sport card (Multisport), PPK, the under-26 relief, overtime or another kind of contract change your net pay – compare with your payslip and correct the net amount below if needed."))}</p>
+          <p class="hint">${esc(T("Estimate for an employment contract (umowa o pracę) in Poland: social and health insurance and income tax. Bonuses, a sport card (Multisport), PPK, the under-26 relief, overtime or another kind of contract change your net pay."))}</p>
         </div>
-        ${field(T("Amount you receive each time (net, after tax)"), numInput("amount", plain(f.Amount), T("e.g. 8500 (what you actually receive, after tax)")))}
-        <div class="two">${field(T("How often"), select("frequency", FREQUENCIES.map(x => [x[0], T(x[0])]), f.Frequency))}
-        ${field(f.Frequency === ONE_TIME ? T("Date the money arrives") : T("Payment date"), dateInput("date", inputDate(parseDate(f.Date))))}</div>
-        <p class="hint date-hint"${f.Frequency === ONE_TIME ? " hidden" : ""}>${esc(T("Any payment date – the last or the next one. MoneyCompass repeats it."))}</p>
+        ${field(T("Net Amount"), numInput("amount", plain(f.Amount), T("e.g. 8500 (what you actually receive, after tax)")))}</div>
+      <div class="inc-side"><div class="inc-prev"><span>${esc(T("Net Income Preview"))}</span><b id="inc-prev">${esc(pln(num(preview) || 0))}</b>
+          <h4>${esc(T("Payment Schedule"))}</h4>
+          <div class="sch-chips">${FREQUENCIES.map(x => `<button type="button" class="sch-chip${x[0] === f.Frequency ? " on" : ""}" data-freq="${esc(x[0])}">${esc(T(x[0] === "Every 2 weeks" ? "Every 2 Weeks" : x[0]))}</button>`).join("")}</div>
+          <div hidden>${select("frequency", FREQUENCIES.map(x => [x[0], T(x[0])]), f.Frequency)}</div>
+          ${field(f.Frequency === ONE_TIME ? T("Date the money arrives") : T("Payment date"), dateInput("date", inputDate(parseDate(f.Date))))}
+          <p class="hint date-hint"${f.Frequency === ONE_TIME ? " hidden" : ""}>${esc(T("Any payment date – the last or the next one. MoneyCompass repeats it."))}</p></div>
         <div class="income-span"${f.Frequency === ONE_TIME ? " hidden" : ""}>
           <div class="two">${field(T("Start date (optional)"), dateInput("start", f.StartDate ? inputDate(parseDate(f.StartDate)) : ""))}
           <div class="field"><span>${esc(T("End date"))}</span>${dateInput("end", f.EndDate ? inputDate(parseDate(f.EndDate)) : "").replace("<input", `<input${f.EndDate ? "" : " disabled"}`)}
           <label class="check small"><input type="checkbox" name="noend"${f.EndDate ? "" : " checked"}><span>${esc(T("No end date"))}</span></label></div></div>
-          ${hint(T("Start date: the first payment – nothing is counted before it, e.g. for a new job. Leave it empty for income you have had for a long time. Without an end date the income continues in all forecasts."))}
         </div>
         ${check("active", T("Active (count it in the totals)"), f.Active)}
-        <div class="buttons">${button(e ? T("Save changes") : T("Add income"), "save-income", "main")}${e ? button(T("Cancel editing"), "cancel-income") : ""}</div></form>`)}
-      ${card(heading(T("Imported inflows")) + hint(T("Money that came into your account, from your bank imports. Choose for each payment how it counts: Extra income – only in that month. Salary – your regular pay, counted every month through Your income sources. Not income – ignored.")) +
-        (d.Received.length ? importedList(d)           : hint(T("Nothing imported yet."))))}
-      ${binCard(["income", "received"])}
-    </div>`;
+        <button type="button" class="btn main inc-save" data-action="save-income">✓ ${esc(e ? T("Save changes") : T("Save Income"))}</button>${e ? button(T("Cancel editing"), "cancel-income") : ""}</div></form>`, "ov-card inc-add");
+    const tlCard = card(`<div class="oc-head"><h3>${ic('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 22)} ${esc(T("Upcoming Income Timeline"))}</h3></div>` + (up.length ? `<div class="tl">${up.slice(0, 6).map(p => `<div class="tl-i"><i></i><span class="tl-d">${esc(fmtShort(p.date))}</span><span><b>${esc(p.source.Name)}</b><small>${pln(p.amount)}</small></span></div>`).join("")}</div>` : hint(T("No payments expected in this period."))), "ov-card");
+    const npCard = card(`<div class="oc-head"><h3>${ic('<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/>', 22)} ${esc(T("Next Payments"))}</h3></div>` + (up.length ? up.slice(0, 5).map(p => `<div class="np-row"><span>${iconFor(p.source)}${esc(p.source.Name)}</span><b>${pln(p.amount)}</b><small>${esc(fmtDate(p.date))}</small></div>`).join("") : hint(T("No payments expected in this period."))), "ov-card");
+    const impCard = card(`<div class="oc-head"><h3>${ic('<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>', 22)} ${esc(T("Imported Statements"))}</h3></div>` + hint(T("Money that came into your account, from your bank imports. Choose for each payment how it counts: Extra income – only in that month. Salary – your regular pay, counted every month through Your income sources. Not income – transfers between your own accounts.")) +
+      (d.Received.length ? importedList(d) : hint(T("Nothing imported yet."))), "ov-card");
+    el.innerHTML = `<div class="pg-title"><span class="pg-ic">${ic('<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><circle cx="16.5" cy="15" r="1.2"/>', 34)}</span><div><h2>${esc(T("Income Management"))}</h2><p>${esc(T("Manage all income sources and plan future cash flow."))}</p></div></div>
+      ${kpis}<div class="inc-grid r2">${srcCard}${aiCard}${fcCard}</div><div class="inc-grid r3">${addCard}${tlCard}</div><div class="inc-grid r4">${npCard}${impCard}</div><div class="grid">${binCard(["income", "received"])}</div>`;
+    el.querySelectorAll("[data-freq]").forEach(b => b.onclick = () => { const fq = el.querySelector('#income-form [name="frequency"]'); fq.value = b.dataset.freq; fq.dispatchEvent(new Event("change")); el.querySelectorAll("[data-freq]").forEach(x => x.classList.toggle("on", x === b)); });
+    el.querySelector('#income-form [name="amount"]').addEventListener("input", ev => { el.querySelector("#inc-prev").textContent = pln(num(ev.target.value) || 0); });
 
     const form = el.querySelector("#income-form");
     form.frequency.onchange = () => {

@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 95, date: "2026-11-08", items: {
+    en: ["✨ New Export window (what to export, date range, Excel/PDF/Word), new Income Management page and new Import window, all in the new design."],
+    pl: ["✨ Nowe okna Eksportu i Importu oraz nowa strona Przychodów w nowym wyglądzie."],
+    de: ["✨ Neue Fenster für Export und Import und neue Einkommensseite im neuen Design."],
+    fr: ["✨ Nouvelles fenêtres d'export et d'import et nouvelle page des revenus dans le nouveau design."] } },
   { build: 94, date: "2026-11-08", items: {
     en: ["✨ The user menu is now compact."],
     pl: ["✨ Menu użytkownika jest teraz mniejsze."],

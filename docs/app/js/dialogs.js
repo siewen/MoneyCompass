@@ -348,7 +348,7 @@ export function openHelp() {
 // ================================================================= Export (Pro on the web)
 
 /** Export: the Reports tab (period, parts and format). */
-export function openExport() { App.go("reports"); }
+export async function openExport() { (await import("./export-dialog.js")).openExportDialog(); }
 
 // ---------- Language: from the 🌐 button in the top bar and from the guide ----------
 export const FLAGS = { en: "🇬🇧", de: "🇩🇪", fr: "🇫🇷", pl: "🇵🇱" };

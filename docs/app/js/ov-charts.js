@@ -51,3 +51,22 @@ export function donutList(items, top, bottom, share) {
 }
 
 export const legendKeys = keys => `<div class="oc-keys">${keys.map(k => `<span><i style="${k.dash ? `border-top:2px dashed ${k.color};background:none;height:0;border-radius:0;width:14px` : `background:${k.color}`}"></i>${esc(k.label)}</span>`).join("")}</div>`;
+
+/** Income forecast: what came in (green) and what is expected from your income sources (blue). */
+export function ovForecast(past, future) {
+  const all = [...past.map(p => ({ month: p.month })), ...future.map(p => ({ month: p.month }))];
+  const max = niceMax(Math.max(1, ...past.map(p => p.value), ...future.map(p => p.value)));
+  const f = frame(all, 0, max), np = past.length;
+  const pts = (vals, off) => vals.map((v, i) => [f.x(i + off), f.y(v), v]);
+  const dots = (arr, c) => arr.map(([x, y, v], i) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.6" fill="${c}"><title>${spaced(v)}</title></circle>`).join("");
+  const pa = pts(past.map(p => p.value), 0), pf = pts([past.length ? past[past.length - 1].value : 0, ...future.map(p => p.value)], np - 1);
+  const poly = (arr, c, dash) => `<polyline points="${arr.map(a => a[0].toFixed(1) + "," + a[1].toFixed(1)).join(" ")}" fill="none" stroke="${c}" stroke-width="2.4" stroke-linejoin="round"${dash ? ' stroke-dasharray="6 4"' : ""}/>`;
+  const area = pa.length > 1 ? `<path d="M${pa[0][0]},${f.y(0)} L${pa.map(a => a[0].toFixed(1) + "," + a[1].toFixed(1)).join(" L")} L${pa[pa.length - 1][0]},${f.y(0)}z" fill="rgba(52,211,153,.14)"/>` : "";
+  return `<svg class="oc" viewBox="0 0 ${W} ${H}" role="img">${f.g}${area}${poly(pa, C_IN)}${poly(pf, C_OUT, true)}${dots(pa, C_IN)}${dots(pf.slice(1), C_OUT)}</svg>`;
+}
+export const spark = (vals, color) => {
+  if (vals.length < 2) return "";
+  const mx = Math.max(...vals), mn = Math.min(...vals), r = mx - mn || 1;
+  const pts = vals.map((v, i) => `${(i / (vals.length - 1) * 100).toFixed(1)},${(30 - (v - mn) / r * 26 - 2).toFixed(1)}`).join(" ");
+  return `<svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`;
+};
