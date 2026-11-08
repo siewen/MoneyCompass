@@ -11,3 +11,4 @@
 :root[data-theme="hell"] .cmp-calc input,:root[data-theme="hell"] .cmp-calc select{background:#fff !important;color:#14201B !important;border:1px solid #C9D0CD !important}
 :root[data-theme="hell"] .switch span{background:#BFC8C4 !important}
 :root[data-theme="hell"] .switch input:checked + span{background:#16B97D !important}
+:root[data-theme="hell"] .opt-tab.on{background:#12A06C !important;color:#fff !important;border-color:#12A06C !important}

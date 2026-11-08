@@ -2108,3 +2108,5 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .cal-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
 .cal-panel[hidden]{display:none}
 .cal-main .cal-cell{min-height:66px}
+.cal-chart-body svg{max-height:300px;width:100%}
+.ov-kpis .kpi .kpi-t b{font-size:clamp(16px,1.55vw,28px) !important;text-overflow:clip !important}

@@ -15,7 +15,7 @@ import { toBin } from "./core.js";
 const D = () => State.data;
 const KINDS = [["expense", "Payment"], ["saving", "Transfer to savings"]];
 const RANGES = [1, 3, 6, 12];
-let calTab = "fc", range = 3, shown = null, editId = null, selectedDay = null, allPast = false;
+let calTab = "fc", range = 3, shown = null, editId = null, selectedDay = null, dayTouched = false, allPast = false;
 const folded = new Map();   // month → open (true) or closed (false), as you left it; all months start closed
 const mkey = ms => ms.getFullYear() * 12 + ms.getMonth();
 
@@ -205,6 +205,7 @@ export const Calendar = {
     // The calendar starts with the oldest month of your data (typed in or imported) and goes into the future
     const first = firstMonth(d);
     if (!shown) shown = start; if (shown < first) shown = first;
+    if (!dayTouched && selectedDay === null && shown.getFullYear() === start.getFullYear() && shown.getMonth() === start.getMonth()) selectedDay = today().getDate();
     const end = addDays(addMonths(start, range), -1);
     const all = events(d, today(), end);
     const sums = t => all.filter(e => e.type === t).reduce((s, e) => s + e.amount, 0);
@@ -330,8 +331,8 @@ export const Calendar = {
     el.querySelectorAll("details.cal-month").forEach(x => x.addEventListener("toggle", () => folded.set(+x.dataset.m, x.open)));
     el.querySelectorAll("[data-past]").forEach(b => b.onclick = () => { allPast = b.dataset.past === "1"; App.refresh(); });
     el.querySelectorAll("[data-range]").forEach(b => b.onclick = () => { range = +b.dataset.range; App.refresh(); });
-    el.querySelectorAll("[data-month]").forEach(b => b.onclick = () => { shown = b.dataset.month === "now" ? start : addMonths(shown, +b.dataset.month); selectedDay = null; App.refresh(); });
-    el.querySelectorAll("[data-day]").forEach(b => b.onclick = () => { selectedDay = +b.dataset.day === selectedDay ? null : +b.dataset.day; App.refresh(); });
+    el.querySelectorAll("[data-month]").forEach(b => b.onclick = () => { shown = b.dataset.month === "now" ? start : addMonths(shown, +b.dataset.month); selectedDay = null; dayTouched = true; App.refresh(); });
+    el.querySelectorAll("[data-day]").forEach(b => b.onclick = () => { dayTouched = true; selectedDay = +b.dataset.day === selectedDay ? null : +b.dataset.day; App.refresh(); });
     const fm = el.querySelector("#rec");
     el.querySelector('[data-action="sched"]').onclick = () => { setTab("reg"); const d = el.querySelector(".cal-reg-card details"); if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "center" }); const n = fm.querySelector('[name="name"]'); if (n) n.focus(); } };
     fm.kind.onchange = () => { fm.category.disabled = fm.kind.value === "saving"; };
