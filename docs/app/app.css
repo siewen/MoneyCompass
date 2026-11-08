@@ -2110,3 +2110,8 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .cal-main .cal-cell{min-height:66px}
 .cal-chart-body svg{max-height:300px;width:100%}
 .ov-kpis .kpi .kpi-t b{font-size:clamp(16px,1.55vw,28px) !important;text-overflow:clip !important}
+.ln-host .kpi-t b{white-space:normal !important;font-size:16px !important;line-height:1.2}
+.ovs .ovh-huge{font-size:clamp(20px,2vw,30px);white-space:nowrap}
+.ovr4>.nw-card{min-width:0}
+.ovc .ovh-huge{font-size:clamp(20px,2vw,32px)}
+.ovc{position:relative}.ovc .spark{position:absolute;right:14px;bottom:16px;top:auto;width:80px;height:26px}
