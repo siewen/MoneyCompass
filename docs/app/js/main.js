@@ -442,10 +442,9 @@ function finishClose(fileSaved) {
   // The browser may not allow a page to close its own window or tab: then say so honestly
   setTimeout(() => {
     if (window.closed) return;
-    popup(`<div class="box-head"><span class="box-icon">⏻</span><h2>${esc(T("Close the window"))}</h2></div>
-      <p>${esc(fileSaved ? T("Your profile file was saved.") : T("No profile file was saved."))}</p>
-      <p class="hint">${esc(T("Your entries always stay in this browser, as before. This browser doesn't let MoneyCompass close the window by itself – close it with the X at the top right."))}</p>
-      <div class="box-buttons"><button class="btn main" data-close>${esc(T("OK"))}</button></div>`, { width: 440, cls: "box" });
+    // The browser would not close the window: sign out by locking the app instead (no error message)
+    closing = false;
+    lock();
   }, 400);
 }
 
