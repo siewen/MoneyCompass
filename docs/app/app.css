@@ -1528,3 +1528,7 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .cal-fold { border: 1px solid rgba(255,255,255,.12); border-radius: 12px; margin: 8px 0; padding: 0 12px; background: rgba(0,0,0,.15); } .cal-fold > summary { cursor: pointer; padding: 10px 0; font-weight: 700; color: #2EF0A8; list-style: none; } .cal-fold > summary::-webkit-details-marker { display: none; } .cal-fold[open] > summary { border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 8px; }
 .cal-fold:not([data-edit]) form > h3 { display: none; }
 .cal-reg-list { max-height: 360px; overflow-y: auto; padding-right: 4px; }
+.kpi.static .kpi-ic.blue svg { fill: #4DB8F0; stroke: #0B3A5A; filter: drop-shadow(0 0 8px rgba(77,184,240,.6)); }
+.rp-si.i-cal svg { fill: #2EDC9A; stroke: none; } .cal-title { margin-bottom: 8px; } .cal-title h3 { margin: 0; font-size: 18px; color: #fff; } .cal-title svg { width: 24px; height: 24px; }
+.cal-chart-side > div { position: relative; padding-left: 22px; } .cal-chart-side > div::before { content: ""; position: absolute; left: 0; top: 8px; width: 12px; height: 12px; border-radius: 50%; background: #22E39A; box-shadow: 0 0 8px currentColor; color: #22E39A; } .cal-chart-side .cs-out::before { background: #FF4D5E; color: #FF4D5E; } .cal-chart-side .cs-net::before { background: #3B9BFF; color: #3B9BFF; }
+.cal-main > .card, .cal-reg-card { background: rgba(255,255,255,.04) !important; border: 1px solid rgba(255,255,255,.09) !important; border-radius: 14px !important; } .rp-si.i-cal svg { fill: #4C9BFF; }
