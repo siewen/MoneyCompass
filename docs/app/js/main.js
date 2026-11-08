@@ -176,6 +176,7 @@ function meMenu() {
   menu.innerHTML = `<button data-m="profile">${mi('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.400 3.600-7 8-7s8 2.600 8 7"/>')}${esc(T("My Profile"))}</button>
     <button data-m="accounts">${mi('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M15 14h3"/>')}${esc(T("Accounts"))}</button>
     <button data-m="categories">${mi('<path d="M3 4h2l2.500 11h10l2-8H6.500"/><circle cx="9" cy="19.500" r="1.400"/><circle cx="17" cy="19.500" r="1.400"/>')}${esc(T("Categories"))}</button>
+    <button data-m="guide">${mi('<path d="M5 19c0-3 1-4 3-5M14 4c4 0 6 2 6 6-2 4-5 6-8 7l-5-5c1-3 3-6 7-8z"/><circle cx="14.500" cy="9.500" r="1.500"/>')}${esc(T("Interactive Onboarding"))}</button>
     <button data-m="help">${mi('<circle cx="12" cy="12" r="9"/><path d="M9.500 9.500a2.500 2.500 0 1 1 3.500 2.300c-.7.400-1 .9-1 1.700M12 17h.01"/>')}${esc(T("Help"))}</button>
     <button data-m="about">${mi('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.500h.01"/>')}${esc(T("About"))}</button>
     <hr>
@@ -187,7 +188,7 @@ function meMenu() {
   const close = () => { shield.remove(); menu.remove(); };
   shield.onclick = close;
   document.addEventListener("keydown", function esc1(e) { if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc1); } });
-  const run = { profile: openProfile, subscription: openProfile, backup: openProfile, options: openOptions, help: openHelp, about, language: () => openLanguage(), accounts: () => App.go("portfolio"), categories: () => manageCategories(), signout: () => installed() ? closeApp() : lock() };
+  const run = { guide: () => openGuide(), profile: openProfile, subscription: openProfile, backup: openProfile, options: openOptions, help: openHelp, about, language: () => openLanguage(), accounts: () => App.go("portfolio"), categories: () => manageCategories(), signout: () => installed() ? closeApp() : lock() };
   menu.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { close(); run[b.dataset.m](); });
   menu.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { close(); setLanguage(b.dataset.lang); });
 }
