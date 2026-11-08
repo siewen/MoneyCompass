@@ -1878,3 +1878,6 @@ button.dz-bhi { cursor: pointer; text-align: left; font: inherit; color: inherit
 .ovkp .kpi-t b{font-size:24px}.ovkp .kpi{gap:12px}.ovkp .kpi-t{gap:2px 8px}
 .ovkp .kpi-t{flex-direction:row!important;flex-wrap:wrap;align-items:baseline}
 .ovkp .kpi-l{flex:0 0 100%}
+.nw-steps > div > span, .nw-disc > div > span { display: flex; flex-direction: column; align-items: flex-start; flex: 1; min-width: 0; }
+.nw-steps > div > span > .nw-open, .nw-disc > div > span > .nw-open { margin-top: auto; }
+.nw-steps > div > span > em, .nw-disc > div > span > small:not(:first-child) { margin-bottom: 10px; }
