@@ -4,7 +4,7 @@ import {
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved, fromPln } from "./core.js";
 import { ico } from "./nw.js";
 import { pageHead, band, si, IC, ring } from "./page-head.js";
-import { budgetDash, loansDash } from "./dash.js";
+import { budgetDash, loansDash, dcard } from "./dash.js";
 import { progress, hbars, savingsChart } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
@@ -264,15 +264,15 @@ export const Goals = {
     const goals = d.Goals.map(x => ({ ...x, Saved: goalSaved(x, d), ref: x }));
     const target = goals.reduce((s, x) => s + x.Target, 0), saved = goals.reduce((s, x) => s + Math.min(x.Saved, x.Target), 0);
     el.innerHTML = `<div class="grid">
-      ${card(heading(T("All goals together")) + row(T("Goal amount (zł)"), pln(target)) + row(T("Already saved"), pln(saved)) +
+      ${dcard("pie","res",T("All goals together"), row(T("Goal amount (zł)"), pln(target)) + row(T("Already saved"), pln(saved)) +
         row(T("To save per month for all goals"), pln(goals.filter(x => x.Saved < x.Target).reduce((s, x) => s + perMonth(x), 0))) + (target > 0 ? progress(saved / target, "var(--goals)") : ""))}
-      ${card(heading(T("Your goals")) + hint(T("Tap a goal to edit it, for example to update how much you have saved.")) + (goals.length ? [...goals].sort((a, b) => parseDate(a.TargetDate) - parseDate(b.TargetDate)).map(x => {
+      ${dcard("star","save",T("Your goals"), hint(T("Tap a goal to edit it, for example to update how much you have saved.")) + (goals.length ? [...goals].sort((a, b) => parseDate(a.TargetDate) - parseDate(b.TargetDate)).map(x => {
         const fr = x.Target > 0 ? x.Saved / x.Target : 0, done = x.Target > 0 && x.Saved >= x.Target;
         return `<div class="bar-item clickable" data-edit-goal="${x.Id}"><div class="bar-head"><b>${esc(x.Name)}</b><button class="icon-btn danger" data-del-goal="${x.Id}">🗑</button></div>
           ${progress(fr, done ? COLORS.leftOver : "var(--goals)")}<span class="hint">${esc(T("{0} of {1} ({2}%) · by {3}", pln(Math.min(x.Saved, x.Target)), pln(x.Target), Math.round(Math.min(100, fr * 100)), fmtDate(x.TargetDate)))}${x.HoldingId && d.Holdings.some(h => h.Id === x.HoldingId) ? " · 🔗 " + esc(d.Holdings.find(h => h.Id === x.HoldingId).Name) : ""}</span>
           <span class="${done ? "good" : ""}">${esc(done ? T("Goal reached – well done!") : T("Save about {0} per month to reach it in time.", pln(perMonth(x))))}</span></div>`;
       }).join("") : hint(T("No goals yet. Add your first one above."))))}
-      ${card(`<form id="goal">${heading(g ? T("Edit goal") : T("Add a goal"))}
+      ${dcard("plus","res",g ? T("Edit goal") : T("Add a goal"), `<form id="goal">
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("New car, holiday, flat"))))}
         <div class="two">${field(T("Goal amount (zł)"), numInput("target", plain(f.Target)))}${field(T("Already saved (zł)"), numInput("saved", plain(f.Saved)))}</div>
         ${d.Holdings.length ? field(T("Linked savings account (optional)"), select("holding", [["", T("None – I enter the amount")], ...d.Holdings.map(h => [h.Id, h.Name])], f.HoldingId || "")) + hint(T("With a linked account, the amount saved is its balance and updates by itself.")) : ""}
@@ -469,12 +469,12 @@ export const Budget = {
       kpis: [{ l: T("Monthly Budget"), v: pln(bd.kpis.total), icon: "wallet", cls: "in" }, { l: T("Spent This Month"), v: pln(bd.kpis.spent), icon: "cart", cls: "src" }, { l: T("Remaining Budget"), v: pln(bd.kpis.left), icon: "check", cls: "in", vcls: bd.kpis.left < 0 ? "bad" : "" }, { l: T("Budget Health Score"), v: bd.kpis.score + " / 100", icon: "heart", cls: "in", hi: true }],
       btn: `<button class="btn main rp-gen" data-action="b-new">＋ ${esc(T("Create Budget"))}</button>` });
     el.innerHTML = bHead + bd.html + `<details class="cal-fold bp-manage"><summary>⚙ ${esc(T("Manage limits"))}</summary><div class="grid">
-      ${card(heading(monthName(today())) + row(T("Spent in categories with a limit"), pln(spent)) + row(T("Your limits together"), pln(total)) +
+      ${dcard("cal","cal",monthName(today()), row(T("Spent in categories with a limit"), pln(spent)) + row(T("Your limits together"), pln(total)) +
         row(T("Left this month"), pln(total - spent), total - spent < 0 ? "bad" : "good") +
         (d.Goals.length ? row(T("To set aside for savings goals"), pln(goalsPerMonth(d))) : ""))}
-      ${card(heading(T("Limits this month")) + hint(T("From your entries in the Outflows tab. Green: on track, amber: almost used, red: over the limit.")) +
+      ${dcard("table","table",T("Limits this month"), hint(T("From your entries in the Outflows tab. Green: on track, amber: almost used, red: over the limit.")) +
         (limits.length ? budgetBars() : hint(T("No limits yet. Set your first one above."))))}
-      ${card(`<form id="budget">${heading(T("Set a monthly limit"))}${hint(T("Choose a category and how much you want to spend on it at most each month. Setting it again changes the limit."))}
+      ${dcard("save","save",T("Set a monthly limit"), `<form id="budget">${hint(T("Choose a category and how much you want to spend on it at most each month. Setting it again changes the limit."))}
         ${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], categories()[0].Name))}
         ${field(T("Limit per month (zł)"), numInput("limit", "", T("e.g. {0}", "800")))}
         ${button(T("Save limit"), "save-limit", "main")}</form>`)}
@@ -482,7 +482,7 @@ export const Budget = {
     </div></details>`;
     // Savings goals: part of the budget plan (how much to set aside each month), with their own cards
     const sec = document.createElement("section"); sec.className = "goals-section";
-    sec.innerHTML = `<h2 class="section-title">🎯 ${esc(T("Savings goals"))}</h2><div class="goals-host"></div>`;
+    sec.innerHTML = `<h2 class="section-title"><span class="rp-si i-res">${si(IC.flag, 26)}</span> ${esc(T("Savings goals"))}</h2><div class="goals-host"></div>`;
     el.appendChild(sec);
     Goals.render(sec.querySelector(".goals-host"));
     const gg = sec.querySelector(".goals-host .grid"); if (gg) gg.dataset.key = "web2:goals";
