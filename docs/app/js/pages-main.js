@@ -5,7 +5,7 @@ import {
   addCategory, removeCategory, updateCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
   matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText, mainCur, currentName } from "./core.js";
 import { pageHead, band, si, IC, ring } from "./page-head.js";
-import { emergencyDash } from "./dash.js";
+import { emergencyDash, iconizeCards } from "./dash.js";
 import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
 import { ovBars, ovTrend, donutList, legendKeys, ovForecast, spark, C_IN, C_OUT, C_LEFT } from "./ov-charts.js";
 import { NEW_CAT } from "./ui.js";
@@ -835,6 +835,7 @@ export const Emergency = {
         <div class="two">${field(T("Months to cover (3 if your job is stable, 6 if less certain)"), select("months", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], s.EmergencyMonths))}
         ${field(T("Extra safety buffer (%)"), numInput("buffer", plain(s.BufferPercent)))}</div></form>`)}
     </div></details>`;
+    iconizeCards(el);
     const form = el.querySelector("#em");
     const apply = () => {
       const v = values(form);

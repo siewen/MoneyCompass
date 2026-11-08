@@ -104,3 +104,14 @@ export function loansDash(d, debtFree) {
   const bandH = `<div class="dz-band ln-band"><span class="rp-si i-res">${si(IC.check, 48)}</span><div class="dz-bt"><h3>${esc(onTrack ? T("Your debt freedom plan is on track!") : T("Your debt load is high – an accelerated plan can help."))}</h3><small>${esc(running.length ? T("With your current strategy, you could be debt-free by {0}.", debtFree) : T("You have no active debts."))}</small></div><div class="ln-bars">${idx.map((k, i) => `<i style="height:${Math.max(6, Math.round((1 - (pick(cur)[i] || 0) / Math.max(1, cur[0])) * 60) + 6)}px"></i>`).join("")}</div><button class="btn main rp-gen" data-action="l-extra">${esc(T("View Detailed Plan"))} →</button></div>`;
   return { kpis: { rem, payments, dScore }, html: `<div class="bp-row1">${plan}${fc}${insC}</div><div class="em-r2">${port}${mp}${br}${fs}</div>${bandH}` };
 }
+
+// Old-style cards inside "Manage …" sections get the same icon header as the dashboard cards
+export function iconizeCards(root) {
+  const map = [[/add|new|set|edit|form|target/i, "plus", "save"], [/repay|overpay|chart/i, "trend", "res"], [/debt|result|summary/i, "pie", "table"], [/loan/i, "bank", "table"], [/where|keep/i, "wallet", "res"], [/bin|deleted/i, "docs", "table"]];
+  root.querySelectorAll(".bp-manage .card:not(.nw-card)").forEach(c => {
+    const h = c.querySelector(":scope > h3, :scope > form > h3, :scope > .card-h > h3, :scope h3"); if (!h || h.closest(".nw-ch")) return;
+    const t = h.textContent, m = map.find(r => r[0].test(t)) || [0, "table", "table"];
+    const wrap = document.createElement("div"); wrap.className = "nw-ch"; h.before(wrap);
+    wrap.innerHTML = `<span class="rp-si i-${m[2]}">${si(IC[m[1]], 24)}</span>`; wrap.appendChild(h); c.classList.add("nw-card", "dz");
+  });
+}

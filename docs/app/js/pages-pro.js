@@ -4,7 +4,7 @@ import {
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved, fromPln } from "./core.js";
 import { ico } from "./nw.js";
 import { pageHead, band, si, IC, ring } from "./page-head.js";
-import { budgetDash, loansDash, dcard } from "./dash.js";
+import { budgetDash, loansDash, dcard, iconizeCards } from "./dash.js";
 import { progress, hbars, savingsChart } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
@@ -389,6 +389,7 @@ export const Loans = {
     </div></details>`;
     el.querySelector('[data-action="l-new"]').onclick = () => { const dt = el.querySelector(".bp-manage"); if (dt) dt.open = true; const f = el.querySelector("#loan"); f.scrollIntoView({ behavior: "smooth", block: "center" }); f.querySelector('[name="name"]')?.focus(); };
     el.querySelectorAll('[data-action="l-extra"]').forEach(b => b.onclick = () => { const dt = el.querySelector(".bp-manage"); if (dt) dt.open = true; const f = el.querySelector("#extra") || el.querySelector("#loan"); f.scrollIntoView({ behavior: "smooth", block: "center" }); });
+    iconizeCards(el);
     const fm = el.querySelector("#loan");
     el.querySelector('[data-action="save-loan"]').onclick = () => {
       const v = values(fm), rem = num(v.remaining);
