@@ -82,7 +82,7 @@ export const Savings = {
         <div class="two">${field(T("Promo rate (% per year)"), numInput("PromoRate", plain(num(f.PromoRate)), "7"))}${field(T("Promo limit (zł)"), numInput("PromoLimit", plain(num(f.PromoLimit)), T("e.g. 100000 (empty = no limit)")))}</div>
         <div class="two">${field(T("Promo length (days)"), numInput("PromoDays", plain(num(f.PromoDays)), "90"))}${field(T("Rate after the promo (% per year)"), numInput("StandardRate", plain(num(f.StandardRate)), "2"))}</div>
         ${field(T("Compare over (days) - use the same number for all offers"), numInput("PeriodDays", plain(num(f.PeriodDays)), "365"))}
-        ${check("ApplyTax", T("Deduct 19% Belka tax"), f.ApplyTax)}</form>`);
+        ${check("ApplyTax", T("Deduct 19% Belka tax"), f.ApplyTax)}<button type="button" class="btn main cmp-calcbtn" data-action="calc">${esc(T("Calculate"))}</button></form>`);
     const resultCard = card(heading(T("Result")) + row(T("Interest during promo"), pln(r.promo)) + row(T("Interest after promo"), pln(r.after)) + row(T("Total before tax"), pln(r.gross)) +
         row(T("Belka tax"), pln(r.tax)) + row(T("You keep"), pln(r.net), "big good") + row(T("Real yearly rate after tax"), rate(r.effective)) +
         hint(T("Simple interest without compounding. Banks pay monthly, so the real result can be slightly higher.")) + button(T("Save to comparison"), "save-offer", "main"));
@@ -96,14 +96,15 @@ export const Savings = {
       top5.length ? T("Expected annual returns range from {0} to {1}.", pln(top5[top5.length - 1].r.net), pln(top5[0].r.net)) : null,
       T("Current savings rates remain attractive.")].filter(Boolean);
     const insCard = `<div class="nw-card cmp-ins"><div class="nw-ch"><span class="rp-si">${si(IC.star, 22)}</span><h3>${esc(T("AI Offer Insights"))}</h3></div><ul class="nw-ul">${ins.map(x => `<li>${okIc}<span>${esc(x)}</span></li>`).join("")}</ul></div>`;
-    const tableCard = `<div class="nw-card cmp-table"><div class="nw-ch"><span class="rp-si">${si(IC.bars, 22)}</span><h3>${esc(T("Comparison Table"))}</h3></div><table><thead><tr><th>${esc(T("Bank"))}</th><th>${esc(T("Promotional Rate"))}</th><th>${esc(T("Effective Annual Yield"))}</th><th>${esc(T("Expected Profit"))}</th><th></th></tr></thead><tbody>${top5.map((x, i) => `<tr><td>${i === 0 ? "🏆 " : ""}${esc(x.o.Bank)}</td><td>${esc(rate(x.o.Rate))}</td><td>${esc(rate(x.r.effective))}</td><td><b>${esc(pln(x.r.net))}</b></td><td><a class="nw-pill" href="${esc(Rates.link(x.o))}" target="_blank" rel="noopener">${esc(T("Open offer"))}</a></td></tr>`).join("")}</tbody></table></div>`;
+    const tableCard = `<div class="nw-card cmp-table"><div class="nw-ch"><span class="rp-si">${si(IC.bars, 22)}</span><h3>${esc(T("Comparison Table"))}</h3>${button("⟳ " + esc(T("Refresh rates")), "refresh-offers", "second small")}</div>
+      <div class="cmp-ctl"><label>${esc(T("Amount to compare (zł)"))}${numInput("bank-amount", plain(A))}</label><label>${esc(T("Rate after the promotion, for all offers (% per year)"))}${numInput("bank-after", plain(after), "0")}</label></div>
+      <p class="hint">${esc(T("Bank offers last updated: {0}", checkedText))}</p><table><thead><tr><th>${esc(T("Bank"))}</th><th>${esc(T("Promotional Rate"))}</th><th>${esc(T("Effective Annual Yield"))}</th><th>${esc(T("Expected Profit"))}</th><th></th></tr></thead><tbody>${bankRows.slice(0, 8).map((x, i) => `<tr><td>${i === 0 ? "🏆 " : ""}${esc(x.o.Bank)}${x.o.Name ? `<small class="ct-sub">${esc(x.o.Name)}</small>` : ""}</td><td>${esc(rate(x.o.Rate))}</td><td>${esc(rate(x.r.effective))}</td><td><b>${esc(pln(x.r.net))}</b></td><td><a class="nw-pill" href="${esc(Rates.link(x.o))}" target="_blank" rel="noopener">${esc(T("Open offer"))}</a> <button class="nw-pill" data-bank="${i}">＋ ${esc(T("Compare"))}</button></td></tr>`).join("")}</tbody></table></div>`;
     const bestCard = `<div class="nw-card cmp-best"><div class="nw-ch"><span class="rp-si">${si(IC.trend, 22)}</span><h3>${esc(T("Best Opportunity Summary"))}</h3></div><div class="cb-body"><div><small>${esc(T("Current Selection"))}:</small><b>${esc(bestBank ? bestBank.o.Bank : "–")}</b>
       <p><span>${esc(T("Expected Profit"))}:</span><em>${esc(pln(bestNet))}</em></p><p><span>${esc(T("Average Competitor"))}:</span><b>${esc(pln(avgNet))}</b></p></div><div class="cb-box"><small>${esc(T("Additional Earnings"))}:</small><b>${esc(pln(extra))}</b></div></div></div>`;
     el.innerHTML = topHead + `<div class="cmp-grid">${rankCard}${insCard}<div class="cmp-calc">${formCard}</div>${tableCard}${bestCard}</div>
     <div class="grid">
       ${savedCard}
       ${resultCard}
-      ${bankCard}
       ${binCard(["offer"])}
     </div>` + bottomBand;
     const fm = el.querySelector("#offer");
@@ -116,6 +117,7 @@ export const Savings = {
       App.refresh();
     };
     fm.querySelectorAll("input").forEach(i => i.addEventListener("change", () => { form = values(fm); App.refresh(); }));
+    fm.querySelector('[data-action="calc"]').onclick = () => { form = values(fm); App.refresh(); };
     el.querySelector('[data-action="save-offer"]').onclick = () => {
       const v = values(fm);
       const o = { Id: uuid(), Name: v.Name.trim() || T("Offer"), Amount: num(v.Amount) || 0, PromoRate: num(v.PromoRate) || 0, PromoLimit: num(v.PromoLimit) || 0,
