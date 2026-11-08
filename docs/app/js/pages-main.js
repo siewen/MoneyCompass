@@ -4,6 +4,7 @@ import {
   today, addDays, addMonths, monthStart, monthName, monthsCount, uuid, categories, findCategory, categoryLabel, categoryIcon,
   addCategory, removeCategory, updateCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
   matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText, mainCur, currentName } from "./core.js";
+import { pageHead, band } from "./page-head.js";
 import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
 import { ovBars, ovTrend, donutList, legendKeys, ovForecast, spark, C_IN, C_OUT, C_LEFT } from "./ov-charts.js";
 import { NEW_CAT } from "./ui.js";
@@ -517,7 +518,11 @@ export const Expenses = {
     const loans = Calc.loanPayments(d);
 
     const otherCount = d.Expenses.filter(x => x.Category === OTHER).length;
-    el.innerHTML = `<div class="grid">
+    const big0 = cats.all && cats.all[0], daysIn = 30, monthly = avg.monthsUsed ? avg.essential + avg.nonEssential : 0;
+    const expHead = pageHead({ icon: "wallet", title: T("Expenses Management"), sub: T("Track spending, identify savings opportunities and improve your budget."),
+      kpis: [{ l: T("Monthly Spending"), v: monthly ? pln(monthly) : "–", icon: "coins", cls: "in" }, { l: T("Average Daily Spending"), v: monthly ? pln(monthly / daysIn) : "–", icon: "cal", cls: "src" }, { l: T("Largest Category"), v: big0 ? categoryLabel(big0.category) : "–", icon: "pie", cls: "next", sub: big0 ? pln(big0.perMonth) : "" }, { l: T("Potential Savings"), v: avg.monthsUsed ? pln(avg.nonEssential * 0.2) : "–", icon: "pig", cls: "rate", sub: T("per month") }] });
+    const expBand = band(T("Savings Opportunities"), "pig", [{ l: T("Not essential per month"), v: avg.monthsUsed ? pln(avg.nonEssential) : "–" }, { l: T("Spending 20% less there saves"), v: avg.monthsUsed ? pln(avg.nonEssential * 0.2) + "/" + T("month") : "–", big: true, cls: "good" }], "rp-trend2");
+    el.innerHTML = expHead + `<div class="grid">
       ${otherCount >= 2 ? `<button class="tip" data-action="sort-other">🏷 ${esc(T("{0} outflows are in \"Other\" – sort them by shop in one go →", otherCount))}</button>` : ""}
       ${card(heading(T("Monthly average")) + (avg.monthsUsed ? row(T("Essential"), pln(avg.essential)) + row(T("Not essential"), pln(avg.nonEssential)) + row(T("Total per month"), pln(avg.essential + avg.nonEssential)) +
           hint(basisText(d)) +
@@ -547,7 +552,7 @@ export const Expenses = {
           : hint(filtering ? T("No expenses match this filter.") : T("No expenses yet."))), "wide")}
       ${movedCard(d)}
       ${binCard(["expense"])}
-    </div>`;
+    </div>` + expBand;
 
     const form = el.querySelector("#expense-form");
     form.category.onchange = () => { form.essential.checked = !!findCategory(form.category.value)?.Essential; };

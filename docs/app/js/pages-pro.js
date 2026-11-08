@@ -3,6 +3,7 @@ import {
   T, State, save, Calc, Advisor, pln, rate, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addMonths, monthName,
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved, fromPln } from "./core.js";
 import { ico } from "./nw.js";
+import { pageHead, band } from "./page-head.js";
 import { progress, hbars, savingsChart } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
@@ -64,7 +65,13 @@ export const Savings = {
         <div class="row-actions"><a class="btn second small" href="${esc(Rates.link(x.o))}" target="_blank" rel="noopener">${esc(T("Open offer"))}</a>
         <button class="btn second small" data-bank="${i}">＋ ${esc(T("Compare"))}</button></div></div>`).join("")}</div>` +
       hint(T("Top rates from the {0} rankings, checked {1}. Conditions apply – always check the bank's own terms.", "rankomat.pl", fmtDate(String(Rates.checked).slice(0, 10)))), "wide");
-    el.innerHTML = `<div class="grid">
+    const avgNet = bankRows.length ? bankRows.reduce((a, x) => a + x.r.net, 0) / bankRows.length : 0, avgRate = bankRows.length ? bankRows.reduce((a, x) => a + x.o.Rate, 0) / bankRows.length : 0;
+    const bestNet = bestBank ? bestBank.r.net : 0, extra = Math.max(0, bestNet - avgNet);
+    const topHead = pageHead({ icon: "scale", title: T("Compare Offers"), sub: T("Compare savings accounts, deposits and promotional offers to maximize your returns."),
+        kpis: [{ l: T("Best Offer Return"), v: pln(bestNet), icon: "trophy" }, { l: T("Average Yield"), v: rate(avgRate), icon: "trend", cls: "in" }, { l: T("Potential Extra Profit"), v: pln(extra), icon: "coins", cls: "left" }, { l: T("Compared Banks"), v: String(bankRows.length), icon: "bank", cls: "rate" }] }) +
+      (bestBank ? band(T("Recommended Offer"), "star", [{ l: bestBank.o.Bank, v: bestBank.o.Name || "", big: false }, { l: T("Deposit Amount"), v: pln(A) }, { l: T("Annual Return After Tax"), v: pln(bestNet), big: true, cls: "good" }, { l: T("Annual Yield"), v: A > 0 ? rate(bestNet / A * 100) : "–" }, { l: T("Advantage Over Average"), v: "+" + pln(extra), cls: "good" }]) : "");
+    const bottomBand = bestBank ? band(T("Profit Projection"), "bars", [{ l: T("Deposit"), v: pln(A) }, { l: T("Best Current Offer"), v: pln(bestNet) }, { l: T("Average Offer"), v: pln(avgNet) }, { l: T("Additional Profit"), v: pln(extra), cls: "good" }, { l: T("Projected Additional Profit Over 5 Years"), v: pln(extra * 5), big: true, cls: "good" }], "rp-trend2") : "";
+    el.innerHTML = topHead + `<div class="grid">
       ${card(heading(T("Comparison")) + hint(T("Best offer on top. Tap an offer to load it into the form.")) + (ranked.length ? `<div class="list">${ranked.map((x, i) => `
         <div class="item clickable${i === 0 ? " best" : ""}" data-load="${x.o.Id}"><div><b>${i === 0 ? "🏆 " : ""}${esc(x.o.Name)}</b><span class="hint">${esc(T("{0} · {1} for {2} days{3}, then {4} · over {5} days", pln(x.o.Amount), rate(x.o.PromoRate), x.o.PromoDays, x.o.PromoLimit > 0 ? " (" + T("up to {0}", pln(x.o.PromoLimit)) + ")" : "", rate(x.o.StandardRate), x.o.PeriodDays))}</span></div>
         <div class="right"><b class="good">${pln(x.r.net)}</b><span class="hint">${rate(x.r.effective)}</span></div><button class="icon-btn danger" data-del-offer="${x.o.Id}">🗑</button></div>`).join("")}</div>` : hint(T("No saved offers yet."))))}
@@ -82,7 +89,7 @@ export const Savings = {
         hint(T("Simple interest without compounding. Banks pay monthly, so the real result can be slightly higher.")) + button(T("Save to comparison"), "save-offer", "main"))}
       ${bankCard}
       ${binCard(["offer"])}
-    </div>`;
+    </div>` + bottomBand;
     const fm = el.querySelector("#offer");
     const pick = fm.querySelector('[name="from-holding"]');
     if (pick) pick.onchange = () => {

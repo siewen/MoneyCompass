@@ -7,6 +7,7 @@ import {
 import { NEW_CAT } from "./ui.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, button, values, confirmBox, toast } from "./ui.js";
 import { App } from "./app.js";
+import { pageHead, band } from "./page-head.js";
 import { binCard, infoBtn } from "./pages-main.js";
 import { toBin } from "./core.js";
 
@@ -259,7 +260,11 @@ export const Calendar = {
     const evRow = e => `<div class="item"><span class="cal-dot ${e.type}"></span><div><b>${esc(e.name)}</b><span class="hint">${fmtDate(e.date)} · ${esc(e.note)}${e.past ? "" : " · " + esc(T("scheduled"))}</span></div>
       ${e.type === "info" ? "" : `<b class="${e.type === "in" ? "good" : e.type === "save" ? "primary" : "bad"}">${e.type === "in" ? "+" : "−"}${pln(e.amount)}</b>`}${e.info ? infoBtn(...e.info) : ""}</div>`;
 
-    el.innerHTML = `<div class="grid">
+    const netCf = inSum - outSum - saveSum;
+    const calHead = pageHead({ icon: "cal", title: T("Financial Calendar"), sub: T("View upcoming income, expenses, subscriptions and cashflow forecasts in one place."),
+      kpis: [{ l: T("Upcoming Income"), v: pln(inSum), icon: "up", cls: "in" }, { l: T("Upcoming Expenses"), v: pln(outSum), icon: "down", cls: "out" }, { l: T("Scheduled Savings Transfers"), v: pln(saveSum), icon: "pig", cls: "rate" }, { l: T("Expected Net Cashflow"), v: (netCf >= 0 ? "+" : "−") + pln(Math.abs(netCf)), icon: "bars", cls: "left", vcls: netCf < 0 ? "bad" : "" }] });
+    const calBand = band(T("Cashflow Projection"), "trend", [{ l: T("Upcoming Income"), v: pln(inSum) }, { l: T("Upcoming Expenses"), v: pln(outSum) }, { l: T("Planned Savings"), v: pln(saveSum) }, { l: T("Expected Surplus"), v: pln(netCf), big: true, cls: netCf < 0 ? "bad" : "good" }], "rp-trend2");
+    el.innerHTML = calHead + `<div class="grid">
       ${card(heading((range === 1 ? T("Forecast for the coming month") : T("Forecast for the next {0} months", range)), "📅") +
         `<div class="chips">${RANGES.map(n => `<button class="chip${n === range ? " on" : ""}" data-range="${n}">${esc(monthsLabel(n))}</button>`).join("")}</div>` +
         row(T("Expected inflows"), `<span class="good">+${pln(inSum)}</span>`) + row(T("Expected outflows"), `<span class="bad">−${pln(outSum)}</span>`) +
@@ -305,7 +310,7 @@ export const Calendar = {
         hint(T("Click a month to see its payments.")) +
         row(T("Balance after {0}", monthsLabel(range)), pln(running), "big" + (running < 0 ? " bad" : " good")), "wide")}
       ${binCard(["recurring"])}
-    </div>`;
+    </div>` + calBand;
 
     el.querySelectorAll("details.cal-month").forEach(x => x.addEventListener("toggle", () => folded.set(+x.dataset.m, x.open)));
     el.querySelectorAll("[data-past]").forEach(b => b.onclick = () => { allPast = b.dataset.past === "1"; App.refresh(); });
