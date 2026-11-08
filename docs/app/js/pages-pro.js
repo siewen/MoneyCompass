@@ -348,13 +348,20 @@ export const Loans = {
       btn: `<button class="btn main rp-gen" data-action="l-new">＋ ${esc(T("Add Loan"))}</button>` });
     el.innerHTML = lHead + ld.html + `<details class="cal-fold bp-manage"><summary>⚙ ${esc(T("Manage loans and overpayments"))}</summary><div class="grid">
       ${loanChartCard(d)}
-      ${card(heading(T("Your debts")) + loanProgress(running.map(x => ({ ...x, Remaining: now(x) }))) +
-        (running.some(x => loanPlan(x).interestRepaid > 0) ? row(T("Interest repaid"), pln(running.reduce((s, x) => s + loanPlan(x).interestRepaid, 0))) : "") +
-        row(T("Remaining principal amount to be repaid"), pln(running.reduce((s, x) => s + now(x), 0))) +
-        row(T("Interest still to be repaid (estimate)"), pln(running.reduce((s, x) => s + (loanPlan(x).never ? 0 : loanPlan(x).interest), 0))) +
-        row(T("Loan payments per month"), pln(payments)) +
-        row(T("Share of your income"), income > 0 ? Math.round(share * 100) + "%" : "–") + row(T("Debt-free"), debtFree) +
-        level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Outflows tab.")))}
+      ${card(`<form id="loan">${heading(l ? T("Edit loan") : T("Add a loan"))}
+        ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("Car loan, credit card, mortgage"))))}
+        ${field(T("Type of loan"), select("kind", LOAN_KINDS.map(([k, n]) => [k, T(n)]), f.Kind || "other"))}
+        <div class="two">${field(T("Loan amount at the start (zł)"), numInput("original", plain(f.Original), T("optional")))}${field(T("Remaining principal amount to be repaid (zł)"), numInput("remaining", plain(l ? loanPlan(l).remainingNow : f.Remaining)))}</div>
+        ${field(T("Interest repaid so far (zł, optional)"), numInput("interestpaid", l ? plain(Math.round(loanPlan(l).interestRepaid * 100) / 100) : "", T("from your bank, e.g. {0}", "12 450,00")))}
+        ${hint(T("Your bank shows these in the loan details: principal amount repaid, interest repaid and remaining principal amount to be repaid. With the amount at the start, MoneyCompass shows how much principal you have already repaid."))}
+        <div class="two">${field(T("Loan payment per month (zł)"), numInput("payment", plain(f.MonthlyPayment)))}${field(T("Interest rate (% per year, 0 if none)"), numInput("rate", plain(f.RatePercent), "0"))}</div>
+        <div class="two">${field(T("Next payment on (then every month)"), dateInput("next", inputDate(l ? (loanPlan(l).next || loanNextPayment(l)) : parseDate(f.NextPayment))))}
+        ${field(T("Paid from which account (optional)"), `<input name="paidfrom" list="loan-accounts" value="${esc(f.PaidFrom || "")}" placeholder="${esc(T("e.g. {0}", "Pekao"))}">`)}</div>
+        <datalist id="loan-accounts">${[...new Set([...d.Holdings.map(h => h.Name), ...d.Expenses.concat(d.Received).map(x => x.Info?.Bank).filter(Boolean), "Pekao", "PKO BP", "mBank", "ING", "Millennium", "Santander", "Alior", "Credit Agricole"])].map(n => `<option value="${esc(n)}">`).join("")}</datalist>
+        ${hint(T("The loan payment counts every month on this day – also when it is paid from a bank you don't import. If it shows up in a bank import, it is not counted twice."))}
+        <p class="loan-preview hint" id="loan-preview"></p>
+        ${hint(T("MoneyCompass works out the debt-free date from what is left, the monthly payment and the interest."))}
+        <div class="buttons">${button(l ? T("Save changes") : T("Add"), "save-loan", "main")}${l ? button(T("Cancel"), "cancel-loan") : ""}</div></form>`)}
       ${card(heading(T("Loans")) + hint(T("Tap a loan to edit it, for example to update what is left.")) + (d.Loans.length ? `<div class="list">${d.Loans.map(x => `
         <div class="item clickable loan-item" data-edit-loan="${x.Id}"><div class="loan-main"><b>${esc(x.Name)}</b>
           <span class="hint">${esc(loanLine(x, plans.get(x.Id) || loanPlan(x)))}</span>
@@ -371,20 +378,13 @@ export const Loans = {
         ${field(T("Regular extra principal every month? (zł, calculation only)"), numInput("monthly", "", T("e.g. {0}", "200")))}
         <div class="extra-result" id="extra-result"></div>
         <div class="buttons">${button("✔ " + esc(T("Save the overpayment")), "save-extra", "main")}</div></form>`) : ""}
-      ${card(`<form id="loan">${heading(l ? T("Edit loan") : T("Add a loan"))}
-        ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", T("Car loan, credit card, mortgage"))))}
-        ${field(T("Type of loan"), select("kind", LOAN_KINDS.map(([k, n]) => [k, T(n)]), f.Kind || "other"))}
-        <div class="two">${field(T("Loan amount at the start (zł)"), numInput("original", plain(f.Original), T("optional")))}${field(T("Remaining principal amount to be repaid (zł)"), numInput("remaining", plain(l ? loanPlan(l).remainingNow : f.Remaining)))}</div>
-        ${field(T("Interest repaid so far (zł, optional)"), numInput("interestpaid", l ? plain(Math.round(loanPlan(l).interestRepaid * 100) / 100) : "", T("from your bank, e.g. {0}", "12 450,00")))}
-        ${hint(T("Your bank shows these in the loan details: principal amount repaid, interest repaid and remaining principal amount to be repaid. With the amount at the start, MoneyCompass shows how much principal you have already repaid."))}
-        <div class="two">${field(T("Loan payment per month (zł)"), numInput("payment", plain(f.MonthlyPayment)))}${field(T("Interest rate (% per year, 0 if none)"), numInput("rate", plain(f.RatePercent), "0"))}</div>
-        <div class="two">${field(T("Next payment on (then every month)"), dateInput("next", inputDate(l ? (loanPlan(l).next || loanNextPayment(l)) : parseDate(f.NextPayment))))}
-        ${field(T("Paid from which account (optional)"), `<input name="paidfrom" list="loan-accounts" value="${esc(f.PaidFrom || "")}" placeholder="${esc(T("e.g. {0}", "Pekao"))}">`)}</div>
-        <datalist id="loan-accounts">${[...new Set([...d.Holdings.map(h => h.Name), ...d.Expenses.concat(d.Received).map(x => x.Info?.Bank).filter(Boolean), "Pekao", "PKO BP", "mBank", "ING", "Millennium", "Santander", "Alior", "Credit Agricole"])].map(n => `<option value="${esc(n)}">`).join("")}</datalist>
-        ${hint(T("The loan payment counts every month on this day – also when it is paid from a bank you don't import. If it shows up in a bank import, it is not counted twice."))}
-        <p class="loan-preview hint" id="loan-preview"></p>
-        ${hint(T("MoneyCompass works out the debt-free date from what is left, the monthly payment and the interest."))}
-        <div class="buttons">${button(l ? T("Save changes") : T("Add"), "save-loan", "main")}${l ? button(T("Cancel"), "cancel-loan") : ""}</div></form>`)}
+      ${card(heading(T("Your debts")) + loanProgress(running.map(x => ({ ...x, Remaining: now(x) }))) +
+        (running.some(x => loanPlan(x).interestRepaid > 0) ? row(T("Interest repaid"), pln(running.reduce((s, x) => s + loanPlan(x).interestRepaid, 0))) : "") +
+        row(T("Remaining principal amount to be repaid"), pln(running.reduce((s, x) => s + now(x), 0))) +
+        row(T("Interest still to be repaid (estimate)"), pln(running.reduce((s, x) => s + (loanPlan(x).never ? 0 : loanPlan(x).interest), 0))) +
+        row(T("Loan payments per month"), pln(payments)) +
+        row(T("Share of your income"), income > 0 ? Math.round(share * 100) + "%" : "–") + row(T("Debt-free"), debtFree) +
+        level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Outflows tab.")))}
       ${binCard(["loan"])}
     </div></details>`;
     el.querySelector('[data-action="l-new"]').onclick = () => { const dt = el.querySelector(".bp-manage"); if (dt) dt.open = true; const f = el.querySelector("#loan"); f.scrollIntoView({ behavior: "smooth", block: "center" }); f.querySelector('[name="name"]')?.focus(); };
