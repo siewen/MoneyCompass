@@ -327,9 +327,25 @@ function loanChartCard(d) {
     `<div class="wave-legend">${keys}</div>` + savingsChart(x.months.map(short), lines, [], axis, fmtV, hid, x.pastCount, ...(window.innerWidth < 700 ? [760, 230] : [1500, 190])) +
     hint(T("Month by month for all your loans together. Up to today: from the payments since you entered each loan; from today on (shaded): a projection with today's rate and monthly payment. Click a name to show or hide it.")), "wide fixed loan-chart-card");
 }
+/** Loans window: chart, loan list, add/edit form and overpayment – opened from the ± button and the plan buttons. */
+function openLoansWindow(focus) {
+  const p = popup("", { width: 1180, cls: "wide-popup nw-win pm-win" }), orig = App.refresh; let busy = false;
+  const draw = (f) => {
+    if (busy) return; busy = true;
+    p.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-table">${si(IC.bank, 24)}</span><h3>${esc(T("Loans & Debts"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="ln-host"></div>`;
+    Loans.render(p.el.querySelector(".ln-host"), { manage: true });
+    busy = false;
+    if (f) setTimeout(() => { const t = p.el.querySelector(f); if (t) { t.scrollIntoView({ behavior: "smooth", block: "center" }); t.querySelector("input,select")?.focus(); } }, 120);
+  };
+  App.refresh = (...a) => { orig(...a); if (!p.closed) draw(); };
+  const close = p.close; p.close = (...a) => { App.refresh = orig; close(...a); };
+  draw(focus);
+}
+
 export const Loans = {
   route: "loans", title: "Loans & debts",
-  render(el) {
+  render(el, opts = {}) {
+    const manage = !!opts.manage;
     const d = D();
     const l = editLoan ? d.Loans.find(x => x.Id === editLoan) : null;
     const f = l || { Name: "", Remaining: "", MonthlyPayment: "", RatePercent: "", NextPayment: isoDate(addMonths(today(), 1)) };
@@ -387,9 +403,15 @@ export const Loans = {
         level + hint(T("These monthly payments are counted in your spending (Overview, Expenses, advice and reports) as \"Loan payments\". Don't enter them again in the Outflows tab.")))}
       ${binCard(["loan"])}
     </div></details>`;
-    el.querySelector('[data-action="l-new"]').onclick = () => { const dt = el.querySelector(".bp-manage"); if (dt) dt.open = true; const f = el.querySelector("#loan"); f.scrollIntoView({ behavior: "smooth", block: "center" }); f.querySelector('[name="name"]')?.focus(); };
-    el.querySelectorAll('[data-action="l-extra"]').forEach(b => b.onclick = () => { const dt = el.querySelector(".bp-manage"); if (dt) dt.open = true; const f = el.querySelector("#extra") || el.querySelector("#loan"); f.scrollIntoView({ behavior: "smooth", block: "center" }); });
-    iconizeCards(el);
+    if (manage) { el.innerHTML = el.querySelector(".bp-manage .grid").outerHTML; }
+    else {
+      el.querySelector(".bp-manage")?.remove();
+      const open = (focus) => openLoansWindow(focus);
+      el.querySelectorAll('[data-action="l-new"]').forEach(b => b.onclick = () => open("#loan"));
+      el.querySelectorAll('[data-action="l-extra"]').forEach(b => b.onclick = () => open("#extra"));
+      return;
+    }
+    el.classList.add("bp-manage"); iconizeCards(el);
     const fm = el.querySelector("#loan");
     el.querySelector('[data-action="save-loan"]').onclick = () => {
       const v = values(fm), rem = num(v.remaining);
