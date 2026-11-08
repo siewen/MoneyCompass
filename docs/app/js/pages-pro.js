@@ -4,7 +4,7 @@ import {
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved, fromPln } from "./core.js";
 import { ico } from "./nw.js";
 import { pageHead, band, si, IC, ring } from "./page-head.js";
-import { budgetDash, loansDash, dcard, iconizeCards } from "./dash.js";
+import { budgetDash, loansDash, dcard, iconizeCards, stat } from "./dash.js";
 import { progress, hbars, savingsChart } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
@@ -469,30 +469,28 @@ export const Budget = {
     const bHead = pageHead({ icon: "wallet", title: T("Budget Plan"), sub: T("Plan spending, control expenses and maximize savings."),
       kpis: [{ l: T("Monthly Budget"), v: pln(bd.kpis.total), icon: "wallet", cls: "in" }, { l: T("Spent This Month"), v: pln(bd.kpis.spent), icon: "cart", cls: "src" }, { l: T("Remaining Budget"), v: pln(bd.kpis.left), icon: "check", cls: "in", vcls: bd.kpis.left < 0 ? "bad" : "" }, { l: T("Budget Health Score"), v: bd.kpis.score + " / 100", icon: "heart", cls: "in", hi: true }],
       btn: `<button class="btn main rp-gen" data-action="b-new">＋ ${esc(T("Create Budget"))}</button>` });
-    el.innerHTML = bHead + bd.html + `<div class="bp-pair"><section class="nw-card dz bp-panel"><div class="nw-ch"><span class="rp-si i-rank">${si(IC.wallet, 24)}</span><h3>${esc(T("Manage limits"))}</h3></div><div class="bp-flat">
-      ${dcard("cal","cal",monthName(today()), row(T("Spent in categories with a limit"), pln(spent)) + row(T("Your limits together"), pln(total)) +
-        row(T("Left this month"), pln(total - spent), total - spent < 0 ? "bad" : "good") +
-        (d.Goals.length ? row(T("To set aside for savings goals"), pln(goalsPerMonth(d))) : ""))}
-      ${dcard("table","table",T("Limits this month"), hint(T("From your entries in the Outflows tab. Green: on track, amber: almost used, red: over the limit.")) +
-        (limits.length ? budgetBars() : hint(T("No limits yet. Set your first one above."))))}
-      ${dcard("save","save",T("Set a monthly limit"), `<form id="budget">${hint(T("Choose a category and how much you want to spend on it at most each month. Setting it again changes the limit."))}
-        ${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], categories()[0].Name))}
-        ${field(T("Limit per month (zł)"), numInput("limit", "", T("e.g. {0}", "800")))}
-        ${button(T("Save limit"), "save-limit", "main")}</form>`)}
-      ${binCard(["budget"])}
-    </div></section></div>`;
-    // Savings goals: part of the budget plan (how much to set aside each month), with their own cards
+    const chips = limits.map(b => { const sp = Calc.spentThisMonth(b.Category), pc = b.MonthlyLimit > 0 ? Math.round(sp / b.MonthlyLimit * 100) : 0;
+      return `<div class="bl-chip ${pc > 100 ? "bad" : pc > 80 ? "warn" : ""}"><span>${esc(categoryLabel(b.Category))}</span><b>${esc(pln(b.MonthlyLimit))}</b><button class="icon-btn danger" data-del-limit="${esc(b.Category)}" title="${esc(T("Delete"))}">✕</button></div>`; }).join("");
+    el.innerHTML = bHead + bd.html + `<div class="bp-pair"><section class="nw-card dz bp-panel"><div class="nw-ch"><span class="rp-si i-rank">${si(IC.wallet, 24)}</span><h3>${esc(T("Budget limits"))}</h3></div>
+      <div class="bp-flat"><div class="bl-sum">${stat(T("Your limits together"), pln(total))}${d.Goals.length ? stat(T("To set aside for savings goals"), pln(goalsPerMonth(d))) : ""}</div>
+      <div class="bl-chips">${chips || `<p class="hint">${esc(T("No limits yet. Set your first one above."))}</p>`}</div>
+      <form id="budget" class="bl-form"><div class="bl-row">${select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], categories()[0].Name)}${numInput("limit", "", T("Limit per month (zł)"))}${button("＋ " + T("Save limit"), "save-limit", "main")}</div></form>
+      ${binCard(["budget"])}</div></section></div>`;
+    // Savings goals: one card (summary + list), with "Add a goal" folded inside
     const sec = document.createElement("section"); sec.className = "nw-card dz bp-panel goals-section";
     sec.innerHTML = `<div class="nw-ch"><span class="rp-si i-res">${si(IC.flag, 24)}</span><h3>${esc(T("Savings goals"))}</h3></div><div class="goals-host bp-flat"></div>`;
     el.querySelector(".bp-pair").appendChild(sec);
-    Goals.render(sec.querySelector(".goals-host"));
-    const gg = sec.querySelector(".goals-host .grid"); if (gg) gg.dataset.key = "web2:goals";
-    el.querySelectorAll("[data-budget]").forEach(b => {
-      const del = document.createElement("button"); del.className = "icon-btn danger"; del.textContent = "🗑";
-      del.onclick = async () => {
-        if (await confirmBox(T("Delete limit?"), T(b.dataset.budget), T("Delete"), T("Cancel"), true)) { toBin("budget", d.Budgets.find(x => x.Category === b.dataset.budget)); d.Budgets = d.Budgets.filter(x => x.Category !== b.dataset.budget); save(); App.refresh(); }
-      };
-      b.querySelector("b").after(del);
+    const gh = sec.querySelector(".goals-host"); Goals.render(gh);
+    { const cs = [...gh.querySelectorAll(".nw-card")]; if (cs.length >= 3) {
+      const [c1, c2, c3] = cs; c1.querySelector(".nw-ch")?.remove(); c2.querySelector(".nw-ch")?.remove();
+      [...c2.children].forEach(x => c1.appendChild(x)); c2.remove();
+      const f3 = c3.querySelector(".nw-ch h3"), ttl = f3 ? f3.textContent : T("Add a goal"); c3.querySelector(".nw-ch")?.remove();
+      const dt = document.createElement("details"); dt.className = "bl-add"; if (editGoal) dt.open = true;
+      dt.innerHTML = `<summary>＋ ${esc(ttl)}</summary>`; while (c3.firstChild) dt.appendChild(c3.firstChild); c1.appendChild(dt); c3.remove(); } }
+    const gg = gh.querySelector(".grid"); if (gg) gg.dataset.key = "web2:goals";
+    el.querySelectorAll("[data-del-limit]").forEach(b => b.onclick = async () => {
+      const cat = b.dataset.delLimit;
+      if (await confirmBox(T("Delete limit?"), T(cat), T("Delete"), T("Cancel"), true)) { toBin("budget", d.Budgets.find(x => x.Category === cat)); d.Budgets = d.Budgets.filter(x => x.Category !== cat); save(); App.refresh(); }
     });
     const fm = el.querySelector("#budget");
     el.querySelector('[data-action="b-new"]').onclick = () => { fm.scrollIntoView({ behavior: "smooth", block: "center" }); fm.querySelector('[name="limit"]')?.focus(); };

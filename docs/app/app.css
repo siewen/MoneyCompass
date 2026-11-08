@@ -1596,3 +1596,12 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .bp-flat input:focus, .bp-flat select:focus { border-color: #34E8A8; box-shadow: 0 0 0 3px rgba(52,232,168,.18); outline: 0; }
 .bp-flat .btn.main, .bp-flat button.main { background: linear-gradient(135deg,#34E8A8,#16B77E); color: #03281C; font-weight: 800; border-radius: 999px; box-shadow: 0 0 14px rgba(52,232,168,.35); }
 .bp-flat .bar-item { background: rgba(255,255,255,.035); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; } .bp-flat .progress { height: 10px; border-radius: 99px; }
+.bl-sum { display: flex; gap: 28px; flex-wrap: wrap; margin-bottom: 12px; } .bl-sum .dz-stat b { font-size: 20px; }
+.bl-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.bl-chip { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.05); border: 1px solid rgba(52,232,168,.35); border-radius: 999px; padding: 6px 8px 6px 14px; font-size: 14px; } .bl-chip.warn { border-color: #FFB020; } .bl-chip.bad { border-color: #FF4D5E; }
+.bl-chip b { color: #34E8A8; } .bl-chip .icon-btn { padding: 2px 7px; font-size: 12px; }
+.bl-row { display: grid; grid-template-columns: 1.3fr 1fr auto; gap: 10px; align-items: center; } .bl-row input, .bl-row select { margin: 0; width: 100%; } @media (max-width: 700px) { .bl-row { grid-template-columns: 1fr; } }
+.bl-add { margin-top: 12px; border-top: 1px solid rgba(255,255,255,.08); padding-top: 10px; } .bl-add > summary { cursor: pointer; font-weight: 700; color: #34E8A8; padding: 6px 0; list-style: none; } .bl-add > summary::-webkit-details-marker { display: none; }
+.goals-host .bp-flat, .bp-panel .goals-host > .grid { margin: 0; } .bp-flat .card { margin-bottom: 0 !important; background: transparent !important; border: 0 !important; padding: 0 !important; }
+.bp-pair > .goals-section, .bp-pair > .bp-panel { margin-top: 0 !important; } .bp-flat .nw-card .dz-stat, .bp-flat .nw-card .row { font-size: 14px; }
+.goals-host .nw-card { background: transparent !important; border: 0 !important; padding: 0 !important; box-shadow: none !important; }
