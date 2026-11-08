@@ -1940,3 +1940,10 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .od-today{display:flex;align-items:center;gap:26px;flex-wrap:wrap;border-top:3px solid #2EDC9A;background:rgba(255,255,255,.04);border-radius:12px;padding:16px 20px;margin-top:8px}
 .od-today small{display:block;color:#9fb0ab}.od-today b{font-size:26px}.od-btns{margin-left:auto;display:flex;gap:10px}.od-btns .sv-btn{width:auto;text-decoration:none}
 @media(max-width:850px){.od-grid,.od-cols{grid-template-columns:1fr}}
+
+/* ---- Change expense window (ee-) ---- */
+.ee-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:4px}
+.ee-c{margin:0;display:grid;gap:10px;align-content:start}.ee-c h4{margin:0;color:#2EDC9A;font-size:14px;letter-spacing:.04em;text-transform:uppercase}
+.ee-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 4px 4px;border-top:1px solid rgba(255,255,255,.08);margin-top:12px}
+.ee-foot .sv-btn{width:auto}
+@media(max-width:700px){.ee-grid{grid-template-columns:1fr}}

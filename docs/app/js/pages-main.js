@@ -834,13 +834,16 @@ function bindExpenseRows(root, after = () => App.refresh()) {
   });
 }
 function editExpense(e, after) {
-  const p = popup(`<h2 class="popup-title">${esc(T("Change expense"))}</h2><form>
-    <div class="two">${field(T("Date"), dateInput("date", inputDate(parseDate(e.Date))))}${field(T("Amount (zł)"), numInput("amount", plain(e.Amount)))}</div>
-    ${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], e.Category))}
-    ${field(T("Description"), textInput("description", e.Description))}
-    ${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(repeatOn(e)), repeatOn(e)))}
-    ${check("essential", T("Essential (must pay even in a crisis)"), e.Essential)}</form>
-    <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button><button class="btn main" data-save>${esc(T("Save"))}</button></div>`, { width: 520 });
+  const p = popup(`<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC.cart, 24)}</span><h3>${esc(T("Change expense"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
+    <form class="ee-form"><div class="ee-grid">
+      <div class="nw-card dz ee-c"><h4>${esc(T("Payment"))}</h4>
+        <div class="two">${field(T("Date"), dateInput("date", inputDate(parseDate(e.Date))))}${field(T("Amount (zł)"), numInput("amount", plain(e.Amount)))}</div>
+        ${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], e.Category))}</div>
+      <div class="nw-card dz ee-c"><h4>${esc(T("Details"))}</h4>
+        ${field(T("Description"), textInput("description", e.Description))}
+        ${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(repeatOn(e)), repeatOn(e)))}
+        ${check("essential", T("Essential (must pay even in a crisis)"), e.Essential)}</div></div></form>
+    <div class="ee-foot"><button class="sv-btn ghost" data-close>${esc(T("Cancel"))}</button><button class="sv-btn" data-save>✓ ${esc(T("Save"))}</button></div>`, { width: 820, cls: "nw-win pm-win" });
   p.el.querySelector("[data-save]").onclick = () => {
     const v = values(p.el), amt = num(v.amount);
     if (!(amt > 0)) { toast(T("Please enter an amount bigger than 0."), "bad"); return; }
