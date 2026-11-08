@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 91, date: "2026-11-08", items: {
+    en: ["✨ New installs get the new compass icon automatically, and apps installed earlier update their icon by themselves."],
+    pl: ["✨ Nowa ikona instaluje się automatycznie; wcześniej zainstalowane aplikacje aktualizują ikonę same."],
+    de: ["✨ Das neue Symbol wird automatisch installiert; bereits installierte Apps aktualisieren es selbst."],
+    fr: ["✨ La nouvelle icône s'installe automatiquement ; les applications déjà installées la mettent à jour."] } },
   { build: 90, date: "2026-11-08", items: {
     en: ["✨ The installed app and home-screen icon now use the new compass logo."],
     pl: ["✨ Ikona zainstalowanej aplikacji używa nowego logo."],

@@ -1,6 +1,6 @@
 // MoneyCompass offline support: the newest version when online, the saved copy when offline.
 // Your own data is never here – it stays in the browser's storage.
-const CACHE = "moneycompass-v160";
+const CACHE = "moneycompass-v161";
 const FILES = ["./", "index.html", "app.css", "manifest.webmanifest", "js/main.js", "js/version.js", "js/core.js", "js/app.js", "js/ui.js", "js/charts.js",
   "js/csv.js", "js/rates.js", "js/pages-main.js", "js/pages-pro.js", "js/dialogs.js", "js/guide.js", "js/news.js", "js/calendar.js", "js/lang-table.js", "js/lang-extra.js",
   "js/advice.js", "js/debts.js", "js/lock.js", "js/crypt.js", "js/savings-check.js", "js/backup.js", "js/import.js", "js/reports.js", "js/investments.js", "js/invest-import.js",
