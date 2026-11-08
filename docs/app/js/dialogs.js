@@ -208,6 +208,7 @@ export function openOptions() {
     <div class="nw-g4 nw-sum">${tl("globe", T("Language"), (LANGS.find(x => x[0] === lang()) || [0, lang()])[1])}${tl("coins", T("Currency"), s.Currency || "PLN")}${tl("shield", T("Security"), pinOn ? T("Protected") : T("No PIN"))}${tl("cloud", T("Backup"), bkOn ? T("Enabled") : T("Off"))}</div>
     <div class="nw-g2 st-g">
       <div class="nw-card st-c">${hd("globe", T("Language"))}${select("language", LANGS, lang())}<p class="hint">${esc(T("Your data stays the same; only the texts change."))}</p></div>
+      <div class="nw-card st-c">${hd("star", T("Appearance"))}<div class="lang-chips">${[["dark", T("Dark")], ["hell", T("Hell (light)")]].map(([c, n]) => `<button class="chip${(store.get("mc-theme") === "hell" ? "hell" : "dark") === c ? " on" : ""}" data-theme-pick="${c}">${esc(n)}</button>`).join("")}</div><p class="hint">${esc(T("Choose a light or dark look. It is saved on this device."))}</p></div>
       <div class="nw-card st-c">${hd("coins", T("Currency"))}${select("maincur", [["PLN", "PLN – złoty"], ["EUR", "EUR – euro"], ["USD", "USD – dollar"]], s.Currency || "PLN")}<p class="hint">${esc(T("Used throughout reports, charts and calculations."))}</p></div>
     </div>
     <div class="nw-g2 st-g">
@@ -277,6 +278,7 @@ export function openOptions() {
     toast(T("Main currency: {0}. All amounts were converted.", to), "good"); p.close(); App.rebuild(); openOptions();
   };
   el.querySelector('select[name="language"]').onchange = e => { s.Language = e.target.value; store.set("mc-lang", s.Language); save(); p.close(); openOptions(); };
+  el.querySelectorAll("[data-theme-pick]").forEach(b => b.onclick = () => { store.set("mc-theme", b.dataset.themePick); App.applyTheme ? App.applyTheme() : (document.documentElement.dataset.theme = b.dataset.themePick); el.querySelectorAll("[data-theme-pick]").forEach(x => x.classList.toggle("on", x === b)); });
   el.querySelectorAll('input[name^="mod-"]').forEach(c => c.onchange = () => setModule(c.name.slice(4), c.checked));
   el.querySelector('input[name="online"]').onchange = e => { s.OnlineRates = e.target.checked; save(); if (s.OnlineRates) Rates.refresh(true); };
   el.querySelector('select[name="closechoice"]').onchange = e => { s.CloseChoice = e.target.value; save(); };
