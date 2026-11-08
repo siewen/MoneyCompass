@@ -5,11 +5,6 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
-  { build: 101, date: "2026-11-08", items: {
-    en: ["✨ New look for About, Help & Learning Center and Profile & Security."],
-    pl: ["✨ Nowy wygląd okien O programie, Pomoc i Profil i bezpieczeństwo."],
-    de: ["✨ Neues Aussehen für Info, Hilfe & Lernzentrum und Profil & Sicherheit."],
-    fr: ["✨ Nouveau look pour À propos, Aide et Profil & sécurité."] } },
   { build: 100, date: "2026-11-08", items: {
     en: ["✨ The Import window is a little bigger again."],
     pl: ["✨ Okno importu jest nieco większe."],
