@@ -2009,3 +2009,27 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .ovo-bars{opacity:.9!important}
 @keyframes ovoPulse{0%,100%{box-shadow:0 0 0 3px rgba(46,220,154,.25),0 0 22px rgba(46,220,154,.5)}50%{box-shadow:0 0 0 7px rgba(46,220,154,.12),0 0 38px rgba(46,220,154,.85)}}
 @media(prefers-reduced-motion:reduce){.sv-btn.ovo-btn{animation:none}}
+/* every button that opens the Optimize window catches the eye */
+[data-action="optimize"]{background:linear-gradient(135deg,#3dffb0,#19b97d)!important;color:#04251a!important;border:0!important;font-weight:800!important;box-shadow:0 0 0 3px rgba(46,220,154,.25),0 0 26px rgba(46,220,154,.6)!important;animation:ovoPulse 2.2s ease-in-out infinite}
+[data-action="optimize"]:hover{filter:brightness(1.1)}
+[data-action="optimize"] svg{stroke:#04251a}
+.ai-btn[data-action="optimize"],.ni-opt{padding:14px 22px!important;font-size:16px!important;border-radius:14px!important}
+@media(prefers-reduced-motion:reduce){[data-action="optimize"]{animation:none}}
+/* Help window */
+.hp-win .nw-hd{padding:22px 28px 6px}
+.hp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:12px 28px 8px;align-items:start}
+.hp-col{display:grid;gap:16px}
+.hp-c{padding:18px 20px!important}
+.hp-h{display:flex;align-items:center;gap:12px;margin-bottom:12px}.hp-h h3{margin:0;font-size:18px}
+.hp-i{width:38px;height:38px;border-radius:12px;background:rgba(46,220,154,.12);display:grid;place-items:center;flex:none}.hp-i .nwi{width:22px;height:22px}
+.hp-steps{margin:0 0 10px;padding-left:22px;display:grid;gap:9px;color:#dbe7e3;line-height:1.5;font-size:14.5px}
+.hp-steps li::marker{color:#2EDC9A;font-weight:800}
+.hp-t,.hp-pro li{display:grid;gap:2px;padding:9px 0;border-top:1px solid rgba(255,255,255,.07)}
+.hp-t:first-of-type{border-top:0;padding-top:0}
+.hp-t b,.hp-pro b{color:#fff;font-size:14.5px}.hp-t span,.hp-pro span{color:#9fb0ab;font-size:13.5px;line-height:1.45}
+.hp-pro{list-style:none;margin:0;padding:0}.hp-pro li:first-child{border-top:0;padding-top:0}
+.hp-pro li b{color:#2EDC9A}
+.hp-p{margin:0 0 8px;color:#dbe7e3;font-size:14px;line-height:1.5}
+.hp-dl{display:inline-block;text-decoration:none;padding:11px 20px}
+.nw-ft{display:flex;justify-content:space-between;align-items:center;padding:14px 28px 20px;position:sticky;bottom:0;background:linear-gradient(0deg,#0B1519 70%,transparent)}
+@media(max-width:900px){.hp-grid{grid-template-columns:1fr}}
