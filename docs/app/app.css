@@ -1776,3 +1776,4 @@ button.dz-bhi { cursor: pointer; text-align: left; font: inherit; color: inherit
 .ei-page .ov-kpis .kpi:nth-child(3) .kpi-t b { font-size: clamp(16px, 1.5vw, 22px); white-space: normal; }
 .ei-rr { grid-template-columns: 26px 74px minmax(0,1fr) minmax(0,1.2fr) auto; } .ei-rr em { font-size: .78rem; }
 .ei-quick .ex-chips { display: grid; grid-template-columns: 1fr 1fr 1fr; } .ei-quick .ex-chip { justify-content: center; font-size: .78rem; padding: 8px 6px; }
+.ei-bulb { border: 0; cursor: pointer; background: radial-gradient(circle, rgba(255,210,63,.35), rgba(255,210,63,.08)); transition: transform .15s; } .ei-bulb:hover { transform: scale(1.06); } .ei-bulb svg { fill: #FFD23F; filter: drop-shadow(0 0 10px rgba(255,210,63,.75)); }

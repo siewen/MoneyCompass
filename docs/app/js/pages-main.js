@@ -562,7 +562,7 @@ export const Expenses = {
     const nonEss = avg.monthsUsed ? avg.nonEssential : 0, saveM = nonEss * 0.2;
     const topNon = sorted0.filter(c => !findCategory(c.category)?.Essential).slice(0, 3);
     const opps = topNon.length ? topNon.map(c => [T("Lower {0} spending", categoryLabel(c.category)), c.perMonth * 0.2]) : [[T("Add expenses to see opportunities"), 0]];
-    const optBand = `<div class="nw-card ei-opp"><span class="ei-bulb">${si(IC.bulb, 70)}</span><div class="ei-o1"><h3>${esc(T("Savings Opportunities"))}</h3><small>${esc(T("Potential Monthly Savings"))}</small><b class="good">${esc(pln(saveM))}</b></div>
+    const optBand = `<div class="nw-card ei-opp"><button type="button" class="ei-bulb" data-action="ex-optimize" title="${esc(T("Optimize My Budget"))}">${si(IC.bulb, 70)}</button><div class="ei-o1"><h3>${esc(T("Savings Opportunities"))}</h3><small>${esc(T("Potential Monthly Savings"))}</small><b class="good">${esc(pln(saveM))}</b></div>
       <div class="ei-o2"><small>${esc(T("Potential Annual Savings"))}</small><b>${esc(pln(saveM * 12))}</b></div>
       <div class="ei-o3"><h4>${esc(T("Top Opportunities"))}</h4>${opps.map(o => `<div class="ei-op">${okE}<span>${esc(o[0])}</span><b>+${esc(pln(o[1]))}/${esc(T("month"))}</b></div>`).join("")}</div>
       <button class="sv-btn ei-ob" data-action="ex-optimize">${si(IC.trend, 18)} ${esc(T("Optimize My Budget"))}</button></div>`;
@@ -622,7 +622,7 @@ export const Expenses = {
     };
     el.querySelector('[data-action="ex-add"]').onclick = () => openAdd(null, el.querySelector('[name="qdate"]')?.value);
     el.querySelectorAll("[data-quick]").forEach(b => b.onclick = () => openAdd(b.dataset.quick, el.querySelector('[name="qdate"]')?.value));
-    el.querySelector('[data-action="ex-optimize"]')?.addEventListener("click", () => App.openOptimize());
+    el.querySelectorAll('[data-action="ex-optimize"]').forEach(b => b.addEventListener("click", () => App.openOptimize()));
     el.querySelector('[data-action="sort-other"]')?.addEventListener("click", () => sortOther(() => App.refresh()));
     const olderBtn = el.querySelector('[data-action="older"]');
     if (olderBtn) olderBtn.onclick = () => { showAllMonths = true; App.refresh(); };
