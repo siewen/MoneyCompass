@@ -78,7 +78,7 @@ function toggleSide() {
 function applyTheme() {
   const th = store.get("mc-theme") === "hell" ? "hell" : "dark";
   document.documentElement.dataset.theme = th;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", th === "hell" ? "#EEF3F1" : "#121615");
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", th === "hell" ? "#DCE3E0" : "#121615");
   document.documentElement.dataset.design = "emerald";
   document.documentElement.dataset.side = side();
 }

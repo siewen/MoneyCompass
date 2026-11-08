@@ -5,7 +5,7 @@ import { donut } from "./charts.js";
 export const C_IN = "#35D399", C_OUT = "#3B82F6", C_LEFT = "#EAF1EE";
 const spaced = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 const niceMax = v => { if (!(v > 0)) return 1; const p = 10 ** Math.floor(Math.log10(v)), f = v / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; };
-let W = 520, H = 240; const L = 58, R = 8, TOP = 10, B = 30;
+let W = 520, H = 240; const L = 66, R = 8, TOP = 10, B = 38;
 
 /** Axis, grid lines and month names; returns the svg start, and a y() to place values. */
 const compactAx = v => { const a = Math.abs(v), sg = v < 0 ? "−" : ""; return a >= 1e6 ? sg + (Math.round(a / 1e5) / 10).toString().replace(".", ",") + "M" : a >= 1000 ? sg + Math.round(a / 1000) + "k" : String(Math.round(v)); };
