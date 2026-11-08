@@ -824,7 +824,8 @@ export const Emergency = {
     const eHead = pageHead({ icon: "shield", title: T("Emergency Fund"), sub: T("Build financial security and protect yourself against unexpected events."),
       kpis: [{ l: T("Emergency Fund Balance"), v: pln(safe), icon: "coins", cls: "in" }, { l: T("Fund Completion"), v: ed.kpis.pct + "%", icon: "check", cls: "in" }, { l: T("Months Covered"), v: ed.kpis.covered.toFixed(1), icon: "calx", cls: "next" }, { l: T("Target Date"), v: ed.kpis.est ? ed.kpis.est.toLocaleDateString(undefined, { month: "long", year: "numeric" }) : ed.kpis.done ? T("Reached") : "–", icon: "flag", cls: "in" }],
       btn: `<button class="btn main rp-gen" data-go="portfolio">＋ ${esc(T("Add Contribution"))}</button>` });
-    el.innerHTML = eHead + ed.html + `<details class="cal-fold bp-manage"><summary>⚙ ${esc(T("Your monthly costs and target"))}</summary><div class="grid">
+    el.innerHTML = eHead + ed.html;
+    const manageHtml = () => `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC.shield, 24)}</span><h3>${esc(T("Your monthly costs and target"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>` + `<div class="grid">
       ${card(heading(T("Result")) + row(T("Monthly need (incl. yearly costs / 12)"), pln(r.monthly)) + row(T("3 months (with buffer)"), pln(r.three)) +
         row(T("6 months (with buffer)"), pln(r.six)) + row(T("Your target"), pln(r.target), "big") + status)}
       ${card(heading(T("Where to keep it")) + `<p>${esc(T("In a Polish bank savings account, in złoty: protected by the BFG up to €100,000 and available the same day. Not in crypto, and not in a long fixed deposit (lokata), because breaking it early usually loses the interest."))}</p>`)}
@@ -835,23 +836,31 @@ export const Emergency = {
         <h3>${esc(T("Settings"))}</h3>
         <div class="two">${field(T("Months to cover (3 if your job is stable, 6 if less certain)"), select("months", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], s.EmergencyMonths))}
         ${field(T("Extra safety buffer (%)"), numInput("buffer", plain(s.BufferPercent)))}</div></form>`)}
-    </div></details>`;
-    iconizeCards(el);
-    const form = el.querySelector("#em");
-    const apply = () => {
-      const v = values(form);
-      s.MonthlyEssentials = num(v.monthly) || 0; s.YearlyCosts = num(v.yearly) || 0;
-      s.EmergencyMonths = +v.months; s.BufferPercent = num(v.buffer) ?? 0;
-      save(); App.refresh();
+    </div>`;
+    const bindManage = root => {
+      const form = root.querySelector("#em");
+      const apply = () => {
+        const v = values(form);
+        s.MonthlyEssentials = num(v.monthly) || 0; s.YearlyCosts = num(v.yearly) || 0;
+        s.EmergencyMonths = +v.months; s.BufferPercent = num(v.buffer) ?? 0;
+        save(); App.refresh();
+      };
+      form.querySelectorAll("input,select").forEach(i => i.addEventListener("change", apply));
+      root.querySelector('[data-action="use-avg"]').onclick = () => {
+        const a = Calc.spending(d);
+        if (!a.monthsUsed) { root.querySelector("#avg-note").textContent = T("No expenses yet. Add them in the Outflows tab first."); return; }
+        s.MonthlyEssentials = Math.round(a.essential * 100) / 100; save(); App.refresh();
+        toast(T("Average of your essential costs in {0}.", a.label));
+      };
     };
-    form.querySelectorAll("input,select").forEach(i => i.addEventListener("change", apply));
+    el.querySelectorAll('[data-action="em-manage"]').forEach(b => b.onclick = () => {
+      const pp = popup("", { width: 1100, cls: "nw-win pm-win" }), orig = App.refresh;
+      const draw = () => { pp.el.innerHTML = `<div class="em-pop">${manageHtml()}</div>`; iconizeCards(pp.el); bindManage(pp.el); };
+      App.refresh = (...a) => { orig(...a); if (!pp.closed) draw(); };
+      const close = pp.close; pp.close = (...a) => { App.refresh = orig; close(...a); };
+      draw();
+    });
     el.querySelector('[data-action="em-opt"]')?.addEventListener("click", () => App.openOptimize());
-    el.querySelector('[data-action="use-avg"]').onclick = () => {
-      const a = Calc.spending(d);
-      if (!a.monthsUsed) { el.querySelector("#avg-note").textContent = T("No expenses yet. Add them in the Outflows tab first."); return; }
-      s.MonthlyEssentials = Math.round(a.essential * 100) / 100; save(); App.refresh();
-      toast(T("Average of your essential costs in {0}.", a.label));
-    };
   },
 };
 
