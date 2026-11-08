@@ -11,6 +11,7 @@ import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
 import { NEW_CAT } from "./ui.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, check, button, values, popup, confirmBox, alertBox, toast, pickFile, ICONS, headingTip } from "./ui.js";
 import { App, requirePro } from "./app.js";
+import { moves } from "./advice.js";
 import { Rates, BOND_CODES, BONDS_WEBSITE, SAVINGS_RANKING, DEPOSITS_RANKING } from "./rates.js";
 import { budgetBars, offerSalary, binCard, bindBin } from "./pages-main.js";
 import * as Csv from "./csv.js";
@@ -166,6 +167,7 @@ export async function openOptimize() {
     // Choose the type of a loan right here – the comparison appears at once
     p.el.querySelectorAll("[data-loan-kind]").forEach(s => { s.onclick = e => e.stopPropagation(); s.onchange = () => {
       const l = D().Loans.find(x => x.Id === s.dataset.loanKind); if (l) { l.Kind = s.value; save(); draw(); } }; });
+    p.el.querySelectorAll("[data-optscroll]").forEach(b => b.onclick = () => p.el.querySelector(".optimize-grid")?.scrollIntoView({ behavior: "smooth" }));
     p.el.querySelector('[data-action="refresh-rates"]').onclick = () => Rates.refresh(true);
     p.el.querySelectorAll("[data-compare]").forEach(b => b.onclick = async () => {
       const [list, i] = b.dataset.compare.split(":");
@@ -182,6 +184,35 @@ export async function openOptimize() {
   Rates.refresh(true);
 }
 const exampleAmount = () => { const s = Calc.portfolio(D()).safe; return s > 0 ? Math.round(s) : 10000; };
+
+
+/** Top of the Optimize window: the "Financial Optimization Center" (KPIs, top opportunity, categories, overview, projected impact). */
+function optHero(d, advice, gain) {
+  const hc = healthCheck(d), score = hc.length ? Math.round(hc.filter(x => x.state === "good").length / hc.length * 100) : 0;
+  const money = advice.filter(a => a.kind === "money" || a.kind === "tip"), quick = advice.filter(a => a.kind !== "warning");
+  const mv = moves(d)[0], p = Calc.portfolio(d), inc = Calc.totalIncome(d), avg = Calc.spending(d), spend = avg.essential + avg.nonEssential;
+  const debt = d.Loans.reduce((x, l) => x + (l.Remaining > 0 ? loanPlan(l).remainingNow : 0), 0), em = Calc.emergency(d.Settings);
+  const kp = (l, v, sub, icon, cls = "") => `<div class="nw-card opt-k"><span class="opt-ki">${si(IC[icon], 30)}</span><div><small>${esc(l)}</small><b class="${cls}">${v}</b><em>${esc(sub)}</em></div></div>`;
+  const top = mv ? { title: T("Move Savings to a Better Account"), text: T("Your money can work harder. Move your savings to an account with a higher interest rate and earn about {0} more per year with little effort.", pln(mv.gain)), gain: mv.gain, from: mv.h.Name, to: mv.o.Bank, amount: Calc.toPln(mv.h.Amount, mv.h.Currency, d.Settings), url: Rates.link(mv.o) }
+    : advice[0] ? { title: advice[0].title, text: advice[0].text, gain: advice[0].benefit || 0, route: advice[0].route } : null;
+  const chip = (icon, l, v, cls = "") => `<div class="opt-chip"><span>${si(IC[icon], 22)}</span><div><small>${esc(l)}</small><b class="${cls}">${esc(v)}</b></div></div>`;
+  const hero = top ? `<div class="nw-card opt-top"><div class="opt-tag"><span class="rp-si i-res">${si(IC.trophy, 22)}</span><b>${esc(T("Top Opportunity"))}</b><span class="em-pill">${esc(T("Priority #1"))}</span></div>
+    <h2>${esc(top.title)}</h2><p>${esc(top.text)}</p>
+    ${mv ? `<div class="opt-move"><div><small>${esc(T("Move"))}</small><b>${esc(pln(top.amount))}</b></div><span class="opt-arr">→</span><div><small>${esc(T("From"))}</small><b>${esc(top.from)}</b></div><div class="dv"><small>${esc(T("To"))}</small><b>${esc(top.to)}</b></div></div>` : ""}
+    <div class="opt-chips">${chip("trend", T("Additional Annual Profit"), top.gain > 0 ? "+" + pln(top.gain) : "–", "good")}${mv ? chip("shield", T("Risk"), T("Very Low")) + chip("cal", T("Time Required"), T("A few minutes")) + chip("check", T("Difficulty"), T("Easy")) : ""}
+      ${mv ? `<a class="sv-btn opt-go" href="${esc(top.url)}" target="_blank" rel="noopener">${esc(T("Open offer"))} →</a>` : top.route ? `<button class="sv-btn opt-go" data-route="${top.route}">${esc(T("Go to {0} →", T(TAB_NAMES[top.route] || "Overview")))}</button>` : ""}</div></div>` : "";
+  const cats = [["warning", T("Risks & warnings"), "warn"], ["safety", T("Safety net"), "shield"], ["money", T("Earn more"), "coins"], ["tip", T("Smart tips"), "bulb"], ["insight", T("Insights"), "bars"]]
+    .map(([k, name, icon]) => ({ k, name, icon, list: advice.filter(a => a.kind === k) })).filter(c => c.list.length);
+  const catRow = cats.length ? `<div class="opt-cats">${cats.map(c => { const sum = c.list.reduce((x, a) => x + (a.benefit || 0), 0); return `<div class="nw-card opt-cat"><div class="opt-ch"><span class="opt-ki sm">${si(IC[c.icon], 22)}</span><div><b>${esc(c.name)}</b><small>${esc(T("{0} opportunities", c.list.length))}</small></div></div><b class="opt-cv">${sum > 0 ? "+" + esc(pln(sum)) : "–"}</b><small>${esc(T("per year"))}</small><button class="sv-btn ghost" data-optscroll>${esc(T("View Opportunities"))}</button></div>`; }).join("")}</div>` : "";
+  const ov = (icon, l, v, sub) => `<div><span class="opt-oi">${si(IC[icon], 22)}</span><span><small>${esc(l)}</small><b>${v}</b><em>${esc(sub)}</em></span></div>`;
+  const quickSum = advice.filter(a => a.kind === "money").reduce((x, a) => x + (a.benefit || 0), 0), maxB = Math.max(1, gain);
+  const bar = (l, v) => `<div class="opt-b"><i style="height:${Math.max(4, v / maxB * 100)}%"></i><small>${esc(l)}</small><b>${esc(pln(v))}</b></div>`;
+  const low = `<div class="opt-low"><div class="nw-card opt-ov"><h3>${esc(T("Your Financial Overview"))}</h3><small>${esc(T("Key figures from your data"))}</small><div class="opt-ovr">${ov("wallet", T("Total Income"), esc(pln(inc)), T("per month"))}${ov("cart", T("Total Expenses"), esc(avg.monthsUsed ? pln(spend) : "–"), T("per month"))}${ov("pig", T("Total Savings"), esc(pln(p.total)), T("all accounts"))}${ov("bank", T("Total Debt"), esc(pln(debt)), T("{0} loan(s)", d.Loans.filter(l => l.Remaining > 0).length))}${ov("shield", T("Emergency Fund"), esc(pln(p.safe)), em.target > 0 ? T("Target: {0}", pln(em.target)) : "")}</div></div>
+    <div class="nw-card opt-imp"><h3>${esc(T("Projected Impact"))}</h3><small>${esc(T("Your potential financial improvement per year"))}</small><div class="opt-bars">${bar(T("Current"), 0)}${bar(T("Earn more"), quickSum)}${bar(T("All opportunities"), gain)}</div></div></div>`;
+  return `<div class="opt-hero"><div class="opt-hd"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T("Financial Optimization Center"))}</h2><p>${esc(T("Discover the highest-impact actions to improve your financial future."))}</p></div></div>
+    <div class="opt-kpis">${kp(T("Annual Improvement Potential"), esc(pln(gain)), T("Based on {0} opportunities", advice.length), "bars", "good")}${kp(T("Active Opportunities"), String(advice.length), T("Across all financial categories"), "bulb")}${kp(T("Quick Wins"), String(quick.length), T("Steps you can do today"), "bolt")}${kp(T("Optimization Score"), score + " / 100", score >= 80 ? T("Excellent! You're on the right track.") : T("Room to improve – see the steps below."), "gauge", "good")}</div>
+    ${hero}${catRow}${low}<h3 class="opt-more">${esc(T("All details"))}</h3></div>`;
+}
 
 const RISK_LABEL = { low: "Low risk", mid: "Medium risk", high: "High risk" };
 function optimizeHtml() {
@@ -211,7 +242,7 @@ function optimizeHtml() {
   const bonds = BOND_CODES.filter(c => Rates.bond(c) !== undefined).map(c => `<div class="bond"><b>${c}</b><span>${esc(T(BOND_NAMES[c]))}</span><b class="good">${rate(Rates.bond(c))}</b></div>`).join("") || "–";
 
   // No window title: the button that opens it already says "Optimize my finances", and each card has its own heading
-  return `<div class="grid optimize-grid">
+  return optHero(d, advice, gain) + `<div class="grid optimize-grid">
     ${(() => { const hc = healthCheck(d); if (!hc.length) return "";
       const good = hc.filter(x => x.state === "good").length;
       return card(headingTip(T("Financial health check"), T("Your numbers compared with common rules of thumb, e.g. the 50/30/20 rule: up to 50% of income for essentials, up to 30% for the rest, at least 20% saved.")) +
