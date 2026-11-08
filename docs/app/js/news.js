@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 92, date: "2026-11-08", items: {
+    en: ["✨ User menu redesigned (My Profile, Accounts, Categories, Language, Backup & Restore, Help, Sign Out). In the installed app, Sign Out closes MoneyCompass again."],
+    pl: ["✨ Nowe menu użytkownika. W zainstalowanej aplikacji „Sign Out” zamyka MoneyCompass."],
+    de: ["✨ Neues Benutzermenü. In der installierten App schließt „Sign Out“ MoneyCompass."],
+    fr: ["✨ Nouveau menu utilisateur. Dans l'application installée, « Sign Out » ferme MoneyCompass."] } },
   { build: 91, date: "2026-11-08", items: {
     en: ["✨ New installs get the new compass icon automatically, and apps installed earlier update their icon by themselves."],
     pl: ["✨ Nowa ikona instaluje się automatycznie; wcześniej zainstalowane aplikacje aktualizują ikonę same."],

@@ -173,13 +173,10 @@ function meMenu() {
   const menu = document.createElement("div"); menu.className = "tab-menu data-menu me-menu";
   const mi = d => `<span class="mi">${I(d)}</span>`;
   menu.innerHTML = `<button data-m="profile">${mi('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.400 3.600-7 8-7s8 2.600 8 7"/>')}${esc(T("My Profile"))}</button>
-    <button data-m="accounts">${mi('<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><circle cx="16.500" cy="15" r="1.200"/>')}${esc(T("Accounts"))}</button>
+    <button data-m="accounts">${mi('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M15 14h3"/>')}${esc(T("Accounts"))}</button>
     <button data-m="categories">${mi('<path d="M3 4h2l2.500 11h10l2-8H6.500"/><circle cx="9" cy="19.500" r="1.400"/><circle cx="17" cy="19.500" r="1.400"/>')}${esc(T("Categories"))}</button>
-    <button data-m="options">${mi('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.900 4.900l2.100 2.100M17 17l2.100 2.100M4.900 19.100L7 17M17 7l2.100-2.100"/>')}${esc(T("Preferences"))}</button>
-    <button data-m="language">${mi('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>')}${esc(T("Language"))}<span class="mi-arrow">›</span></button>
-    <hr>
-    <button data-m="subscription">${mi('<rect x="3" y="6" width="18" height="13" rx="2.500"/><path d="M3 10h18M7 15h4"/>')}${esc(T("Subscription"))}</button>
-    <button data-m="backup">${mi('<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 20h16"/>')}${esc(T("Backup & Restore"))}</button>
+    <button data-m="language">${mi('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>')}${esc(T("Language"))}</button>
+    <button data-m="backup">${mi('<path d="M7 18a4.500 4.500 0 0 1-.5-9A6 6 0 0 1 18 10a4 4 0 0 1 0 8z"/><path d="M12 16v-5M9.500 13.500L12 11l2.500 2.500"/>')}${esc(T("Backup & Restore"))}</button>
     <button data-m="help">${mi('<circle cx="12" cy="12" r="9"/><path d="M9.500 9.500a2.500 2.500 0 1 1 3.500 2.300c-.7.400-1 .9-1 1.700M12 17h.01"/>')}${esc(T("Help"))}</button>
     <hr>
     <button data-m="signout">${mi('<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M15 8l4 4-4 4M19 12H9"/>')}${esc(T("Sign Out"))}</button>`;
@@ -190,7 +187,7 @@ function meMenu() {
   const close = () => { shield.remove(); menu.remove(); };
   shield.onclick = close;
   document.addEventListener("keydown", function esc1(e) { if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc1); } });
-  const run = { profile: openProfile, subscription: openProfile, backup: openProfile, options: openOptions, help: openHelp, language: () => openLanguage(), accounts: () => App.go("portfolio"), categories: () => manageCategories(), signout: () => lock() };
+  const run = { profile: openProfile, subscription: openProfile, backup: openProfile, options: openOptions, help: openHelp, language: () => openLanguage(), accounts: () => App.go("portfolio"), categories: () => manageCategories(), signout: () => installed() ? closeApp() : lock() };
   menu.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { close(); run[b.dataset.m](); });
   menu.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { close(); setLanguage(b.dataset.lang); });
 }
