@@ -1088,3 +1088,23 @@ svg.oc { width: 100%; height: auto; display: block; margin-top: 4px; } .oc-ax { 
 .ln-tab { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; } .ln-tab > div { display: grid; grid-template-columns: 1.2fr 1.2fr .6fr auto; gap: 8px; align-items: center; padding: 9px 12px; font-size: 13px; } .ln-tab > div + div { border-top: 1px solid var(--border); }
 .ov-peak { position: relative; overflow: hidden; min-height: 190px; display: flex; align-items: flex-end; padding: 0 !important; border-radius: 18px; }
 .ov-peak svg { position: absolute; inset: 0; width: 100%; height: 100%; } .ov-peak p { position: relative; margin: 0; padding: 20px 22px; font-size: 18px; line-height: 1.35; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+
+/* Side menu like the mockup: bigger blue icons, Reports green; user menu */
+@media (min-width: 700px) {
+  :root[data-design] .tab { font-size: 15.5px; padding: 11px 14px; }
+  :root[data-design] .tab .ti svg { width: 24px; height: 24px; }
+  :root[data-design] .tab .ti { color: #9DB8E8; }
+  :root[data-design] .tab-reports .ti { color: #34D399; }
+  :root[data-design] .tab.active .ti { color: #fff; }
+  :root[data-design="emerald"] .tab.active { background: linear-gradient(135deg, #1FA878, #0F7A58); color: #fff; box-shadow: 0 6px 20px rgba(18,168,117,.35); }
+  :root[data-design] .tab-settings .ti { color: #9DB8E8; }
+}
+.side-card { flex-direction: row; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid var(--border); }
+.side-card .sc-ic { width: 38px; height: 38px; border-radius: 10px; background: rgba(52,211,153,.14); display: grid; place-items: center; flex: none; color: #34D399; }
+.side-card b { font-size: 13px; font-weight: 600; }
+.me-badge.pro { background: rgba(52,211,153,.16); color: #34D399; padding: 1px 10px; font-weight: 600; font-size: 11.5px; }
+.me-menu { width: 250px; padding: 8px !important; border-radius: 16px !important; }
+.me-menu button { display: flex !important; align-items: center; gap: 14px; padding: 11px 12px !important; font-weight: 600; font-size: 15px; color: var(--ink); }
+.me-menu .mi { display: inline-flex; width: 22px; color: #B7C7E6; } .me-menu .mi svg { width: 20px; height: 20px; }
+.me-menu .mi-arrow { margin-left: auto; color: var(--muted); font-size: 18px; }
+.me-menu hr { border: 0; border-top: 1px solid var(--border); margin: 6px 4px; }

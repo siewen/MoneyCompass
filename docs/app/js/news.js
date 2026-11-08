@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 88, date: "2026-11-08", items: {
+    en: ["✨ New side menu (bigger icons, Savings Goals, private-data note) and a new user menu: My Profile, Accounts, Categories, Preferences, Language, Subscription, Backup & Restore, Help, Sign Out."],
+    pl: ["✨ Nowe menu boczne i nowe menu użytkownika."],
+    de: ["✨ Neues Seitenmenü und neues Benutzermenü."],
+    fr: ["✨ Nouveau menu latéral et nouveau menu utilisateur."] } },
   { build: 87, date: "2026-11-08", items: {
     en: ["✨ Overview redesigned to match the new design: new compass logo, icon cards with the change against the previous month, bar and trend charts, category and savings donuts, Budget Plan, Emergency Fund, Loans and Goals cards, plus Add Transaction and a notification bell."],
     pl: ["✨ Nowy wygląd Przeglądu: nowe logo, karty z ikonami, wykresy, Dodaj transakcję i dzwonek powiadomień."],

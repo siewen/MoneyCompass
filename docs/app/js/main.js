@@ -11,7 +11,7 @@ import { Rates } from "./rates.js";
 import { WEB_VERSION, WEB_BUILD, WEB_DATE } from "./version.js";
 import { openGuide, shouldShowGuide } from "./guide.js";
 import { hasNews, openNews } from "./news.js";
-import { Overview, Income, Expenses, Emergency, Portfolio, bindBin, setSearch } from "./pages-main.js";
+import { Overview, Income, Expenses, Emergency, Portfolio, bindBin, setSearch, manageCategories } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
 import { Calendar } from "./calendar.js";
 import { promoReminder } from "./advice.js";
@@ -94,16 +94,15 @@ function buildShell() {
     <header class="top">
       <button class="side-toggle" data-act="side" title="${esc(T(side() === "pinned" ? "Fold the menu (it opens when you point at it)" : "Keep the menu open"))}">${side() === "pinned" ? "‹" : "›"}</button>
       <a class="brand" href="../index.html" title="MoneyCompass"><img src="brand.svg" alt=""><span class="bt"><span class="bn"><i>Money</i><b>Compass</b></span></span></a>
-      <nav class="tabs" id="tabs">${main.map(tabBtn).join("")}${foot.map(tabBtn).join("")}<button class="tab tab-settings" data-act="options" style="--accent:#9AA9A4"><span class="ti">${I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.100-1.500 1.700 1.700 0 0 0-1.800.3l-.1.1a2 2 0 1 1-2.800-2.800l.1-.1a1.700 1.700 0 0 0 .3-1.800 1.700 1.700 0 0 0-1.500-1H3a2 2 0 1 1 0-4h.1a1.700 1.700 0 0 0 1.500-1.100 1.700 1.700 0 0 0-.3-1.800l-.1-.1a2 2 0 1 1 2.800-2.800l.1.1a1.700 1.700 0 0 0 1.800.3H9a1.700 1.700 0 0 0 1-1.500V3a2 2 0 1 1 4 0v.1a1.700 1.700 0 0 0 1 1.500 1.700 1.700 0 0 0 1.800-.3l.1-.1a2 2 0 1 1 2.800 2.800l-.1.1a1.700 1.700 0 0 0-.3 1.800V9a1.700 1.700 0 0 0 1.500 1H21a2 2 0 1 1 0 4h-.1a1.700 1.700 0 0 0-1.500 1z"/>')}</span><span class="tl">${esc(T("Settings"))}</span></button><div class="side-card"><span class="sc-ic">${I('<path d="M12 21V9"/><path d="M12 9c0-3 2-5 5-5 0 3-2 5-5 5z"/><path d="M12 13c0-2.5-1.7-4-4.5-4 0 2.5 1.700 4 4.500 4z"/>')}</span><b>${esc(T("Small steps. Bigger tomorrows."))}</b><small>${esc(T("Every step you take today builds a brighter future."))}</small></div></nav>
+      <nav class="tabs" id="tabs">${main.map(t => tabBtn(t) + (t.route === "portfolio" && moduleOn("budget") ? `<button class="tab tab-goals" data-nav="budget" style="--accent:#9DB8E8"><span class="ti">${TAB_ICON.goals}</span><span class="tl">${esc(T("Savings Goals"))}</span></button>` : "")).join("")}${foot.map(tabBtn).join("")}<button class="tab tab-settings" data-act="options" style="--accent:#9AA9A4"><span class="ti">${I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.100-1.500 1.700 1.700 0 0 0-1.800.3l-.1.1a2 2 0 1 1-2.800-2.800l.1-.1a1.700 1.700 0 0 0 .3-1.800 1.700 1.700 0 0 0-1.500-1H3a2 2 0 1 1 0-4h.1a1.700 1.700 0 0 0 1.500-1.100 1.700 1.700 0 0 0-.3-1.800l-.1-.1a2 2 0 1 1 2.800-2.800l.1.1a1.700 1.700 0 0 0 1.800.3H9a1.700 1.700 0 0 0 1-1.500V3a2 2 0 1 1 4 0v.1a1.700 1.700 0 0 0 1 1.500 1.700 1.700 0 0 0 1.800-.3l.1-.1a2 2 0 1 1 2.800 2.800l-.1.1a1.700 1.700 0 0 0-.3 1.800V9a1.700 1.700 0 0 0 1.500 1H21a2 2 0 1 1 0 4h-.1a1.700 1.700 0 0 0-1.500 1z"/>')}</span><span class="tl">${esc(T("Settings"))}</span></button><div class="side-card"><span class="sc-ic">${I('<rect x="5" y="11" width="14" height="10" rx="2.500"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/><circle cx="12" cy="16" r="1.300"/>')}</span><b>${esc(T("Your data is private and always secure"))}</b></div></nav>
     </header>
     <div class="topbar">
       <label class="tb-search"><span aria-hidden="true">🔍</span><input type="search" id="tb-search" placeholder="${esc(T("Search transactions, categories, goals…"))}" autocomplete="off"></label>
       <button class="tb-btn" data-act="import" title="${esc(T("Import a bank statement (CSV) – current or savings account. You can also drop the file onto the app."))}"><span aria-hidden="true">⬆</span><span class="tb-l">${esc(T("Import"))}${license.isPro ? "" : " 🔒"}</span></button>
       <button class="tb-btn" data-act="export" title="${esc(T("Export"))}"><span aria-hidden="true">⬇</span><span class="tb-l">${esc(T("Export"))}</span></button>
-      <button class="tb-add" data-act="add" title="${esc(T("Add an expense"))}"><span aria-hidden="true">＋</span><span class="tb-l">${esc(T("Add Transaction"))}</span></button>
       <button class="tb-bell" data-act="bell" title="${esc(T("Notifications"))}" aria-label="${esc(T("Notifications"))}">${I('<path d="M6 16V11a6 6 0 0 1 12 0v5l1.500 2h-15z"/><path d="M10 21h4"/>')}<span class="bell-n" id="bell-n" hidden></span></button>
       <button class="me-row profile-btn" data-act="me" title="${esc(T("Profile: {0}", currentName()))}">${avatar(36)}
-        <span class="me-text"><b>${esc(currentName())}</b><small class="me-badge ${license.isPro ? "pro" : "demo"}">${esc(license.isPro ? T("Pro plan") : T("Demo"))}</small></span>
+        <span class="me-text"><b>${esc(currentName())}</b><small class="me-badge ${license.isPro ? "pro" : "demo"}">${esc(license.isPro ? T("Pro Plan") : T("Demo"))}</small></span>
         <span class="me-more" aria-hidden="true">⌄</span></button>
     </div>
     ${license.isPro ? "" : `<div class="free-bar">${esc(T("Free web version."))} <a href="${DOWNLOAD_URL}" target="_blank" rel="noopener">${esc(T("Download the Windows app"))}</a> · <a href="#" data-act="profile">${esc(T("Enter license key"))}</a></div>`}
@@ -123,6 +122,7 @@ function buildShell() {
   });
   const acts = { import: () => openImportCenter(), options: () => openOptions(), add: addTransaction, bell: bellMenu, delete: openDelete, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide, me: meMenu };
   document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
+  document.querySelectorAll("[data-nav]").forEach(b => b.onclick = () => App.go(b.dataset.nav));
   const sb = document.getElementById("tb-search");
   if (sb) sb.onkeydown = e => { if (e.key !== "Enter" || !sb.value.trim()) return; setSearch(sb.value.trim()); if (current === "expenses") App.refresh(); else App.go("expenses"); sb.blur(); };
   updateBell();
@@ -171,14 +171,18 @@ function meMenu() {
   const btn = document.querySelector(".me-row"), r = btn.getBoundingClientRect();
   const shield = document.createElement("div"); shield.className = "help-shield me-shield";
   const menu = document.createElement("div"); menu.className = "tab-menu data-menu me-menu";
-  menu.innerHTML = `<button data-m="profile"><span class="mi">👤</span>${esc(T("Profile & license"))}</button>
-    <button data-m="options"><span class="mi">⚙</span>${esc(T("Settings"))}</button>
-    <hr><button data-m="help"><span class="mi">❓</span>${esc(T("Help"))}</button>
-    <button data-m="guide"><span class="mi">🧭</span>${esc(T("Guide"))}</button>
-    <button data-m="about"><span class="mi">ℹ</span>${esc(T("About"))}</button>
-    ${installed() ? "" : `<button data-m="install"><span class="mi">📲</span>${esc(T("Install app"))}</button>`}
-    <div class="me-lang"><span class="mi">🌐</span>${LANGS.map(([c]) => `<button class="chip${c === lang() ? " on" : ""}" data-lang="${c}">${c.toUpperCase()}</button>`).join("")}</div>
-    ${installed() ? `<hr><button data-m="exit" class="danger-item"><span class="mi">⏻</span>${esc(T("Close MoneyCompass"))}</button>` : ""}`;
+  const mi = d => `<span class="mi">${I(d)}</span>`;
+  menu.innerHTML = `<button data-m="profile">${mi('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.400 3.600-7 8-7s8 2.600 8 7"/>')}${esc(T("My Profile"))}</button>
+    <button data-m="accounts">${mi('<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><circle cx="16.500" cy="15" r="1.200"/>')}${esc(T("Accounts"))}</button>
+    <button data-m="categories">${mi('<path d="M3 4h2l2.500 11h10l2-8H6.500"/><circle cx="9" cy="19.500" r="1.400"/><circle cx="17" cy="19.500" r="1.400"/>')}${esc(T("Categories"))}</button>
+    <button data-m="options">${mi('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.900 4.900l2.100 2.100M17 17l2.100 2.100M4.900 19.100L7 17M17 7l2.100-2.100"/>')}${esc(T("Preferences"))}</button>
+    <button data-m="language">${mi('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>')}${esc(T("Language"))}<span class="mi-arrow">›</span></button>
+    <hr>
+    <button data-m="subscription">${mi('<rect x="3" y="6" width="18" height="13" rx="2.500"/><path d="M3 10h18M7 15h4"/>')}${esc(T("Subscription"))}</button>
+    <button data-m="backup">${mi('<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 20h16"/>')}${esc(T("Backup & Restore"))}</button>
+    <button data-m="help">${mi('<circle cx="12" cy="12" r="9"/><path d="M9.500 9.500a2.500 2.500 0 1 1 3.500 2.300c-.7.400-1 .9-1 1.700M12 17h.01"/>')}${esc(T("Help"))}</button>
+    <hr>
+    <button data-m="signout">${mi('<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M15 8l4 4-4 4M19 12H9"/>')}${esc(T("Sign Out"))}</button>`;
   document.body.append(shield, menu);
   const w = menu.offsetWidth, h = menu.offsetHeight, below = r.top < window.innerHeight / 2;
   menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + "px";
@@ -186,7 +190,7 @@ function meMenu() {
   const close = () => { shield.remove(); menu.remove(); };
   shield.onclick = close;
   document.addEventListener("keydown", function esc1(e) { if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc1); } });
-  const run = { profile: openProfile, options: openOptions, help: openHelp, guide: openGuide, about, install, exit: closeApp };
+  const run = { profile: openProfile, subscription: openProfile, backup: openProfile, options: openOptions, help: openHelp, language: () => openLanguage(), accounts: () => App.go("portfolio"), categories: () => manageCategories(), signout: () => lock() };
   menu.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { close(); run[b.dataset.m](); });
   menu.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { close(); setLanguage(b.dataset.lang); });
 }
