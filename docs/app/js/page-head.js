@@ -2,6 +2,9 @@
 import { esc } from "./ui.js";
 export const si = (d, n = 26) => `<svg class="nwi" width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 export const IC = {
+  bulb: '<path d="M12 2a7 7 0 00-4 12.700V17h8v-2.300A7 7 0 0012 2zM9 19h6v1.500a1.500 1.500 0 01-1.500 1.500h-3A1.500 1.500 0 019 20.500z" stroke="none"/>',
+  calc: '<path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm1 3v4h10V5zm1 6.500a1.200 1.200 0 100 2.400 1.200 1.200 0 000-2.400zm4 0a1.200 1.200 0 100 2.400 1.200 1.200 0 000-2.400zm4 0a1.200 1.200 0 100 2.400 1.200 1.200 0 000-2.400zM8 16a1.200 1.200 0 100 2.400A1.200 1.200 0 008 16zm4 0a1.200 1.200 0 100 2.400 1.200 1.200 0 000-2.400zm4 0a1.200 1.200 0 100 2.400 1.200 1.200 0 000-2.400z" stroke="none"/>',
+  table: '<path d="M3 4h18v16H3zm2 4v3h4V8zm6 0v3h8V8zm-6 5v3h4v-3zm6 0v3h8v-3z" fill-rule="evenodd" stroke="none"/>',
   trophy: '<path d="M7 3h10v5a5 5 0 01-10 0zM7 5H3v2a4 4 0 004 4zM17 5h4v2a4 4 0 01-4 4zM10.500 13h3v3h-3zM8 18h8v3H8z" stroke="none"/>',
   trend: '<path d="M3 18l6-6 4 4 7-9" fill="none" stroke="#2EDC9A" stroke-width="3"/><path d="M14 6h7v7z" stroke="none"/>', coins: '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.700 3 3 7 3s7-1.300 7-3V6M5 12v6c0 1.700 3 3 7 3s7-1.300 7-3v-6"/>',
   bank: '<path d="M12 2L2 8v2h20V8zM4 11h3v8H4zM10.500 11h3v8h-3zM17 11h3v8h-3zM2 20h20v2H2z" stroke="none"/>', up: '<circle cx="12" cy="12" r="9"/><path d="M12 17V8M8 11l4-4 4 4"/>', down: '<circle cx="12" cy="12" r="9"/><path d="M12 7v9M8 13l4 4 4-4"/>',
@@ -11,7 +14,7 @@ export const IC = {
 };
 export function pageHead({ icon, title, sub, btn = "", kpis = [] }) {
   return `<div class="pg-title"><span class="pg-ic">${si(IC[icon] || IC.bars, 34)}</span><div><h2>${esc(title)}</h2><p>${esc(sub)}</p></div>${btn}</div>
-    <div class="ov-kpis">${kpis.map(k => `<div class="kpi static"><span class="kpi-ic ${k.cls || "in"}">${si(IC[k.icon] || IC.bars)}</span><span class="kpi-t"><span class="kpi-l">${esc(k.l)}</span><b class="${k.vcls || ""}">${esc(k.v)}</b>${k.sub ? `<small class="kpi-sub">${esc(k.sub)}</small>` : ""}</span></div>`).join("")}</div>`;
+    <div class="ov-kpis">${kpis.map(k => `<div class="kpi static${k.hi ? " hi" : ""}"><span class="kpi-ic ${k.cls || "in"}">${si(IC[k.icon] || IC.bars)}</span><span class="kpi-t"><span class="kpi-l">${esc(k.l)}</span><b class="${k.vcls || ""}">${esc(k.v)}</b>${k.sub ? `<small class="kpi-sub">${esc(k.sub)}</small>` : ""}</span></div>`).join("")}</div>`;
 }
 /** A glowing band: title (with icon) and a row of label/value figures. */
 export function band(title, icon, figs, cls = "", extra = "") {
