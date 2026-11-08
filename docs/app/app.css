@@ -2102,3 +2102,6 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .adv-more{align-self:flex-start;background:none;border:0;color:var(--accent,#34d399);font-size:12px;cursor:pointer;padding:0}
 .opt-panel[data-optp="plan"] .optimize-grid{display:block !important;columns:1 !important;column-count:1 !important}
 .opt-panel[data-optp="plan"] .optimize-grid>*{width:100% !important;max-width:none !important;display:block;break-inside:avoid;margin:0 0 14px !important;box-sizing:border-box}
+.gl-i{margin-left:6px;vertical-align:middle}
+.gl-body{display:grid;gap:12px}.gl-r b{display:block;color:var(--accent,#34d399);font-size:13px;margin-bottom:2px}.gl-r p{margin:0;font-size:15px;line-height:1.5}
+.od-sl{font-size:12px;opacity:.7;margin-left:4px}
