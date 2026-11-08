@@ -522,26 +522,25 @@ export const Expenses = {
     const expHead = pageHead({ icon: "wallet", title: T("Expenses Management"), sub: T("Track spending, identify savings opportunities and improve your budget."),
       kpis: [{ l: T("Monthly Spending"), v: monthly ? pln(monthly) : "–", icon: "coins", cls: "in" }, { l: T("Average Daily Spending"), v: monthly ? pln(monthly / daysIn) : "–", icon: "cal", cls: "src" }, { l: T("Largest Category"), v: big0 ? categoryLabel(big0.category) : "–", icon: "pie", cls: "next", sub: big0 ? pln(big0.perMonth) : "" }, { l: T("Potential Savings"), v: avg.monthsUsed ? pln(avg.nonEssential * 0.2) : "–", icon: "pig", cls: "rate", sub: T("per month") }] });
     const expBand = band(T("Savings Opportunities"), "pig", [{ l: T("Not essential per month"), v: avg.monthsUsed ? pln(avg.nonEssential) : "–" }, { l: T("Spending 20% less there saves"), v: avg.monthsUsed ? pln(avg.nonEssential * 0.2) + "/" + T("month") : "–", big: true, cls: "good" }], "rp-trend2");
-    el.innerHTML = expHead + `<div class="grid">
-      ${otherCount >= 2 ? `<button class="tip" data-action="sort-other">🏷 ${esc(T("{0} outflows are in \"Other\" – sort them by shop in one go →", otherCount))}</button>` : ""}
-      ${card(heading(T("Monthly average")) + (avg.monthsUsed ? row(T("Essential"), pln(avg.essential)) + row(T("Not essential"), pln(avg.nonEssential)) + row(T("Total per month"), pln(avg.essential + avg.nonEssential)) +
+    const tipC = otherCount >= 2 ? `<button class="tip" data-action="sort-other">🏷 ${esc(T("{0} outflows are in \"Other\" – sort them by shop in one go →", otherCount))}</button>` : "";
+    const avgCard = card(heading(T("Monthly average")) + (avg.monthsUsed ? row(T("Essential"), pln(avg.essential)) + row(T("Not essential"), pln(avg.nonEssential)) + row(T("Total per month"), pln(avg.essential + avg.nonEssential)) +
           hint(basisText(d)) +
           (loans > 0 ? hint(T("Includes {0} per month of loan payments from the Loans & debts tab. Expenses in the \"Loan payments\" category are not counted, so nothing is counted twice.", pln(loans))) : "")
-        : hint(T("Add expenses to see your averages."))))}
-      ${card(heading(T("Outflows by category")) + hint(basisText(d)) + (cats.all.length
+        : hint(T("Add expenses to see your averages."))));
+    const catCard = card(heading(T("Outflows by category")) + hint(basisText(d)) + (cats.all.length
         ? (() => { // every category its own colour: the ring and the list show exactly the same
             const all = cats.all.map((c, n) => ({ key: c.category, color: COLORS.cats[n % COLORS.cats.length], label: categoryLabel(c.category), value: c.perMonth, text: pln(c.perMonth), share: ChartData.share(c.perMonth, cats.total) }));
             return `<div class="chart-row">${donut(all, pln(cats.total), T("per month"))}${legend(all)}</div>`; })() + hint(T("Click to see these expenses"))
-        : hint(T("Add expenses to see where your money goes."))))}
-      ${card(`<form id="expense-form">${heading(T("Add an expense"))}
+        : hint(T("Add expenses to see where your money goes."))));
+    const formCard = card(`<form id="expense-form">${heading(T("Add an expense"))}
         <div class="two">${field(T("Date"), dateInput("date", inputDate(today())))}${field(T("Amount (zł)"), numInput("amount", "", T("e.g. {0}", "120,50")))}</div>
         <div class="cat-row">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], cat0.Name))}
           ${button(T("Edit categories…"), "categories", "second small")}</div>
         ${field(T("Description (optional)"), textInput("description", "", T("e.g. {0}", "Biedronka")))}
         <div class="two">${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), ""))}<div class="hint">${esc(T("Repeating expenses appear automatically in the Calendar, also in the next months."))}</div></div>
         ${check("essential", T("Essential (must pay even in a crisis)"), cat0.Essential)}
-        <div class="buttons">${button(T("Add expense"), "add-expense", "main")}</div></form>`)}
-      ${card(heading(T("Outflow history")) + hint(T("Click an expense to switch it between essential and not essential. The pen changes date, category, amount and more.")) + filterBar +
+        <div class="buttons">${button(T("Add expense"), "add-expense", "main")}</div></form>`);
+    const histCard = card(heading(T("Outflow history")) + hint(T("Click an expense to switch it between essential and not essential. The pen changes date, category, amount and more.")) + filterBar +
         (months.length ? visible.map((m, i) => {
           // Folded by month: the newest month open, older ones closed (all open while you search or filter)
           const total = m.items.reduce((s, e) => s + e.Amount, 0), ess = m.items.filter(e => e.Essential).reduce((s, e) => s + e.Amount, 0);
@@ -549,11 +548,32 @@ export const Expenses = {
           return `<details class="rec-month hist-month" data-hm="${k}"${open ? " open" : ""}><summary><b>${esc(monthName(m.start))}</b>
             <span class="hint">${esc(T("{0} expenses", m.items.length))} · <b>${pln(total)}</b> · ${esc(T("essential {0}", pln(ess)))}</span></summary><div class="list">${m.items.map(expenseRow).join("")}</div></details>`;
         }).join("") + (!showAllMonths && older ? button(T("Show older expenses ({0})", older), "older", "second") : "")
-          : hint(filtering ? T("No expenses match this filter.") : T("No expenses yet."))), "wide")}
+          : hint(filtering ? T("No expenses match this filter.") : T("No expenses yet."))), "wide");
+    const tm = ChartData.trend(d).slice(-12), nxt = tm.length ? tm[tm.length - 1] : null;
+    const okE = `<span class="nw-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></span>`;
+    const trendCard = `<div class="nw-card ex-card"><div class="nw-ch"><h3>${esc(T("Monthly Spending Trend"))}</h3></div>${tm.length ? ovTrend(tm.map(m => ({ month: m.month, income: m.expenses, expenses: m.expenses }))) : ""}</div>`;
+    const fcCard = `<div class="nw-card ex-card"><div class="nw-ch"><h3>${esc(T("Expense Forecast"))}</h3></div><small class="ex-s">${esc(T("Predicted next month"))}:</small><b class="ex-big">${esc(monthly ? pln(monthly) : "–")}</b>${tm.length ? ovBars(tm.slice(-6).map(m => ({ month: m.month, income: m.expenses, expenses: 0 }))) : ""}</div>`;
+    const sorted0 = [...(cats.all || [])].sort((x, y) => y.perMonth - x.perMonth), insights = [
+      sorted0[0] ? T("{0} is your largest category: {1} per month", categoryLabel(sorted0[0].category), pln(sorted0[0].perMonth)) : null,
+      avg.monthsUsed ? T("Not essential spending: {0} per month", pln(avg.nonEssential)) : null,
+      avg.monthsUsed ? T("Potential savings opportunity: {0} per month", pln(avg.nonEssential * 0.2)) : null,
+      otherCount ? T("{0} outflows are not sorted into a category yet", otherCount) : null].filter(Boolean);
+    const insCard = `<div class="nw-card ex-card"><div class="nw-ch"><h3>${esc(T("AI Spending Insights"))}</h3></div><ul class="nw-ul">${insights.map(x => `<li>${okE}<span>${esc(x)}</span></li>`).join("") || `<li class="hint">${esc(T("Add expenses to see insights."))}</li>`}</ul><button class="btn main ex-opt" data-action="ex-optimize">${esc(T("Optimize My Budget"))}</button></div>`;
+    const reps0 = d.Expenses.filter(e => e.Repeat), seenR = new Set(), bills = reps0.filter(e => { const k = e.Description || e.Category; if (seenR.has(k)) return false; seenR.add(k); return true; }).slice(0, 4);
+    const billsCard = `<div class="nw-card ex-card"><div class="nw-ch"><h3>${esc(T("Repeating payments"))}</h3></div>${bills.map(e => `<div class="ex-li"><span>${esc(e.Description || T(e.Category))}</span><b>${esc(pln(e.Amount))}</b></div>`).join("") || `<p class="hint">${esc(T("Mark an expense with 🔁 to see it here."))}</p>`}</div>`;
+    const recent = [...d.Expenses].sort((x, y) => parseDate(y.Date) - parseDate(x.Date)).slice(0, 5);
+    const recentCard = `<div class="nw-card ex-card"><div class="nw-ch"><h3>${esc(T("Recent Expenses"))}</h3></div>${recent.map(e => `<div class="ex-li"><span>${esc(e.Description || T(e.Category))}</span><b>${esc(pln(e.Amount))}</b><small>${esc(fmtDate(e.Date))}</small></div>`).join("") || `<p class="hint">–</p>`}</div>`;
+    const previewCard = `<div class="nw-card ex-card ex-prev"><div class="nw-ch"><h3>${esc(T("Net Expense Preview"))}</h3></div><b class="ex-big">${esc(monthly ? pln(monthly) : "–")}</b><small class="ex-s">${esc(T("average per month"))}</small>${avg.monthsUsed ? `<div class="ex-imp"><b>${esc(T("Essential"))}: ${esc(pln(avg.essential))}</b><span class="cr-bar"><i style="width:${Math.min(100, Math.round(avg.essential / Math.max(1, monthly) * 100))}%;background:#34D399"></i></span></div>` : ""}</div>`;
+    el.innerHTML = expHead + `${tipC}<div class="ex-row1">${catCard}${trendCard}${fcCard}${insCard}</div>
+    <div class="ex-row2"><div class="ex-form">${formCard}</div>${previewCard}${billsCard}${recentCard}</div>
+    <div class="grid">
+      ${avgCard}
+      ${histCard}
       ${movedCard(d)}
       ${binCard(["expense"])}
     </div>` + expBand;
 
+    el.querySelector('[data-action="ex-optimize"]')?.addEventListener("click", () => App.openOptimize());
     const form = el.querySelector("#expense-form");
     form.category.onchange = () => { form.essential.checked = !!findCategory(form.category.value)?.Essential; };
     el.querySelector('[data-action="add-expense"]').onclick = () => {

@@ -7,7 +7,8 @@ import {
 import { NEW_CAT } from "./ui.js";
 import { esc, card, heading, hint, row, field, textInput, numInput, dateInput, select, button, values, confirmBox, toast } from "./ui.js";
 import { App } from "./app.js";
-import { pageHead, band } from "./page-head.js";
+import { pageHead, band, si, IC } from "./page-head.js";
+import { ovTrend } from "./ov-charts.js";
 import { binCard, infoBtn } from "./pages-main.js";
 import { toBin } from "./core.js";
 
@@ -225,8 +226,8 @@ export const Calendar = {
       const isToday = date.getTime() === today().getTime();
       const net = ev.reduce((s, e) => s + (e.type === "in" ? e.amount : -e.amount), 0), money = ev.some(e => e.type !== "info");
       cells += `<button class="cal-cell${isToday ? " today" : ""}${date < today() ? " past" : ""}${ev.length ? " has" : ""}${selectedDay === day ? " sel" : ""}" data-day="${day}">
-        <span class="cal-day">${day}</span>${ev.slice(0, 3).map(e => `<span class="cal-dot ${e.type}" title="${esc(e.name)}: ${esc(pln(e.amount))}"></span>`).join("")}
-        ${money ? `<span class="cal-net ${net >= 0 ? "good" : "bad"}">${net >= 0 ? "+" : "−"}${esc(short(Math.abs(net)))}</span>` : ""}</button>`;
+        <span class="cal-day">${day}</span>${ev.slice(0, 2).map(e => `<span class="cal-chip ${e.type}" title="${esc(e.name)}: ${esc(pln(e.amount))}"><b>${esc(e.name)}</b>${e.type === "info" ? "" : `<i>${e.type === "in" ? "+" : "−"}${esc(short(e.amount))}</i>`}</span>`).join("")}${ev.length > 2 ? `<span class="cal-more">+${ev.length - 2}</span>` : ""}
+        </button>`;
     }
     const dayList = selectedDay ? monthEvents.filter(e => e.date.getDate() === selectedDay) : [];
 
@@ -264,18 +265,15 @@ export const Calendar = {
     const calHead = pageHead({ icon: "cal", title: T("Financial Calendar"), sub: T("View upcoming income, expenses, subscriptions and cashflow forecasts in one place."),
       kpis: [{ l: T("Upcoming Income"), v: pln(inSum), icon: "up", cls: "in" }, { l: T("Upcoming Expenses"), v: pln(outSum), icon: "down", cls: "out" }, { l: T("Scheduled Savings Transfers"), v: pln(saveSum), icon: "pig", cls: "rate" }, { l: T("Expected Net Cashflow"), v: (netCf >= 0 ? "+" : "−") + pln(Math.abs(netCf)), icon: "bars", cls: "left", vcls: netCf < 0 ? "bad" : "" }] });
     const calBand = band(T("Cashflow Projection"), "trend", [{ l: T("Upcoming Income"), v: pln(inSum) }, { l: T("Upcoming Expenses"), v: pln(outSum) }, { l: T("Planned Savings"), v: pln(saveSum) }, { l: T("Expected Surplus"), v: pln(netCf), big: true, cls: netCf < 0 ? "bad" : "good" }], "rp-trend2");
-    el.innerHTML = calHead + `<div class="grid">
-      ${card(heading((range === 1 ? T("Forecast for the coming month") : T("Forecast for the next {0} months", range)), "📅") +
+    const forecastCard = card(heading((range === 1 ? T("Forecast for the coming month") : T("Forecast for the next {0} months", range)), "📅") +
         `<div class="chips">${RANGES.map(n => `<button class="chip${n === range ? " on" : ""}" data-range="${n}">${esc(monthsLabel(n))}</button>`).join("")}</div>` +
         row(T("Expected inflows"), `<span class="good">+${pln(inSum)}</span>`) + row(T("Expected outflows"), `<span class="bad">−${pln(outSum)}</span>`) +
         row(T("Transfers to savings"), `<span class="primary">${pln(saveSum)}</span>`) + row(T("Expected balance"), pln(inSum - outSum - saveSum), "big" + (inSum - outSum - saveSum < 0 ? " bad" : " good")) +
-        hint(T("From today to {0}. Includes your income sources, recurring payments and loan instalments.", fmtDate(end))))}
-      ${card(`<div class="cal-head"><button class="icon-btn" data-month="-1"${shown <= first ? ` disabled title="${esc(T("This is the first month of your data."))}"` : ""}>◀</button><h3>${esc(monthName(shown))}</h3>${shown.getTime() !== start.getTime() ? `<button class="chip" data-month="now">${esc(T("Today"))}</button>` : ""}<button class="icon-btn" data-month="1">▶</button></div>
+        hint(T("From today to {0}. Includes your income sources, recurring payments and loan instalments.", fmtDate(end))));
+    const calCard = card(`<div class="cal-head"><button class="icon-btn" data-month="-1"${shown <= first ? ` disabled title="${esc(T("This is the first month of your data."))}"` : ""}>◀</button><h3>${esc(monthName(shown))}</h3>${shown.getTime() !== start.getTime() ? `<button class="chip" data-month="now">${esc(T("Today"))}</button>` : ""}<button class="icon-btn" data-month="1">▶</button></div>
         <div class="cal-grid">${dayNames.map(n => `<div class="cal-dow">${esc(n)}</div>`).join("")}${cells}</div>
-        <div class="cal-legend"><span><i class="cal-dot in"></i>${esc(T("Inflows"))}</span><span><i class="cal-dot out"></i>${esc(T("Outflows"))}</span><span><i class="cal-dot save"></i>${esc(T("Savings"))}</span><span><i class="cal-dot info"></i>${esc(T("Promotion ends"))}</span></div>` +
-        hint(T("Before today: actual transactions (your entries and bank imports). From today: scheduled payments.")) +
-        (selectedDay ? `<h3>${esc(fmtDate(new Date(shown.getFullYear(), shown.getMonth(), selectedDay)))}</h3>` + (dayList.length ? `<div class="list">${dayList.map(evRow).join("")}</div>` : hint(T("Nothing on this day."))) : hint(T("Click a day to see its payments."))))}
-      ${card(heading(T("Regular payments")) + (deps.length ? `<h3 class="sub-h">🔁 ${esc(T("Standing orders to savings"))}</h3><div class="list">${deps.map(h => `
+        <div class="cal-legend"><span><i class="cal-dot in"></i>${esc(T("Inflows"))}</span><span><i class="cal-dot out"></i>${esc(T("Outflows"))}</span><span><i class="cal-dot save"></i>${esc(T("Savings"))}</span><span><i class="cal-dot info"></i>${esc(T("Promotion ends"))}</span></div>` );
+    const regCard = card(heading(T("Regular payments")) + (deps.length ? `<h3 class="sub-h">🔁 ${esc(T("Standing orders to savings"))}</h3><div class="list">${deps.map(h => `
         <div class="item clickable" data-go="portfolio"><span class="cal-dot save"></span><div><b>${esc(h.Name)}</b>
         <span class="hint">${esc(freqLabel(h.DepositFrequency || "Monthly"))} · ${esc(T("Transfer to savings"))}${h.DepositFrom ? " · " + esc(T("from {0}", h.DepositFrom)) : ""} · ${esc(T("next {0}", fmtDate(Calc.nextPayment({ Date: h.DepositDate, Frequency: h.DepositFrequency || "Monthly" }, today()) || h.DepositDate)))}</span></div>
         <b class="primary">${pln(h.Deposit)}</b></div>`).join("")}</div><hr>` : "") + (recs.length ? `<h3 class="sub-h">🔁 ${esc(T("Recurring income"))}</h3><div class="list">${recs.map(r => `
@@ -291,8 +289,8 @@ export const Calendar = {
         <button class="icon-btn danger" data-del-rec="${x.Id}">🗑</button></div>`)}` + hint(T("Use the switch to stop counting a payment without deleting it.")) : (reps.length || deps.length ? "" : hint(T("No regular payments yet. Add your rent, bills and subscriptions above.")))) +
         (sugg.length ? `<hr><h3>💡 ${esc(T("Suggestions from your expenses"))}</h3>${hint(T("These recur every month. Add them with one click."))}<div class="list">${sugg.map((x, i) => `
           <div class="item"><div><b>${esc(x.name)}</b><span class="hint">${esc(categoryLabel(x.category))} · ${esc(T("in {0} months", x.months))}</span></div><b>${pln(x.amount)}</b>
-          <button class="btn second small" data-sugg="${i}">＋ ${esc(T("Add"))}</button></div>`).join("")}</div>` : ""))}
-      ${card(`<form id="rec">${heading(r ? T("Edit: {0}", r.Name) : T("Add a regular payment"))}
+          <button class="btn second small" data-sugg="${i}">＋ ${esc(T("Add"))}</button></div>`).join("")}</div>` : ""));
+    const formCard = card(`<form id="rec">${heading(r ? T("Edit: {0}", r.Name) : T("Add a regular payment"))}
         ${hint(T("Rent, bills, subscriptions, insurance or a standing order to savings – anything that recurs. Payments added here are included in your expenses, budget and forecasts, unless the same payment is already in your expenses. Income is managed in the Inflows tab."))}
         ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", "Netflix, czynsz, PZU")))}
         <div class="two">${field(T("Type"), select("kind", KINDS.map(k => [k[0], T(k[1])]), f.Kind))}${field(T("Amount (zł)"), numInput("amount", plain(f.Amount)))}</div>
@@ -300,15 +298,25 @@ export const Calendar = {
         <div class="two">${field(T("Date of a payment (past or upcoming)"), dateInput("date", inputDate(parseDate(f.Date))))}
         ${field(T("Final payment (optional)"), `<input type="date" name="end" value="${f.EndDate ? inputDate(parseDate(f.EndDate)) : ""}">`)}</div>
         ${hint(T("For payments that end, such as a contract: enter the final payment date and it stops counting after that. You can also switch a payment off in the list below."))}
-        <div class="buttons">${button(r ? T("Save changes") : T("Add"), "save-rec", "main")}${r ? button(T("Cancel"), "cancel-rec") : ""}</div></form>`)}
-      ${card(heading(T("Month by month")) + `<div class="chips past-chips"><button class="chip${allPast ? "" : " on"}" data-past="0">🔁 ${esc(T("Recurring only"))}</button><button class="chip${allPast ? " on" : ""}" data-past="1">${esc(T("All transactions"))}</button></div>` +
+        <div class="buttons">${button(r ? T("Save changes") : T("Add"), "save-rec", "main")}${r ? button(T("Cancel"), "cancel-rec") : ""}</div></form>`);
+    const monthsCard = card(heading(T("Month by month")) + `<div class="chips past-chips"><button class="chip${allPast ? "" : " on"}" data-past="0">🔁 ${esc(T("Recurring only"))}</button><button class="chip${allPast ? " on" : ""}" data-past="1">${esc(T("All transactions"))}</button></div>` +
         hint(allPast ? T("Past months show every transaction from your entries and bank imports.") : T("Past months show recurring items only: expenses marked 🔁, salary, recurring income and transfers to savings. Mark an expense with 🔁 in the Outflows tab to include it.")) + pastMonths.map(m => `<details class="cal-month past" data-m="${mkey(m.ms)}"${folded.get(mkey(m.ms)) ? " open" : ""}><summary class="cal-month-head"><span class="m-name"><b>${esc(monthName(m.ms))}</b> <small class="hint">· ${esc(T("actual"))}</small></span>
         <span><span class="good">+${pln(m.inn)}</span> · <span class="bad">−${pln(m.out)}</span>${m.sav ? ` · <span class="primary">${pln(m.sav)}</span>` : ""} · <b class="${m.inn - m.out - m.sav >= 0 ? "good" : "bad"}">${pln(m.inn - m.out - m.sav)}</b></span></summary>
         <div class="list">${m.ev.map(evRow).join("") || hint(T("Nothing in this month."))}</div></details>`).join("") + months.map(m => `<details class="cal-month" data-m="${mkey(m.ms)}"${folded.get(mkey(m.ms)) ? " open" : ""}><summary class="cal-month-head"><span class="m-name"><b>${esc(monthName(m.ms))}</b></span>
         <span><span class="good">+${pln(m.inn)}</span> · <span class="bad">−${pln(m.out)}</span>${m.sav ? ` · <span class="primary">${pln(m.sav)}</span>` : ""} · <b class="${m.inn - m.out - m.sav >= 0 ? "good" : "bad"}">${pln(m.inn - m.out - m.sav)}</b></span></summary>
         <div class="list">${m.ev.map(evRow).join("") || hint(T("No payments scheduled for this period."))}</div></details>`).join("") +
         hint(T("Click a month to see its payments.")) +
-        row(T("Balance after {0}", monthsLabel(range)), pln(running), "big" + (running < 0 ? " bad" : " good")), "wide")}
+        row(T("Balance after {0}", monthsLabel(range)), pln(running), "big" + (running < 0 ? " bad" : " good")), "wide");
+    const evCard = `<div class="nw-card cal-ev"><div class="nw-ch"><span class="rp-si">${si(IC.cal, 22)}</span><h3>${esc(T("Event Details"))}</h3></div>${selectedDay ? `<h3 class="cal-evd">${esc(fmtDate(new Date(shown.getFullYear(), shown.getMonth(), selectedDay)))}</h3>` + (dayList.length ? `<div class="list">${dayList.map(evRow).join("")}</div>` : hint(T("Nothing on this day."))) : hint(T("Click a day to see its payments."))}${hint(T("Before today: actual transactions (your entries and bank imports). From today: scheduled payments."))}</div>`;
+    const trendMonths = months.map(m => ({ month: monthName(m.ms), income: m.inn, expenses: m.out }));
+    const chartCard = `<div class="nw-card cal-chart"><div class="nw-ch"><span class="rp-si">${si(IC.trend, 22)}</span><h3>${esc(T("Cashflow Forecast"))}</h3><span class="rp-leg"><i style="background:#35D399"></i>${esc(T("Income"))} <i style="background:#3B82F6"></i>${esc(T("Expenses"))}</span></div>
+      <div class="chips">${RANGES.map(n => `<button class="chip${n === range ? " on" : ""}" data-range="${n}">${esc(monthsLabel(n))}</button>`).join("")}</div>
+      <div class="cal-chart-body">${trendMonths.length ? ovTrend(trendMonths) : ""}<div class="cal-chart-side"><div><small>${esc(T("Expected Income"))}</small><b class="good">${esc(pln(inSum))}</b></div><div><small>${esc(T("Expected Expenses"))}</small><b>${esc(pln(outSum + saveSum))}</b></div><div><small>${esc(T("Net Cashflow"))}</small><b class="${netCf < 0 ? "bad" : "good"}">${esc((netCf >= 0 ? "+" : "−") + pln(Math.abs(netCf)))}</b></div></div></div></div>`;
+    el.innerHTML = calHead + `<div class="cal-top"><div class="cal-main">${calCard}</div><div class="cal-side">${evCard}</div></div>
+    <div class="cal-mid">${chartCard}<div class="cal-reg">${regCard}</div></div>
+    <div class="grid">
+      ${formCard}
+      ${monthsCard}
       ${binCard(["recurring"])}
     </div>` + calBand;
 
