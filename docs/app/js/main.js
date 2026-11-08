@@ -448,20 +448,7 @@ function finishClose(fileSaved) {
   }, 400);
 }
 
-function about() {
-  const p = popup(`<div class="about"><img src="../logo.svg" alt="" width="72"><h2>MoneyCompass</h2><p>${esc(T("Your personal money overview"))}</p>
-    <p><b>${esc(T("Version {0} (build {1})", WEB_VERSION, WEB_BUILD))}</b> · ${esc(T("Web version"))}</p>
-    <p><button class="btn second" data-news>✨ ${esc(T("What's new"))}</button></p>
-    <p class="hint">${esc(T("Last update: {0}", fmtDate(WEB_DATE) + " " + WEB_DATE.slice(11, 16)))}</p>
-    <p class="hint">${esc(Rates.data.Updated ? T("Current rates from NBP and the Ministry of Finance, updated {0}.", fmtDate(Rates.data.Updated) + " " + new Date(Rates.data.Updated).toTimeString().slice(0, 5)) : T("Current rates have not been downloaded yet."))}</p>
-    <p class="hint">${esc(license.status)}</p>
-    <p class="hint">${esc(T("© {0} MoneyCompass. All rights reserved.", new Date().getFullYear()))}</p>
-    <p class="hint"><a href="../terms.html#${lang()}" target="_blank" rel="noopener">${esc(T("Terms of use"))}</a> · <a href="../privacy.html#${lang()}" target="_blank" rel="noopener">${esc(T("Privacy policy"))}</a></p>
-    ${installed() ? `<p class="hint good">✔ ${esc(T("Installed as an app on this device."))}</p>` : `<button class="btn go" data-install>📲 ${esc(T("Install app"))}</button>`}</div>
-    <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`, { width: 420 });
-  p.el.querySelector("[data-news]").onclick = e => { e.preventDefault(); p.close(); openNews(true); };
-  const ib = p.el.querySelector("[data-install]"); if (ib) ib.onclick = () => { p.close(); install(); };
-}
+function about() { import("./about-help.js").then(x => x.openAbout({ install, installed })); }
 
 function render() {
   const page = tabs().find(t => t.route === current) || Overview;

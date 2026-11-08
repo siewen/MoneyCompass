@@ -11,6 +11,7 @@ import { fileProtected, setFilePassword, removeFilePassword, profileFileText, ba
 import { Rates } from "./rates.js";
 import { autoSupported, backupInfo, backupLine, chooseBackupFile, stopBackup, drawBackupBar } from "./backup.js";
 import { openBankImport } from "./pages-pro.js";
+import { ico } from "./nw.js";
 
 const D = () => State.data;
 const COLORS_AVATAR = ["#0F766E", "#1D4ED8", "#C2410C", "#7E22CE", "#BE123C", "#0E7490", "#4338CA", "#15803D"];
@@ -24,30 +25,46 @@ export function avatar(size = 36) {
 // ================================================================= Profile (name, picture, license, profiles)
 
 export function openProfile() {
-  const p = popup("", { width: 420, anchor: "top-right", cls: "profile-panel" });
+  const p = popup("", { width: 1000, cls: "profile-panel nw-win nw-prof" });
   const draw = () => {
-    const l = license.current;
-    const list = profiles();
-    p.el.innerHTML = `<div class="profile-head">${avatar(72)}<div><h2>${esc(currentName())}</h2>
-        ${l?.email ? `<div class="hint">${esc(l.email)}</div>` : ""}<div class="${license.isPro ? "good" : "hint"}"><b>${esc(license.isPro ? T("MoneyCompass Pro") : T("Free version"))}</b></div>
-        <div class="links"><a href="#" data-a="rename">${esc(T("Change name"))}</a> · <a href="#" data-a="pic">${esc(T("Change picture"))}</a>${picture() ? ` · <a href="#" data-a="nopic">${esc(T("Remove picture"))}</a>` : ""}</div></div></div>
-      <hr><h3>${license.isPro ? "✔" : "🔒"} ${esc(T("Activation"))}</h3>
-      ${license.isPro ? hint(license.status) + hint(T("Thank you! All features are unlocked.")) + button(esc(T("Remove license from this browser")), "remove-license", "second small")
-        : (l ? `<p class="bad">${esc(license.status)}</p>` : "") +
-          hint(T("Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules and unlimited exports (the free version has {0}).", 0)) +
-          field(T("License key"), `<textarea name="key" rows="3" placeholder="MC1-…" data-nofocus></textarea>`) + button(esc(T("Activate")), "activate", "main")}
-      <hr><h3>🔒 ${esc(T("PIN"))}</h3>
-      ${hint(hasPin() ? T("This profile is protected with a PIN.") : T("No PIN: anyone using this device can open this profile."))}
-      <div class="buttons">${button(esc(hasPin() ? T("Change or remove PIN…") : T("Set a PIN…") + (license.isPro ? "" : " 🔒")), "pin", "second small")}</div>
-      ${bioAvailable() ? (hasPin()
-        ? `<label class="check"><input type="checkbox" data-bio${bioOn() ? " checked" : ""}><span>👆 ${esc(T("Unlock with fingerprint or face on this device") + (license.isPro ? "" : " 🔒"))}</span></label>`
-        : hint("👆 " + T("Set a PIN to also unlock with fingerprint or face."))) : ""}
-      <hr><h3>${esc(T("Profiles"))}</h3>
-      <div class="list">${list.map(x => `<div class="item${x.current ? " current" : " clickable"}" data-switch="${x.id}"><div><b>${esc(x.name)}</b>${x.current ? `<span class="hint">${esc(T("in use"))}</span>` : ""}</div>
-        ${x.current ? "" : `<button class="icon-btn danger" data-del-profile="${x.id}">🗑</button>`}</div>`).join("")}</div>
-      <div class="buttons">${button("＋ " + esc(T("New profile")), "new-profile", "second")}${button(esc(T("Save profile") + (license.isPro ? "" : " 🔒")), "save-file", "second")}${button(esc(T("Load a profile…")), "load-file", "second")}</div>
-      ${hint("🛡️ " + backupLine())}
-      <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
+    const l = license.current, pro = license.isPro;
+    const list = profiles(), bk = backupInfo(), bkOn = bk.status === "on";
+    const ok = `<span class="nw-ok">${ico("check")}</span>`;
+    const tile = (i, a, b) => `<div class="nw-tile">${ico(i, "big")}<small>${esc(a)}</small><b>${esc(b)}</b></div>`;
+    const bio = bioAvailable();
+    p.el.innerHTML = `<div class="nw-hd"><span class="nw-hi">${ico("shield")}</span><h2>${esc(T("Profile & Security"))}</h2><button class="nw-x" data-close aria-label="Close">✕</button></div>
+      <div class="nw-ph"><div class="nw-av">${avatar(96)}</div><div class="nw-pn"><h2>${esc(currentName())}</h2>${l?.email ? `<div class="hint">${esc(l.email)}</div>` : ""}
+        ${pro ? `<div class="nw-ver">${ok} ${esc(T("Verified Account"))}</div>` : ""}
+        <div class="nw-pa"><a href="#" class="nw-pill" data-a="pic">${ico("cam")}${esc(T("Change picture"))}</a><a href="#" class="nw-pill" data-a="rename">${ico("pen")}${esc(T("Change name"))}</a>${picture() ? `<a href="#" class="nw-pill" data-a="nopic">${esc(T("Remove picture"))}</a>` : ""}</div></div>
+        <div class="nw-tiles">${tile(pro ? "gem" : "user", T("Plan"), pro ? "MoneyCompass Pro" : T("Free version"))}${tile("shield", T("Security"), hasPin() ? T("Protected") : T("No PIN"))}${tile("user", T("Profiles"), T("{0} Active", list.length))}${tile("cloud", T("Backup"), bkOn ? T("Enabled") : T("Off"))}</div></div>
+      <div class="nw-g2 p">
+        <div class="nw-card"><div class="nw-ch">${ico("crown", "gold")}<h3>MoneyCompass ${pro ? "Pro" : ""}</h3></div>
+          ${pro ? `<div class="nw-pro">${ico("gem", "gem")}<div><p><span>${esc(T("Status"))}</span><em class="nw-tag">${esc(T("Active"))}</em></p><p><span>${esc(T("Licensed to"))}</span><b>${esc(l?.name || currentName())}</b></p><p>${ok} ${esc(T("Thank you! All features are unlocked."))}</p></div></div>
+            <p class="hint">${esc(license.status)}</p>${button(esc(T("Remove license from this browser")), "remove-license", "nw-wide second small")}`
+          : `${l ? `<p class="bad">${esc(license.status)}</p>` : ""}${hint(T("Pro unlocks: Optimize my finances with current rates, Compare offers, Import bank statement, own categories with icons, the Modules and unlimited exports (the free version has {0}).", 0))}
+            ${field(T("License key"), `<textarea name="key" rows="2" placeholder="MC1-…" data-nofocus></textarea>`)}${button(ico("crown") + esc(T("Activate")), "activate", "nw-wide main")}`}</div>
+        <div class="nw-card"><div class="nw-ch">${ico("shield", "cy")}<h3>${esc(T("Security Center"))}</h3></div>
+          <p class="nw-sr">${ico("lock")}<span>${esc(T("PIN"))}</span>${ok}<em>${esc(hasPin() ? T("Enabled") : T("Off"))}</em></p>
+          ${bio ? `<p class="nw-sr">${ico("finger")}<span>${esc(T("Fingerprint or face"))}</span><label class="nw-sw"><input type="checkbox" data-bio${bioOn() ? " checked" : ""}><i></i></label></p>` : ""}
+          <p class="nw-sr">${ico("clock")}<span>${esc(T("Last Sign-In"))}</span>${ok}<em>${esc(T("Today"))}</em></p>
+          <p class="nw-sr">${ico("shield")}<span>${esc(T("Security Status"))}</span>${ok}<em>${esc(hasPin() ? T("Protected") : T("No PIN"))}</em></p>
+          ${button(ico("shield") + esc(hasPin() ? T("Change or remove PIN…") : T("Set a PIN…") + (pro ? "" : " 🔒")), "pin", "nw-wide main")}</div>
+      </div>
+      <div class="nw-g3 q">
+        <div class="nw-card"><div class="nw-ch">${ico("user")}<h3>${esc(T("Profiles"))}</h3></div>
+          <div class="nw-pl">${list.map(x => `<div class="nw-pr${x.current ? " current" : ""}" data-switch="${x.id}"><span class="nw-mini">${esc(initials(x.name))}</span><div><b>${esc(x.name)}</b><small>${x.current ? esc(T("in use")) : ""}</small></div>${x.current ? `<span class="nw-tag">${esc(T("Active Profile"))}</span>` : `<button class="icon-btn danger" data-del-profile="${x.id}">🗑</button>`}</div>`).join("")}</div>
+          <div class="nw-bt">${button(ico("plus") + esc(T("New profile")), "new-profile", "nw-sm")}${button(ico("save") + esc(T("Save profile") + (pro ? "" : " 🔒")), "save-file", "nw-sm")}${button(ico("folder") + esc(T("Load a profile…")), "load-file", "nw-sm")}</div></div>
+        <div class="nw-card"><div class="nw-ch">${ico("cloud", "cy")}<h3>${esc(T("Automatic Backup"))}</h3></div>
+          <p class="hint">${esc(backupLine())}</p>
+          <p class="nw-sr s">${ico("check")}<span>${esc(T("Automatic Backup"))}</span><em>${esc(bkOn ? T("Enabled") : T("Off"))}</em></p>
+          ${bk.file ? `<p class="nw-sr s">${ico("doc")}<span>${esc(T("Backup File"))}</span><em class="f">${esc(bk.file)}</em></p>` : ""}
+          <div class="nw-bt">${button(ico("gear") + esc(T("Settings")), "to-settings", "nw-sm")}</div></div>
+        <div class="nw-card"><div class="nw-ch">${ico("bars", "cy")}<h3>${esc(T("Activity & Privacy"))}</h3></div>
+          <ul class="nw-ul s">${["Local data encryption enabled", "Biometric protection enabled", "Automatic backups enabled", "No personal data shared"].map(x => `<li>${ok}<span>${esc(T(x))}</span></li>`).join("")}</ul></div>
+      </div>
+      <div class="nw-foot">${ico("shield", "big")}<div><b>${esc(T("Account Health"))}</b><small>${esc(T("Your MoneyCompass data stays only on this device."))}</small></div>
+        <div class="nw-fs"><small>${esc(T("Security"))}</small><b>${esc(hasPin() ? T("Protected") : T("No PIN"))}</b></div><div class="nw-fs"><small>${esc(T("Backup"))}</small><b>${esc(bkOn ? T("Enabled") : T("Off"))}</b></div>
+        <button class="btn main" data-close>${esc(T("Close"))}</button></div>`;
     bind();
   };
   const bind = () => {
@@ -98,6 +115,7 @@ export function openProfile() {
       if (!n || !n.trim()) return;
       createProfile(n.trim()); p.close(); App.rebuild();
     });
+    on('[data-action="to-settings"]', () => { p.close(); openOptions(); });
     on('[data-action="save-file"]', saveProfileFile);
     on('[data-action="load-file"]', async () => { if (await loadProfileFile()) p.close(); });
   };
@@ -312,7 +330,8 @@ export function openImport() {
 
 // ================================================================= Help & About
 
-export function openHelp() {
+export function openHelp(guide = false) {
+  if (!guide) { import("./about-help.js").then(m => m.openHelpCenter()); return; }
   const tabs = [["Overview", "Your money at a glance: inflows, outflows, balance and savings rate, with diagrams. \"Optimize my finances\" gives your financial health check and a personal plan with concrete tips."],
     ["Inflows", "Add every source of income: salary, side jobs, bonuses – each with its own amount, frequency, currency and payday, and gross → net for a salary. Money received from bank imports is listed here too."],
     ["Outflows", "Enter what you spend or import a bank statement (one Import button, or drop the file). Mark expenses essential or not, set repeats (🔁), filter and search. Transfers to your own accounts are listed apart and not counted."],
