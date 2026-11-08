@@ -551,45 +551,78 @@ export const Expenses = {
             <span class="hint">${esc(T("{0} expenses", m.items.length))} · <b>${pln(total)}</b> · ${esc(T("essential {0}", pln(ess)))}</span></summary><div class="list">${m.items.map(expenseRow).join("")}</div></details>`;
         }).join("") + (!showAllMonths && older ? button(T("Show older expenses ({0})", older), "older", "second") : "")
           : hint(filtering ? T("No expenses match this filter.") : T("No expenses yet."))), "wide");
-    const tm = ChartData.trend(d).slice(-12), nxt = tm.length ? tm[tm.length - 1] : null;
+    // ---------- Expenses Intelligence (design mockup) ----------
     const okE = `<span class="nw-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></span>`;
-    const trendCard = `<div class="nw-card ex-card"><div class="nw-ch"><h3>${esc(T("Monthly Spending Trend"))}</h3></div>${tm.length ? ovTrend(tm.map(m => ({ month: m.month, income: m.expenses, expenses: m.expenses }))) : ""}</div>`;
-    const fcCard = `<div class="nw-card ex-card"><div class="nw-ch"><span class="rp-si i-res">${si(IC.trend, 24)}</span><h3>${esc(T("Expense Forecast"))}</h3></div><small class="ex-s">${esc(T("Predicted next month"))}:</small><b class="ex-big">${esc(monthly ? pln(monthly) : "–")}</b>${tm.length ? ovBars(tm.slice(-6).map(m => ({ month: m.month, income: m.expenses, expenses: 0 }))) : ""}</div>`;
-    const sorted0 = [...(cats.all || [])].sort((x, y) => y.perMonth - x.perMonth), insights = [
-      sorted0[0] ? T("{0} is your largest category: {1} per month", categoryLabel(sorted0[0].category), pln(sorted0[0].perMonth)) : null,
-      avg.monthsUsed ? T("Not essential spending: {0} per month", pln(avg.nonEssential)) : null,
-      avg.monthsUsed ? T("Potential savings opportunity: {0} per month", pln(avg.nonEssential * 0.2)) : null,
-      otherCount ? T("{0} outflows are not sorted into a category yet", otherCount) : null].filter(Boolean);
-    const insCard = `<div class="nw-card ex-card"><div class="nw-ch"><span class="rp-si i-bulb">${si(IC.bulb, 24)}</span><h3>${esc(T("AI Spending Insights"))}</h3></div><ul class="nw-ul">${insights.map(x => `<li>${okE}<span>${esc(x)}</span></li>`).join("") || `<li class="hint">${esc(T("Add expenses to see insights."))}</li>`}</ul><button class="btn main ex-opt" data-action="ex-optimize">${esc(T("Optimize My Budget"))}</button></div>`;
-    const reps0 = d.Expenses.filter(e => e.Repeat), seenR = new Set(), bills = reps0.filter(e => { const k = e.Description || e.Category; if (seenR.has(k)) return false; seenR.add(k); return true; }).slice(0, 4);
-    const billsCard = `<div class="nw-card ex-card"><div class="nw-ch"><span class="rp-si i-table">${si(IC.calx, 24)}</span><h3>${esc(T("Upcoming Bills"))}</h3></div>${bills.map(e => `<div class="ex-li"><span>${esc(e.Description || T(e.Category))}</span><b>${esc(pln(e.Amount))}</b><small>${esc(fmtDate(Calc.nextPayment({ Date: e.Date, Frequency: e.Repeat }, today()) || e.Date))}</small></div>`).join("") || `<p class="hint">${esc(T("Mark an expense with 🔁 to see it here."))}</p>`}</div>`;
-    const recent = [...d.Expenses].sort((x, y) => parseDate(y.Date) - parseDate(x.Date)).slice(0, 5);
-    const recentCard = `<div class="nw-card ex-card"><div class="nw-ch"><span class="rp-si i-res">${si(IC.res, 24)}</span><h3>${esc(T("Recent Expenses"))}</h3></div>${recent.map(e => `<div class="ex-li"><span>${esc(e.Description || T(e.Category))}</span><b>${esc(pln(e.Amount))}</b><small>${esc(fmtDate(e.Date))}</small></div>`).join("") || `<p class="hint">–</p>`}</div>`;
-    const previewCard = `<div class="nw-card ex-card ex-prev"><div class="nw-ch"><span class="rp-si i-res">${si(IC.calx, 24)}</span><h3>${esc(T("Net Expense Preview"))}</h3></div><b class="ex-big">${esc(monthly ? pln(monthly) : "–")}</b><small class="ex-s">${esc(T("average per month"))}</small>${avg.monthsUsed ? `<div class="ex-imp"><b>${esc(T("Essential"))}: ${esc(pln(avg.essential))}</b><span class="cr-bar"><i style="width:${Math.min(100, Math.round(avg.essential / Math.max(1, monthly) * 100))}%;background:#34D399"></i></span></div>` : ""}</div>`;
-    const topCats = [...(cats.all || [])].sort((x, y) => y.perMonth - x.perMonth).slice(0, 8);
-    const quickCard = `<div class="nw-card ex-card ex-quick"><div class="nw-ch"><h3>${esc(T("Expense Categories Quick Access"))}</h3></div><div class="ex-chips">${topCats.map(c => `<button class="ex-chip" data-quick="${esc(c.category)}">${esc(categoryLabel(c.category))}</button>`).join("") || `<p class="hint">–</p>`}</div></div>`;
-    el.innerHTML = expHead + `${tipC}<div class="ex-row1">${catCard}${trendCard}${fcCard}${insCard}</div>
-    <div class="ex-row2"><div class="ex-form">${formCard}</div>${previewCard}${billsCard}${recentCard}</div>
-    <div class="ex-row3">${quickCard}</div>
+    const sorted0 = [...(cats.all || [])].sort((x, y) => y.perMonth - x.perMonth), t0 = today(), dim = new Date(t0.getFullYear(), t0.getMonth() + 1, 0).getDate();
+    const monthSum = (off, catName) => { const m0 = monthStart(addMonths(t0, off)), m1 = addMonths(m0, 1); return d.Expenses.filter(e => { const dt = parseDate(e.Date); return dt >= m0 && dt < m1 && (!catName || e.Category === catName); }).reduce((a, e) => a + e.Amount, 0); };
+    const cum = off => { const m0 = monthStart(addMonths(t0, off)), n = new Date(m0.getFullYear(), m0.getMonth() + 1, 0).getDate(), arr = Array(n).fill(0); d.Expenses.forEach(e => { const dt = parseDate(e.Date); if (dt.getFullYear() === m0.getFullYear() && dt.getMonth() === m0.getMonth()) arr[dt.getDate() - 1] += e.Amount; }); let r = 0; return arr.map(v => (r += v)); };
+    const cur = cum(0).map((v, i) => i < t0.getDate() ? v : null), prev = cum(-1), prevAvg = [1, 2, 3].map(k => cum(-k)), avg3 = Array.from({ length: dim }, (_, i) => Math.round(prevAvg.reduce((a, x) => a + (x[Math.min(i, x.length - 1)] || 0), 0) / 3));
+    const dayL = Array.from({ length: dim }, (_, i) => [1, 7, 14, 21, 28].includes(i + 1) ? String(i + 1) : "");
+    const spentNow = monthSum(0), proj = spentNow > 0 ? spentNow / t0.getDate() * dim : monthly, budgetLim = d.Budgets.reduce((a, b) => a + (+b.MonthlyLimit || 0), 0);
+    const nonEss = avg.monthsUsed ? avg.nonEssential : 0, saveM = nonEss * 0.2;
+    const topNon = sorted0.filter(c => !findCategory(c.category)?.Essential).slice(0, 3);
+    const opps = topNon.length ? topNon.map(c => [T("Lower {0} spending", categoryLabel(c.category)), c.perMonth * 0.2]) : [[T("Add expenses to see opportunities"), 0]];
+    const optBand = `<div class="nw-card ei-opp"><span class="ei-bulb">${si(IC.bulb, 70)}</span><div class="ei-o1"><h3>${esc(T("Savings Opportunities"))}</h3><small>${esc(T("Potential Monthly Savings"))}</small><b class="good">${esc(pln(saveM))}</b></div>
+      <div class="ei-o2"><small>${esc(T("Potential Annual Savings"))}</small><b>${esc(pln(saveM * 12))}</b></div>
+      <div class="ei-o3"><h4>${esc(T("Top Opportunities"))}</h4>${opps.map(o => `<div class="ei-op">${okE}<span>${esc(o[0])}</span><b>+${esc(pln(o[1]))}/${esc(T("month"))}</b></div>`).join("")}</div>
+      <button class="sv-btn ei-ob" data-action="ex-optimize">${si(IC.trend, 18)} ${esc(T("Optimize My Budget"))}</button></div>`;
+    const expHead2 = pageHead({ icon: "wallet", title: T("Expenses Intelligence"), sub: T("Analyze spending habits, reduce unnecessary costs and improve monthly savings."),
+      kpis: [{ l: T("Monthly Spending"), v: monthly ? pln(monthly) : "–", icon: "wallet", cls: "in" }, { l: T("Average Daily Spending"), v: monthly ? pln(monthly / 30) : "–", icon: "cal", cls: "src" },
+        { l: T("Largest Category"), v: sorted0[0] ? categoryLabel(sorted0[0].category) : "–", sub: sorted0[0] ? pln(sorted0[0].perMonth) : "", icon: "star", cls: "left" }, { l: T("Savings Opportunity"), v: pln(saveM) + "/" + T("month"), vcls: "good", icon: "pig", cls: "rate" }] });
+    const bdAll = (cats.all || []).map((c, n) => ({ label: categoryLabel(c.category), value: c.perMonth, color: COLORS.cats[n % COLORS.cats.length], sh: ChartData.share(c.perMonth, cats.total) }));
+    const breakCard = dcard("pie", "res", T("Spending Breakdown"), bdAll.length ? `<div class="sv-ar ei-br">${donut(bdAll, pln(cats.total), T("/month"), 150)}<ul class="sv-al">${bdAll.slice(0, 7).map(x => `<li data-cat="${esc(x.label)}"><i style="background:${x.color}"></i><span>${esc(x.label)}</span><b>${esc(String(x.sh).includes("%") ? x.sh : x.sh + "%")}</b></li>`).join("")}</ul></div>` : `<p class="hint">${esc(T("Add expenses to see where your money goes."))}</p>`, { klass: "ei-break" });
+    const trendC = dcard("trend", "res", T("Monthly Spending Trend"), `<span class="sv-leg"><i style="background:#2EDC9A"></i>${esc(T("Current Month"))}<i style="background:#3B9BFF"></i>${esc(T("Previous Month"))}<i style="background:#F5A623"></i>${esc(T("3-Month Average"))}</span>` +
+      lineChart(dayL, [{ vals: avg3, color: "#F5A623", dash: true }, { vals: prev, color: "#3B9BFF" }, { vals: cur, color: "#2EDC9A", dots: false }], { w: 560, h: 190 }), { klass: "ei-trend" });
+    const fcLine = Array.from({ length: dim }, (_, i) => Math.round(proj * (i + 1) / dim));
+    const fcC = dcard("bars", "res", T("Expense Forecast"), `<div class="ei-fh"><div><small>${esc(T("Projected Month-End Spending"))}</small><b>${esc(pln(proj))}</b></div><div class="ei-fl"><small>${esc(T("Budget Limit"))}</small><b class="good">${budgetLim ? esc(pln(budgetLim)) : "–"}</b></div></div>` +
+      lineChart(Array(dim).fill(""), [{ vals: fcLine, color: "#2EDC9A", area: true }].concat(budgetLim ? [{ vals: Array(dim).fill(budgetLim), color: "#FFB020", dash: true }] : []), { w: 420, h: 150 }) + `<span class="sv-leg"><i style="background:#2EDC9A"></i>${esc(T("Trend Projection"))}</span>`, { klass: "ei-fc" });
+    const lastM = monthSum(-1), prevM = monthSum(-2), downUp = lastM && prevM ? (lastM < prevM ? T("Spending is trending downward.") : T("Spending is trending upward.")) : null;
+    const insights = [sorted0[0] ? T("Largest category remains stable.") : null, downUp, otherCount ? T("{0} transactions remain uncategorized.", otherCount) : null, budgetLim ? T("Budget remains within acceptable range.") : null, saveM > 0 ? T("Monthly savings opportunity identified.") : null].filter(Boolean);
+    const insC = dcard("sparkle", "res", T("AI Spending Insights"), `<ul class="nw-ul">${insights.map(x => `<li>${okE}<span>${esc(x)}</span></li>`).join("") || `<li class="hint">–</li>`}</ul>`, { klass: "ei-ins" });
+    const chg = c => { const a = monthSum(-1, c), b2 = monthSum(-2, c); if (!(b2 > 0)) return `<span class="ei-ch">–</span>`; const v = Math.round((a - b2) / b2 * 100); return `<span class="ei-ch ${v > 0 ? "up" : v < 0 ? "dn" : ""}">${v > 0 ? "↑ +" : v < 0 ? "↓ " : "↔ "}${v}%</span>`; };
+    const anaC = dcard("bars", "res", T("Category Analysis"), `<table class="sv-t ei-t"><thead><tr><th>${esc(T("Category"))}</th><th>${esc(T("Amount"))}</th><th>${esc(T("Change"))}</th></tr></thead><tbody>${sorted0.slice(0, 5).map(c => `<tr><td>${esc(categoryLabel(c.category))}</td><td><b>${esc(pln(c.perMonth))}</b></td><td>${chg(c.category)}</td></tr>`).join("") || `<tr><td colspan="3" class="hint">–</td></tr>`}</tbody></table>`, { klass: "ei-ana" });
+    const reps0 = d.Expenses.filter(e => e.Repeat), seenR = new Set(), bills = reps0.filter(e => { const k = e.Description || e.Category; if (seenR.has(k)) return false; seenR.add(k); return true; }).map(e => ({ e, due: Calc.nextPayment({ Date: e.Date, Frequency: e.Repeat }, today()) || e.Date })).sort((x, y) => parseDate(x.due) - parseDate(y.due)).slice(0, 4);
+    const billC = dcard("calx", "res", T("Upcoming Bills"), `<table class="sv-t ei-t"><thead><tr><th>${esc(T("Due Date"))}</th><th>${esc(T("Bill"))}</th><th>${esc(T("Amount"))}</th></tr></thead><tbody>${bills.map(x => `<tr><td>${esc(fmtDate(x.due))}</td><td>${esc(x.e.Description || T(x.e.Category))}</td><td><b>${esc(pln(x.e.Amount))}</b></td></tr>`).join("") || `<tr><td colspan="3" class="hint">${esc(T("Mark an expense with 🔁 to see it here."))}</td></tr>`}</tbody></table>`, { klass: "ei-bills" });
+    const recent = [...d.Expenses].sort((x, y) => parseDate(y.Date) - parseDate(x.Date)).slice(0, 3);
+    const recC = `<div class="nw-card dz ei-rec"><div class="nw-ch"><h3>${esc(T("Recent Expenses"))}</h3></div>${recent.map(e => `<div class="ei-rr"><span>${esc(categoryIcon(e.Category) || "🧾")}</span><small>${esc(fmtDate(e.Date))}</small><b>${esc(e.Description || T(e.Category))}</b><em>${esc(T(e.Category))}</em><b>${esc(pln(e.Amount))}</b></div>`).join("") || `<p class="hint">–</p>`}</div>`;
+    const topCats = sorted0.slice(0, 6);
+    const quickC = `<div class="nw-card dz ei-quick"><div class="ei-qa"><h3>${esc(T("Quick Category Access"))}</h3><div class="ex-chips">${topCats.map(c => `<button class="ex-chip" data-quick="${esc(c.category)}">${esc(categoryLabel(c.category))}</button>`).join("") || `<p class="hint">–</p>`}</div></div>
+      <div class="ei-ae"><h3>${esc(T("Add Expense"))}</h3><small>${esc(T("Date"))}</small>${dateInput("qdate", inputDate(today()))}<button class="sv-btn ei-add" data-action="ex-add">＋ ${esc(T("Add Expense"))}</button></div></div>`;
+    const over = d.Budgets.some(b => Calc.spentThisMonth(b.Category) > (+b.MonthlyLimit || Infinity)), share = monthly > 0 ? nonEss / monthly : 0;
+    const hs = Math.max(0, Math.min(100, Math.round(100 - share * 60 - Math.min(10, otherCount) - (over ? 10 : 0)))), unn = share < 0.25 ? T("Low") : share < 0.45 ? T("Medium") : T("High");
+    const healthC = `<div class="nw-card dz ei-health"><div class="nw-ch"><h3>${esc(T("Expense Health Score"))}</h3></div><div class="ei-hb">${ring(hs, String(hs), "/ 100", 110, "#22E39A")}<div class="ei-hl"><p>${okE}<span><small>${esc(T("Unnecessary Spending"))}</small><b class="good">${esc(unn)}</b></span></p><p>${okE}<span><small>${esc(T("Budget Compliance"))}</small><b class="good">${esc(over ? T("Over limit") : T("Healthy"))}</b></span></p><p>${okE}<span><small>${esc(T("Potential Additional Savings"))}</small><b class="good">${esc(pln(saveM))}/${esc(T("month"))}</b></span></p></div></div></div>`;
+    const msg = `<div class="nw-card ei-msg">${okE}<span>${esc(saveM > 0 ? T("Your spending remains under control and opportunities exist to improve monthly savings.") : T("Add your expenses to get personal savings opportunities."))}</span></div>`;
+    el.innerHTML = `<div class="ei-page">` + expHead2 + optBand + `<div class="ei-r1">${breakCard}${trendC}${fcC}</div><div class="ei-r2">${insC}${anaC}${billC}</div><div class="ei-r3">${recC}${quickC}${healthC}</div>${msg}</div>${tipC}
     <div class="grid">
       ${avgCard}
       ${histCard}
       ${movedCard(d)}
       ${binCard(["expense"])}
-    </div>` + expBand;
-
-    el.querySelector('[data-action="ex-add"]').onclick = () => { const f = el.querySelector("#expense-form"); f.scrollIntoView({ behavior: "smooth", block: "center" }); f.querySelector('[name="amount"]')?.focus(); };
-    el.querySelectorAll("[data-quick]").forEach(b => b.onclick = () => { const f = el.querySelector("#expense-form"), sel = f.querySelector('[name="category"]'); if (sel) { sel.value = b.dataset.quick; sel.dispatchEvent(new Event("change", { bubbles: true })); } f.scrollIntoView({ behavior: "smooth", block: "center" }); f.querySelector('[name="amount"]')?.focus(); });
-    el.querySelector('[data-action="ex-optimize"]')?.addEventListener("click", () => App.openOptimize());
-    const form = el.querySelector("#expense-form");
-    form.category.onchange = () => { form.essential.checked = !!findCategory(form.category.value)?.Essential; };
-    el.querySelector('[data-action="add-expense"]').onclick = () => {
-      const v = values(form), amt = num(v.amount);
-      if (!(amt > 0)) { toast(T("Please enter an amount bigger than 0."), "bad"); return; }
-      d.Expenses.push({ Id: uuid(), Date: isoDate(v.date ? parseDate(v.date) : today()), Description: v.description.trim(), Category: v.category, Amount: amt, Essential: v.essential, Repeat: v.repeat || "" });
-      save(); toast(T("Added: {0}, {1}.", T(v.category), pln(amt))); App.refresh();
+    </div>`;
+    const openAdd = (cat, date) => {
+      const cat1 = findCategory(cat) || cat0;
+      const pp = popup("", { width: 580, cls: "nw-win pm-win" });
+      pp.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC.plus, 24)}</span><h3>${esc(T("Add Expense"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
+        <form id="expense-form"><div class="two">${field(T("Date"), dateInput("date", date || inputDate(today())))}${field(T("Amount (zł)"), numInput("amount", "", T("e.g. {0}", "120,50")))}</div>
+        <div class="cat-row">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], cat1.Name))}${button(T("Edit categories…"), "categories", "second small")}</div>
+        ${field(T("Description (optional)"), textInput("description", "", T("e.g. {0}", "Biedronka")))}
+        <div class="two">${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), ""))}<div class="hint">${esc(T("Repeating expenses appear automatically in the Calendar, also in the next months."))}</div></div>
+        ${check("essential", T("Essential (must pay even in a crisis)"), !!cat1.Essential)}
+        <div class="buttons">${button(T("Add expense"), "add-expense", "main")}</div></form>`;
+      const f = pp.el.querySelector("#expense-form");
+      f.category.onchange = () => { f.essential.checked = !!findCategory(f.category.value)?.Essential; };
+      pp.el.querySelector('[data-action="categories"]').onclick = () => { pp.close(); manageCategories(); };
+      pp.el.querySelector('[data-action="add-expense"]').onclick = () => {
+        const v = values(f), amt = num(v.amount);
+        if (!(amt > 0)) { toast(T("Please enter an amount bigger than 0."), "bad"); return; }
+        d.Expenses.push({ Id: uuid(), Date: isoDate(v.date ? parseDate(v.date) : today()), Description: v.description.trim(), Category: v.category, Amount: amt, Essential: v.essential, Repeat: v.repeat || "" });
+        save(); toast(T("Added: {0}, {1}.", T(v.category), pln(amt))); pp.close(); App.refresh();
+      };
+      setTimeout(() => f.amount.focus(), 80);
     };
-    el.querySelector('[data-action="categories"]').onclick = () => manageCategories();
+    el.querySelector('[data-action="ex-add"]').onclick = () => openAdd(null, el.querySelector('[name="qdate"]')?.value);
+    el.querySelectorAll("[data-quick]").forEach(b => b.onclick = () => openAdd(b.dataset.quick, el.querySelector('[name="qdate"]')?.value));
+    el.querySelector('[data-action="ex-optimize"]')?.addEventListener("click", () => App.openOptimize());
     el.querySelector('[data-action="sort-other"]')?.addEventListener("click", () => sortOther(() => App.refresh()));
     const olderBtn = el.querySelector('[data-action="older"]');
     if (olderBtn) olderBtn.onclick = () => { showAllMonths = true; App.refresh(); };
