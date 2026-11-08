@@ -106,7 +106,7 @@ export const Savings = {
     const insCard = `<div class="nw-card cmp-ins"><div class="nw-ch"><span class="rp-si i-bulb">${si(IC.bulb, 24)}</span><h3>${esc(T("AI Offer Insights"))}</h3></div><ul class="nw-ul">${ins.map(x => `<li>${okIc}<span>${esc(x)}</span></li>`).join("")}</ul></div>`;
     const tableCard = `<div class="nw-card cmp-table"><div class="nw-ch"><span class="rp-si i-table">${si(IC.table, 24)}</span><h3>${esc(T("Comparison Table"))}</h3>${button("⟳ " + esc(T("Refresh rates")), "refresh-offers", "second small")}</div>
       <div class="cmp-ctl"><label>${esc(T("Amount to compare (zł)"))}${numInput("bank-amount", plain(A))}</label><label>${esc(T("Rate after the promotion, for all offers (% per year)"))}${numInput("bank-after", plain(after), "0")}</label></div>
-      <p class="hint">${esc(T("Bank offers last updated: {0}", checkedText))}</p><table><thead><tr><th>${esc(T("Bank"))}</th><th>${esc(T("Promotional Rate"))}</th><th>${esc(T("Effective Annual Yield"))}</th><th>${esc(T("Expected Profit"))}</th><th>${esc(T("Risk Rating"))}</th><th></th></tr></thead><tbody>${bankRows.slice(0, 8).map((x, i) => `<tr><td class="ct-bank">${i === 0 ? '<span class="ct-tr">🏆</span>' : `<span class="ct-dot">${esc((x.o.Bank || "?").trim().charAt(0).toUpperCase())}</span>`}<span>${esc(x.o.Bank)}${x.o.Name ? `<small class="ct-sub">${esc(x.o.Name)}</small>` : ""}</span></td><td>${esc(rate(x.o.Rate))}</td><td>${esc(rate(x.r.effective))}</td><td><b>${esc(pln(x.r.net))}</b></td><td><span class="ct-risk" title="${esc(T("Covered by the deposit guarantee scheme"))}">A</span></td><td class="ct-act"><button class="nw-pill" data-offer-detail="${i}">${esc(T("Details"))}</button> <a class="nw-pill" href="${esc(Rates.link(x.o))}" target="_blank" rel="noopener">${esc(T("Open offer"))}</a> <button class="nw-pill" data-bank="${i}">＋ ${esc(T("Compare"))}</button></td></tr>`).join("")}</tbody></table></div>`;
+      <p class="hint">${esc(T("Bank offers last updated: {0}", checkedText))}</p><table><thead><tr><th>${esc(T("Bank"))}</th><th>${esc(T("Promotional Rate"))}</th><th>${esc(T("Effective Annual Yield"))}</th><th>${esc(T("Expected Profit"))}</th><th>${esc(T("Risk Rating"))}</th><th></th></tr></thead><tbody>${bankRows.slice(0, 8).map((x, i) => `<tr><td class="ct-bank">${i === 0 ? '<span class="ct-tr">🏆</span>' : `<span class="ct-dot">${esc((x.o.Bank || "?").trim().charAt(0).toUpperCase())}</span>`}<span>${esc(x.o.Bank)}${x.o.Name ? `<small class="ct-sub">${esc(x.o.Name)}</small>` : ""}</span></td><td>${esc(rate(x.o.Rate))}</td><td>${esc(rate(x.r.effective))}</td><td><b>${esc(pln(x.r.net))}</b></td><td><span class="ct-risk" title="${esc(T("Covered by the deposit guarantee scheme"))}">A</span></td><td class="ct-act"><button class="nw-pill ct-details" data-offer-detail="${i}">${esc(T("Details"))} →</button> <button class="nw-pill" data-bank="${i}">＋ ${esc(T("Compare"))}</button></td></tr>`).join("")}</tbody></table></div>`;
     const bestCard = `<div class="nw-card cmp-best"><div class="nw-ch"><span class="rp-si">${si(IC.trend, 24)}</span><h3>${esc(T("Best Opportunity Summary"))}</h3></div><div class="cb-body"><div><small>${esc(T("Current Selection"))}:</small><b>${esc(bestBank ? bestBank.o.Bank : "–")}</b>
       <p><span>${esc(T("Expected Profit"))}:</span><em>${esc(pln(bestNet))}</em></p><p><span>${esc(T("Average Competitor"))}:</span><b>${esc(pln(avgNet))}</b></p></div><div class="cb-box"><small>${esc(T("Additional Earnings"))}:</small><b>${esc(pln(extra))}</b></div></div></div>`;
     el.innerHTML = topHead + `<div class="cmp-grid">${rankCard}${insCard}<div class="cmp-calc">${formCard}${savedCard}${resultCard}</div>${tableCard}${bestCard}</div>
@@ -146,52 +146,64 @@ export const Savings = {
       d.Offers.push(o); save(); toast(T("Saved \"{0}\" to the comparison.", o.Name)); App.refresh();
     });
 
-    // ---------- Offer details window: score, what we like / don't, similar accounts ----------
-    const refRate = Rates.data.ReferenceRate || 0, maxRate = Math.max(1, ...bankRows.map(x => x.o.Rate));
-    const scoreOf = x => {
-      const o = x.o, txt = (o.Details || "").toLowerCase(), cond = /now(e|ych|i)|new|konto osobiste|z kontem/.test(txt);
-      const sc = 40 * Math.min(1, o.Rate / maxRate) + 25 * (o.MaxAmount > 0 ? Math.min(1, fromPln(o.MaxAmount) / Math.max(1, A)) : 1) + 20 * Math.min(1, (o.Days || 365) / 365) + (cond ? 5 : 15);
-      return Math.round(sc);
-    };
-    const stars = sc => { const n = Math.round(sc / 20); return "★".repeat(n) + `<span class="od-off">${"★".repeat(5 - n)}</span>`; };
-    const prosCons = x => {
-      const o = x.o, txt = (o.Details || "").toLowerCase(), lim = o.MaxAmount > 0 ? fromPln(o.MaxAmount) : 0, like = [], dont = [];
-      if (refRate > 0) (o.Rate >= refRate ? like : dont).push(o.Rate >= refRate ? T("The rate ({0}) is above the NBP reference rate ({1}).", rate(o.Rate), rate(refRate)) : T("The rate ({0}) is below the NBP reference rate ({1}).", rate(o.Rate), rate(refRate)));
-      if (!lim) like.push(T("No limit on the amount."));
-      else if (lim >= A) like.push(T("The limit ({0}) covers your amount ({1}).", pln(lim), pln(A)));
-      else dont.push(T("The rate applies only up to {0} – your amount is {1}.", pln(lim), pln(A)));
-      if ((o.Days || 365) >= 365) like.push(T("The rate is paid for a full year.")); else dont.push(T("The rate is paid for {0} days only, then it usually drops – the ranking does not say to what.", o.Days));
-      if (/zmienn|wibor|variable/.test(txt)) dont.push(T("The rate is variable and can change."));
-      if (/now(e|ych|i)|new/.test(txt)) dont.push(T("Only for new money or new customers."));
-      if (/konto osobiste|z kontem|personal account/.test(txt)) dont.push(T("Needs a personal account at the bank."));
-      if (!/now(e|ych|i)|new|konto osobiste|z kontem/.test(txt)) like.push(T("No extra conditions are listed."));
-      like.push(T("Deposits are guaranteed by the BFG up to €100,000 per bank."));
-      return { like, dont };
-    };
-    const openDetail = idx => {
-      const pp = popup("", { width: 1180, cls: "nw-win pm-win od-win" });
-      const draw = i => {
-        const x = bankRows[i], sc = scoreOf(x), pc = prosCons(x), others = bankRows.map((y, k) => k).filter(k => k !== i).slice(0, 3);
-        pp.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC.bank, 24)}</span><h3>${esc(T("Offer details"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
-        <div class="od-grid"><aside><h4>${esc(T("Similar offers"))}</h4>${others.map(k => { const y = bankRows[k]; return `<div class="od-sim"><div class="od-logo">${esc((y.o.Bank || "?").trim().charAt(0).toUpperCase())}</div><div><b>${esc(y.o.Bank)}</b><small>${esc(y.o.Name || y.kind)}</small></div><div class="od-r"><b>${esc(rate(y.o.Rate))}</b><span class="od-st">${stars(scoreOf(y))}</span></div><button class="sv-btn ghost" data-od="${k}">${esc(T("Details"))} →</button></div>`; }).join("")}</aside>
-        <main><div class="od-h"><h2>${esc(x.o.Bank)}</h2><span class="od-sc"><b>${sc}</b> / 100</span><span class="od-st">${stars(sc)}</span></div>
-          <small class="od-name">${esc(x.o.Name || "")} · ${esc(x.kind)}</small>
-          <p class="hint">${esc(T("MoneyCompass score: 40 points for the rate, 25 for how well the amount limit covers your amount, 20 for how long the rate is paid, 15 if there are no extra conditions. Based on the listed data, not an editorial review."))}</p>
-          <div class="od-cols"><div><h3 class="od-l">✓ ${esc(T("What we like"))}</h3><ul>${pc.like.map(t => `<li>${esc(t)}</li>`).join("")}</ul></div><div><h3 class="od-d">✕ ${esc(T("What we don't"))}</h3><ul>${(pc.dont.length ? pc.dont : [T("Nothing negative found in the listed data.")]).map(t => `<li>${esc(t)}</li>`).join("")}</ul></div></div>
-          <div class="od-today"><div class="od-logo big">${esc((x.o.Bank || "?").trim().charAt(0).toUpperCase())}</div><div><small>${esc(T("Rate"))}</small><b>${esc(rate(x.o.Rate))}</b></div><div><small>${esc(T("Limit"))}</small><b>${esc(x.o.MaxAmount > 0 ? pln(fromPln(x.o.MaxAmount)) : T("no limit"))}</b></div><div><small>${esc(T("You keep (after tax)"))}</small><b class="good">${esc(pln(x.r.net))}</b></div><div class="od-btns"><a class="sv-btn" href="${esc(Rates.link(x.o))}" target="_blank" rel="noopener">${esc(T("View offer"))} →</a><button class="sv-btn ghost" data-od-add="${i}">＋ ${esc(T("Compare"))}</button></div></div>
-          ${x.o.Details ? `<p class="hint">${esc(x.o.Details)}</p>` : ""}</main></div>`;
-        pp.el.querySelectorAll("[data-od]").forEach(b => b.onclick = () => draw(+b.dataset.od));
-        pp.el.querySelector("[data-od-add]").onclick = () => { const y = bankRows[i]; d.Offers.push({ Id: uuid(), Name: y.o.Name ? `${y.o.Bank} – ${y.o.Name}` : y.o.Bank, ...y.offer }); save(); toast(T("Saved \"{0}\" to the comparison.", y.o.Bank)); pp.close(); App.refresh(); };
-      };
-      draw(idx);
-    };
-    el.querySelectorAll("[data-offer-detail]").forEach(b => b.onclick = ev => { ev.stopPropagation(); openDetail(+b.dataset.offerDetail); });
+    el.querySelectorAll("[data-offer-detail]").forEach(b => b.onclick = ev => { ev.stopPropagation(); offerDetailWindow(bankRows, A, +b.dataset.offerDetail); });
     el.querySelectorAll("[data-del-offer]").forEach(b => b.onclick = async () => {
       const o = d.Offers.find(y => y.Id === b.dataset.delOffer);
       if (await confirmBox(T("Delete?"), o.Name, T("Delete"), T("Cancel"), true)) { toBin("offer", o); d.Offers = d.Offers.filter(y => y !== o); save(); App.refresh(); }
     });
   },
 };
+
+/** Rows of today's best bank offers calculated for one amount (as in the Comparison Table). */
+export function bankRowsFor(A, period = 365, after = 0) {
+  return [...Rates.savings.map(o => ({ o, kind: T("Savings account") })), ...Rates.deposits.map(o => ({ o, kind: T("12-month deposit") }))].map(x => {
+    const offer = { Amount: A, PromoRate: x.o.Rate, PromoLimit: x.o.MaxAmount ? fromPln(x.o.MaxAmount) : 0, PromoDays: Math.min(Math.max(x.o.Days || 365, 1), period), StandardRate: after, PeriodDays: period, ApplyTax: true };
+    return { ...x, offer, r: Calc.savings(offer) };
+  }).sort((a, b) => b.r.net - a.r.net);
+}
+/** The offer details window: score, what we like / don't, similar offers. */
+export function offerDetailWindow(bankRows, A, idx) {
+  const d = D();
+    const refRate = Rates.data.ReferenceRate || 0, maxRate = Math.max(1, ...bankRows.map(x => x.o.Rate));
+  const scoreOf = x => {
+    const o = x.o, txt = (o.Details || "").toLowerCase(), cond = /now(e|ych|i)|new|konto osobiste|z kontem/.test(txt);
+    const sc = 40 * Math.min(1, o.Rate / maxRate) + 25 * (o.MaxAmount > 0 ? Math.min(1, fromPln(o.MaxAmount) / Math.max(1, A)) : 1) + 20 * Math.min(1, (o.Days || 365) / 365) + (cond ? 5 : 15);
+    return Math.round(sc);
+  };
+  const stars = sc => { const n = Math.round(sc / 20); return "★".repeat(n) + `<span class="od-off">${"★".repeat(5 - n)}</span>`; };
+  const prosCons = x => {
+    const o = x.o, txt = (o.Details || "").toLowerCase(), lim = o.MaxAmount > 0 ? fromPln(o.MaxAmount) : 0, like = [], dont = [];
+    if (refRate > 0) (o.Rate >= refRate ? like : dont).push(o.Rate >= refRate ? T("The rate ({0}) is above the NBP reference rate ({1}).", rate(o.Rate), rate(refRate)) : T("The rate ({0}) is below the NBP reference rate ({1}).", rate(o.Rate), rate(refRate)));
+    if (!lim) like.push(T("No limit on the amount."));
+    else if (lim >= A) like.push(T("The limit ({0}) covers your amount ({1}).", pln(lim), pln(A)));
+    else dont.push(T("The rate applies only up to {0} – your amount is {1}.", pln(lim), pln(A)));
+    if ((o.Days || 365) >= 365) like.push(T("The rate is paid for a full year.")); else dont.push(T("The rate is paid for {0} days only, then it usually drops – the ranking does not say to what.", o.Days));
+    if (/zmienn|wibor|variable/.test(txt)) dont.push(T("The rate is variable and can change."));
+    if (/now(e|ych|i)|new/.test(txt)) dont.push(T("Only for new money or new customers."));
+    if (/konto osobiste|z kontem|personal account/.test(txt)) dont.push(T("Needs a personal account at the bank."));
+    if (!/now(e|ych|i)|new|konto osobiste|z kontem/.test(txt)) like.push(T("No extra conditions are listed."));
+    like.push(T("Deposits are guaranteed by the BFG up to €100,000 per bank."));
+    return { like, dont };
+  };
+  const openDetail = idx => {
+    const pp = popup("", { width: 1180, cls: "nw-win pm-win od-win" });
+    const draw = i => {
+    const x = bankRows[i], sc = scoreOf(x), pc = prosCons(x), others = bankRows.map((y, k) => k).filter(k => k !== i).slice(0, 3);
+      pp.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC.bank, 24)}</span><h3>${esc(T("Offer details"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
+      <div class="od-grid"><aside><h4>${esc(T("Similar offers"))}</h4>${others.map(k => { const y = bankRows[k]; return `<div class="od-sim"><div class="od-logo">${esc((y.o.Bank || "?").trim().charAt(0).toUpperCase())}</div><div><b>${esc(y.o.Bank)}</b><small>${esc(y.o.Name || y.kind)}</small></div><div class="od-r"><b>${esc(rate(y.o.Rate))}</b><span class="od-st">${stars(scoreOf(y))}</span></div><button class="sv-btn ghost" data-od="${k}">${esc(T("Details"))} →</button></div>`; }).join("")}</aside>
+      <main><div class="od-h"><h2>${esc(x.o.Bank)}</h2><span class="od-sc"><b>${sc}</b> / 100</span><span class="od-st">${stars(sc)}</span></div>
+        <small class="od-name">${esc(x.o.Name || "")} · ${esc(x.kind)}</small>
+        <p class="hint">${esc(T("MoneyCompass score: 40 points for the rate, 25 for how well the amount limit covers your amount, 20 for how long the rate is paid, 15 if there are no extra conditions. Based on the listed data, not an editorial review."))}</p>
+        <div class="od-cols"><div><h3 class="od-l">✓ ${esc(T("What we like"))}</h3><ul>${pc.like.map(t => `<li>${esc(t)}</li>`).join("")}</ul></div><div><h3 class="od-d">✕ ${esc(T("What we don't"))}</h3><ul>${(pc.dont.length ? pc.dont : [T("Nothing negative found in the listed data.")]).map(t => `<li>${esc(t)}</li>`).join("")}</ul></div></div>
+        <div class="od-today"><div class="od-logo big">${esc((x.o.Bank || "?").trim().charAt(0).toUpperCase())}</div><div><small>${esc(T("Rate"))}</small><b>${esc(rate(x.o.Rate))}</b></div><div><small>${esc(T("Limit"))}</small><b>${esc(x.o.MaxAmount > 0 ? pln(fromPln(x.o.MaxAmount)) : T("no limit"))}</b></div><div><small>${esc(T("You keep (after tax)"))}</small><b class="good">${esc(pln(x.r.net))}</b></div><div class="od-btns"><a class="sv-btn" href="${esc(Rates.link(x.o))}" target="_blank" rel="noopener">${esc(T("View offer"))} →</a><button class="sv-btn ghost" data-od-add="${i}">＋ ${esc(T("Compare"))}</button></div></div>
+        ${x.o.Details ? `<p class="hint">${esc(x.o.Details)}</p>` : ""}</main></div>`;
+      pp.el.querySelectorAll("[data-od]").forEach(b => b.onclick = () => draw(+b.dataset.od));
+      pp.el.querySelector("[data-od-add]").onclick = () => { const y = bankRows[i]; d.Offers.push({ Id: uuid(), Name: y.o.Name ? `${y.o.Bank} – ${y.o.Name}` : y.o.Bank, ...y.offer }); save(); toast(T("Saved \"{0}\" to the comparison.", y.o.Bank)); pp.close(); App.refresh(); };
+    };
+    draw(idx);
+  };
+  openDetail(idx);
+}
 
 // ================================================================= Optimize my finances (pop-up)
 
@@ -215,6 +227,9 @@ export async function openOptimize() {
     p.el.querySelectorAll("[data-optscroll]").forEach(b => b.onclick = () => showTab("plan"));
     showTab(optTab);
     p.el.querySelector('[data-action="refresh-rates"]').onclick = () => Rates.refresh(true);
+    const openOd = o => { const A = exampleAmount(), rows = bankRowsFor(A), i = rows.findIndex(x => x.o === o); if (i >= 0) offerDetailWindow(rows, A, i); };
+    p.el.querySelectorAll("[data-od-offer]").forEach(b => b.onclick = () => { const [list, i] = b.dataset.odOffer.split(":"); openOd((list === "s" ? Rates.savings : Rates.deposits)[+i]); });
+    p.el.querySelectorAll("[data-od-top]").forEach(b => b.onclick = () => { const m = moves(D())[0]; if (m) openOd(m.o); });
     p.el.querySelectorAll("[data-compare]").forEach(b => b.onclick = async () => {
       const [list, i] = b.dataset.compare.split(":");
       const o = (list === "s" ? Rates.savings : Rates.deposits)[+i];
@@ -246,7 +261,7 @@ function optHero(d, advice, gain, parts) {
     <h2>${esc(top.title)}</h2><p>${esc(top.text)}</p>
     ${mv ? `<div class="opt-move"><div><small>${esc(T("Move"))}</small><b>${esc(pln(top.amount))}</b></div><span class="opt-arr">→</span><div><small>${esc(T("From"))}</small><b>${esc(top.from)}</b></div><div class="dv"><small>${esc(T("To"))}</small><b>${esc(top.to)}</b></div></div>` : ""}
     <div class="opt-chips">${chip("trend", T("Additional Annual Profit"), top.gain > 0 ? "+" + pln(top.gain) : "–", "good")}${mv ? chip("shield", T("Risk"), T("Very Low")) + chip("cal", T("Time Required"), T("A few minutes")) + chip("check", T("Difficulty"), T("Easy")) : ""}
-      ${mv ? `<a class="sv-btn opt-go" href="${esc(top.url)}" target="_blank" rel="noopener">${esc(T("Open offer"))} →</a>` : top.route ? `<button class="sv-btn opt-go" data-route="${top.route}">${esc(T("Go to {0} →", T(TAB_NAMES[top.route] || "Overview")))}</button>` : ""}</div></div>` : "";
+      ${mv ? `<button class="sv-btn opt-go" data-od-top="1">${esc(T("Details"))} →</button>` : top.route ? `<button class="sv-btn opt-go" data-route="${top.route}">${esc(T("Go to {0} →", T(TAB_NAMES[top.route] || "Overview")))}</button>` : ""}</div></div>` : "";
   const cats = [["warning", T("Risks & warnings"), "warn"], ["safety", T("Safety net"), "shield"], ["money", T("Earn more"), "coins"], ["tip", T("Smart tips"), "bulb"], ["insight", T("Insights"), "bars"]]
     .map(([k, name, icon]) => ({ k, name, icon, list: advice.filter(a => a.kind === k) })).filter(c => c.list.length);
   const catRow = cats.length ? `<div class="opt-cats">${cats.map(c => { const sum = c.list.reduce((x, a) => x + (a.benefit || 0), 0); return `<div class="nw-card opt-cat"><div class="opt-ch"><span class="opt-ki sm">${si(IC[c.icon], 22)}</span><div><b>${esc(c.name)}</b><small>${esc(T("{0} opportunities", c.list.length))}</small></div></div><b class="opt-cv">${sum > 0 ? "+" + esc(pln(sum)) : "–"}</b><small>${esc(T("per year"))}</small><button class="sv-btn ghost" data-optscroll>${esc(T("View Opportunities"))}</button></div>`; }).join("")}</div>` : "";
@@ -278,7 +293,7 @@ function optimizeHtml() {
     const net = inOffer * o.Rate / 100 * days / 365 * (1 - BELKA);
     return `<div class="offer"><div><b>${esc(o.Bank)}</b>${o.Name ? `<div>${esc(o.Name)}</div>` : ""}${o.Details ? `<span class="hint">${esc(o.Details)}</span>` : ""}
       <div class="good small">${esc(days >= 365 ? (key === "s" ? T("On {0}: about {1} a year after tax – a savings account, your money stays available.", pln(inOffer), pln(net)) : T("On {0}: about {1} after tax in a year.", pln(inOffer), pln(net))) : T("On {0}: about {1} after tax in {2} days.", pln(inOffer), pln(net), days))}</div></div>
-      <div class="offer-right"><b class="rate">${rate(o.Rate)}</b><a class="btn second small" href="${esc(Rates.link(o))}" target="_blank" rel="noopener">${esc(T("Open offer"))}</a>
+      <div class="offer-right"><b class="rate">${rate(o.Rate)}</b><button class="nw-pill ct-details" data-od-offer="${key}:${i}">${esc(T("Details"))} →</button>
       <button class="btn second small" data-compare="${key}:${i}">＋ ${esc(T("Compare"))}</button></div></div>`;
   }).join("<hr>");
   const offersStatus = T("Top rates from the {0} rankings, checked {1}. Conditions apply – always check the bank's own terms.", "rankomat.pl", fmtDate(String(Rates.checked).slice(0, 10)));
