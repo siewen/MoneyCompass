@@ -110,7 +110,7 @@ export const Savings = {
       <p class="hint">${esc(T("Bank offers last updated: {0}", checkedText))}</p><table><thead><tr><th>${esc(T("Bank"))}</th><th>${esc(T("Promotional Rate"))}</th><th>${esc(T("Effective Annual Yield"))}</th><th>${esc(T("Expected Profit"))}</th><th>${esc(T("Risk Rating"))}</th><th></th></tr></thead><tbody>${bankRows.slice(0, 8).map((x, i) => `<tr><td class="ct-bank">${i === 0 ? '<span class="ct-tr">🏆</span>' : `<span class="ct-dot">${esc((x.o.Bank || "?").trim().charAt(0).toUpperCase())}</span>`}<span>${esc(x.o.Bank)}${x.o.Name ? `<small class="ct-sub">${esc(x.o.Name)}</small>` : ""}</span></td><td>${esc(rate(x.o.Rate))}</td><td>${esc(rate(x.r.effective))}</td><td><b>${esc(pln(x.r.net))}</b></td><td><span class="ct-risk" title="${esc(T("Covered by the deposit guarantee scheme"))}">A</span></td><td class="ct-act"><button class="nw-pill ct-details" data-offer-detail="${i}">${esc(T("Details"))} →</button> <button class="nw-pill" data-bank="${i}">＋ ${esc(T("Compare"))}</button></td></tr>`).join("")}</tbody></table></div>`;
     const bestCard = `<div class="nw-card cmp-best"><div class="nw-ch"><span class="rp-si">${si(IC.trend, 24)}</span><h3>${esc(T("Best Opportunity Summary"))}</h3></div><div class="cb-body"><div><small>${esc(T("Current Selection"))}:</small><b>${esc(bestBank ? bestBank.o.Bank : "–")}</b>
       <p><span>${esc(T("Expected Profit"))}:</span><em>${esc(pln(bestNet))}</em></p><p><span>${esc(T("Average Competitor"))}:</span><b>${esc(pln(avgNet))}</b></p></div><div class="cb-box"><small>${esc(T("Additional Earnings"))}:</small><b>${esc(pln(extra))}</b></div></div></div>`;
-    el.innerHTML = topHead + `<div class="cmp-grid">${rankCard}${insCard}<div class="cmp-calc">${formCard}${savedCard}${resultCard}</div>${tableCard}${bestCard}</div>
+    el.innerHTML = topHead + `<div class="cmp-saved">${savedCard}</div><div class="cmp-grid">${rankCard}${insCard}<div class="cmp-calc">${formCard}${resultCard}</div>${tableCard}${bestCard}</div>
     <div class="grid">
       ${binCard(["offer"])}
     </div>` + bottomBand;
@@ -220,6 +220,7 @@ export async function openOptimize() {
   const draw = () => { p.el.innerHTML = optimizeHtml(); bind(); };
   const bind = () => {
     p.el.querySelectorAll("[data-route]").forEach(c => c.onclick = () => { p.close(); App.go(c.dataset.route); });
+    p.el.querySelectorAll(".adv-grid .advice p").forEach(x => x.onclick = ev => { ev.stopPropagation(); x.closest(".advice").classList.toggle("open"); });
     // Choose the type of a loan right here – the comparison appears at once
     p.el.querySelectorAll("[data-loan-kind]").forEach(s => { s.onclick = e => e.stopPropagation(); s.onchange = () => {
       const l = D().Loans.find(x => x.Id === s.dataset.loanKind); if (l) { l.Kind = s.value; save(); draw(); } }; });
@@ -311,9 +312,9 @@ function optimizeHtml() {
     ${card(heading(T("Your personal plan"), "🧭") + `<p class="${gain > 0 ? "good big-text" : "hint"}">${esc(gain > 0 ? T("Following these steps could be worth about {0} per year.", pln(gain)) : T("Your personal plan, based on what you entered."))}</p>` +
       hint(T("Click a step to go to the right tab.")) +
       (advice.length ? "" : `<h3 class="good">✔ ${esc(T("Well done!"))}</h3><p>${esc(T("Your emergency fund is complete, you save at least 20% and your money is in good places. Check your offers again when promotions end."))}</p>`) +
-      advice.map((a, i) => `<div class="advice ${kind[a.kind][1]}"${a.route ? ` data-route="${a.route}"` : ""}><b class="adv-title"><span class="adv-ic">${kind[a.kind][0]}</span>${i + 1}. ${esc(a.title)}</b><p>${esc(a.text)}</p>
+      `<div class="adv-grid">` + advice.map((a, i) => `<div class="advice ${kind[a.kind][1]}"${a.route ? ` data-route="${a.route}"` : ""}><b class="adv-title"><span class="adv-ic">${kind[a.kind][0]}</span>${i + 1}. ${esc(a.title)}</b><p>${esc(a.text)}</p>
         ${a.benefit > 0 ? `<b class="${kind[a.kind][1]}">${esc(a.kind === "warning" ? T("Shortfall: about {0} per year", pln(a.benefit)) : T("Worth about {0} per year", pln(a.benefit)))}</b>` : ""}
-        ${a.route ? `<span class="go-link">${esc(T("Go to {0} →", T(TAB_NAMES[a.route] || "Overview")))}</span>` : ""}</div>`).join(""))}
+        ${a.route ? `<span class="go-link">${esc(T("Go to {0} →", T(TAB_NAMES[a.route] || "Overview")))}</span>` : ""}</div>`).join("") + `</div>`)}
     ${moduleOn("loans") ? debtAdvice(d) : ""}
   </div></div><div class="opt-panel" data-optp="health" hidden>${parts.low}<div class="grid optimize-grid">
     ${(() => { const hc = healthCheck(d); if (!hc.length) return "";

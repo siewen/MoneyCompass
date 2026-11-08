@@ -2084,3 +2084,21 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .kpi.clk:hover::after{opacity:1}
 .ovh-row .clk:hover{background:rgba(46,220,154,.06);border-radius:12px}
 .ovh-row>.clk{padding-top:6px;padding-bottom:6px}
+/* Compare Offers: saved offers on top, calculator and its result together */
+.cmp-saved{margin:0 0 14px}
+.cmp-saved .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px}
+.cmp-saved .list .item{margin:0}
+.cmp-calc{display:grid;gap:12px;align-content:start}
+.cmp-calc .cmp-calcbtn{width:100%;margin-top:6px}
+/* Personal plan: full width, steps side by side, long text folded (click to read) */
+.opt-panel[data-optp="plan"] .optimize-grid{display:block}
+.opt-panel[data-optp="plan"] .optimize-grid>.card,.opt-panel[data-optp="plan"] .optimize-grid>.nw-card{width:100%;max-width:none;margin:0 0 14px}
+.adv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:8px}
+.adv-grid .advice{margin:0;display:flex;flex-direction:column;gap:6px;padding:12px 14px}
+.adv-grid .advice p{margin:0;font-size:13.5px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.adv-grid .advice.open p{-webkit-line-clamp:unset;display:block}
+.adv-grid .advice .adv-title{font-size:15px}
+.adv-grid .advice .go-link{margin-top:auto}
+.adv-more{align-self:flex-start;background:none;border:0;color:var(--accent,#34d399);font-size:12px;cursor:pointer;padding:0}
+.opt-panel[data-optp="plan"] .optimize-grid{display:block !important;columns:1 !important;column-count:1 !important}
+.opt-panel[data-optp="plan"] .optimize-grid>*{width:100% !important;max-width:none !important;display:block;break-inside:avoid;margin:0 0 14px !important;box-sizing:border-box}

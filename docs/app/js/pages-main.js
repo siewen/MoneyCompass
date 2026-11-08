@@ -859,7 +859,7 @@ function bindExpenseRows(root, after = () => App.refresh()) {
   root.querySelectorAll("[data-del]").forEach(x => x.onclick = async () => {
     const e = d.Expenses.find(y => y.Id === x.dataset.del);
     if (await confirmBox(T("Delete?"), `${e.Description || T(e.Category)} · ${pln(e.Amount)}`, T("Delete"), T("Cancel"), true)) {
-      toBin("expense", e); d.Expenses = d.Expenses.filter(y => y !== e); save(); after();
+      toBin("expense", e); d.Expenses = d.Expenses.filter(y => y !== e); save(); toast(T("Deleted: {0}.", e.Description || T(e.Category))); after();
     }
   });
 }
@@ -893,7 +893,7 @@ function editExpense(e, after) {
     root.querySelectorAll("input,select").forEach(x => x.addEventListener("input", paint)); root.querySelectorAll("select").forEach(x => x.addEventListener("change", paint));
     root.querySelector("[data-del-exp]").onclick = async () => {
       const d = D();
-      if (await confirmBox(T("Delete?"), `${e.Description || T(e.Category)} · ${pln(e.Amount)}`, T("Delete"), T("Cancel"), true)) { toBin("expense", e); d.Expenses = d.Expenses.filter(y => y !== e); save(); p.close(); after(); }
+      if (await confirmBox(T("Delete?"), `${e.Description || T(e.Category)} · ${pln(e.Amount)}`, T("Delete"), T("Cancel"), true)) { toBin("expense", e); d.Expenses = d.Expenses.filter(y => y !== e); save(); toast(T("Deleted: {0}.", e.Description || T(e.Category))); p.close(); after(); }
     };
     paint();
   }

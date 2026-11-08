@@ -169,7 +169,7 @@ function notices() {
 }
 function bellMenu() {
   if (document.querySelector(".bell-menu")) { document.querySelectorAll(".bell-menu, .me-shield").forEach(x => x.remove()); return; }
-  const r = document.querySelector(".tb-bell").getBoundingClientRect(), list = notices(); try { localStorage.setItem("mc-bell-seen", JSON.stringify(list.map(x => x.t))); } catch {} setTimeout(updateBell, 0); const del = (State.data.Deleted || []).slice(0, 5);
+  const r = document.querySelector(".tb-bell").getBoundingClientRect(), list = notices(); try { localStorage.setItem("mc-bell-seen", JSON.stringify(list.map(x => x.t))); } catch {} try { localStorage.setItem("mc-bell-del", JSON.stringify((State.data.Deleted || []).map(x => x.Id))); } catch {} setTimeout(updateBell, 0); const del = (State.data.Deleted || []).slice(0, 5);
   const shield = document.createElement("div"); shield.className = "help-shield me-shield";
   const menu = document.createElement("div"); menu.className = "tab-menu data-menu bell-menu";
   const when = x => { const m = Math.round((Date.now() - new Date(x.DeletedAt)) / 60000); return m < 1 ? T("just now") : m < 60 ? T("{0} min ago", m) : m < 1440 ? T("{0} h ago", Math.round(m / 60)) : fmtDate(x.DeletedAt.slice(0, 10)); };
@@ -186,7 +186,9 @@ function bellMenu() {
   menu.querySelectorAll("[data-undo]").forEach(b => b.onclick = () => { const e = restoreFromBin(b.dataset.undo); if (e) { toast(T("Restored: {0}.", binLabel(e).name)); App.refresh(); } close(); updateBell(); });
 }
 const bellSeen = () => { try { return new Set(JSON.parse(localStorage.getItem("mc-bell-seen") || "[]")); } catch { return new Set(); } };
-function updateBell() { const n = document.getElementById("bell-n"); if (!n) return; const seen = bellSeen(), c = notices().filter(x => !seen.has(x.t)).length; n.hidden = !c; n.textContent = c; }
+const delSeen = () => { try { return new Set(JSON.parse(localStorage.getItem("mc-bell-del") || "[]")); } catch { return new Set(); } };
+setInterval(() => { try { updateBell(); } catch {} }, 1500);
+function updateBell() { const n = document.getElementById("bell-n"); if (!n) return; const seen = bellSeen(), ds = delSeen(), c = notices().filter(x => !seen.has(x.t)).length + (State.data?.Deleted || []).filter(x => !ds.has(x.Id)).length; n.hidden = !c; n.textContent = c; }
 
 // ---------- The profile row: one small menu for profile, options, language, help and closing ----------
 function meMenu() {

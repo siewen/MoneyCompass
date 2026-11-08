@@ -548,3 +548,11 @@
 :root[data-theme="hell"] .sc-t .sc-bad{color:#9a0f12}
 :root[data-theme="hell"] .sc-bar{background:rgba(23,38,34,0.072)}
 :root[data-theme="hell"] .sc-row small{color:#4b645d}
+:root[data-theme="hell"] .hp-n{border:1px solid rgba(23,38,34,0.104);background:rgba(23,38,34,0.027);color:#172621}
+:root[data-theme="hell"] .hp-n.on{color:#000000}
+:root[data-theme="hell"] .hp-step{border:1px solid rgba(23,38,34,0.104);background:rgba(23,38,34,0.027)}
+:root[data-theme="hell"] .hp-step p{color:#172621}
+:root[data-theme="hell"] .hp-tile{border:1px solid rgba(23,38,34,0.104);background:rgba(23,38,34,0.027)}
+:root[data-theme="hell"] .hp-tile span,:root[data-theme="hell"] .hp-tile small{color:#344943}
+:root[data-theme="hell"] .hp-tile.big span{color:#172621}
+:root[data-theme="hell"] .hp-win .hp-p{color:#172621}
