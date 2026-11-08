@@ -1,12 +1,10 @@
 <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6EE7B7"/><stop offset="1" stop-color="#2FA57E"/></linearGradient>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5CF0B0"/><stop offset="1" stop-color="#12B26B"/></linearGradient>
   </defs>
-  <circle cx="32" cy="32" r="27" fill="#12201C" stroke="url(#g)" stroke-width="4"/>
-  <g stroke="#4FC59B" stroke-width="2.4" stroke-linecap="round" opacity=".75">
-    <path d="M32 9.5v4M32 50.5v4M9.5 32h4M50.5 32h4"/>
-  </g>
-  <path d="M32 14 L39 32 L32 36 L25 32 Z" fill="url(#g)"/>
-  <path d="M32 50 L25 32 L32 28 L39 32 Z" fill="#2B6F59"/>
-  <circle cx="32" cy="32" r="3.2" fill="#12201C" stroke="#BFF5DF" stroke-width="1.6"/>
+  <path d="M32 5a27 27 0 1 0 27 27" fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round"/>
+  <g stroke="#5CF0B0" stroke-width="3" stroke-linecap="round"><path d="M32 12v5M32 47v5M12 32h5M47 32h5"/></g>
+  <path d="M50 10L38 38 26 26z" fill="url(#g)"/>
+  <path d="M14 54l12-28 12 12z" fill="#0E8F57"/>
+  <circle cx="32" cy="32" r="3.4" fill="#0B1512" stroke="#CFFBE6" stroke-width="1.8"/>
 </svg>

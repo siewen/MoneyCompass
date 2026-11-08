@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 87, date: "2026-11-08", items: {
+    en: ["✨ Overview redesigned to match the new design: new compass logo, icon cards with the change against the previous month, bar and trend charts, category and savings donuts, Budget Plan, Emergency Fund, Loans and Goals cards, plus Add Transaction and a notification bell."],
+    pl: ["✨ Nowy wygląd Przeglądu: nowe logo, karty z ikonami, wykresy, Dodaj transakcję i dzwonek powiadomień."],
+    de: ["✨ Neue Übersicht: neues Logo, Karten mit Symbolen, Diagramme, Buchung hinzufügen und Benachrichtigungen."],
+    fr: ["✨ Nouvel aperçu : nouveau logo, cartes avec icônes, graphiques, ajout de transaction et cloche de notifications."] } },
   { build: 86, date: "2026-11-08", items: {
     en: ["✨ New look for the Overview: new compass logo, a fixed side menu with Reports and Settings, a top bar with search, Import, Export and your profile, a greeting, and income, spending, left over and savings rate with the change against the previous month."],
     pl: ["✨ Nowy wygląd Przeglądu: nowe logo, stałe menu boczne, pasek wyszukiwania, powitanie i zmiana względem poprzedniego miesiąca."],

@@ -1,8 +1,8 @@
 // MoneyCompass web: the window, the tabs and starting up.
-import { store, T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed, summary, fmtDate, changedSinceFile, LANGS } from "./core.js";
+import { store, T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed, summary, fmtDate, changedSinceFile, LANGS, duePromos } from "./core.js";
 import { esc, popup, toast } from "./ui.js";
 import { startLock, lock, hasPin } from "./lock.js";
-import { startBackup, drawBackupBar, backupProfileChanged } from "./backup.js";
+import { startBackup, drawBackupBar, backupProfileChanged, backupInfo } from "./backup.js";
 import { smartImport, openImportCenter } from "./import.js";
 import { Reports } from "./reports.js";
 import { openSavingsCheck } from "./savings-check.js";
@@ -44,19 +44,20 @@ export function moveTab(route, target) {
 }
 
 // Line icons for the tabs (shown in the beta design's side menu)
-const I = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const I = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const TAB_ICON = {
-  overview: I('<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'),
-  income: I('<path d="M12 4v12M6 10l6 6 6-6"/><path d="M4 20h16"/>'),
-  expenses: I('<path d="M12 20V8M6 14l6-6 6 6"/><path d="M4 4h16"/>'),
-  emergency: I('<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>'),
-  portfolio: I('<path d="M4 8h13a3 3 0 0 1 3 3v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 8l11-4 2 4"/><circle cx="16" cy="14" r="1.3"/>'),
-  loans: I('<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h4"/>'),
-  budget: I('<path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/>'),
-  calendar: I('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
+  overview: I('<path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/>'),
+  income: I('<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><circle cx="16.5" cy="15" r="1.2"/>'),
+  expenses: I('<path d="M3 4h2l2.5 11h10l2-8H6.500"/><circle cx="9" cy="19.500" r="1.400"/><circle cx="17" cy="19.500" r="1.400"/>'),
+  emergency: I('<path d="M12 3l8 3v6c0 5-3.500 8-8 9-4.500-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>'),
+  portfolio: I('<path d="M5 12a7 5.500 0 0 1 7-5.500c3 0 5 1.200 6 3l2-.5v4l-2 .5c-.5 1-1.300 1.700-2.300 2.200V19h-3v-1.500h-3.400V19H7.300v-3.600C5.800 14.500 5 13.300 5 12z"/><circle cx="15" cy="11" r=".9"/>'),
+  goals: I('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.500"/>'),
+  loans: I('<path d="M3 9l9-5 9 5z"/><path d="M5.500 9v9M10 9v9M14 9v9M18.500 9v9"/><path d="M3 21h18"/>'),
+  budget: I('<rect x="5" y="4" width="14" height="17" rx="2.500"/><path d="M9 2.500h6v3H9zM9 11h6M9 15h6"/>'),
+  calendar: I('<rect x="3" y="5" width="18" height="16" rx="2.500"/><path d="M3 10h18M8 3v4M16 3v4M8 14h2M12 14h2M8 17.500h2"/>'),
   investments: I('<path d="M3 17l5-5 4 3 8-8"/><path d="M15 7h5v5"/><path d="M3 21h18"/>'),
-  savings: I('<path d="M4 7h16M4 12h16M4 17h10"/><path d="M18 15l2 2-2 2"/>'),
-  reports: I('<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 17v-3M12 17v-6M15 17v-4"/>'),
+  savings: I('<path d="M12 4v16M7 20h10M5 7h14"/><path d="M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z"/>'),
+  reports: I('<rect x="4" y="11" width="4" height="9" rx="1"/><rect x="10" y="5" width="4" height="15" rx="1"/><rect x="16" y="13" width="4" height="7" rx="1"/>'),
 };
 /** MoneyCompass has one design: Emerald (dark green, side menu on wide screens, bottom bar on phones). */
 const beta = () => "emerald";
@@ -92,13 +93,15 @@ function buildShell() {
   document.getElementById("app").innerHTML = `
     <header class="top">
       <button class="side-toggle" data-act="side" title="${esc(T(side() === "pinned" ? "Fold the menu (it opens when you point at it)" : "Keep the menu open"))}">${side() === "pinned" ? "‹" : "›"}</button>
-      <a class="brand" href="../index.html" title="MoneyCompass"><img src="brand.svg" alt=""><span class="bt"><span class="bn"><i>Money</i><b>Compass</b></span><small>PLAN TODAY. LIVE BRIGHTER.</small></span></a>
-      <nav class="tabs" id="tabs">${main.map(tabBtn).join("")}<div class="side-card"><span class="sc-ic">${I('<path d="M12 21V9"/><path d="M12 9c0-3 2-5 5-5 0 3-2 5-5 5z"/><path d="M12 13c0-2.5-1.7-4-4.5-4 0 2.5 1.700 4 4.500 4z"/>')}</span><b>${esc(T("Small steps. Bigger tomorrows."))}</b><small>${esc(T("Every step you take today builds a brighter future."))}</small></div>${foot.map(tabBtn).join("")}<button class="tab tab-settings" data-act="options" style="--accent:#9AA9A4"><span class="ti">${I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.100-1.500 1.700 1.700 0 0 0-1.800.3l-.1.1a2 2 0 1 1-2.800-2.800l.1-.1a1.700 1.700 0 0 0 .3-1.800 1.700 1.700 0 0 0-1.500-1H3a2 2 0 1 1 0-4h.1a1.700 1.700 0 0 0 1.500-1.100 1.700 1.700 0 0 0-.3-1.800l-.1-.1a2 2 0 1 1 2.800-2.800l.1.1a1.700 1.700 0 0 0 1.800.3H9a1.700 1.700 0 0 0 1-1.500V3a2 2 0 1 1 4 0v.1a1.700 1.700 0 0 0 1 1.500 1.700 1.700 0 0 0 1.800-.3l.1-.1a2 2 0 1 1 2.800 2.800l-.1.1a1.700 1.700 0 0 0-.3 1.800V9a1.700 1.700 0 0 0 1.500 1H21a2 2 0 1 1 0 4h-.1a1.700 1.700 0 0 0-1.500 1z"/>')}</span><span class="tl">${esc(T("Settings"))}</span></button></nav>
+      <a class="brand" href="../index.html" title="MoneyCompass"><img src="brand.svg" alt=""><span class="bt"><span class="bn"><i>Money</i><b>Compass</b></span></span></a>
+      <nav class="tabs" id="tabs">${main.map(tabBtn).join("")}${foot.map(tabBtn).join("")}<button class="tab tab-settings" data-act="options" style="--accent:#9AA9A4"><span class="ti">${I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.100-1.500 1.700 1.700 0 0 0-1.800.3l-.1.1a2 2 0 1 1-2.800-2.800l.1-.1a1.700 1.700 0 0 0 .3-1.800 1.700 1.700 0 0 0-1.500-1H3a2 2 0 1 1 0-4h.1a1.700 1.700 0 0 0 1.500-1.100 1.700 1.700 0 0 0-.3-1.800l-.1-.1a2 2 0 1 1 2.800-2.800l.1.1a1.700 1.700 0 0 0 1.800.3H9a1.700 1.700 0 0 0 1-1.500V3a2 2 0 1 1 4 0v.1a1.700 1.700 0 0 0 1 1.500 1.700 1.700 0 0 0 1.800-.3l.1-.1a2 2 0 1 1 2.800 2.800l-.1.1a1.700 1.700 0 0 0-.3 1.800V9a1.700 1.700 0 0 0 1.500 1H21a2 2 0 1 1 0 4h-.1a1.700 1.700 0 0 0-1.500 1z"/>')}</span><span class="tl">${esc(T("Settings"))}</span></button><div class="side-card"><span class="sc-ic">${I('<path d="M12 21V9"/><path d="M12 9c0-3 2-5 5-5 0 3-2 5-5 5z"/><path d="M12 13c0-2.5-1.7-4-4.5-4 0 2.5 1.700 4 4.500 4z"/>')}</span><b>${esc(T("Small steps. Bigger tomorrows."))}</b><small>${esc(T("Every step you take today builds a brighter future."))}</small></div></nav>
     </header>
     <div class="topbar">
       <label class="tb-search"><span aria-hidden="true">🔍</span><input type="search" id="tb-search" placeholder="${esc(T("Search transactions, categories, goals…"))}" autocomplete="off"></label>
       <button class="tb-btn" data-act="import" title="${esc(T("Import a bank statement (CSV) – current or savings account. You can also drop the file onto the app."))}"><span aria-hidden="true">⬆</span><span class="tb-l">${esc(T("Import"))}${license.isPro ? "" : " 🔒"}</span></button>
       <button class="tb-btn" data-act="export" title="${esc(T("Export"))}"><span aria-hidden="true">⬇</span><span class="tb-l">${esc(T("Export"))}</span></button>
+      <button class="tb-add" data-act="add" title="${esc(T("Add an expense"))}"><span aria-hidden="true">＋</span><span class="tb-l">${esc(T("Add Transaction"))}</span></button>
+      <button class="tb-bell" data-act="bell" title="${esc(T("Notifications"))}" aria-label="${esc(T("Notifications"))}">${I('<path d="M6 16V11a6 6 0 0 1 12 0v5l1.500 2h-15z"/><path d="M10 21h4"/>')}<span class="bell-n" id="bell-n" hidden></span></button>
       <button class="me-row profile-btn" data-act="me" title="${esc(T("Profile: {0}", currentName()))}">${avatar(36)}
         <span class="me-text"><b>${esc(currentName())}</b><small class="me-badge ${license.isPro ? "pro" : "demo"}">${esc(license.isPro ? T("Pro plan") : T("Demo"))}</small></span>
         <span class="me-more" aria-hidden="true">⌄</span></button>
@@ -118,10 +121,11 @@ function buildShell() {
     b.addEventListener("dragleave", () => b.classList.remove("drop-tab"));
     b.addEventListener("drop", e => { const r = e.dataTransfer.getData("text/mc-tab"); b.classList.remove("drop-tab"); if (r) { e.preventDefault(); e.stopPropagation(); moveTab(r, b.dataset.tab); } });
   });
-  const acts = { import: () => openImportCenter(), options: () => openOptions(), delete: openDelete, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide, me: meMenu };
+  const acts = { import: () => openImportCenter(), options: () => openOptions(), add: addTransaction, bell: bellMenu, delete: openDelete, export: openExport, profile: openProfile, install, exit: closeApp, lang: () => openLanguage(), data: dataMenu, side: toggleSide, me: meMenu };
   document.querySelectorAll("[data-act]:not(.help-fab)").forEach(b => b.onclick = ev => { ev.preventDefault(); acts[b.dataset.act](); });
   const sb = document.getElementById("tb-search");
   if (sb) sb.onkeydown = e => { if (e.key !== "Enter" || !sb.value.trim()) return; setSearch(sb.value.trim()); if (current === "expenses") App.refresh(); else App.go("expenses"); sb.blur(); };
+  updateBell();
   setupHelpButton();
   // Another profile now? Read its backup state; otherwise only draw the bar again
   if (shellProfile !== State.id) { shellProfile = State.id; backupProfileChanged(); } else drawBackupBar(saveProfileFile);
@@ -135,6 +139,31 @@ function buildShell() {
     top.addEventListener("mouseleave", () => { top.classList.remove("open"); top.dataset.hold = ""; });
   }
 }
+
+/** Top bar "Add Transaction": opens Expenses at the form for a new expense. */
+function addTransaction() {
+  const go = () => { const f = document.getElementById("expense-form"); if (f) { f.scrollIntoView({ block: "center" }); f.querySelector("input,select")?.focus(); } };
+  if (current === "expenses") go(); else { App.go("expenses"); setTimeout(go, 400); }
+}
+/** The bell: what needs your attention (ended promotions, a backup that is not running). */
+function notices() {
+  const out = [], d = State.data;
+  for (const x of duePromos(d)) out.push(x.p.ended ? T("The promotion at {0} ended on {1}", x.h.Name, fmtDate(x.p.end)) : T("The promotion at {0} ends in {1} days", x.h.Name, x.p.daysLeft));
+  const b = backupInfo();
+  if (license.isPro && (b.status === "paused" || b.status === "error")) out.push(T(b.status === "paused" ? "Automatic backup is waiting for your browser's permission." : "The automatic backup could not be written."));
+  return out;
+}
+function bellMenu() {
+  if (document.querySelector(".bell-menu")) { document.querySelectorAll(".bell-menu, .me-shield").forEach(x => x.remove()); return; }
+  const r = document.querySelector(".tb-bell").getBoundingClientRect(), list = notices();
+  const shield = document.createElement("div"); shield.className = "help-shield me-shield";
+  const menu = document.createElement("div"); menu.className = "tab-menu data-menu bell-menu";
+  menu.innerHTML = list.length ? list.map(t => `<p>${esc(t)}</p>`).join("") : `<p>${esc(T("You're all caught up."))}</p>`;
+  document.body.append(shield, menu);
+  menu.style.top = (r.bottom + 8) + "px"; menu.style.left = Math.max(8, Math.min(r.right - 280, window.innerWidth - 288)) + "px";
+  shield.onclick = () => { shield.remove(); menu.remove(); };
+}
+function updateBell() { const n = document.getElementById("bell-n"); if (!n) return; const c = notices().length; n.hidden = !c; n.textContent = c; }
 
 // ---------- The profile row: one small menu for profile, options, language, help and closing ----------
 function meMenu() {
