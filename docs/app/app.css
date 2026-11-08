@@ -2003,3 +2003,9 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 @media(max-width:700px){.item.expense.hx{grid-template-columns:40px 1fr auto}.hx .c-repeat,.hx .c-edit,.hx .c-del{grid-row:2}}
 .nw-pill.ct-details{background:linear-gradient(135deg,#2EDC9A,#19b97d)!important;color:#06281d!important;border:0!important;font-weight:800;box-shadow:0 0 14px rgba(46,220,154,.45)}
 .nw-pill.ct-details:hover{filter:brightness(1.1)}
+/* View Opportunity: attention button */
+.sv-btn.ovo-btn{font-size:17px;font-weight:800;padding:16px 30px;border-radius:14px;background:linear-gradient(135deg,#3dffb0,#19b97d)!important;color:#04251a!important;border:0!important;box-shadow:0 0 0 3px rgba(46,220,154,.25),0 0 28px rgba(46,220,154,.65);animation:ovoPulse 2.2s ease-in-out infinite}
+.sv-btn.ovo-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.ovo-bars{opacity:.9!important}
+@keyframes ovoPulse{0%,100%{box-shadow:0 0 0 3px rgba(46,220,154,.25),0 0 22px rgba(46,220,154,.5)}50%{box-shadow:0 0 0 7px rgba(46,220,154,.12),0 0 38px rgba(46,220,154,.85)}}
+@media(prefers-reduced-motion:reduce){.sv-btn.ovo-btn{animation:none}}
