@@ -825,18 +825,40 @@ export const Emergency = {
       kpis: [{ l: T("Emergency Fund Balance"), v: pln(safe), icon: "coins", cls: "in" }, { l: T("Fund Completion"), v: ed.kpis.pct + "%", icon: "check", cls: "in" }, { l: T("Months Covered"), v: ed.kpis.covered.toFixed(1), icon: "calx", cls: "next" }, { l: T("Target Date"), v: ed.kpis.est ? ed.kpis.est.toLocaleDateString(undefined, { month: "long", year: "numeric" }) : ed.kpis.done ? T("Reached") : "–", icon: "flag", cls: "in" }],
       btn: `<button class="btn main rp-gen" data-go="portfolio">＋ ${esc(T("Add Contribution"))}</button>` });
     el.innerHTML = eHead + ed.html;
-    const manageHtml = () => `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC.shield, 24)}</span><h3>${esc(T("Your monthly costs and target"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>` + `<div class="grid">
-      ${card(heading(T("Result")) + row(T("Monthly need (incl. yearly costs / 12)"), pln(r.monthly)) + row(T("3 months (with buffer)"), pln(r.three)) +
-        row(T("6 months (with buffer)"), pln(r.six)) + row(T("Your target"), pln(r.target), "big") + status)}
-      ${card(heading(T("Where to keep it")) + `<p>${esc(T("In a Polish bank savings account, in złoty: protected by the BFG up to €100,000 and available the same day. Not in crypto, and not in a long fixed deposit (lokata), because breaking it early usually loses the interest."))}</p>`)}
-      ${card(`<form id="em">${heading(T("Your monthly costs"))}${hint(T("Only costs you must pay even in a crisis: rent, bills, food, transport, insurance, loan payments."))}
-        ${field(T("Essential costs per month (zł)"), numInput("monthly", plain(s.MonthlyEssentials), T("e.g. {0}", "4500")))}
-        ${button(T("Use my average from the Outflows tab"), "use-avg", "second small")}<p class="hint" id="avg-note"></p>
-        ${field(T("Yearly costs (zł per year) - car insurance, car service, home insurance, yearly subscriptions"), numInput("yearly", plain(s.YearlyCosts), T("e.g. {0}", "3000")))}
-        <h3>${esc(T("Settings"))}</h3>
-        <div class="two">${field(T("Months to cover (3 if your job is stable, 6 if less certain)"), select("months", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], s.EmergencyMonths))}
-        ${field(T("Extra safety buffer (%)"), numInput("buffer", plain(s.BufferPercent)))}</div></form>`)}
-    </div>`;
+    const manageHtml = () => {
+      const tgt = r.target, covered = tgt > 0 && safe >= tgt, pc = tgt > 0 ? Math.min(100, Math.round(safe / tgt * 100)) : 0;
+      const okI = `<span class="nw-ok">✓</span>`, rowI = (ic, l, v) => `<div class="em-rr"><span class="rp-si i-res">${si(IC[ic], 22)}</span><span>${esc(l)}</span><b>${esc(v)}</b></div>`;
+      const safeH = d.Holdings.filter(h => h.Safe).map(h => ({ n: h.Name, v: Calc.toPln(h.Amount, h.Currency, s) })).filter(x => x.v > 0), sTot = safeH.reduce((a, x) => a + x.v, 0);
+      const pal = ["#3B9BFF", "#F5A623", "#8B5CF6", "#2EDC9A", "#C98FA0"];
+      const ins = [covered ? T("Emergency fund target fully covered") : T("Your safe money covers {0}% of the target", pc), covered ? T("Safe savings exceed required reserve") : T("Still missing: {0}", pln(Math.max(0, tgt - safe))), covered ? T("No additional contributions required") : T("Keep contributing every month"), T("Liquidity remains excellent")];
+      const kp = [["calx", T("Monthly Essential Costs"), pln(r.monthly)], ["flag", T("Recommended Target"), pln(tgt)], ["shield", T("Protected Months"), String(s.EmergencyMonths)], ["percent", T("Safety Buffer"), (s.BufferPercent || 0) + "%"]];
+      return `<button class="pm-x pm-x-abs" data-close aria-label="${esc(T("Close"))}">✕</button>
+      <div class="pg-title"><span class="pg-ic">${si(IC.shield, 38)}</span><div><h2>${esc(T("Emergency Fund Target"))}</h2><p>${esc(T("Calculate how much financial protection you need and track your readiness."))}</p></div></div>
+      <div class="ov-kpis">${kp.map(k => `<div class="kpi static"><span class="kpi-ic in">${si(IC[k[0]])}</span><span class="kpi-t"><span class="kpi-l">${esc(k[1])}</span><b>${esc(k[2])}</b></span></div>`).join("")}</div>
+      <div class="em-g1"><div class="nw-card dz em-ready"><div class="nw-ch"><span class="rp-si i-res">${si(IC.check, 24)}</span><h3>${esc(T("Emergency Fund Readiness"))}</h3></div>
+          <div class="em-rb"><div class="em-ringc">${ring(pc, pc + " / 100", T("Readiness Score"), 150, "#22E39A")}<span class="em-pill">${okI} ${esc(covered ? T("Fully Protected") : T("Building"))}</span></div>
+          <div class="em-cur"><small>${esc(T("Current Safe Savings"))}</small><b>${esc(pln(safe))}</b><small>${esc(T("Target"))}</small><b>${esc(pln(tgt))}</b></div></div>
+          <div class="em-msg">${okI}<span>${esc(covered ? T("Your available safe savings already cover your recommended emergency fund target.") : T("Your safe savings do not cover the target yet."))}</span></div></div>
+        <div class="em-col"><div class="nw-card dz em-rec"><div class="nw-ch"><span class="rp-si i-save">${si(IC.star, 24)}</span><h3>${esc(T("Recommended Emergency Fund"))}</h3></div>
+          ${rowI("calx", T("Monthly Need"), pln(r.monthly))}${rowI("coins", T("3 Months Coverage"), pln(r.three))}${rowI("coins", T("6 Months Coverage"), pln(r.six))}
+          <div class="em-tg"><span class="rp-si i-res">${si(IC.flag, 26)}</span><div><small>${esc(T("Recommended Target"))}</small><b>${esc(pln(tgt))}</b></div><span class="em-pill">${okI} ${esc(covered ? T("Fully Funded") : T("In progress"))}</span></div></div>
+        <div class="nw-card dz em-keep"><div class="nw-ch"><span class="rp-si i-bulb">${si(IC.bulb, 24)}</span><h3>${esc(T("Where To Keep Emergency Funds"))}</h3></div>
+          <div class="em-kb"><div><p>${esc(T("Recommended Location:"))} <b class="good">${esc(T("Polish Savings Account"))}</b></p><p>${okI} <span class="good">${esc(T("Protection:"))}</span> ${esc(T("BFG Coverage up to €100 000"))}</p><p>${okI} <span class="good">${esc(T("Liquidity:"))}</span> ${esc(T("Same-Day Access"))}</p><p><span class="em-w">▲</span> ${esc(T("Risk Level: Very Low"))}</p></div>
+          <div class="em-av"><b>${esc(T("Avoid:"))}</b><p>✕ ${esc(T("Crypto Assets"))}</p><p>✕ ${esc(T("Long-Term Fixed Deposits"))}</p><p>✕ ${esc(T("Illiquid Investments"))}</p></div></div></div></div></div>
+      <div class="em-g2"><div class="nw-card dz em-set"><form id="em"><div class="nw-ch"><span class="rp-si i-res">${si(IC.calc, 24)}</span><h3>${esc(T("Emergency Fund Settings"))}</h3></div>
+          <div class="em-sg"><div>${field(T("Essential Monthly Costs"), numInput("monthly", plain(s.MonthlyEssentials), "4500"))}${field(T("Annual Costs"), numInput("yearly", plain(s.YearlyCosts), "3000"))}</div>
+          <div>${field(T("Coverage Goal"), select("months", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => [n, n + " " + T(n === 1 ? "Month" : "Months")]), s.EmergencyMonths))}${field(T("Safety Buffer (%)"), numInput("buffer", plain(s.BufferPercent)))}</div></div>
+          <button type="button" class="btn second em-avg" data-action="use-avg">${si(IC.calc, 16)} ${esc(T("Use my average from the Outflows tab"))}</button><p class="hint" id="avg-note"></p></form></div>
+        <div class="nw-card dz em-alloc"><div class="nw-ch"><span class="rp-si i-save">${si(IC.trophy, 24)}</span><h3>${esc(T("Emergency Fund Allocation"))}</h3></div><div class="sv-ar">${donut(safeH.map((x, i) => ({ label: x.n, value: x.v, color: pal[i % pal.length] })), pln(tgt), T("Target"), 130)}
+          <ul class="sv-al">${safeH.map((x, i) => `<li><i style="background:${pal[i % pal.length]}"></i><span>${esc(x.n)}</span><b>${sTot > 0 ? Math.round(x.v / sTot * 100) : 0}%</b></li>`).join("") || `<li class="hint">–</li>`}</ul></div></div>
+        <div class="nw-card dz em-ins"><div class="nw-ch"><span class="rp-si i-res">${si(IC.sparkle, 24)}</span><h3>${esc(T("AI Emergency Fund Insights"))}</h3></div><ul class="nw-ul">${ins.map(x => `<li>${okI}<span>${esc(x)}</span></li>`).join("")}</ul></div></div>
+      <div class="nw-card rp-sum em-bot"><div class="sv-b1"><span class="rp-si i-res">${si(IC.heart, 34)}</span><div><small>${esc(T("Emergency Fund Health"))}</small><b>${pc} / 100</b></div></div>
+        <div class="sv-b1 dv"><span class="rp-si i-res">${si(IC.calx, 30)}</span><div><small>${esc(T("Coverage"))}</small><b class="good">${esc(s.EmergencyMonths + " " + T("Months"))}</b></div></div>
+        <div class="sv-b1 dv"><span class="rp-si i-res">${si(IC.trophy, 30)}</span><div><small>${esc(T("Target"))}</small><b class="good">${esc(covered ? T("Achieved") : T("In progress"))}</b></div></div>
+        <div class="sv-b1 dv"><span class="rp-si i-res">${si(IC.bolt, 30)}</span><div><small>${esc(T("Liquidity"))}</small><b class="good">${esc(T("Excellent"))}</b></div></div>
+        <div class="sv-msg"><span class="rp-si i-res">${si(IC.check, 30)}</span><span>${esc(covered ? T("You have sufficient emergency savings and are financially prepared for unexpected expenses.") : T("Keep building your emergency savings."))}</span></div>
+        <div class="em-btns"><button type="button" class="sv-btn" data-close>${esc(T("Save Emergency Fund Plan"))}</button><button type="button" class="sv-btn ghost" data-close>${esc(T("Close"))}</button></div></div>`;
+    };
     const bindManage = root => {
       const form = root.querySelector("#em");
       const apply = () => {
@@ -854,8 +876,13 @@ export const Emergency = {
       };
     };
     el.querySelectorAll('[data-action="em-manage"]').forEach(b => b.onclick = () => {
-      const pp = popup("", { width: 1100, cls: "nw-win pm-win" }), orig = App.refresh;
-      const draw = () => { pp.el.innerHTML = `<div class="em-pop">${manageHtml()}</div>`; iconizeCards(pp.el); bindManage(pp.el); };
+      const pp = popup("", { width: 1250, cls: "wide-popup nw-win pm-win" }), orig = App.refresh;
+      const draw = () => {
+        pp.el.innerHTML = `<div class="em-pop">${manageHtml()}</div>`; bindManage(pp.el);
+        const host = pp.el.querySelector(".em-pop"), avail = window.innerHeight * 0.94 - 30; let z = 1; host.style.zoom = 1;
+        for (let i = 0; i < 4 && z > 0.4; i++) { const hh = host.getBoundingClientRect().height; if (hh <= avail) break; z = Math.max(0.4, z * avail / hh * 0.99); host.style.zoom = z; }
+        pp.el.style.maxHeight = "none"; pp.el.style.overflow = "hidden";
+      };
       App.refresh = (...a) => { orig(...a); if (!pp.closed) draw(); };
       const close = pp.close; pp.close = (...a) => { App.refresh = orig; close(...a); };
       draw();
