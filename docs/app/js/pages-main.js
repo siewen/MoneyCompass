@@ -602,7 +602,7 @@ export const Expenses = {
     const filtering = !!(flt.cat || flt.text.trim() || flt.ess || flt.rep || flt.min || flt.max || flt.days);
     const minA = num(flt.min), maxA = num(flt.max), since = flt.days ? addDays(today(), -(+flt.days)) : null;
     const words = flt.text.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    const shown = d.Expenses.filter(e => (!flt.cat || e.Category === flt.cat) && (!(minA > 0) || e.Amount >= minA) && (!(maxA > 0) || e.Amount <= maxA) && (!since || parseDate(e.Date) >= since) && (!flt.ess || (flt.ess === "yes") === !!e.Essential) && (!flt.rep || !!repeatOn(e)) &&
+    const shown = d.Expenses.filter(e => (!flt.cat || e.Category === flt.cat) && (!(minA > 0) || e.Amount >= minA) && (!(maxA > 0) || e.Amount <= maxA) && (!since || parseDate(e.Date) >= since) && (!flt.ess || (flt.ess.startsWith("i:") ? impOf(e) === flt.ess.slice(2) : (flt.ess === "yes") === !!e.Essential)) && (!flt.rep || !!repeatOn(e)) &&
       words.every(w => `${e.Description || ""} ${T(e.Category)} ${plain(e.Amount)} ${e.Info ? Object.values(e.Info).join(" ") : ""}`.toLowerCase().includes(w)));
     const sorted = shown.sort((a, b) => parseDate(b.Date) - parseDate(a.Date));
     for (const e of sorted) {
@@ -614,7 +614,7 @@ export const Expenses = {
     const filterBar = d.Expenses.length ? `<div class="filter-bar">
       <input type="search" name="f-text" value="${esc(flt.text)}" placeholder="🔍 ${esc(T("Search: shop, amount…"))}">
       <select name="f-cat"><option value="">${esc(T("All categories"))}</option>${usedCats.map(c => `<option value="${esc(c)}"${c === flt.cat ? " selected" : ""}>${esc(categoryLabel(c))}</option>`).join("")}</select>
-      <select name="f-ess"><option value="">${esc(T("All"))}</option><option value="yes"${flt.ess === "yes" ? " selected" : ""}>${esc(T("Essential"))}</option><option value="no"${flt.ess === "no" ? " selected" : ""}>${esc(T("Not essential"))}</option></select>
+      <select name="f-ess"><option value="">${esc(T("All"))}</option><option value="yes"${flt.ess === "yes" ? " selected" : ""}>${esc(T("Essential"))}</option><option value="no"${flt.ess === "no" ? " selected" : ""}>${esc(T("Not essential"))}</option>${IMPORTANCE.map(x => `<option value="i:${x[0]}"${flt.ess === "i:" + x[0] ? " selected" : ""}>${esc(T(x[1]))} ★</option>`).join("")}</select>
       <select name="f-days"><option value="">${esc(T("Whole period"))}</option>${[30, 90, 180, 365].map(n => `<option value="${n}"${String(n) === flt.days ? " selected" : ""}>${esc(T("Last {0} days", n))}</option>`).join("")}</select>
       <span class="amount-range"><input name="f-min" inputmode="decimal" value="${esc(flt.min)}" placeholder="${esc(T("Amount from"))} zł" data-tip="${esc(T("Amount from"))} (zł)"><span>–</span><input name="f-max" inputmode="decimal" value="${esc(flt.max)}" placeholder="${esc(T("Amount to"))} zł" data-tip="${esc(T("Amount to"))} (zł)"></span>
       <label class="check"><input type="checkbox" name="f-rep"${flt.rep ? " checked" : ""}><span>🔁 ${esc(T("Repeating only"))}</span></label>
@@ -646,7 +646,7 @@ export const Expenses = {
         <div class="two">${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), ""))}<div class="hint">${esc(T("Repeating expenses appear automatically in the Calendar, also in the next months."))}</div></div>
         ${check("essential", T("Essential (must pay even in a crisis)"), cat0.Essential)}
         <div class="buttons">${button(T("Add expense"), "add-expense", "main")}</div></form>`);
-    const histCard = card(heading(T("Outflow history")) + hint(T("Click an expense to switch it between essential and not essential. The pen changes date, category, amount and more.")) + filterBar +
+    const histCard = card(hint(T("Click an expense to switch it between essential and not essential. The pen changes date, category, amount and more.")) + filterBar +
         (months.length ? visible.map((m, i) => {
           // Folded by month: the newest month open, older ones closed (all open while you search or filter)
           const total = m.items.reduce((s, e) => s + e.Amount, 0), ess = m.items.filter(e => e.Essential).reduce((s, e) => s + e.Amount, 0);
@@ -700,21 +700,39 @@ export const Expenses = {
     lastEx = { hist: histCard + binCard(["expense"]), side: avgCard + movedCard(d) };
     const openAdd = (cat, date) => {
       const cat1 = findCategory(cat) || cat0;
-      const pp = popup("", { width: 580, cls: "nw-win pm-win" });
-      pp.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC.plus, 24)}</span><h3>${esc(T("Add Expense"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
-        <form id="expense-form"><div class="two">${field(T("Date"), dateInput("date", date || inputDate(today())))}${field(T("Amount (zł)"), numInput("amount", "", T("e.g. {0}", "120,50")))}</div>
-        <div class="cat-row">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], cat1.Name))}${button(T("Edit categories…"), "categories", "second small")}</div>
-        ${field(T("Description (optional)"), textInput("description", "", T("e.g. {0}", "Biedronka")))}
-        <div class="two">${field(T("Repeats"), select("repeat", REPEAT_OPTIONS(), ""))}<div class="hint">${esc(T("Repeating expenses appear automatically in the Calendar, also in the next months."))}</div></div>
-        ${check("essential", T("Essential (must pay even in a crisis)"), !!cat1.Essential)}
-        <div class="buttons">${button(T("Add expense"), "add-expense", "main")}</div></form>`;
-      const f = pp.el.querySelector("#expense-form");
-      f.category.onchange = () => { f.essential.checked = !!findCategory(f.category.value)?.Essential; };
+      const pp = popup("", { width: 980, cls: "nw-win pm-win ee-win" });
+      const sec = (n, t, sub, body) => `<section class="ee-s"><div class="ee-sh"><span class="ee-n">${n}</span><div><b>${esc(t)}</b><small>${esc(sub)}</small></div></div>${body}</section>`;
+      const repOpts = REPEAT_OPTIONS();
+      pp.el.innerHTML = `<div class="ee-hd"><span class="ee-hi">${si(IC.plus, 30)}</span><div><h2>${esc(T("Add Expense"))}</h2><p>${esc(T("Enter the details of a new expense and how important it is."))}</p></div><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
+        <form id="expense-form" class="ee-form">
+          ${sec(1, T("Transaction Information"), T("Basic details about this transaction."), `<div class="ee-r3">${field(T("Date"), dateInput("date", date || inputDate(today())))}${field(T("Amount (zł)"), numInput("amount", "", T("e.g. {0}", "120,50")))}<div class="cat-row">${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], cat1.Name))}${button(T("Edit categories…"), "categories", "second small")}</div></div>`)}
+          ${sec(2, T("Classification"), T("Add a description and set the importance of this expense."), `<div class="ee-r2">${field(T("Description (optional)"), textInput("description", "", T("e.g. {0}", "Biedronka")))}<div class="ee-imp"><label>${esc(T("Expense importance"))}</label><div class="ee-chips" data-ee-imp>${IMPORTANCE.map(([v, l, c]) => `<button type="button" data-v="${v}" style="--c:${c}">${esc(T(l))}</button>`).join("")}</div><small data-ee-impnote></small></div></div><input type="hidden" name="importance" value="${cat1.Essential ? "essential" : "flexible"}"><label class="ee-hid">${check("essential", "", !!cat1.Essential)}</label>`)}
+          ${sec(3, T("Recurrence"), T("How often does this expense occur? Repeating expenses appear automatically in the Calendar."), `<div class="ee-chips ee-rec" data-ee-rec>${repOpts.map(([v, l]) => `<button type="button" data-v="${esc(v)}">${esc(String(l).replace("🔁 ", ""))}</button>`).join("")}</div><div class="ee-hid">${select("repeat", repOpts, "")}</div>`)}
+          ${sec(4, T("Financial Impact Preview"), T("See how this expense affects your financial plan."), `<div class="ee-prev" data-ee-prev></div>`)}
+        </form>
+        <div class="ee-foot"><button class="sv-btn ghost" data-close>${esc(T("Cancel"))}</button><button class="sv-btn" data-action="add-expense">＋ ${esc(T("Add expense"))}</button></div>`;
+      const f = pp.el.querySelector("#expense-form"), root = pp.el, imp = f.importance, ess = f.essential, rep = f.repeat;
+      const paint = () => {
+        root.querySelectorAll("[data-ee-imp] button").forEach(b => b.classList.toggle("on", b.dataset.v === imp.value));
+        root.querySelector("[data-ee-impnote]").textContent = { essential: T("Essential: a payment you must make even in a crisis."), important: T("Important: not vital, but you would rather not skip it."), flexible: T("Flexible: can be reduced when money is tight."), optional: T("Optional: nice to have, the first thing to cut.") }[imp.value];
+        root.querySelectorAll("[data-ee-rec] button").forEach(b => b.classList.toggle("on", b.dataset.v === rep.value));
+        const amt = num(f.amount.value) || 0, mon = rep.value ? Calc.monthlyPln({ Amount: amt, Currency: "PLN", Frequency: rep.value }, d.Settings) : 0;
+        const cell = (ic2, l, v, sub) => `<div><span>${si(ic2, 26)}</span><span><small>${esc(l)}</small><b>${esc(v)}</b><em>${esc(sub)}</em></span></div>`;
+        root.querySelector("[data-ee-prev]").innerHTML = cell(IC.house, T("Budget Category"), categoryLabel(f.category.value).replace(/^\S+\s/, "") || categoryLabel(f.category.value), ess.checked ? T("Part of your essential expenses") : T("Part of your not essential expenses")) +
+          cell(IC.bars, T("Monthly Impact"), rep.value ? pln(mon) : T("One-time"), rep.value ? T("On your monthly budget") : pln(amt)) +
+          cell(IC.calx, T("Annual Impact"), rep.value ? pln(mon * 12) : pln(amt), rep.value ? T("Total per year") : T("This year only")) +
+          cell(IC.trend, T("Forecast Classification"), ess.checked ? (rep.value ? T("Essential Recurring Expense") : T("Essential Expense")) : T("Flexible Expense"), ess.checked ? T("Included in Emergency Fund calculations") : T("Not part of the Emergency Fund"));
+      };
+      root.querySelectorAll("[data-ee-imp] button").forEach(b => b.onclick = () => { imp.value = b.dataset.v; ess.checked = imp.value === "essential"; paint(); });
+      root.querySelectorAll("[data-ee-rec] button").forEach(b => b.onclick = () => { rep.value = b.dataset.v; paint(); });
+      f.addEventListener("input", paint); f.addEventListener("change", paint);
+      f.category.addEventListener("change", () => { ess.checked = !!findCategory(f.category.value)?.Essential; imp.value = ess.checked ? "essential" : "flexible"; paint(); });
+      paint();
       pp.el.querySelector('[data-action="categories"]').onclick = () => { pp.close(); manageCategories(); };
       pp.el.querySelector('[data-action="add-expense"]').onclick = () => {
         const v = values(f), amt = num(v.amount);
         if (!(amt > 0)) { toast(T("Please enter an amount bigger than 0."), "bad"); return; }
-        d.Expenses.push({ Id: uuid(), Date: isoDate(v.date ? parseDate(v.date) : today()), Description: v.description.trim(), Category: v.category, Amount: amt, Essential: v.essential, Repeat: v.repeat || "" });
+        d.Expenses.push({ Id: uuid(), Date: isoDate(v.date ? parseDate(v.date) : today()), Description: v.description.trim(), Category: v.category, Amount: amt, Essential: v.essential, Importance: v.importance, Repeat: v.repeat || "" });
         save(); toast(T("Added: {0}, {1}.", T(v.category), pln(amt))); pp.close(); App.refresh();
       };
       setTimeout(() => f.amount.focus(), 80);
@@ -764,15 +782,19 @@ function movedCard(d) {
       <span class="hint">${esc(T("{0} transfers", items.length))} · <b>${pln(items.reduce((a, t) => a + t.Amount, 0))}</b></span></summary>
       <div class="list">${items.map(t => `<div class="item"><div><b>${esc(t.Description || "–")}</b><span class="hint">${fmtDate(t.Date)}${t.Saved ? " · 🏦 " + esc(T("Savings")) : ""}${t.Info?.OtherAccount ? " → " + esc(t.Info.OtherAccount) : ""}</span></div><b>${pln(t.Amount)}</b></div>`).join("")}</div></details>`).join(""));
 }
+const IMPORTANCE = [["essential", "Essential", "#2EDC9A"], ["important", "Important", "#FFC928"], ["flexible", "Flexible", "#3B9BFF"], ["optional", "Optional", "#9AA7B2"]];
+/** Importance level of an expense: the chosen one, or essential / flexible from the old yes-no switch. */
+const impOf = e => (e.Importance && (e.Importance === "essential") === !!e.Essential) ? e.Importance : (e.Essential ? "essential" : "flexible");
+const impLabel = e => { const k = impOf(e); return (e.Importance && (e.Importance === "essential") === !!e.Essential) ? T(IMPORTANCE.find(x => x[0] === k)[1]) : (e.Essential ? T("Essential") : T("Not essential")); };
 const REPEAT_OPTIONS = (cur = "") => [["", T("Does not repeat")], ...FREQUENCIES.filter(f => f[0] !== ONE_TIME).map(f => [f[0], "🔁 " + T(f[0])]),
   ...(parseCustom(cur) ? [[cur, "🔁 " + freqLabel(cur)]] : [])];
 function expenseRow(e) {
-  const icon = categoryIcon(e.Category);
-  const rep = repeatOn(e);
-  return `<div class="item expense" data-id="${e.Id}">
+  const icon = categoryIcon(e.Category), rep = repeatOn(e), k = impOf(e), col = IMPORTANCE.find(x => x[0] === k)[2];
+  return `<div class="item expense hx" data-id="${e.Id}">
+    <span class="hx-ic">${icon || "💳"}</span>
     <div class="toggle" data-toggle="${e.Id}" title="${esc(T("Click to switch between essential and not essential"))}"><b>${esc(e.Description || T(e.Category))}</b>
-      <span class="hint">${fmtDate(e.Date)} · ${esc((icon ? icon + " " : "") + T(e.Category))} · <span class="${e.Essential ? "ess" : "noness"}">${esc(e.Essential ? T("Essential") : T("Not essential"))}</span> · <button class="rep-tag${rep ? " on" : ""}" data-repeat="${e.Id}" title="${esc(T("How often does it repeat?"))}">🔁 ${esc(rep ? freqLabel(rep) : T("Does not repeat"))}</button></span></div>
-    <b>${pln(e.Amount)}</b>${infoBtn("expense", e)}
+      <span class="hx-m"><span class="hx-d">${fmtDate(e.Date)}</span><span class="hx-c">${esc(T(e.Category))}</span><span class="hx-i" style="--c:${col}">${esc(impLabel(e))}</span><button class="rep-tag${rep ? " on" : ""}" data-repeat="${e.Id}" title="${esc(T("How often does it repeat?"))}">🔁 ${esc(rep ? freqLabel(rep) : T("Does not repeat"))}</button></span></div>
+    <b class="hx-a">${pln(e.Amount)}</b>${infoBtn("expense", e)}
     <button class="icon-btn c-repeat${rep ? " on" : ""}" data-repeat="${e.Id}" title="${esc(rep ? T("Repeats: {0} – click to change", freqLabel(rep)) : T("Click to choose how often it repeats"))}">${ICON.repeat}</button>
     <button class="icon-btn c-edit${e.Edited ? " on" : ""}" data-edit="${e.Id}" title="${esc(e.Edited ? T("Changed by you – click to change again") : T("Change"))}">${ICON.edit}</button>
     <button class="icon-btn c-del" data-del="${e.Id}" title="${esc(T("Delete"))}">${ICON.trash}</button></div>`;
@@ -823,7 +845,7 @@ function bindExpenseRows(root, after = () => App.refresh()) {
     });
   });
   root.querySelectorAll("[data-toggle]").forEach(x => x.onclick = () => {
-    const e = d.Expenses.find(y => y.Id === x.dataset.toggle); e.Essential = !e.Essential; save(); after();
+    const e = d.Expenses.find(y => y.Id === x.dataset.toggle); e.Essential = !e.Essential; e.Importance = e.Essential ? "essential" : "flexible"; save(); after();
   });
   root.querySelectorAll("[data-edit]").forEach(x => x.onclick = () => editExpense(d.Expenses.find(y => y.Id === x.dataset.edit), after));
   root.querySelectorAll("[data-del]").forEach(x => x.onclick = async () => {
@@ -839,15 +861,16 @@ function editExpense(e, after) {
   const p = popup(`<div class="ee-hd"><span class="ee-hi">${si(IC.docs, 30)}</span><div><h2>${esc(T("Edit Expense"))}</h2><p>${esc(T("Update transaction details and budget classification."))}</p></div><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
     <form class="ee-form">
       ${sec(1, T("Transaction Information"), T("Basic details about this transaction."), `<div class="ee-r3">${field(T("Date"), dateInput("date", inputDate(parseDate(e.Date))))}${field(T("Amount (zł)"), numInput("amount", plain(e.Amount)))}${field(T("Category"), select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], e.Category))}</div>`)}
-      ${sec(2, T("Classification"), T("Add a description and set the importance of this expense."), `<div class="ee-r2">${field(T("Description"), textInput("description", e.Description))}<div class="ee-imp"><label>${esc(T("Expense importance"))}</label><div class="ee-chips" data-ee-imp><button type="button" data-v="1">${si(IC.shield, 18)} ${esc(T("Essential"))}</button><button type="button" data-v="0">${esc(T("Not essential"))}</button></div><small>${esc(T("Essential: a payment you must make even in a crisis."))}</small></div></div><label class="ee-hid">${check("essential", "", e.Essential)}</label>`)}
+      ${sec(2, T("Classification"), T("Add a description and set the importance of this expense."), `<div class="ee-r2">${field(T("Description"), textInput("description", e.Description))}<div class="ee-imp"><label>${esc(T("Expense importance"))}</label><div class="ee-chips" data-ee-imp>${IMPORTANCE.map(([v, l, c]) => `<button type="button" data-v="${v}" style="--c:${c}">${esc(T(l))}</button>`).join("")}</div><small data-ee-impnote></small></div></div><input type="hidden" name="importance" value="${impOf(e)}"><label class="ee-hid">${check("essential", "", e.Essential)}</label>`)}
       ${sec(3, T("Recurrence"), T("How often does this expense occur?"), `<div class="ee-chips ee-rec" data-ee-rec>${repOpts.map(([v, l]) => `<button type="button" data-v="${esc(v)}">${esc(String(l).replace("🔁 ", ""))}</button>`).join("")}</div><div class="ee-hid">${select("repeat", repOpts, rep0)}</div>`)}
       ${sec(4, T("Financial Impact Preview"), T("See how this expense affects your financial plan."), `<div class="ee-prev" data-ee-prev></div>`)}
     </form>
     <div class="ee-foot"><button class="sv-btn ghost" data-close>${esc(T("Cancel"))}</button><button class="sv-btn ee-del" data-del-exp>🗑 ${esc(T("Delete Expense"))}</button><button class="sv-btn" data-save>✓ ${esc(T("Save Changes"))}</button></div>`, { width: 980, cls: "nw-win pm-win ee-win" });
   {
-    const root = p.el, ess = root.querySelector('[name="essential"]'), rep = root.querySelector('[name="repeat"]');
+    const root = p.el, imp = root.querySelector('[name="importance"]'), ess = root.querySelector('[name="essential"]'), rep = root.querySelector('[name="repeat"]');
     const paint = () => {
-      root.querySelectorAll("[data-ee-imp] button").forEach(b => b.classList.toggle("on", (b.dataset.v === "1") === ess.checked));
+      root.querySelectorAll("[data-ee-imp] button").forEach(b => b.classList.toggle("on", b.dataset.v === imp.value));
+      root.querySelector("[data-ee-impnote]").textContent = { essential: T("Essential: a payment you must make even in a crisis."), important: T("Important: not vital, but you would rather not skip it."), flexible: T("Flexible: can be reduced when money is tight."), optional: T("Optional: nice to have, the first thing to cut.") }[imp.value];
       root.querySelectorAll("[data-ee-rec] button").forEach(b => b.classList.toggle("on", b.dataset.v === rep.value));
       const amt = num(root.querySelector('[name="amount"]').value) || 0, cat = root.querySelector('[name="category"]').value;
       const mon = rep.value ? Calc.monthlyPln({ Amount: amt, Currency: "PLN", Frequency: rep.value }, D().Settings) : 0;
@@ -857,7 +880,7 @@ function editExpense(e, after) {
         cell(IC.calx, T("Annual Impact"), rep.value ? pln(mon * 12) : pln(amt), rep.value ? T("Total per year") : T("This year only")) +
         cell(IC.trend, T("Forecast Classification"), ess.checked ? (rep.value ? T("Essential Recurring Expense") : T("Essential Expense")) : T("Flexible Expense"), ess.checked ? T("Included in Emergency Fund calculations") : T("Not part of the Emergency Fund"));
     };
-    root.querySelectorAll("[data-ee-imp] button").forEach(b => b.onclick = () => { ess.checked = b.dataset.v === "1"; paint(); });
+    root.querySelectorAll("[data-ee-imp] button").forEach(b => b.onclick = () => { imp.value = b.dataset.v; ess.checked = imp.value === "essential"; paint(); });
     root.querySelectorAll("[data-ee-rec] button").forEach(b => b.onclick = () => { rep.value = b.dataset.v; paint(); });
     root.querySelectorAll("input,select").forEach(x => x.addEventListener("input", paint)); root.querySelectorAll("select").forEach(x => x.addEventListener("change", paint));
     root.querySelector("[data-del-exp]").onclick = async () => {
@@ -871,7 +894,7 @@ function editExpense(e, after) {
     if (!(amt > 0)) { toast(T("Please enter an amount bigger than 0."), "bad"); return; }
     const before = repeatOn(e);
     const changed = isoDate(parseDate(v.date)) !== e.Date || amt !== e.Amount || v.category !== e.Category || v.description.trim() !== e.Description;
-    Object.assign(e, { Date: isoDate(parseDate(v.date)), Amount: amt, Category: v.category, Description: v.description.trim(), Essential: v.essential });
+    Object.assign(e, { Date: isoDate(parseDate(v.date)), Amount: amt, Category: v.category, Description: v.description.trim(), Essential: v.essential, Importance: v.importance });
     if (changed) e.Edited = true;
     if (v.repeat !== before) { setRepeat(D(), e, ""); if (v.repeat) setRepeat(D(), e, v.repeat); }
     const oldCat = p.oldCat;

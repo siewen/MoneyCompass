@@ -1984,3 +1984,20 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .ee-win .ee-hd{padding-bottom:10px}.ee-hi{width:48px;height:48px}.ee-hd h2{font-size:24px}
 .ee-foot{position:sticky;bottom:0;background:#141a19;padding:12px 6px;margin-top:0;z-index:2}
 .ee-prev b{font-size:17px}
+
+/* ---- Outflow history redesign (hx-) + importance chips ---- */
+.ee-chips button[data-v][style].on{border-color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c);box-shadow:0 0 0 1px var(--c) inset}
+.hist-month{border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.025);margin:10px 0;overflow:hidden}
+.hist-month>summary{padding:12px 16px;background:rgba(46,220,154,.06);display:flex;justify-content:space-between;gap:12px;font-size:15px}
+.hist-month .list{display:grid;gap:0}
+.item.expense.hx{display:grid;grid-template-columns:44px 1fr auto auto auto auto auto;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.06)}
+.hx-ic{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.07);display:grid;place-items:center;font-size:20px}
+.hx .toggle{min-width:0;cursor:pointer}.hx .toggle>b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hx-m{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px;font-size:12px}
+.hx-d{color:#9fb0ab}.hx-c{color:#cfe0da;background:rgba(255,255,255,.06);padding:2px 9px;border-radius:999px}
+.hx-i{color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);padding:2px 9px;border-radius:999px;font-weight:700}
+.hx .rep-tag{font-size:12px;padding:2px 9px;border-radius:999px}
+.hx-a{font-size:17px;white-space:nowrap}
+.filter-bar{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px}
+.filter-bar input,.filter-bar select{border-radius:999px!important}
+@media(max-width:700px){.item.expense.hx{grid-template-columns:40px 1fr auto}.hx .c-repeat,.hx .c-edit,.hx .c-del{grid-row:2}}
