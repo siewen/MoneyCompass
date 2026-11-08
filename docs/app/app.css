@@ -1358,3 +1358,36 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .nw-imp select, .nw-imp input { background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.16); color: #E8F1EE; border-radius: 10px; padding: 8px 10px; } .nw-imp .chip { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.14); color: #E8F1EE; border-radius: 999px; } .nw-imp .chip.on { background: rgba(52,211,153,.2); border-color: #34D399; }
 .nw-imp .btn.main { background: linear-gradient(180deg,#34D399,#10B981); color: #04281D; border: 0; }
 @media (max-width: 800px) { .nw-itbs { grid-template-columns: 1fr 1fr; } .nw-itype, .nw-file { flex-wrap: wrap; } }
+
+/* Optimize my finances */
+.nw-opt { padding: 14px !important; } .popup.nw-opt { padding: 14px !important; }
+.nw-opt .card { background: rgba(255,255,255,.04) !important; border: 1px solid rgba(255,255,255,.1) !important; border-radius: 14px; color: #E8F1EE; }
+.nw-opt .card h2, .nw-opt .card h3 { color: #fff; } .nw-opt .hint { color: #A5B8B1; } .nw-opt .good { color: #6EE7B7; }
+.nw-opt .advice { border: 2px solid rgba(255,255,255,.14); border-radius: 14px; padding: 12px 14px; margin-top: 10px; cursor: pointer; background: rgba(255,255,255,.03); }
+.nw-opt .advice.primary { border-color: #34D399; background: rgba(52,211,153,.12); } .nw-opt .advice.warn { border-color: #E5B53A; background: rgba(229,181,58,.08); } .nw-opt .advice.bad { border-color: #EF6B6B; background: rgba(239,107,107,.08); }
+.nw-opt .go-link { color: #6EE7B7; font-weight: 700; display: block; margin-top: 6px; }
+.nw-opt .offer { padding: 8px 0; } .nw-opt hr { border-color: rgba(255,255,255,.08); }
+.nw-opt .offer .btn.second, .nw-opt .btn.second.small { background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.5); color: #6EE7B7; border-radius: 999px; }
+.nw-opt .rate { color: #34D399; font-size: 20px; }
+.nw-opt .nw-foot { margin: 0; position: sticky; bottom: 0; background: #0E2420; } .nw-opt .nw-foot .btn.second { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.15); color: #fff; padding: 9px 22px; }
+
+/* Interactive Onboarding */
+.nw-gd { padding: 0 !important; } .popup.nw-gd { padding: 0 !important; }
+.nw-gd .g2-step, .nw-gd .g2-panel { --c: #34D399 !important; }
+.nw-gd .nw-gh { padding: 20px 26px; display: flex; gap: 28px; align-items: center; margin: 0; background: linear-gradient(120deg, rgba(16,185,129,.12), transparent 60%); }
+.nw-gd .g2-progress, .nw-gd .g2-ring { width: 130px; height: 130px; } .nw-gd .g2-ring circle { stroke-width: 7; } .nw-gd .g2-ring .bg { stroke: rgba(255,255,255,.1); } .nw-gd .g2-ring .fg { stroke: #34D399; } .nw-gd .g2-ring-text { font-size: 22px; color: #fff; }
+.nw-gd .g2-title { flex: 1; } .nw-gd .g2-title h2 { font-size: 28px; color: #fff; margin: 0 0 16px; line-height: 1.25; }
+.nw-seg { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; } .nw-seg i { height: 8px; border-radius: 4px; background: rgba(255,255,255,.14); } .nw-seg i.on { background: #34D399; }
+.nw-gd .g2-main { padding: 0 20px; gap: 16px; } .nw-gd .g2-nav { background: rgba(255,255,255,.03); border-radius: 14px; padding: 8px; }
+.nw-gd .g2-step { color: #E8F1EE; } .nw-gd .g2-step.on { background: rgba(52,211,153,.18); } .nw-gd .g2-step-text b { font-size: 16px; color: #fff; } .nw-gd .g2-step-text small { color: #A5B8B1; } .nw-gd .g2-step.on .g2-step-text small { color: #34D399; font-weight: 700; }
+.nw-gd .g2-dot { background: #1B2B30; color: #E8F1EE; } .nw-gd .g2-step.done .g2-dot, .nw-gd .g2-step.on .g2-dot { background: #1FBF85; color: #04281D; }
+.nw-gd .g2-panel { background: rgba(255,255,255,.035); border: 1px solid rgba(52,211,153,.22); color: #E8F1EE; border-radius: 16px; }
+.nw-gd .g2-panel-head h3 { font-size: 34px; color: #fff; } .nw-gd .g2-panel-head small { text-transform: none; font-size: 18px; color: #E8F1EE; letter-spacing: 0; } .nw-gd .g2-icon { width: 90px; height: 90px; border-radius: 50%; background: rgba(52,211,153,.16); font-size: 42px; }
+.nw-gd .g2-why { font-size: 17px; color: #C9D8D2; }
+.nw-gd .g2-form { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); } .nw-gd .g2-form h4 { color: #fff; font-size: 20px; text-transform: none; letter-spacing: 0; }
+.nw-gd input, .nw-gd select { background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.16); color: #E8F1EE; border-radius: 10px; }
+.nw-gd .btn.main { background: linear-gradient(180deg,#34D399,#10B981) !important; color: #04281D; border: 0; border-radius: 999px; font-weight: 700; padding: 11px 28px; }
+.nw-gd .btn.second { background: transparent; border: 1px solid rgba(52,211,153,.6); color: #fff; border-radius: 999px; }
+.nw-gd .g2-checks li { background: rgba(255,255,255,.05); color: #A5B8B1; } .nw-gd .g2-checks li.ok { color: #fff; background: rgba(52,211,153,.18); }
+.nw-gd .g2-foot { margin: 14px 20px 18px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.1); } .nw-fnote { flex: 1; color: #A5B8B1; } .nw-gd .g2-foot .check { color: #34D399; }
+@media (max-width: 800px) { .nw-gd .nw-gh { flex-wrap: wrap; } .nw-gd .g2-title h2 { font-size: 20px; } .nw-gd .g2-progress, .nw-gd .g2-ring { width: 90px; height: 90px; } }

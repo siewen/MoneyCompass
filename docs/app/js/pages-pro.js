@@ -128,7 +128,7 @@ const TAB_NAMES = { income: "Inflows", expenses: "Outflows", emergency: "Emergen
 
 export async function openOptimize() {
   if (!(await requirePro(T("Optimize my finances")))) return;
-  const p = popup("", { width: 1200, cls: "wide-popup" });
+  const p = popup("", { width: 1280, cls: "wide-popup nw-win nw-opt" });
   const draw = () => { p.el.innerHTML = optimizeHtml(); bind(); };
   const bind = () => {
     p.el.querySelectorAll("[data-route]").forEach(c => c.onclick = () => { p.close(); App.go(c.dataset.route); });
@@ -212,7 +212,7 @@ function optimizeHtml() {
     ${option("📊", T("Crypto savings"), T("Higher rates on stablecoins and crypto, often without time limits. But no state guarantee: if the platform fails, your money can be lost."),
       esc(T("Rates differ a lot between platforms and coins and change often – there is no guarantee.")), ["high", T("High – no BFG guarantee, prices can fall")], T("Usually same day"), T("Only money you can afford to lose"))}
     ${card(heading(T("Please note")) + hint(T("These suggestions are calculated from what you entered and are estimates. They are not financial, investment or tax advice.")) + `<p class="hint"><a href="../terms.html#${lang()}" target="_blank" rel="noopener">${esc(T("Terms of use"))}</a></p>`)}
-  </div><div class="popup-buttons"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
+  </div><div class="nw-foot"><span class="nw-fsh">${ico("shield", "big")}</span><div><small>${esc(T("Your data is processed locally and remains private."))}</small></div><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
 }
 
 // ================================================================= Savings goals

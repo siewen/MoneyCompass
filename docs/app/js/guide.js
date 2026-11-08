@@ -4,6 +4,7 @@
 import { T, State, save, license, pln, num, uuid, isoDate, today, mainCur, categories, categoryLabel, OTHER, Calc } from "./core.js";
 import { esc, popup, toast, field, numInput, textInput, select } from "./ui.js";
 import { App } from "./app.js";
+import { ico } from "./nw.js";
 import { languageChips, setLanguage } from "./dialogs.js";
 
 const D = () => State.data;
@@ -101,17 +102,17 @@ export function openGuide(step) {
   hideBar();
   const d = D();
   current = step ?? Math.max(0, STEPS.findIndex(s => !s.done(d)));
-  const p = popup("", { width: 920, cls: "guide-popup g2" });
+  const p = popup("", { width: 1100, cls: "guide-popup g2 nw-win nw-gd" });
   let flash = "";   // the message after a quick form was saved
   const draw = () => {
     const s = STEPS[current], doneCount = STEPS.filter(x => x.done(d)).length, finished = doneCount === STEPS.length;
     const checks = s.checks ? s.checks(d) : [];
     p.el.innerHTML = `
-      <div class="g2-head">
+      <div class="nw-hd"><span class="nw-hi">${ico("rocket")}</span><h2>${esc(T("Interactive Onboarding"))}</h2><button class="nw-x" data-close aria-label="Close">✕</button></div>
+      <div class="g2-head nw-gh">
         <div class="g2-progress">${ring(doneCount, STEPS.length)}</div>
-        <div class="g2-title"><h2>${esc(T("Getting started"))}</h2>
-          <p class="hint">${esc(finished ? T("All set – MoneyCompass knows enough to give you a full picture.") : T("{0} of {1} steps done. Fill in a step right here, or import your statements.", doneCount, STEPS.length))}</p></div>
-        <div class="g2-lang">${languageChips()}</div></div>
+        <div class="g2-title"><h2>${esc(finished ? T("All set – MoneyCompass knows enough to give you a full picture.") : T("Complete these {0} steps to set up MoneyCompass and build your financial overview.", STEPS.length))}</h2>
+          <div class="nw-seg">${STEPS.map(x => `<i class="${x.done(d) ? "on" : ""}"></i>`).join("")}</div></div></div>
       <div class="g2-main">
         <nav class="g2-nav">${STEPS.map((x, i) => `<button class="g2-step${i === current ? " on" : ""}${x.done(d) ? " done" : ""}" data-step="${i}" style="--c:${x.color}">
           <span class="g2-dot">${x.done(d) ? "✓" : i + 1}</span><span class="g2-step-text"><b>${esc(T(x.title))}</b><small>${esc(x.done(d) ? T("Done") : i === current ? T("Now") : T("To do"))}</small></span></button>`).join("")}</nav>
@@ -128,6 +129,7 @@ export function openGuide(step) {
           <details class="g2-detail"><summary>${esc(T("More about this step"))}</summary><p>${esc(T(s.text))}</p></details>
         </section></div>
       <div class="g2-foot">
+        <span class="nw-fsh">${ico("shield", "big")}</span><small class="nw-fnote">${esc(T("Your data is secure and will never be shared with third parties."))}</small>
         <label class="check"><input type="checkbox" name="hide"${d.Settings.GuideHidden ? " checked" : ""}><span>${esc(T("Don't show the guide again"))}</span></label>
         <div class="buttons">
           ${current > 0 ? `<button class="btn second" data-g="back">← ${esc(T("Back"))}</button>` : ""}
