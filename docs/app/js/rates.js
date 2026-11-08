@@ -62,6 +62,13 @@ export const DEPOSITS_RANKING = "https://rankomat.pl/finanse/rankingi/ranking-lo
 
 function load() { try { return JSON.parse(store.get("mc-rates")) || {}; } catch { return {}; } }
 
+// Official websites of banks that appear in the rankings (used when the ranking gave no address for an offer).
+const BANK_SITES = [[/pko/i, "https://www.pkobp.pl/"], [/\bing\b/i, "https://www.ing.pl/"], [/erste/i, "https://www.erstebank.pl/"], [/toyota/i, "https://www.toyotabank.pl/"], [/raiffeisen/i, "https://www.raiffeisendigital.pl/"],
+  [/credit agricole/i, "https://www.credit-agricole.pl/"], [/nest/i, "https://www.nestbank.pl/"], [/volkswagen/i, "https://www.vwbank.pl/"], [/renault/i, "https://www.renaultbank.pl/"], [/inbank/i, "https://inbank.pl/"],
+  [/millennium/i, "https://www.bankmillennium.pl/"], [/mbank/i, "https://www.mbank.pl/"], [/santander/i, "https://www.santander.pl/"], [/pekao/i, "https://www.pekao.com.pl/"], [/alior/i, "https://www.aliorbank.pl/"],
+  [/bnp/i, "https://www.bnpparibas.pl/"], [/citi/i, "https://www.citibankonline.pl/"], [/velo/i, "https://www.velobank.pl/"], [/bos|ochrony/i, "https://www.bankbps.pl/"], [/getin/i, "https://www.velobank.pl/"], [/credit.?agricole/i, "https://www.credit-agricole.pl/"]];
+const bankSite = name => { const b = BANK_SITES.find(([re]) => re.test(name || "")); return b ? b[1] : ""; };
+
 export const Rates = {
   data: Object.assign({ Usd: 0, Eur: 0, ExchangeDate: null, ReferenceRate: 0, Bonds: [], SavingsOffers: [], DepositOffers: [], OffersChecked: null, Updated: null }, load()),
   updating: false, failed: false, listeners: [],
@@ -78,7 +85,8 @@ export const Rates = {
   get loansChecked() { const k = this.data.LoanOffers; return k?.Checked && (k.mortgage?.length >= 3 || k.cash?.length >= 3) ? k.Checked : BUILT_IN_LOANS.Checked; },
   bond(code) { return this.data.Bonds?.find(b => b.Code === code)?.Rate; },
   bestOffer() { return [...this.savings, ...this.deposits].sort((a, b) => b.Rate - a.Rate)[0] || null; },
-  link(o) { return o.Url || "https://www.google.com/search?q=" + encodeURIComponent(`${o.Bank} ${o.Name}`.trim()); },
+  /** The offer itself; without a stored address, the bank's own website (never a search page). */
+  link(o) { return o.Url || bankSite(o.Bank) || "https://rankomat.pl/finanse/"; },
 
   async refresh(force = false) {
     if (!State.data.Settings.OnlineRates || this.updating) return;

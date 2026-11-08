@@ -66,6 +66,11 @@ function parseOffers(html, defaultDays) {
       if (href.startsWith("/")) href = "https://rankomat.pl" + href;
       if (/^http/i.test(href)) { url = href; break; }
     }
+    // Some rows have no <a> with a link: look for data attributes, onclick and any "/redirect/" address in the row
+    if (!url) {
+      const m = /(?:data-(?:href|url|link|redirect|target)|onclick|data-action)="[^"]*?((?:https?:\/\/|\/)[^"'\s)]+)/i.exec(row[1]) || /["'(]((?:https?:\/\/rankomat\.pl)?\/finanse\/redirect\/[^"'\s)]+)/i.exec(row[1]);
+      if (m) { let h = decode(m[1]).trim(); if (h.startsWith("/")) h = "https://rankomat.pl" + h; if (/^http/i.test(h)) url = h; }
+    }
     offers.push({ Url: url, Bank: names[0], Name: names[1] || "", Rate: rate, MaxAmount: maxAmount(all), Days: days(all, defaultDays), Details: all.length > 160 ? all.slice(0, 157).trimEnd() + "…" : all });
   }
   const seen = new Set();
