@@ -469,7 +469,7 @@ export const Budget = {
     const bHead = pageHead({ icon: "wallet", title: T("Budget Plan"), sub: T("Plan spending, control expenses and maximize savings."),
       kpis: [{ l: T("Monthly Budget"), v: pln(bd.kpis.total), icon: "wallet", cls: "in" }, { l: T("Spent This Month"), v: pln(bd.kpis.spent), icon: "cart", cls: "src" }, { l: T("Remaining Budget"), v: pln(bd.kpis.left), icon: "check", cls: "in", vcls: bd.kpis.left < 0 ? "bad" : "" }, { l: T("Budget Health Score"), v: bd.kpis.score + " / 100", icon: "heart", cls: "in", hi: true }],
       btn: `<button class="btn main rp-gen" data-action="b-new">＋ ${esc(T("Create Budget"))}</button>` });
-    el.innerHTML = bHead + bd.html + `<details class="cal-fold bp-manage"><summary>⚙ ${esc(T("Manage limits"))}</summary><div class="grid">
+    el.innerHTML = bHead + bd.html + `<div class="bp-pair"><section class="nw-card dz bp-panel"><div class="nw-ch"><span class="rp-si i-rank">${si(IC.wallet, 24)}</span><h3>${esc(T("Manage limits"))}</h3></div><div class="bp-flat">
       ${dcard("cal","cal",monthName(today()), row(T("Spent in categories with a limit"), pln(spent)) + row(T("Your limits together"), pln(total)) +
         row(T("Left this month"), pln(total - spent), total - spent < 0 ? "bad" : "good") +
         (d.Goals.length ? row(T("To set aside for savings goals"), pln(goalsPerMonth(d))) : ""))}
@@ -480,11 +480,11 @@ export const Budget = {
         ${field(T("Limit per month (zł)"), numInput("limit", "", T("e.g. {0}", "800")))}
         ${button(T("Save limit"), "save-limit", "main")}</form>`)}
       ${binCard(["budget"])}
-    </div></details>`;
+    </div></section></div>`;
     // Savings goals: part of the budget plan (how much to set aside each month), with their own cards
-    const sec = document.createElement("section"); sec.className = "goals-section";
-    sec.innerHTML = `<h2 class="section-title"><span class="rp-si i-res">${si(IC.flag, 26)}</span> ${esc(T("Savings goals"))}</h2><div class="goals-host"></div>`;
-    el.appendChild(sec);
+    const sec = document.createElement("section"); sec.className = "nw-card dz bp-panel goals-section";
+    sec.innerHTML = `<div class="nw-ch"><span class="rp-si i-res">${si(IC.flag, 24)}</span><h3>${esc(T("Savings goals"))}</h3></div><div class="goals-host bp-flat"></div>`;
+    el.querySelector(".bp-pair").appendChild(sec);
     Goals.render(sec.querySelector(".goals-host"));
     const gg = sec.querySelector(".goals-host .grid"); if (gg) gg.dataset.key = "web2:goals";
     el.querySelectorAll("[data-budget]").forEach(b => {
@@ -495,7 +495,7 @@ export const Budget = {
       b.querySelector("b").after(del);
     });
     const fm = el.querySelector("#budget");
-    el.querySelector('[data-action="b-new"]').onclick = () => { const dt = fm.closest("details"); if (dt) dt.open = true; fm.scrollIntoView({ behavior: "smooth", block: "center" }); fm.querySelector('[name="limit"]')?.focus(); };
+    el.querySelector('[data-action="b-new"]').onclick = () => { fm.scrollIntoView({ behavior: "smooth", block: "center" }); fm.querySelector('[name="limit"]')?.focus(); };
     el.querySelector('[data-action="b-opt"]').onclick = () => App.openOptimize();
     el.querySelector('[data-action="save-limit"]').onclick = () => {
       const v = values(fm), lim = num(v.limit);
