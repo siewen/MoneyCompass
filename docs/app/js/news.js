@@ -5,6 +5,11 @@ import { esc, popup } from "./ui.js";
 import { WEB_BUILD } from "./version.js";
 
 export const NEWS = [
+  { build: 96, date: "2026-11-08", items: {
+    en: ["✨ Import window closer to the design: solid glowing icons, chips with icons and a Privacy Protected badge."],
+    pl: ["✨ Okno importu bliższe projektowi: pełne ikony, znaczniki z ikonami i plakietka prywatności."],
+    de: ["✨ Import-Fenster näher am Design: gefüllte Symbole, Chips mit Symbolen und Datenschutz-Badge."],
+    fr: ["✨ Fenêtre d'import plus proche du design : icônes pleines, pastilles avec icônes et badge de confidentialité."] } },
   { build: 95, date: "2026-11-08", items: {
     en: ["✨ New Export window (what to export, date range, Excel/PDF/Word), new Income Management page and new Import window, all in the new design."],
     pl: ["✨ Nowe okna Eksportu i Importu oraz nowa strona Przychodów w nowym wyglądzie."],
