@@ -1571,3 +1571,19 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .ln-band { gap: 18px; } .ln-bars { margin-left: auto; display: flex; align-items: flex-end; gap: 6px; height: 70px; } .ln-bars i { width: 10px; background: linear-gradient(180deg,#34E8A8,#0E8F63); border-radius: 3px; box-shadow: 0 0 8px rgba(46,240,168,.5); } .dz-bt small { color: #CFE3DB; }
 .goals-section .section-title{display:flex;align-items:center;gap:10px}.goals-section .section-title .rp-si{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center}.goals-section .section-title .rp-si svg{width:22px;height:22px}
 .bp-manage .nw-card.dz{border-radius:18px}.bp-manage .nw-ch{display:flex;align-items:center;gap:10px;margin-bottom:10px}.bp-manage .nw-ch h3{margin:0}
+/* Manage sections: calmer, tile-based look */
+.bp-manage > summary { padding: 14px 18px; font-size: 15px; letter-spacing: .2px; display: flex; align-items: center; gap: 8px; }
+.bp-manage > summary::after { content: "▾"; margin-left: auto; color: #34E8A8; transition: transform .2s; } .bp-manage[open] > summary::after { transform: rotate(180deg); }
+.bp-manage .card.nw-card { background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)); border: 1px solid rgba(60,220,160,.16); box-shadow: 0 6px 22px rgba(0,0,0,.28); }
+.bp-manage .sav-figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 6px 0 14px; }
+.bp-manage .sav-figures > * { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); border-radius: 14px; padding: 12px 14px; }
+.bp-manage .sav-figures b, .bp-manage .sav-figures strong { font-size: 20px; }
+.bp-manage .loan-item { background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.07); border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; transition: border-color .15s, transform .15s; }
+.bp-manage .loan-item:hover { border-color: rgba(52,232,168,.55); transform: translateY(-1px); }
+.bp-manage .loan-item > .right b { color: #34E8A8; font-size: 17px; }
+.bp-manage .list .item { border: 0; }
+.bp-manage input, .bp-manage select { background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.09); border-radius: 12px; }
+.bp-manage input:focus, .bp-manage select:focus { border-color: #34E8A8; box-shadow: 0 0 0 3px rgba(52,232,168,.18); outline: 0; }
+.bp-manage label, .bp-manage .field > span { color: #BFD3CB; font-size: 13px; }
+.bp-manage .btn.main, .bp-manage button.main { background: linear-gradient(135deg,#34E8A8,#16B77E); color: #03281C; font-weight: 800; border-radius: 999px; box-shadow: 0 0 14px rgba(52,232,168,.35); }
+.bp-manage .progress { height: 10px; border-radius: 99px; }
