@@ -2033,3 +2033,15 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .hp-dl{display:inline-block;text-decoration:none;padding:11px 20px}
 .nw-ft{display:flex;justify-content:space-between;align-items:center;padding:14px 28px 20px;position:sticky;bottom:0;background:linear-gradient(0deg,#0B1519 70%,transparent)}
 @media(max-width:900px){.hp-grid{grid-template-columns:1fr}}
+/* What's new window */
+.wn-win .nw-hd{padding:22px 28px 6px}
+.wn-list{display:grid;gap:12px;padding:12px 28px 4px;max-height:62vh;overflow:auto}
+.wn-item{padding:14px 18px!important}
+.wn-new{border-color:rgba(46,220,154,.5)!important;box-shadow:0 0 22px rgba(46,220,154,.15)}
+.wn-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.wn-b{font-weight:800;font-size:16px;color:#fff}.wn-d{margin-left:auto;color:#9fb0ab;font-size:13px}
+.wn-item ul{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.wn-item li{display:flex;gap:10px;align-items:flex-start;color:#dbe7e3;font-size:14.5px;line-height:1.5}
+.wn-item li i{flex:none;width:18px;height:18px;margin-top:2px;color:#F5B83D}.wn-item li i .nwi{width:18px;height:18px;color:#F5B83D}
+.wn-ft{gap:16px}.wn-ft .check{margin:0}
+.wn-note{padding:0 28px 18px;margin:0}

@@ -1,3 +1,4 @@
+import { ico } from "./nw.js";
 // "What's new": shown once after an update (only the changes since the last visit), and from ? → What's new.
 // Add a new entry at the TOP with every web build that users should know about.
 import { T, lang, store, fmtDate, State, save } from "./core.js";
@@ -463,13 +464,13 @@ export function openNews(all = false, onClose) {
   const s = seen();
   const list = all || s === null ? NEWS.slice(0, all ? NEWS.length : 3) : NEWS.filter(n => n.build > s);
   const l = lang();
-  const box = popup(`<div class="box-head"><span class="box-icon go">✨</span><h2>${esc(T("What's new"))}</h2></div>
-    ${list.map(n => `<div class="news"><div class="news-head"><b>${esc(T("Build {0}", n.build))}</b><span class="hint">${fmtDate(n.date)}</span></div>
-      <ul>${(n.items[l] || n.items.en).map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`).join("")}
-    <div class="box-buttons"><button class="btn go" data-close>${esc(T("OK"))}</button></div>
-    <label class="check"><input type="checkbox" name="newsoff"${State.data.Settings.NewsHidden ? " checked" : ""}><span>${esc(T("Don't show what's new after updates"))}</span></label>
-    <p class="hint">${esc(T("You can switch it back on in Options → Backup & restore, and always find it in ? → About."))}</p>`,
-    { width: 520, cls: "box", onClose: () => {
+  const clean = x => String(x).replace(/^\s*✨\s*/, "");
+  const box = popup(`<div class="nw-hd"><span class="nw-hi">${ico("star")}</span><div><h2>${esc(T("What's new"))}</h2><p class="nw-sub">${esc(T("The latest improvements to MoneyCompass."))}</p></div><button class="nw-x" data-close aria-label="Close">✕</button></div>
+    <div class="wn-list">${list.map((n, i) => `<div class="nw-card wn-item${i === 0 ? " wn-new" : ""}"><div class="wn-head"><span class="wn-b">${esc(T("Build {0}", n.build))}</span>${i === 0 ? `<span class="em-pill">${esc(T("Latest"))}</span>` : ""}<span class="wn-d">${fmtDate(n.date)}</span></div>
+      <ul>${(n.items[l] || n.items.en).map(x => `<li><i>${ico("star")}</i><span>${esc(clean(x))}</span></li>`).join("")}</ul></div>`).join("")}</div>
+    <div class="nw-ft wn-ft"><label class="check"><input type="checkbox" name="newsoff"${State.data.Settings.NewsHidden ? " checked" : ""}><span>${esc(T("Don't show what's new after updates"))}</span></label><button class="btn main" data-close>${esc(T("OK"))}</button></div>
+    <p class="hint wn-note">${esc(T("You can switch it back on in Options → Backup & restore, and always find it in ? → About."))}</p>`,
+    { width: 640, cls: "nw-win wn-win", onClose: () => {
         const off = box.el.querySelector('[name="newsoff"]').checked;
         if (off !== !!State.data.Settings.NewsHidden) { State.data.Settings.NewsHidden = off; save(); }
         markSeen(); onClose && onClose(); } });
