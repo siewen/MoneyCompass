@@ -341,6 +341,11 @@ function openLoansWindow(focus) {
     p.el.innerHTML = `<button class="pm-x pm-x-abs" data-close aria-label="${esc(T("Close"))}">✕</button><div class="ln-host"></div>`;
     Loans.render(p.el.querySelector(".ln-host"), { manage: true });
     busy = false;
+    // Fit the window to the screen: shrink until no scrolling is needed
+    const host = p.el.querySelector(".ln-host"), avail = window.innerHeight - 40; let z = 1;
+    host.style.zoom = 1;
+    for (let i = 0; i < 4 && z > 0.5; i++) { const h = host.getBoundingClientRect().height; if (h <= avail) break; z = Math.max(0.5, z * avail / h * 0.99); host.style.zoom = z; }
+    p.el.style.maxHeight = "none"; p.el.style.overflow = "hidden";
     if (f) setTimeout(() => { const t = p.el.querySelector(f); if (t) { t.scrollIntoView({ behavior: "smooth", block: "center" }); t.querySelector("input,select")?.focus(); } }, 120);
   };
   App.refresh = (...a) => { orig(...a); if (!p.closed) draw(); };
