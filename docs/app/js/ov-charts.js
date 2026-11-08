@@ -14,7 +14,7 @@ function frame(months, min, max) {
   let g = "";
   for (let i = 0; i <= 4; i++) { const v = min + step * i; g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(255,255,255,.08)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" class="oc-ax">${spaced(v)}</text>`; }
   const x = i => L + inner * (i + .5) / n;
-  const lab = months.map((m, i) => `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" class="oc-ax${m.current ? " cur" : ""}">${esc((/^\d{4}$/.test(m.month) ? m.month : m.month.slice(0, 3)) + (m.current ? "*" : ""))}</text>`).join("");
+  const lab = months.map((m, i) => `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" class="oc-ax${m.current ? " cur" : ""}">${esc((/^(\d{4}|\w{3} \d{4})$/.test(m.month) ? m.month : m.month.slice(0, 3)) + (m.current ? "*" : ""))}</text>`).join("");
   return { g: g + lab, x, y, inner, n };
 }
 

@@ -6,6 +6,7 @@ import {
   matchKey, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText, mainCur, currentName } from "./core.js";
 import { pageHead, band, si, IC, ring } from "./page-head.js";
 import { emergencyDash, iconizeCards, dcard } from "./dash.js";
+import { lineChart } from "./ov-charts.js";
 import { hbars, donut, legend, monthBars, progress, waveChart } from "./charts.js";
 import { ovBars, ovTrend, donutList, legendKeys, ovForecast, spark, C_IN, C_OUT, C_LEFT } from "./ov-charts.js";
 import { NEW_CAT } from "./ui.js";
@@ -857,7 +858,7 @@ export const Emergency = {
 // ================================================================= My savings
 
 const PLACES = ["Bank", "Crypto platform", "Broker", "Cash", "Other"];
-let editHolding = null;
+let editHolding = null, svRange = 3;
 export const Portfolio = {
   route: "portfolio", title: "Savings",
   render(el) {
@@ -891,46 +892,55 @@ export const Portfolio = {
         <div class="sv-opb"><a class="sv-btn" href="${esc(Rates.link(m.o))}" target="_blank" rel="noopener">${si(IC.eye, 16)} ${esc(T("View Offer"))}</a>
           <button class="sv-btn ghost" data-moved="${i}">✓ ${esc(T("Already Completed"))}</button></div></div>`).join("") :
       `<p class="hint">${esc(d.Holdings.some(h => h.Safe && h.Amount > 0) ? T("Your savings already earn about as much as today's best offers. Nothing to move right now.") : T("Add your savings (bank, cash) above, with their interest rate, to see where they would earn more."))}</p>`;
-    const optBand = `<div class="nw-card sv-opp"><div class="sv-oh"><span class="rp-si i-save">${si(IC.star, 40)}</span><div><h3>${esc(T("Wealth Optimization Opportunities"))}</h3><small>${esc(T("Smart recommendations to help you get more from your savings."))}</small></div></div>${dueTxt}<div class="sv-ops">${opp}</div>
+    const optBand = `<div class="nw-card sv-opp"><div class="sv-oh"><span class="sv-star">${si(IC.star, 40)}</span><div><h3>${esc(T("Wealth Optimization Opportunities"))}</h3><small>${esc(T("Smart recommendations to help you get more from your savings."))}</small></div></div>${dueTxt}<div class="sv-ops${mvShown.length > 1 ? "" : " one"}">${opp}</div>
       ${!license.isPro && mv.length > 1 ? `<p class="hint">🔒 ${esc(T("{0} more suggestions for your other savings with MoneyCompass Pro.", mv.length - 1))}</p>` : ""}</div>`;
-    const holdCard = dcard("bank", "res", T("Accounts & Holdings"), (d.Holdings.length ? `<div class="sv-hl">${hv.map(({ x, pl, r: rr }) => `<div class="sv-h" data-edit-holding="${x.Id}">${dot(x.Name)}
-        <div class="sv-hn"><b>${esc(x.Name)}</b><small>${esc(T(x.Place))} · ${esc(x.Safe ? T("Safe") : T("Risky"))}${rr ? " · " + esc(T("Annual Return: {0}", pln(pl * rr / 100))) : ""}</small>${promoBadge(x)}</div>
-        <div class="sv-hv"><b>${amount(x.Amount, x.Currency)}</b></div><div class="sv-hr">${esc(rate(rr))}</div>
-        ${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></div>`).join("")}</div>` : hint(T("Nothing added yet."))) + hint(T("Tap an item to edit it, for example to update the amount.")), { klass: "sv-hold" });
+    // ---------- Savings Performance: what today's rates do to your savings over 1 / 3 / 5 years ----------
+    const yrs = svRange, steps = yrs * 4, risky = hv.filter(y => !y.x.Safe).reduce((a, y) => a + y.pl, 0);
+    const labs = [], tot = [], inv = [], intr = [];
+    for (let k = 0; k <= steps; k++) {
+      const mo = k * 3, dt = addMonths(today(), mo); labs.push(dt.toLocaleDateString(undefined, { month: "short", year: "numeric" }));
+      let t = 0; for (const y of hv) t += y.x.Safe || !y.r ? y.pl * Math.pow(1 + y.r / 100 / 12, mo) : y.pl;
+      tot.push(Math.round(t)); inv.push(Math.round(risky)); intr.push(Math.round(t - p.total));
+    }
+    const perfChart = dcard("bars", "res", T("Savings Performance"), `<span class="sv-leg"><i style="background:#2EDC9A"></i>${esc(T("Total Savings"))}<i style="background:#3B9BFF"></i>${esc(T("Investments"))}<i style="background:#F5A623"></i>${esc(T("Interest Earned"))}</span>` +
+      lineChart(labs.map((l, i) => i % Math.ceil(steps / 6) === 0 ? l : ""), [{ vals: tot, color: "#2EDC9A", dots: true }, { vals: inv, color: "#3B9BFF", dots: true }, { vals: intr, color: "#F5A623", dots: true }], { w: 700, h: 200 }),
+      { klass: "sv-chart", extra: `<span class="sv-tabs">${[1, 3, 5].map(n => `<button type="button" data-svr="${n}" class="${n === yrs ? "on" : ""}">${n} ${esc(n === 1 ? T("Year") : T("Years"))}</button>`).join("")}</span>` });
+    const holdCard = dcard("bank", "res", T("Accounts & Holdings"), (d.Holdings.length ? `<div class="sv-hl">${hv.map(({ x, pl, r: rr }) => `<div class="sv-h" data-edit-holding="${x.Id}"><span class="sv-hi">${si(x.Place === "Cash" ? IC.coins || IC.bank : IC.bank, 26)}</span>
+        <div class="sv-hn"><b>${esc(x.Name)}</b><small>${esc(T("Annual Return: {0}", pln(pl * rr / 100)))}</small>${promoBadge(x)}</div>
+        <div class="sv-hv">${amount(x.Amount, x.Currency)}</div><div class="sv-hr">${esc(rate(rr))}</div>
+        <span class="sv-hx">${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></span></div>`).join("")}</div>` : hint(T("Nothing added yet."))), { klass: "sv-hold" });
     const risk = x => x.Safe ? T("Low") : T("High");
-    const perfCard = dcard("trend", "res", T("Performance Analysis"), `<table class="sv-t"><thead><tr><th>${esc(T("Institution"))}</th><th>${esc(T("Balance"))}</th><th>${esc(T("Yield"))}</th><th>${esc(T("Annual Return"))}</th><th>${esc(T("Risk Profile"))}</th></tr></thead><tbody>${hv.map(({ x, pl, r: rr }) =>
-      `<tr><td>${esc(x.Name)}</td><td>${esc(pln(pl))}</td><td>${esc(rate(rr))}</td><td>${esc(pln(pl * rr / 100))}</td><td><span class="sv-risk ${x.Safe ? "low" : "high"}">${esc(risk(x))}</span></td></tr>`).join("") || `<tr><td colspan="5" class="hint">–</td></tr>`}</tbody></table>`, { klass: "sv-perf" });
+    const perfCard = `<div class="nw-card dz sv-perf"><div class="nw-ch"><span class="rp-si i-res">${si(IC.trend, 22)}</span><h3>${esc(T("Performance Analysis"))}</h3></div><table class="sv-t"><thead><tr><th>${esc(T("Institution"))}</th><th>${esc(T("Balance"))}</th><th>${esc(T("Yield"))}</th><th>${esc(T("Annual Return"))}</th><th>${esc(T("Risk Profile"))}</th></tr></thead><tbody>${hv.map(({ x, pl, r: rr }) =>
+      `<tr><td>${esc(x.Name)}</td><td>${esc(pln(pl))}</td><td>${esc(rate(rr))}</td><td>${esc(pln(pl * rr / 100))}</td><td><span class="sv-risk ${x.Safe ? "low" : "high"}">${esc(risk(x))}</span></td></tr>`).join("") || `<tr><td colspan="5" class="hint">–</td></tr>`}</tbody></table></div>`;
     const pal = ["#2EDC9A", "#3B9BFF", "#F5A623", "#C98FA0", "#8B5CF6", "#22C7A0"];
-    const allocCard = dcard("pie", "res", T("Allocation"), donutList(hv.filter(y => y.pl > 0).map((y, i) => ({ label: y.x.Name, value: y.pl, color: pal[i % pal.length], text: p.total > 0 ? Math.round(y.pl / p.total * 100) + "%" : "" })), pln(p.total), "", v => p.total > 0 ? Math.round(v / p.total * 100) + "%" : ""), { klass: "sv-alloc" });
-    const fxCard = `<div class="nw-card dz sv-fx"><form id="fx"><div class="nw-ch"><span class="rp-si i-res">${si(IC.repeat, 24)}</span><h3>${esc(T("Exchange rates"))}</h3></div>${hint(T("Used to convert dollars and euros to złoty."))}
-        <div class="sv-fxr"><span>USD</span>${numInput("usd", plain(s.UsdToPln))}</div><div class="sv-fxr"><span>EUR</span>${numInput("eur", plain(s.EurToPln))}</div>
-        ${check("auto", T("Update automatically with the official NBP rates"), s.AutoExchangeRates)}${hint(rateInfo)}</form></div>`;
-    const addCard = `<div class="nw-card dz sv-add"><form id="hold"><div class="nw-ch"><span class="rp-si i-res">${si(IC.plus, 24)}</span><h3>${esc(h ? T("Edit: {0}", h.Name) : T("Add Savings Account"))}</h3></div>
-        ${field(T("Name"), textInput("name", f.Name, T("e.g. {0}", "ING, Revolut, …")))}
-        ${field(T("Where"), select("place", PLACES.map(x => [x, T(x)]), f.Place))}${field(T("Currency"), select("currency", CURRENCIES, f.Currency))}
-        ${field(T("Amount"), numInput("amount", plain(f.Amount), T("e.g. {0}", "10000")))}${field(T("Interest rate (% per year, 0 if none)"), numInput("rate", plain(f.RatePercent), "0"))}
+    const al = hv.filter(y => y.pl > 0).map((y, i) => ({ n: y.x.Name, v: y.pl, c: pal[i % pal.length] }));
+    const allocCard = `<div class="nw-card dz sv-alloc"><div class="nw-ch"><span class="rp-si i-res">${si(IC.star, 22)}</span><h3>${esc(T("Allocation"))}</h3></div><div class="sv-ar">${donut(al.map(a => ({ label: a.n, value: a.v, color: a.c })), pln(p.total), "", 130)}
+      <ul class="sv-al">${al.map(a => `<li><i style="background:${a.c}"></i><span>${esc(a.n)}</span><b>${p.total > 0 ? Math.round(a.v / p.total * 100) : 0}%</b></li>`).join("")}</ul></div></div>`;
+    const fxCard = `<div class="nw-card dz sv-fx"><form id="fx"><div class="nw-ch"><span class="rp-si i-res">${si(IC.repeat, 22)}</span><h3>${esc(T("Exchange rates"))}</h3></div><small class="sv-fxs">${esc(T("Official NBP Rates"))}</small>
+        <div class="sv-fxr"><span>EUR</span>${numInput("eur", plain(s.EurToPln))}</div><div class="sv-fxr"><span>USD</span>${numInput("usd", plain(s.UsdToPln))}</div>
+        <label class="sv-auto"><input type="checkbox" name="auto"${s.AutoExchangeRates ? " checked" : ""}><span class="nw-ok">✓</span> ${esc(T("Automatically Updated"))}</label></form></div>`;
+    const addCard = `<div class="nw-card dz sv-add"><form id="hold"><div class="nw-ch"><span class="rp-si i-res">${si(IC.plus, 22)}</span><h3>${esc(h ? T("Edit: {0}", h.Name) : T("Add Savings Account"))}</h3></div>
+        ${field(T("Institution"), textInput("name", f.Name, T("e.g. {0}", "ING, Revolut, …")))}
+        ${field(T("Account Type"), select("place", PLACES.map(x => [x, T(x)]), f.Place))}${field(T("Currency"), select("currency", CURRENCIES, f.Currency))}
+        <div class="two">${field(T("Balance"), numInput("amount", plain(f.Amount), "10000"))}${field(T("Interest Rate (%)"), numInput("rate", plain(f.RatePercent), "0"))}</div>
+        <details class="deposit sv-more"${f.Deposit > 0 || f.PromoEnd ? " open" : ""}><summary>${esc(T("More options"))}</summary>
         ${check("safe", T("Safe money (guaranteed, e.g. bank)"), f.Safe)}
-        <details class="deposit"${f.Deposit > 0 ? " open" : ""}><summary>🔁 ${esc(T("Regular deposit (standing order) – optional"))}</summary>
-          <div class="two">${field(T("Amount (zł)"), numInput("deposit", plain(f.Deposit), T("e.g. {0}", "500")))}${field(T("How often"), select("depfreq", FREQUENCIES.filter(x => x[0] !== ONE_TIME).map(x => [x[0], T(x[0])]), f.DepositFrequency || "Monthly"))}</div>
-          <div class="two">${field(T("Date of a payment (last or next one)"), dateInput("depdate", inputDate(parseDate(f.DepositDate || isoDate(today())))))}
-          ${field(T("From which account (optional)"), `<input name="depfrom" list="dep-accounts" value="${esc(f.DepositFrom || "")}" placeholder="${esc(T("e.g. {0}", "mBank, PKO – konto osobiste"))}">`)}</div>
+        <div class="two">${field(T("Regular deposit (zł)"), numInput("deposit", plain(f.Deposit), "500"))}${field(T("How often"), select("depfreq", FREQUENCIES.filter(x => x[0] !== ONE_TIME).map(x => [x[0], T(x[0])]), f.DepositFrequency || "Monthly"))}</div>
+        <div class="two">${field(T("Date of a payment (last or next one)"), dateInput("depdate", inputDate(parseDate(f.DepositDate || isoDate(today())))))}
+          ${field(T("From which account (optional)"), `<input name="depfrom" list="dep-accounts" value="${esc(f.DepositFrom || "")}" placeholder="mBank">`)}</div>
           <datalist id="dep-accounts">${[T("Current account"), ...d.Holdings.filter(x => !h || x.Id !== h.Id).map(x => x.Name)].map(n => `<option value="${esc(n)}">`).join("")}</datalist>
-          ${hint(T("Shown as \"To savings\" in the Calendar. The amount above is not changed by itself – update it when you check your account."))}
-        </details>
-        <details class="deposit promo"${f.PromoEnd ? " open" : ""}><summary>🎁 ${esc(T("Promotion – optional"))}</summary>
-          <div class="two">${field(T("Promotion ends on"), `<input type="date" name="promoend" value="${f.PromoEnd ? inputDate(parseDate(f.PromoEnd)) : ""}">`)}
-          ${field(T("Rate after the promotion (% per year)"), numInput("rateafter", f.RateAfter !== null && f.RateAfter !== undefined ? plain(f.RateAfter) : "", T("e.g. {0}", "0,5")))}</div>
-          ${hint(T("The interest rate above is the promotion rate. MoneyCompass reminds you 2 weeks before it ends and shows where to move the money – after a promotion most banks pay only about 0.5%."))}
+        <div class="two">${field(T("Promotion ends on"), `<input type="date" name="promoend" value="${f.PromoEnd ? inputDate(parseDate(f.PromoEnd)) : ""}">`)}
+          ${field(T("Rate after the promotion (% per year)"), numInput("rateafter", f.RateAfter !== null && f.RateAfter !== undefined ? plain(f.RateAfter) : "", "0,5"))}</div>
         </details>
         <div class="buttons">${button("＋ " + (h ? T("Save changes") : T("Add Account")), "save-holding", "main sv-addbtn")}${h ? button(T("Cancel editing"), "cancel-holding") : ""}</div></form></div>`;
-    const bot = `<div class="nw-card rp-sum sv-bot"><div class="sv-b1"><span class="rp-si i-res">${si(IC.check, 40)}</span><div><small>${esc(T("Wealth Health Score"))}</small><b>${score} / 100</b></div></div>
-      <div class="sv-b1"><span class="rp-si i-res">${si(IC.bars, 34)}</span><div><small class="good">${esc(T("Diversification"))}</small><b>${esc(divers >= 1 ? T("Good") : divers > 0.3 ? T("Fair") : T("Low"))}</b></div></div>
-      <div class="sv-b1"><span class="rp-si i-save">${si(IC.coins || IC.save, 34)}</span><div><small>${esc(T("Potential Additional Return"))}</small><b>+${esc(pln(potential))}</b></div></div>
-      <div class="sv-b1"><span class="rp-si i-res">${si(IC.trend, 34)}</span><div><small>${esc(T("Projected Annual Return"))}</small><b>${esc(pln(p.yearly + potential))}</b></div></div>
-      <div class="sv-msg"><span class="rp-si i-res">${si(IC.check, 34)}</span><span>${esc(mv.length ? T("Your savings portfolio is healthy and multiple opportunities exist to improve annual returns.") : T("Your savings portfolio is healthy."))} ${esc(em)}</span></div></div>`;
-    el.innerHTML = head + optBand + `<div class="sv-grid"><div class="sv-chart">${savingsChartCard(d)}</div>${holdCard}${addCard}${perfCard}${allocCard}${fxCard}</div>
-      <div class="grid">${savedChecksCard(d)}${binCard(["holding"])}</div>` + bot +
-      (p.missing ? hint(T("Some items are in USD or EUR but the exchange rate is empty, so they count as 0 zł. Enter the rates below."), "bad") : "");
+    const bot = `<div class="nw-card rp-sum sv-bot"><div class="sv-b1"><span class="rp-si i-res">${si(IC.check, 44)}</span><div><small>${esc(T("Wealth Health Score"))}</small><b>${score} / 100</b></div></div>
+      <div class="sv-b1 dv"><span class="rp-si i-res">${si(IC.bars, 34)}</span><div><small class="good">${esc(T("Diversification"))}</small><b>${esc(divers >= 1 ? T("Good") : divers > 0.3 ? T("Fair") : T("Low"))}</b></div></div>
+      <div class="sv-b1 dv"><span class="rp-si i-save">${si(IC.coins || IC.save, 34)}</span><div><small>${esc(T("Potential Additional Return"))}</small><b>+${esc(pln(potential))}</b></div></div>
+      <div class="sv-b1 dv"><span class="rp-si i-res">${si(IC.trend, 34)}</span><div><small>${esc(T("Projected Annual Return"))}</small><b>${esc(pln(p.yearly + potential))}</b></div></div>
+      <div class="sv-msg"><span class="rp-si i-res">${si(IC.check, 34)}</span><span>${esc(mv.length ? T("Your savings portfolio is healthy and multiple opportunities exist to improve annual returns.") : T("Your savings portfolio is healthy."))}</span></div></div>`;
+    el.innerHTML = `<div class="sv-page">` + head + optBand + `<div class="sv-main"><div class="sv-left"><div class="sv-r1">${perfChart}${holdCard}</div><div class="sv-r2">${perfCard}${allocCard}${fxCard}</div></div>${addCard}</div>` + bot +
+      `<div class="grid">${savedChecksCard(d)}${binCard(["holding"])}</div>` + (p.missing ? hint(T("Some items are in USD or EUR but the exchange rate is empty, so they count as 0 zł. Enter the rates below."), "bad") : "") + `</div>`;
+    el.querySelectorAll("[data-svr]").forEach(b => b.onclick = () => { svRange = +b.dataset.svr; App.refresh(); });
     bindAdvice(el, d);
     el.querySelector('[data-action="savings-check"]')?.addEventListener("click", () => openSavingsCheck());
     bindSavedChecks(el, d); bindSavingsChart(el, d);
