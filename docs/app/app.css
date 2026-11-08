@@ -1926,3 +1926,17 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .sv-star svg, .ei-bulb svg { color: #FFC928 !important; }
 .nwi.gold-ic, .sv-star svg.gold-ic, .ei-bulb svg.gold-ic { fill: #FFC928 !important; filter: drop-shadow(0 0 7px rgba(255,201,40,.6)) !important; }
 .rp-si.i-save, .rp-si.i-res { }
+
+/* ---- Offer details window (od-) ---- */
+.od-grid{display:grid;grid-template-columns:310px 1fr;gap:22px;padding:6px 4px 4px}
+.od-grid aside h4{margin:0 0 10px}.od-sim{display:grid;grid-template-columns:auto 1fr auto;gap:6px 12px;align-items:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px;margin-bottom:12px}
+.od-sim small{display:block;color:#9fb0ab}.od-sim .sv-btn{grid-column:1/-1;width:100%;justify-content:center}
+.od-logo{width:38px;height:38px;border-radius:10px;background:#FFC928;color:#222;font-weight:800;display:grid;place-items:center}.od-logo.big{width:64px;height:64px;font-size:28px}
+.od-r{text-align:right;display:grid}.od-st{color:#FFC928;letter-spacing:1px}.od-off{color:rgba(255,255,255,.2)}
+.od-h{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.od-h h2{margin:0;font-size:32px}.od-sc b{font-size:30px;color:#2EDC9A}.od-name{color:#9fb0ab}
+.od-cols{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin:14px 0}
+.od-cols h3{margin:0 0 8px;padding-bottom:8px;border-bottom:2px solid rgba(255,255,255,.12)}.od-l{color:#2EDC9A}.od-d{color:#F2777A}
+.od-cols ul{margin:0;padding-left:20px;display:grid;gap:8px}
+.od-today{display:flex;align-items:center;gap:26px;flex-wrap:wrap;border-top:3px solid #2EDC9A;background:rgba(255,255,255,.04);border-radius:12px;padding:16px 20px;margin-top:8px}
+.od-today small{display:block;color:#9fb0ab}.od-today b{font-size:26px}.od-btns{margin-left:auto;display:flex;gap:10px}.od-btns .sv-btn{width:auto;text-decoration:none}
+@media(max-width:850px){.od-grid,.od-cols{grid-template-columns:1fr}}
