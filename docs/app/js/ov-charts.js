@@ -5,7 +5,7 @@ import { donut } from "./charts.js";
 export const C_IN = "#35D399", C_OUT = "#3B82F6", C_LEFT = "#EAF1EE";
 const spaced = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 const niceMax = v => { if (!(v > 0)) return 1; const p = 10 ** Math.floor(Math.log10(v)), f = v / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; };
-const W = 520, H = 240, L = 58, R = 8, TOP = 10, B = 30;
+let W = 520, H = 240; const L = 58, R = 8, TOP = 10, B = 30;
 
 /** Axis, grid lines and month names; returns the svg start, and a y() to place values. */
 function frame(months, min, max) {
@@ -14,7 +14,7 @@ function frame(months, min, max) {
   let g = "";
   for (let i = 0; i <= 4; i++) { const v = min + step * i; g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(255,255,255,.08)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" class="oc-ax">${spaced(v)}</text>`; }
   const x = i => L + inner * (i + .5) / n;
-  const lab = months.map((m, i) => `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" class="oc-ax${m.current ? " cur" : ""}">${esc(m.month.slice(0, 3) + (m.current ? "*" : ""))}</text>`).join("");
+  const lab = months.map((m, i) => `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" class="oc-ax${m.current ? " cur" : ""}">${esc((/^\d{4}$/.test(m.month) ? m.month : m.month.slice(0, 3)) + (m.current ? "*" : ""))}</text>`).join("");
   return { g: g + lab, x, y, inner, n };
 }
 
@@ -74,6 +74,10 @@ export const spark = (vals, color) => {
 
 /** Generic line chart: labels on x, any number of series {vals, color, dash, dots, area}. */
 export function lineChart(labels, series, opt = {}) {
+  const w0 = W, h0 = H; if (opt.w) W = opt.w; if (opt.h) H = opt.h;
+  try { return lineChart0(labels, series, opt); } finally { W = w0; H = h0; }
+}
+function lineChart0(labels, series, opt = {}) {
   const all = series.flatMap(s => s.vals.filter(v => v != null));
   const hi = Math.max(1, ...all), lo = Math.min(0, ...all);
   const max = niceMax(hi), min = lo < 0 ? -niceMax(-lo) : 0;

@@ -4,6 +4,7 @@ import {
   uuid, categories, findCategory, categoryLabel, license, moduleOn, OTHER, RECEIVED, COLORS, BELKA, goalSaved, fromPln } from "./core.js";
 import { ico } from "./nw.js";
 import { pageHead, band, si, IC, ring } from "./page-head.js";
+import { lineChart } from "./ov-charts.js";
 import { budgetDash, loansDash, dcard, iconizeCards, stat, PM } from "./dash.js";
 import { progress, hbars, savingsChart } from "./charts.js";
 import { debtAdvice, extraEffect, applyExtra } from "./debts.js";
@@ -411,16 +412,31 @@ export const Loans = {
     if (manage) {
       const lf = loanFigures(d), formHtml = el.querySelector("#loan").outerHTML, extraEl = el.querySelector("#extra"), extraHtml = extraEl ? extraEl.outerHTML : "";
       const head = pageHead({ icon: "coins", title: T("Loans & Debts"), sub: T("Track your loans, manage debt and plan your repayments."),
-        kpis: [{ l: T("Outstanding Principal"), v: pln(lf.bal), icon: "wallet", cls: "in" }, { l: T("Principal Repaid"), v: pln(lf.prin), icon: "flag", cls: "in" }, { l: T("Interest Paid"), v: pln(lf.int), icon: "calx", cls: "src" }, { l: T("Total Credit Cost"), v: pln(lf.total), icon: "bars", cls: "src" }, { l: T("Debt-Free Date"), v: lf.end, icon: "cal", cls: "in", vcls: "good" }] });
-      const loanCards = d.Loans.map(x => { const pl = plans.get(x.Id) || loanPlan(x); return `<div class="ln-lc clickable" data-edit-loan="${x.Id}"><div class="ln-lh"><span class="rp-si i-table">${si(IC.bank, 22)}</span><b>${esc(x.Name)}</b><span class="ln-act">${esc(x.Remaining > 0 ? T("Active") : T("Paid off"))}</span><button class="icon-btn danger" data-del-loan="${x.Id}" title="${esc(T("Delete"))}">🗑</button></div>
-        <div class="ln-lg"><div><span>${esc(T("Remaining Balance"))}</span><b>${esc(pln(pl.remainingNow))}</b><span>${esc(T("Monthly Payment"))}</span><b>${esc(pln(x.MonthlyPayment))}</b><span>${esc(T("Interest Rate"))}</span><b>${esc(rate(x.RatePercent || 0))}</b>${x.PaidFrom ? `<span>${esc(T("Bank"))}</span><b>${esc(x.PaidFrom)}</b>` : ""}</div>
-        <div><span>${esc(T("Next Payment"))}</span><b>${pl.next ? esc(fmtDate(pl.next)) : "–"}</b><span>${esc(T("Remaining Payments"))}</span><b>${pl.never ? "∞" : esc(String(pl.needed ?? "–"))}</b></div></div>
+        kpis: [{ l: T("Outstanding Principal"), v: pln(lf.bal), icon: "wallet", cls: "in" }, { l: T("Principal Repaid"), v: pln(lf.prin), icon: "trend", cls: "in" }, { l: T("Interest Paid"), v: pln(lf.int), icon: "percent", cls: "in" }, { l: T("Total Credit Cost"), v: pln(lf.total), icon: "bars", cls: "in" }, { l: T("Debt-Free Date"), v: lf.end, icon: "cal", cls: "in", vcls: "good" }] });
+      // Chart: one point per year, like the design
+      const sch = loanSchedule(d); let chart = "";
+      if (sch && sch.months.length > 1) {
+        const idx = [], seen = new Set(); sch.months.forEach((m, i) => { const y = m.getFullYear(); if (!seen.has(y)) { seen.add(y); idx.push(i); } }); if (idx[idx.length - 1] !== sch.months.length - 1) idx.push(sch.months.length - 1);
+        const pick = arr => idx.map(i => arr[i]);
+        chart = lineChart(idx.map(i => sch.months[i].getFullYear()), [{ vals: pick(sch.balance), color: "#22E39A", dots: true }, { vals: pick(sch.principal), color: "#3B9BFF", dots: true }, { vals: pick(sch.interest), color: "#F5A623", dots: true }], { w: 1300, h: 190 });
+      }
+      const legend = `<span class="rp-leg ln-leg"><i style="background:#22E39A"></i>${esc(T("Outstanding Principal"))} <i style="background:#3B9BFF"></i>${esc(T("Principal Repaid (Cumulative)"))} <i style="background:#F5A623"></i>${esc(T("Interest Paid (Cumulative)"))}</span>`;
+      const loanCards = d.Loans.map(x => { const pl = plans.get(x.Id) || loanPlan(x), ic = x.Kind === "car" ? IC.car : x.Kind === "mortgage" ? IC.house : IC.bank; return `<div class="ln-lc clickable" data-edit-loan="${x.Id}"><div class="ln-lh"><span class="rp-si i-res ln-lic">${si(ic, 26)}</span><b>${esc(x.Name)}</b><span class="ln-act">${esc(x.Remaining > 0 ? T("Active") : T("Paid off"))}</span><button class="icon-btn danger" data-del-loan="${x.Id}" title="${esc(T("Delete"))}">🗑</button></div>
+        <div class="ln-lg"><div class="ln-l"><span>${esc(T("Remaining Balance"))}:</span><b>${esc(pln(pl.remainingNow))}</b><span>${esc(T("Monthly Payment"))}:</span><b>${esc(pln(x.MonthlyPayment))}</b><span>${esc(T("Interest Rate"))}:</span><b>${esc(rate(x.RatePercent || 0))}</b>${x.PaidFrom ? `<span>${esc(T("Bank"))}:</span><b class="plain">${esc(x.PaidFrom)}</b>` : ""}</div>
+        <div class="ln-r"><span>${esc(T("Next Payment"))}:</span><b>${pl.next ? esc(fmtDate(pl.next)) : "–"}</b><span>${esc(T("Remaining Payments"))}:</span><b>${pl.never ? "∞" : esc(String(pl.needed ?? "–"))}</b></div></div>
         <div class="ln-df"><span>${esc(T("Projected Debt-Free"))}:</span><b>${pl.never ? esc(T("never – see the warning")) : pl.end ? esc(monthName(pl.end)) : "–"}</b></div>${loanWarning(x)}</div>`; }).join("") || `<p class="hint">${esc(T("No loans – great! Add one above if you have any."))}</p>`;
-      el.innerHTML = head + loanChartCard(d, true) + `<div class="ln-row3"><div class="nw-card dz ln-add"><div class="nw-ch"><span class="rp-si i-res">${si(IC.plus, 22)}</span><h3>${esc(l ? T("Edit loan") : T("Add a loan"))}</h3></div>${formHtml}</div>
-        <div class="nw-card dz"><div class="nw-ch"><span class="rp-si i-table">${si(IC.table, 22)}</span><h3>${esc(T("Active Loans"))}</h3></div><div class="ln-lcs">${loanCards}</div></div>
-        <div class="nw-card dz ln-early"><div class="nw-ch"><span class="rp-si i-bulb">${si(IC.bolt || IC.sparkle, 22)}</span><h3>${esc(T("Early Repayment Strategy"))}</h3></div>${extraHtml || `<p class="hint">${esc(T("No active loans"))}</p>`}</div></div>`;
-      el.querySelector("#loan .nw-ch, #loan h3")?.remove();
-      const f2 = el.querySelector("#extra h3"); f2?.remove();
+      el.innerHTML = head + dcard("trend", "res", T("Repayment Projection"), chart || `<p class="hint">–</p>`, { extra: legend, klass: "ln-chart" }) + `<div class="ln-row3"><div class="nw-card dz ln-add"><div class="nw-ch"><span class="rp-si i-res">${si(IC.plus, 22)}</span><h3>${esc(l ? T("Edit loan") : T("Add Loan"))}</h3></div><p class="ln-desc">${esc(T("Add mortgages, personal loans, car loans or credit card balances."))}</p>${formHtml}</div>
+        <div class="nw-card dz"><div class="nw-ch"><span class="rp-si i-res">${si(IC.table, 22)}</span><h3>${esc(T("Active Loans"))}</h3></div><div class="ln-lcs">${loanCards}</div></div>
+        <div class="nw-card dz ln-early"><div class="nw-ch"><span class="rp-si i-res">${si(IC.bolt, 22)}</span><h3>${esc(T("Early Repayment Strategy"))}</h3></div>${extraHtml || `<p class="hint">${esc(T("No active loans"))}</p>`}</div></div><div class="ln-foot"><button class="btn second" data-close>✕ ${esc(T("Cancel"))}</button></div>`;
+      el.querySelector("#loan h3")?.remove(); el.querySelector("#extra h3")?.remove();
+      // Labels as in the design
+      const rl = (form, name, label, ph) => { const i = el.querySelector(`${form} [name="${name}"]`); if (!i) return; const sp = i.closest(".field")?.querySelector(":scope > span"); if (sp) sp.textContent = label; if (ph !== undefined) i.placeholder = ph; };
+      rl("#loan", "name", T("Loan Name"), T("e.g. {0}", "Mortgage")); rl("#loan", "kind", T("Loan Type")); rl("#loan", "original", T("Original Loan Amount"), "0,00 zł"); rl("#loan", "remaining", T("Remaining Principal"), "0,00 zł");
+      rl("#loan", "interestpaid", T("Interest Paid To Date"), "0,00 zł"); rl("#loan", "payment", T("Monthly Payment"), "0,00 zł"); rl("#loan", "rate", T("Interest Rate (%)"), "0,00 %"); rl("#loan", "next", T("Next Payment Date")); rl("#loan", "paidfrom", T("Paid From Account"), T("Select account"));
+      rl("#extra", "loan", T("Loan Selection")); rl("#extra", "amount", T("Overpayment Amount"), "5 000 zł"); rl("#extra", "date", T("Overpayment Date")); rl("#extra", "mode", T("Overpayment Strategy"));
+      const md = el.querySelector('#extra [name="mode"]'); if (md) { md.options[0].textContent = T("Shorten Loan Term (keep monthly payment unchanged)"); if (md.options[1]) md.options[1].textContent = T("Reduce Monthly Payment (keep term unchanged)"); }
+      const sb = el.querySelector('[data-action="save-loan"]'); if (sb && !l) sb.textContent = "＋ " + T("Add Loan");
+      const se = el.querySelector('[data-action="save-extra"]'); if (se) se.innerHTML = si(IC.save, 18) + " " + esc(T("Save Overpayment Plan"));
     }
     else {
       el.querySelector(".bp-manage")?.remove();
@@ -455,14 +471,15 @@ export const Loans = {
     if (xf) {
       const show = () => {
         const v = values(xf), loan = d.Loans.find(y => y.Id === v.loan), amt = num(v.amount) || 0, monthly = num(v.monthly) || 0, out = el.querySelector("#extra-result");
-        if (!loan || (!(amt > 0) && !(monthly > 0))) { out.innerHTML = hint(T("Enter an amount to see what it changes.")); return; }
+        if (!loan || (!(amt > 0) && !(monthly > 0))) { out.innerHTML = `<div class="ln-pr"><div class="ln-pr-h"><span class="nw-ok">✓</span>${esc(T("Projected Result"))}</div><div class="ln-pr-g"><div><small>${esc(T("Debt-Free"))}</small><b>–</b></div><div><small>${esc(T("Interest Saved"))}</small><b>–</b></div><div><small>${esc(T("Time Saved"))}</small><b>–</b></div></div></div>`; return; }
         const e = extraEffect(loan, amt, v.mode, monthly);
         const lines = [];
         if (v.mode === "lower" && amt > 0) lines.push(T("New monthly payment: about {0} instead of {1}.", pln(e.newPayment), pln(loan.MonthlyPayment)));
         if (e.after.months !== Infinity && e.after.months !== e.before.months) lines.push(T("Debt-free in {0} instead of {1}.", monthName(addMonths(e.next, e.after.months - 1)), e.before.months === Infinity ? T("never") : monthName(addMonths(e.next, e.before.months - 1))));
         if (e.saved > 0 && e.saved !== Infinity) lines.push(T("You save about {0} in interest.", pln(e.saved)));
         if (monthly > 0) lines.push(T("Includes {0} extra every month – that part is only a calculation.", pln(monthly)));
-        out.innerHTML = `<div class="alert good-alert">${lines.map(l => `<p>✔ ${esc(l)}</p>`).join("")}</div>`;
+        const dfT = e.after.months !== Infinity ? monthName(addMonths(e.next, e.after.months - 1)) : "–", svT = e.saved > 0 && e.saved !== Infinity ? pln(e.saved) : "–", tmT = e.after.months !== Infinity && e.before.months !== Infinity && e.before.months > e.after.months ? T("{0} months", e.before.months - e.after.months) : "–";
+        out.innerHTML = `<div class="ln-pr"><div class="ln-pr-h"><span class="nw-ok">✓</span>${esc(T("Projected Result"))}</div><div class="ln-pr-g"><div><small>${esc(T("Debt-Free"))}</small><b>${esc(dfT)}</b></div><div><small>${esc(T("Interest Saved"))}</small><b>${esc(svT)}</b></div><div><small>${esc(T("Time Saved"))}</small><b>${esc(tmT)}</b></div></div>${v.mode === "lower" && amt > 0 ? `<p class="hint">${esc(T("New monthly payment: about {0} instead of {1}.", pln(e.newPayment), pln(loan.MonthlyPayment)))}</p>` : ""}</div>`;
       };
       xf.querySelectorAll("input, select").forEach(i => i.addEventListener("input", show)); show();
       el.querySelector('[data-action="save-extra"]').onclick = async () => {

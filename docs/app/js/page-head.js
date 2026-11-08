@@ -2,6 +2,9 @@
 import { esc } from "./ui.js";
 export const si = (d, n = 26) => `<svg class="nwi" width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 export const IC = {
+  house: '<path d="M12 3l9.500 8.200h-3V21h-5.500v-6h-2v6H5.500v-9.800h-3z" stroke="none"/>', bolt: '<path d="M13.500 2L4 14h6.200l-1 8L19 9.800h-6.300z" stroke="none"/>',
+  car: '<path fill-rule="evenodd" d="M5.200 11l1.400-4.300A2 2 0 018.500 5.300h7a2 2 0 011.900 1.400L18.800 11a2 2 0 011.700 2v4.500h-2.200v1.300a1.300 1.300 0 01-2.600 0v-1.300H8.400v1.300a1.300 1.300 0 01-2.600 0v-1.300H3.500V13a2 2 0 011.700-2zm2.600 0h8.400l-.9-3H8.700zm-.8 3a1.200 1.200 0 100 2.400 1.200 1.200 0 000-2.400zm10 0a1.200 1.200 0 100 2.400 1.200 1.200 0 000-2.400z" stroke="none"/>',
+  percent: '<path fill-rule="evenodd" d="M12 2a10 10 0 100 20 10 10 0 000-20zM8.500 6.800a1.700 1.700 0 110 3.400 1.700 1.700 0 010-3.400zm7 7a1.700 1.700 0 110 3.400 1.700 1.700 0 010-3.400zM16.600 7.100l1.200 1.200-9.400 9.400-1.200-1.200z" stroke="none"/>',
   gauge: '<path d="M12 3a10 10 0 100 20 10 10 0 000-20zm0 4a6 6 0 016 6h-2a4 4 0 00-8 0H6a6 6 0 016-6zm1 7.500l3.500-4.500 1.200 1-3.600 4.700a1.600 1.600 0 11-1.100-1.200z" fill-rule="evenodd" stroke="none"/>',
   flag: '<path d="M5 2h2v20H5zM8 3h12l-3 5 3 5H8z" stroke="none"/>',
   cart: '<path d="M2 3h3l.6 3H21l-2 9H8L5 4H2zM9 18a1.700 1.700 0 100 3.400A1.700 1.700 0 009 18zm9 0a1.700 1.700 0 100 3.400A1.700 1.700 0 0018 18z" stroke="none"/>',
