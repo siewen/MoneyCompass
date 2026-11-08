@@ -269,7 +269,7 @@ export const Reports = {
       <div class="rp-trend"><span class="rp-si">${si(IC.bars, 54)}</span><div class="rp-tt"><h3>${esc(T("Financial Performance Trends"))}</h3></div>
         <div><small>${esc(T("Inflows"))}</small><b>${esc(pln(inflow))}</b></div><div><small>${esc(T("Outflows"))}</small><b>${esc(pln(outflow))}</b></div><div><small>${esc(T("Balance"))}</small><b>${esc(pln(inflow - outflow))}</b></div><div><small>${esc(T("Savings Rate"))}</small><b>${esc(rateTxt)}</b></div></div>
       <div class="grid">
-      ${card(`<div class="nw-ch"><span class="rp-si i-table">${si(IC.table, 24)}</span><h3>${esc(T("Monthly totals"))}</h3></div>` + (() => { const m = all.find(x => x[0] === "monthly")[2];
+      ${card(`<div class="nw-ch"><span class="rp-si i-table">${si(IC.table, 24)}</span><h3>${esc(T("Monthly Overview"))}</h3></div>` + (() => { const m = all.find(x => x[0] === "monthly")[2];
         return m.length > 1 ? `<table class="rate-table"><thead><tr>${m[0].map(h => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${m.slice(1).reverse().map(x => `<tr><td>${esc(x[0])}</td><td>${pln(x[1])}</td><td>${pln(x[2])}</td><td class="${x[3] < 0 ? "bad" : "good"}">${pln(x[3])}</td></tr>`).join("")}</tbody></table>` : hint(T("No data in this period."));
       })(), "wide")}
     </div>`;

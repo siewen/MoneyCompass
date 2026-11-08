@@ -1520,3 +1520,4 @@ details { border-radius: 8px; background: rgba(255,255,255,.04); margin-bottom: 
 .rp-fmt button b.ff { display: grid; place-items: center; min-width: 34px; height: 30px; padding: 0 5px; border-radius: 6px; font-size: 14px; font-weight: 800; color: #fff; }
 .rp-fmt .fx b.ff { background: #1E8E4E; } .rp-fmt .fp b.ff { background: #E5383B; font-size: 11px; } .rp-fmt .fw b.ff { background: #2B6CD6; }
 .rp-fmt .fx { border-color: #1FBF85 !important; } .rp-fmt .fp { border-color: #E5555A !important; } .rp-fmt .fw { border-color: #3B82F6 !important; }
+.drag-handle { display: none !important; }
