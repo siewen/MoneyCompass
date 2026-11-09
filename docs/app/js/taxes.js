@@ -61,7 +61,7 @@ export const Taxes = {
   route: "taxes", title: "Taxes",
   render(el) {
     const P = plan();
-    const head = pageHead({ icon: "percent", title: T("Taxes"), sub: T("A rough estimate: gross and net pay, taxes and the bracket you are in."),
+    const head = pageHead({ icon: "percent", title: T("Taxes"), sub: T("A rough estimate for Poland: gross and net pay, taxes and the bracket you are in."),
       kpis: [{ l: T("Rates valid for"), v: String(TAX.year), icon: "star" }, { l: T("Income tax"), v: "12% / 32%", icon: "percent", cls: "rate" }, { l: T("Tax-free amount a year"), v: pln(TAX.pit.taxFree), icon: "coins" }, { l: T("32% starts above (a year)"), v: pln(TAX.pit.threshold), icon: "bars", cls: "left" }] });
     const itemsHtml = () => {
       const it = P.items, tot = k => it.filter(x => x.kind === k).reduce((a, x) => a + (x.amount || 0), 0);
@@ -77,6 +77,7 @@ export const Taxes = {
           <button type="button" class="btn main" data-add-item>＋ ${esc(T("Add"))}</button></form>`;
     };
     el.innerHTML = `<div class="ni-page tx-page">${head}
+      <p class="tx-pl">🇵🇱 ${esc(T("Poland only for now: these are Polish rules for {0}. Other countries may follow.", TAX.year))}</p>
       <div class="tx-grid">
         <div class="tx-left">
         ${card(`<h3>${esc(T("Your pay"))}</h3>

@@ -2299,3 +2299,4 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .tx-add{border:1px dashed var(--line,rgba(255,255,255,.18));border-radius:14px;padding:12px 14px;margin-top:10px}.tx-add h4{margin:0 0 8px}
 .tx-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .tx-f{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}@media(max-width:560px){.tx-f{grid-template-columns:1fr}}
+.tx-pl{margin:0 0 12px;padding:8px 12px;border-radius:12px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);font-size:13.5px}
