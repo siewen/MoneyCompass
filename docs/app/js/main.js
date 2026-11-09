@@ -78,13 +78,16 @@ function toggleSide() {
 }
 
 function applyTheme() {
-  const th = store.get("mc-theme") === "hell" ? "hell" : "dark";
+  const pick = store.get("mc-theme"), h = new Date().getHours();
+  const th = pick === "auto" ? (h >= 7 && h < 19 ? "hell" : "dark") : pick === "hell" ? "hell" : "dark";
   document.documentElement.dataset.theme = th;
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", th === "hell" ? "#DCE3E0" : "#121615");
   document.documentElement.dataset.design = "emerald";
   document.documentElement.dataset.side = side();
 }
 
+App.applyTheme = applyTheme;
+setInterval(() => { if (store.get("mc-theme") === "auto") applyTheme(); }, 300000);   // Auto: light by day, dark in the evening
 let shellProfile = "";
 function buildShell() {
   applyTheme();

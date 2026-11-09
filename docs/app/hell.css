@@ -572,6 +572,7 @@
 :root[data-theme="hell"] .bk-btns .btn.second{color:#0c1311;background:rgba(23,38,34,0.045);border:1px solid rgba(23,38,34,0.182)}
 :root[data-theme="hell"] .popup .bk-btns .btn.second{color:#0c1311 !important}
 :root[data-theme="hell"] .ov-wins span{color:#109850}
+:root[data-theme="hell"] .mc-tip p{color:#7c702c}
 /* Hand-written Light theme fixes (appended by make-hell.py): neutral page, no green glow, calm cards */
 :root[data-theme="hell"] body{background:#CDD3D0 !important}
 :root[data-theme="hell"] .sidebar,:root[data-theme="hell"] aside{background:#D8DEDB !important}
@@ -587,3 +588,6 @@
 :root[data-theme="hell"] .switch input:checked + span{background:#16B97D !important}
 :root[data-theme="hell"] .opt-tab.on{background:#12A06C !important;color:#fff !important;border-color:#12A06C !important}
 :root[data-theme="hell"] header.top,:root[data-theme="hell"] .top{background:#D8DEDB !important}
+:root[data-theme="hell"] .mc-tip p{color:#4a3d05}
+:root[data-theme="hell"] .ov-wins span{color:#12402b;background:rgba(52,211,153,.18)}
+:root[data-theme="hell"] .hint.mc-empty{color:#17251F}
