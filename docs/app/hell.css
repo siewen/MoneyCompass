@@ -571,6 +571,7 @@
 :root[data-theme="hell"] .bk-st small{color:#435e56}
 :root[data-theme="hell"] .bk-btns .btn.second{color:#0c1311;background:rgba(23,38,34,0.045);border:1px solid rgba(23,38,34,0.182)}
 :root[data-theme="hell"] .popup .bk-btns .btn.second{color:#0c1311 !important}
+:root[data-theme="hell"] .ov-wins span{color:#109850}
 /* Hand-written Light theme fixes (appended by make-hell.py): neutral page, no green glow, calm cards */
 :root[data-theme="hell"] body{background:#CDD3D0 !important}
 :root[data-theme="hell"] .sidebar,:root[data-theme="hell"] aside{background:#D8DEDB !important}

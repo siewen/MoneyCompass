@@ -1,6 +1,11 @@
 // New texts (redesign): German, French, Polish
 export const NEW = {
 "de": {
+"You keep {0} of your income. Wealth score: {1}/100.": "Sie behalten {0} Ihres Einkommens. Wert: {1}/100.",
+"Emergency fund complete": "Notgroschen vollständig",
+"Debt-free": "Schuldenfrei",
+"{0} months in a row with money left over": "{0} Monate in Folge mit Geld übrig",
+"Saving over 20% of your income": "Über 20 % Ihres Einkommens gespart",
 "Goodbye!": "Auf Wiedersehen!",
 "Your data is saved. You can close this window now.": "Ihre Daten sind gespeichert. Sie können dieses Fenster jetzt schließen.",
 "Open MoneyCompass again": "MoneyCompass wieder öffnen",
@@ -833,6 +838,11 @@ export const NEW = {
 "This category will be available in:": "Diese Kategorie ist verfügbar in:"
 },
 "fr": {
+"You keep {0} of your income. Wealth score: {1}/100.": "Vous gardez {0} de vos revenus. Score : {1}/100.",
+"Emergency fund complete": "Épargne de précaution complète",
+"Debt-free": "Sans dette",
+"{0} months in a row with money left over": "{0} mois de suite avec de l'argent de reste",
+"Saving over 20% of your income": "Plus de 20 % de vos revenus épargnés",
 "Goodbye!": "Au revoir !",
 "Your data is saved. You can close this window now.": "Vos données sont enregistrées. Vous pouvez fermer cette fenêtre maintenant.",
 "Open MoneyCompass again": "Rouvrir MoneyCompass",
@@ -1665,6 +1675,11 @@ export const NEW = {
 "This category will be available in:": "Cette catégorie sera disponible dans :"
 },
 "pl": {
+"You keep {0} of your income. Wealth score: {1}/100.": "Zostaje Ci {0} dochodu. Wskaźnik: {1}/100.",
+"Emergency fund complete": "Poduszka finansowa kompletna",
+"Debt-free": "Bez długów",
+"{0} months in a row with money left over": "{0} miesiące z rzędu z nadwyżką",
+"Saving over 20% of your income": "Oszczędzasz ponad 20% dochodów",
 "Goodbye!": "Do zobaczenia!",
 "Your data is saved. You can close this window now.": "Twoje dane są zapisane. Możesz teraz zamknąć to okno.",
 "Open MoneyCompass again": "Otwórz MoneyCompass ponownie",

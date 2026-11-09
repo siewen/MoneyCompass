@@ -194,7 +194,10 @@ export const Overview = {
     const wealth = Math.round(40 * Math.min(1, emF) + 30 * Math.min(1, Math.max(0, svRate) / 0.2) + 30 * (debt <= 0 ? 1 : income > 0 ? Math.max(0, 1 - debt / (income * 12)) : 0));
     const wl = wealth >= 80 ? T("Excellent") : wealth >= 60 ? T("Good") : wealth >= 40 ? T("Fair") : T("Needs attention");
     const kp = (l, v, ic2, cls, dl) => { const g = goAttr(l); return `<div class="kpi static${g ? " clk" : ""}"${g}><span class="kpi-ic ${cls}">${si(IC[ic2])}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b>${v}</b>${dl || ""}</span></div>`; };
-    const head = `<div class="pg-title"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T("Financial Dashboard"))}</h2><p>${esc(T("Your complete financial overview and personalized insights."))}</p></div></div>
+    const head = `<div class="pg-title"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T(hello))}${first ? ", " + esc(first) : ""}!</h2><p>${esc(both ? T("You keep {0} of your income. Wealth score: {1}/100.", savingsRateText(left, income), wealth) : T("Your complete financial overview and personalized insights."))}</p></div></div>
+      ${(() => { let st = 0; for (let i = done.length - 1; i >= 0 && done[i].income - done[i].expenses > 0; i--) st++;
+        const w = [target > 0 && emF >= 1 ? "🛡️ " + T("Emergency fund complete") : "", debt <= 0 && d.Loans.length ? "🎉 " + T("Debt-free") : "", st >= 2 ? "🔥 " + T("{0} months in a row with money left over", st) : "", both && svRate >= 0.2 ? "🏆 " + T("Saving over 20% of your income") : ""].filter(Boolean);
+        return w.length ? `<div class="ov-wins">${w.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""; })()}
       <div class="ov-kpis ovkp">${kp(T("Income per Month"), esc(pln(income)), "wallet", "in", dIn)}${kp(T("Spending per Month"), esc(avg.monthsUsed ? pln(spending) : "–"), "cart", "out", dOut)}${kp(T("Monthly Surplus"), esc(both ? pln(left) : "–"), "pig", "left", dLeft)}${kp(T("Savings Rate"), esc(both ? savingsRateText(left, income) : "–"), "percent", "rate", dRate)}</div>`;
     let hk = hist.map(([k, v]) => ({ k, v: v - debt }));
     if (hk.length < 2) {   // not enough recorded history: estimate backwards from today using each month's surplus

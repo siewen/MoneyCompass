@@ -1,5 +1,6 @@
 // MoneyCompass web: the window, the tabs and starting up.
 import "./glossary.js";
+import "./alive.js";
 import { store, T, State, loadCurrent, license, moduleOn, MODULES, lang, currentName, save, lastSaveFailed, summary, fmtDate, changedSinceFile, LANGS, duePromos } from "./core.js";
 import { esc, popup, toast } from "./ui.js";
 import { Calc, pln, restoreFromBin, binLabel, categoryLabel, today, addDays } from "./core.js";
