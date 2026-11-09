@@ -2251,3 +2251,10 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .oi-card{background:rgba(127,127,127,.07);border:1px solid var(--line,rgba(255,255,255,.08));border-radius:14px;padding:12px 14px}
 .oi-card h4{margin:0 0 6px}.oi-card p{margin:4px 0}
 .oi-notes{margin:0;padding-left:18px;opacity:.85;display:flex;flex-direction:column;gap:4px}
+
+/* Menus: emerald instead of blue (dark theme) */
+:root[data-design]:not([data-theme="hell"]) .data-menu{--menu-bg:#0f1f1a;background:#0f1f1a;border-color:rgba(52,211,153,.22)}
+:root[data-design]:not([data-theme="hell"]) .data-menu button:hover{background:rgba(52,211,153,.12)}
+:root[data-design]:not([data-theme="hell"]) .me-menu .mi{color:#34d399}
+:root[data-design]:not([data-theme="hell"]) .tab .ti{color:#6fd1ae}
+:root[data-design]:not([data-theme="hell"]) .tab:not(.on) .ti{color:#7fbfa6}
