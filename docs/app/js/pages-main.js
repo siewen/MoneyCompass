@@ -680,8 +680,8 @@ export const Expenses = {
       <div class="ei-o3"><h4>${esc(T("Top Opportunities"))}</h4>${opps.map(o => `<div class="ei-op">${okE}<span>${esc(o[0])}</span><b>+${esc(pln(o[1]))}/${esc(T("month"))}</b></div>`).join("")}</div>
       <button class="sv-btn ei-ob" data-action="ex-optimize">${si(IC.trend, 18)} ${esc(T("Optimize My Budget"))}</button></div>`;
     const expHead2 = pageHead({ icon: "wallet", title: T("Expenses Intelligence"), sub: T("Analyze spending habits, reduce unnecessary costs and improve monthly savings."),
-      kpis: [{ l: T("Monthly Spending"), v: monthly ? pln(monthly) : "–", icon: "wallet", cls: "in" }, { l: T("Average Daily Spending"), v: monthly ? pln(monthly / 30) : "–", icon: "cal", cls: "src" },
-        { l: T("Largest Category"), v: sorted0[0] ? categoryLabel(sorted0[0].category) : "–", sub: sorted0[0] ? pln(sorted0[0].perMonth) : "", icon: "star", cls: "left" }, { l: T("Savings Opportunity"), v: pln(saveM) + "/" + T("month"), vcls: "good", icon: "pig", cls: "rate" }] });
+      kpis: [{ l: T("Monthly Spending"), v: monthly ? pln(monthly) : "–", icon: "wallet", cls: "in", attr: ' data-hist=""' }, { l: T("Average Daily Spending"), v: monthly ? pln(monthly / 30) : "–", icon: "cal", cls: "src", attr: ' data-hist=""' },
+        { l: T("Largest Category"), v: sorted0[0] ? categoryLabel(sorted0[0].category) : "–", sub: sorted0[0] ? pln(sorted0[0].perMonth) : "", icon: "star", cls: "left", attr: sorted0[0] ? ` data-hist="${esc(sorted0[0].category)}"` : "" }, { l: T("Savings Opportunity"), v: pln(saveM) + "/" + T("month"), vcls: "good", icon: "pig", cls: "rate" }] });
     const bdAll = (cats.all || []).map((c, n) => ({ label: categoryLabel(c.category), value: c.perMonth, color: COLORS.cats[n % COLORS.cats.length], sh: ChartData.share(c.perMonth, cats.total) }));
     const breakCard = dcard("pie", "res", T("Spending Breakdown"), bdAll.length ? `<div class="sv-ar ei-br">${donut(bdAll, pln(cats.total), T("/month"), 150)}<ul class="sv-al">${bdAll.slice(0, 7).map(x => `<li data-cat="${esc(x.label)}"><i style="background:${x.color}"></i><span>${esc(x.label)}</span><b>${esc(String(x.sh).includes("%") ? x.sh : x.sh + "%")}</b></li>`).join("")}</ul></div>` : `<p class="hint">${esc(T("Add expenses to see where your money goes."))}</p>`, { klass: "ei-break", extra: PM("ex-more", T("Monthly average and transfers")) });
     const trendC = dcard("trend", "res", T("Monthly Spending Trend"), `<span class="sv-leg"><i style="background:#2EDC9A"></i>${esc(T("Current Month"))}<i style="background:#3B9BFF"></i>${esc(T("Previous Month"))}<i style="background:#F5A623"></i>${esc(T("3-Month Average"))}</span>` +
@@ -747,6 +747,7 @@ export const Expenses = {
       setTimeout(() => f.amount.focus(), 80);
     };
     el.querySelector('[data-action="ex-add"]').onclick = () => openAdd(null, el.querySelector('[name="qdate"]')?.value);
+    el.querySelectorAll("[data-hist]").forEach(b => b.onclick = () => { flt.cat = b.dataset.hist; App.refresh(); openWin(T("Outflow history"), "table", "hist", 1000, () => { flt.cat = ""; App.refresh(); }); });
     el.querySelectorAll("[data-quick]").forEach(b => b.onclick = () => { flt.cat = b.dataset.quick; App.refresh(); openWin(T("Outflow history"), "table", "hist", 1000, () => { flt.cat = ""; App.refresh(); }); });
     el.querySelectorAll('[data-action="ex-optimize"]').forEach(b => b.addEventListener("click", () => App.openOptimize()));
     el.querySelector('[data-action="sort-other"]')?.addEventListener("click", () => sortOther(() => App.refresh()));

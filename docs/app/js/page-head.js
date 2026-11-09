@@ -44,7 +44,7 @@ const KGO = { "Income per Month": "income", "Spending per Month": "expenses", "M
   "Next Payment": "calendar", "Income Growth Potential": "#opt", "Potential Savings": "#opt", "Savings Opportunity": "#opt", "Potential Monthly Savings": "#opt", "Spending 20% less there saves": "#opt",
   "Emergency Fund Balance": "portfolio", "Months Covered": "expenses", "Annual Interest Projection": "savings", "Savings Health Score": "#opt", "Potential Extra Profit": "#opt", "Additional Profit": "#opt",
   "Monthly Payments": "calendar", "Spent This Month": "expenses", "Planned Savings": "portfolio", "Upcoming Income": "income", "Upcoming Expenses": "expenses", "Scheduled Savings Transfers": "portfolio",
-  "Debt Score": "#opt", "Budget Health Score": "#opt", "Best Offer Return": "#opt", "Best Current Offer": "#opt" };
+  "Monthly Income": "reports", "Income Stability": "calendar", "Total Savings": "savings", "Net Growth": "reports", "Average Yield": "portfolio", "Compared Banks": "portfolio", "Total Debt Remaining": "reports", "Debt-Free Date": "calendar", "Monthly Budget": "expenses", "Remaining Budget": "expenses", "Expected Net Cashflow": "reports", "Total Income": "income", "Total Expenses": "expenses", "Net Balance": "overview", "Debt Score": "#opt", "Budget Health Score": "#opt", "Best Offer Return": "#opt", "Best Current Offer": "#opt" };
 let rev = null, revLang = "";
 export function goAttr(label, here = "") {
   const k = (document.documentElement.lang || "") + T("Overview");
@@ -55,7 +55,7 @@ export function goAttr(label, here = "") {
 }
 export function pageHead({ icon, title, sub, btn = "", kpis = [] }) {
   return `<div class="pg-title"><span class="pg-ic">${si(IC[icon] || IC.bars, 34)}</span><div><h2>${esc(title)}</h2><p>${esc(sub)}</p></div>${btn}</div>
-    <div class="ov-kpis">${kpis.map(k => { const g = goAttr(k.l, window.__curRoute); return `<div class="kpi static${k.hi ? " hi" : ""}${g ? " clk" : ""}"${g}><span class="kpi-ic ${k.cls || "in"}">${si(IC[k.icon] || IC.bars)}</span><span class="kpi-t"><span class="kpi-l">${esc(k.l)}</span><b class="${k.vcls || ""}">${esc(k.v)}</b>${k.sub ? `<small class="kpi-sub">${esc(k.sub)}</small>` : ""}</span></div>`; }).join("")}</div>`;
+    <div class="ov-kpis">${kpis.map(k => { const g = k.attr || goAttr(k.l, window.__curRoute); return `<div class="kpi static${k.hi ? " hi" : ""}${g ? " clk" : ""}"${g}><span class="kpi-ic ${k.cls || "in"}">${si(IC[k.icon] || IC.bars)}</span><span class="kpi-t"><span class="kpi-l">${esc(k.l)}</span><b class="${k.vcls || ""}">${esc(k.v)}</b>${k.sub ? `<small class="kpi-sub">${esc(k.sub)}</small>` : ""}</span></div>`; }).join("")}</div>`;
 }
 /** A glowing band: title (with icon) and a row of label/value figures. */
 export function band(title, icon, figs, cls = "", extra = "") {

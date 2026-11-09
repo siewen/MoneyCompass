@@ -8,7 +8,7 @@ import { App, requirePro } from "./app.js";
 import { monthBars, donut, savingsChart } from "./charts.js";
 import { savingsData } from "./savings-check.js";
 import { ovTrend } from "./ov-charts.js";
-import { IC } from "./page-head.js";
+import { IC, goAttr } from "./page-head.js";
 
 const D = () => State.data;
 const round = v => Math.round(v * 100) / 100;
@@ -242,7 +242,7 @@ export const Reports = {
       inflow - outflow >= 0 && inflow > 0 ? T("Financial position is positive") : inflow > 0 ? T("Outflows are higher than inflows") : null].filter(Boolean);
     const si = (d, n = 28) => `<svg class="nwi" width="${n}" height="${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
     const okc = `<span class="nw-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></span>`;
-    const kp = (l, v, ic, cls = "") => `<div class="kpi static"><span class="kpi-ic ${cls}">${ic}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b>${esc(v)}</b></span></div>`;
+    const kp = (l, v, ic, cls = "") => { const g = goAttr(l, "reports"); return `<div class="kpi static${g ? " clk" : ""}"${g}><span class="kpi-ic ${cls}">${ic}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b>${esc(v)}</b></span></div>`; };
     const pl = k => ({ summary: 0 }[k]);
     el.innerHTML = `<div class="pg-title"><span class="pg-ic">${si('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>', 34)}</span><div><h2>${esc(T("Financial Report"))}</h2><p>${esc(T("Analyze financial performance and generate professional reports."))}</p></div>
         <button class="btn main rp-gen" data-f="pdf">${esc(T("Generate Report"))}</button></div>
