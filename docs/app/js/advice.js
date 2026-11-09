@@ -114,23 +114,10 @@ export function promoReminder() {
 }
 
 
-/** Information page for one recommended offer; the bank's own site is one click further. */
-function offerInfo(m) {
+/** Opens the full "Offer details" window (score, pros and cons) for a recommended offer; the bank's site is linked from there. */
+async function offerInfo(m) {
   if (!m) return;
-  const o = m.o, nm = offerName(o), lim = o.MaxAmount > 0 ? pln(o.MaxAmount) : T("no limit");
-  const pp = popup("", { width: 720, cls: "nw-win sc-win" });
-  const notes = [];
-  if (m.promoEnd) notes.push(T("Best moved when your promotion ends on {0}.", fmtDate(m.promoEnd)));
-  notes.push(T("Promotions are usually for new money and need a personal account in that bank and some card payments – check the bank's terms."));
-  notes.push(T("Deposits are guaranteed by the BFG up to €100,000 per bank."));
-  pp.el.innerHTML = `<div class="nw-hd"><span class="nw-hi">🏦</span><div><h2>${esc(o.Bank || nm)}</h2><p class="nw-sub">${esc(o.Name || T("Savings offer"))}</p></div><button class="nw-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
-    <div class="sc-body oi-body">
-      <div class="ow-bigs"><div class="ow-big"><small>${esc(T("Interest rate"))}</small><b class="good">${esc(rate(o.Rate))}</b></div><div class="ow-big"><small>${esc(T("Additional Annual Profit"))}</small><b class="good">+${esc(pln(m.gain))}</b></div></div>
-      <div class="oi-card"><h4>${esc(T("What to move"))}</h4><p>${esc(T("Move {0} from {1}", pln(m.moved), m.h.Name))} → <b>${esc(nm)}</b></p>
-        <p class="hint">${esc(T("instead of {0}", rate(m.now)))} · ${esc(T("{0} days", m.days))} · ${esc(T("Limit"))}: ${esc(lim)}</p></div>
-      ${o.Details ? `<div class="oi-card"><h4>${esc(T("Conditions"))}</h4><p>${esc(o.Details)}</p></div>` : ""}
-      <ul class="oi-notes">${notes.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
-      <p class="hint">${esc(T("This is a calculation, not financial advice."))}</p>
-    </div>
-    <div class="nw-ft"><button class="btn second" data-close>${esc(T("Close"))}</button><a class="btn main" href="${esc(Rates.link(o))}" target="_blank" rel="noopener">${esc(T("Go to the bank's website"))} ↗</a></div>`;
+  const { bankRowsFor, offerDetailWindow } = await import("./pages-pro.js");
+  const A = Math.max(1, Math.round(m.moved)), rows = bankRowsFor(A), i = rows.findIndex(x => x.o === m.o);
+  if (i >= 0) offerDetailWindow(rows, A, i);
 }

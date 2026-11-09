@@ -1192,7 +1192,7 @@ export const Portfolio = {
           <small>${esc(T("From: {0}", m.h.Name))} → ${esc(T("To: {0}", offerNm(m.o)))}</small></div>
         <div class="sv-opg"><small>${esc(T("Additional Annual Profit"))}</small><b>+${esc(pln(m.gain))}</b></div>
         <div class="sv-opb"><button class="sv-btn" data-offer-info="${i}">${si(IC.eye, 16)} ${esc(T("View Offer"))}</button>
-          <button class="sv-btn ghost" data-moved="${i}">✓ ${esc(T("Already Completed"))}</button></div></div>`).join("") :
+          <button class="sv-btn ghost" data-moved="${i}">✓ ${esc(T("I moved it"))}</button></div></div>`).join("") :
       `<p class="hint">${esc(d.Holdings.some(h => h.Safe && h.Amount > 0) ? T("Your savings already earn about as much as today's best offers. Nothing to move right now.") : T("Add your savings (bank, cash) above, with their interest rate, to see where they would earn more."))}</p>`;
     const optBand = `<div class="nw-card sv-opp"><div class="sv-oh"><span class="sv-star">${si(IC.star, 40)}</span><div><h3>${esc(T("Wealth Optimization Opportunities"))}</h3><small>${esc(T("Smart recommendations to help you get more from your savings."))}</small></div></div>${dueTxt}<div class="sv-ops${mvShown.length > 1 ? "" : " one"}">${opp}</div>
       ${!license.isPro && mv.length > 1 ? `<p class="hint">🔒 ${esc(T("{0} more suggestions for your other savings with MoneyCompass Pro.", mv.length - 1))}</p>` : ""}</div>`;
