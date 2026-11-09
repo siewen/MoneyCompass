@@ -2362,3 +2362,16 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .tp-warn{margin:12px 0 4px;padding:10px 14px;border-radius:12px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);font-size:.9rem}
 
 .tp-exp{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 4px}
+
+.tx-chk{display:flex;align-items:center;gap:6px;font-size:.78rem;opacity:.85;margin-top:3px}
+
+/* Taxes & Payroll on phones */
+@media (max-width:760px){
+  .tp,.tx-page{max-width:100%;overflow-x:clip}
+  .tp .tp-two,.tp .tp-main,.tp .tp-sum,.tp .tp-brk{grid-template-columns:1fr !important}
+  .tp .tp-ann{display:grid !important;grid-template-columns:1fr !important;gap:10px}
+  .tp .tp-head{flex-wrap:wrap}
+  .tp .tp-country{margin-left:0}
+  .tp .tp-sum>div{border:0 !important}
+  .tp-mt th,.tp-mt td{padding:7px 8px}
+}

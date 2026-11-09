@@ -17,7 +17,8 @@ export const TAX = {
       full: { base: 5652, pension: 0.1952, disability: 0.08, accident: 0.0167, fund: 0.0245, sickness: 0.0245 },   // "big ZUS": base = 60% of the forecast average wage
       pref: { base: 1441.8, pension: 0.1952, disability: 0.08, accident: 0.0167, fund: 0, sickness: 0.0245 },     // preferential ZUS, first 24 months: base = 30% of the minimum wage
     },
-    linear: 0.19,                                           // flat tax
+    linear: 0.19, healthDeductLimit: 14100,   // flat tax: health insurance paid can be deducted from the income, up to this amount a year
+    zusPlus: { factor: 0.5, min: 1441.8, max: 5652, revenueLimit: 120000 },   // small ZUS Plus: base = income of last year / days * 30 * 0.5, between min and max                                           // flat tax
     health: { min: 432.54, minJan: 314.96, scale: 0.09, linear: 0.049, lump: [[60000, 5537.18], [300000, 9228.64], [Infinity, 16611.55]] },   // lump: yearly revenue limit → base; 9% of the base
     lumpRates: [0.17, 0.15, 0.14, 0.125, 0.12, 0.10, 0.085, 0.055, 0.03, 0.02],
   },
