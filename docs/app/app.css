@@ -2411,3 +2411,23 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 @media(max-width:1100px){.tp .tp2{grid-template-columns:1fr}.tp .tp2-side{position:static;max-height:none;overflow:visible}}
 @media(max-width:760px){.tp .tp-tab{padding:8px 10px;font-size:.8rem}}
 .tp-mt th{white-space:normal;line-height:1.2}.tp .tp-mt th,.tp .tp-mt td{padding-left:7px;padding-right:7px}
+
+/* Overview: Financial Assessment */
+.ov-assess{display:grid;grid-template-columns:minmax(0,1fr) 190px;grid-template-areas:"main score" "next next";gap:14px;margin:6px 0 14px}
+.ov-assess .oa-main{grid-area:main;border-left:4px solid var(--st);padding:18px 20px}
+.ov-assess .oa-score{grid-area:score;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;text-align:center}
+.ov-assess .oa-score small{opacity:.75}.ov-assess .oa-score b{color:var(--st)}
+.ov-assess .oa-next{grid-area:next;padding:16px 20px}
+.oa-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}.oa-top h3{margin:0;font-size:1.05rem}.oa-top small{opacity:.7;margin-left:auto}
+.oa-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;font-weight:700;font-size:.82rem;background:color-mix(in srgb,var(--st) 18%,transparent);color:var(--st);border:1px solid color-mix(in srgb,var(--st) 45%,transparent)}
+.oa-text{margin:4px 0 14px;font-size:1.02rem;line-height:1.5}
+.oa-boxes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.oa-box{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.oa-box small{display:block;opacity:.7;font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;font-weight:600}.oa-box p{margin:3px 0 0;font-size:.9rem;line-height:1.4}
+.oa-box.oa-b-bad .oa-bi{color:#f87171}.oa-box.oa-b-good .oa-bi{color:#34d399}.oa-box.oa-b-warn .oa-bi{color:#fbbf24}.oa-box p{color:inherit !important}
+.oa-note{display:block;margin-top:12px;opacity:.55;font-size:.74rem}
+.oa-act{display:grid;grid-template-columns:auto auto 1fr auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid rgba(255,255,255,.07)}
+.oa-act:first-of-type{border-top:0}
+.oa-n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#12936A;color:#fff;font-size:.78rem;font-weight:700}
+.oa-ai{font-size:1.3rem}.oa-act b{display:block}.oa-act p{margin:2px 0 0;opacity:.75;font-size:.86rem}
+@media(max-width:900px){.ov-assess{grid-template-columns:1fr;grid-template-areas:"main" "score" "next"}.oa-boxes{grid-template-columns:1fr}.oa-act{grid-template-columns:auto 1fr;}.oa-act .sv-btn{grid-column:1/-1}}

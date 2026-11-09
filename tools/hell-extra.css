@@ -18,3 +18,5 @@
 :root[data-theme="hell"] .hint.mc-empty{color:#17251F}
 :root[data-theme="hell"] .ov-wins button{color:#12402b;background:rgba(52,211,153,.18)}
 :root[data-theme="hell"] .ow-ring::before{background:#E1E6E3}:root[data-theme="hell"] .ow-big small,:root[data-theme="hell"] .ow-st small,:root[data-theme="hell"] .ow-score p,:root[data-theme="hell"] .ow-body h4{color:#44574F}
+:root[data-theme="hell"] .oa-box{background:rgba(0,0,0,.035) !important;border-color:rgba(0,0,0,.09) !important}
+:root[data-theme="hell"] .oa-act{border-top-color:rgba(0,0,0,.09) !important}

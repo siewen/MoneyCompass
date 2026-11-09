@@ -37,7 +37,7 @@ function decorate() {
     if (h.matches(".hint") && h.children.length === 0 && /^(No |Nothing|Mark an expense|Add your|Nothing yet|–$)/.test(h.textContent.trim()) && h.textContent.trim().length > 2) { h.dataset.empty = "1"; h.classList.add("mc-empty"); }
   });
   const ov = document.querySelector("#page .pg-title p");
-  if (ov && !document.querySelector("#page .mc-tip") && document.documentElement.dataset.page === "overview") {
+  if (ov && !document.querySelector("#page .mc-tip") && document.documentElement.dataset.page === "overview" && !document.querySelector("#page .ov-assess")) {
     const d = new Date(), tip = TIPS[(d.getFullYear() * 400 + d.getMonth() * 31 + d.getDate()) % TIPS.length];
     const w = document.querySelector("#page .ov-wins") || document.querySelector("#page .pg-title");
     const el = document.createElement("div"); el.className = "mc-tip"; el.innerHTML = "<span>💡</span><p><b>Tip of the day:</b> " + tip + "</p>";
