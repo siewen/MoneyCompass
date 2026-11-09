@@ -2312,3 +2312,36 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .tx-it{transition:border-color .2s,transform .2s}.tx-it:hover{border-color:rgba(52,211,153,.5);transform:translateX(2px)}
 .tx-page .ov-card{transition:box-shadow .25s}.tx-page .ov-card:hover{box-shadow:0 10px 28px rgba(0,0,0,.25)}
 .tx-bar i{background:linear-gradient(90deg,#10b981,#34d399)}
+
+/* Taxes & Payroll Intelligence Center */
+.tp-head{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.tp-head h2{margin:0;font-size:26px}.tp-head p{margin:4px 0 0;opacity:.8}
+.tp-logo{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;color:#34d399;background:radial-gradient(circle,rgba(52,211,153,.35),rgba(52,211,153,.05) 70%);border:1px solid rgba(52,211,153,.35);box-shadow:0 0 28px rgba(52,211,153,.25);flex:none}
+.tp-country{margin-left:auto;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:14px;border:1px solid var(--border,rgba(255,255,255,.12));background:rgba(255,255,255,.04)}
+.tp-country select{background:transparent;border:0;color:inherit;font:inherit;font-weight:600}
+.tp-main{display:grid;grid-template-columns:minmax(290px,340px) 1fr;gap:16px;align-items:start;margin-top:12px}
+@media(max-width:980px){.tp-main{grid-template-columns:1fr}}
+.tp-left,.tp-right{display:flex;flex-direction:column;gap:16px;min-width:0}
+.tp-two{display:grid;grid-template-columns:1fr 1.15fr;gap:16px}@media(max-width:760px){.tp-two{grid-template-columns:1fr}}
+.tp-bot{margin-top:16px;grid-template-columns:1.1fr 1fr}
+.tp-card{padding:18px}
+.tp-h{display:flex;align-items:center;gap:10px;margin-bottom:12px}.tp-h h3{margin:0;font-size:17px}.tp-hi{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(52,211,153,.14);font-size:18px}
+.tp-fold{border-top:1px solid var(--border,rgba(255,255,255,.1));padding:10px 0}.tp-fold summary{display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:600;list-style:none}.tp-fold summary::-webkit-details-marker{display:none}
+.tp-fold[open] summary svg{transform:rotate(90deg)}.tp-fold summary svg{transition:transform .2s;opacity:.7}
+.tp-sum{display:grid;grid-template-columns:1.15fr .85fr 1fr;gap:18px;align-items:start}@media(max-width:860px){.tp-sum{grid-template-columns:1fr}}
+.tp-r{display:flex;justify-content:space-between;padding:7px 0}.tp-r.tp-net b{color:#34d399;font-size:18px}.tp-r b{font-size:16px}
+.tp-s2{display:flex;flex-direction:column;align-items:center;gap:6px;border-left:1px solid var(--border,rgba(255,255,255,.1));border-right:1px solid var(--border,rgba(255,255,255,.1));padding:0 8px}
+@media(max-width:860px){.tp-s2{border:0}}
+.tp-s3{display:flex;flex-direction:column;gap:6px}.tp-s3 small{opacity:.75}.tp-s3 b{font-size:17px}.tp-s3 b.warn{color:#fbbf24}
+.tp-util{display:flex;align-items:center;gap:10px}.tp-util .tx-bar{flex:1;margin:0}
+.tp-brk{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.tp-brk .tx-donut{position:relative;width:150px}
+.tp-dc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}.tp-dc b{font-size:15px}.tp-dc small{opacity:.7}
+.tx-leg.col{flex-direction:column;gap:8px;margin:0;flex:1;min-width:130px}.tx-leg.col span{display:flex;align-items:center}.tx-leg.col b{margin-left:auto}
+.tp-ib{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;padding:12px;border-radius:14px;background:linear-gradient(135deg,rgba(52,211,153,.16),rgba(52,211,153,.03));border:1px solid rgba(52,211,153,.22)}
+.tp-ib small{display:block;opacity:.8}.tp-ib b{font-size:26px}
+.tp-tips{margin:12px 0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.tp-ann{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.tp-ann small{display:block;opacity:.75}.tp-ann b{font-size:24px}
+.tp-srch{display:flex;align-items:center;gap:10px;margin-bottom:10px}.tp-srch h3{margin:0}.tp-info{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#3b82f6;color:#fff;font-weight:700;font-size:14px}
+.tp-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.tp .tx-add{border:0;padding:0;margin-top:8px}.tp .tx-add .tp-fold{padding:10px 0 0}.tp .tx-it{padding:8px 10px}.tp .tx-n small{font-size:12px}.tp .tx-a input{width:76px}
+.tp-logo{font-size:30px}
