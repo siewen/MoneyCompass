@@ -14,6 +14,7 @@ import { Rates } from "./rates.js";
 import { WEB_VERSION, WEB_BUILD, WEB_DATE } from "./version.js";
 import { ico } from "./nw.js";
 import { openGuide, shouldShowGuide } from "./guide.js";
+import { openTour, shouldTour } from "./tour.js";
 import { hasNews, openNews } from "./news.js";
 import { Overview, Income, Expenses, Emergency, Portfolio, bindBin, setSearch, manageCategories } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
@@ -508,6 +509,17 @@ function shorten(el) {
     h.classList.add("fold-h"); if (!keep) c.classList.add("folded");
     h.addEventListener("click", () => c.classList.toggle("folded"));
   });
+  // every other long page: cards after the first two fold behind their heading
+  if (!el.querySelector(".ox")) {
+    const all = [...el.querySelectorAll(".nw-card, .card")].filter(c => !c.parentElement.closest(".nw-card, .card") && !c.classList.contains("folded") && !c.classList.contains("oa-main") && !c.classList.contains("oa-score") && !c.classList.contains("oa-next") && !c.classList.contains("adv-panel") && c.querySelector("h3"));
+    all.forEach((c, i) => {
+      if (i < 2 || c.querySelector(":scope > .fold-h")) return;
+      const h3 = c.querySelector("h3"); let h = h3; while (h.parentElement !== c) h = h.parentElement;
+      if (h.contains(c.querySelector("input,select,textarea,button:not(.pm-btn)")) ) return;   // headings that carry controls stay open
+      h.classList.add("fold-h"); c.classList.add("folded");
+      h.addEventListener("click", e => { if (e.target.closest("button,select,input,a")) return; c.classList.toggle("folded"); });
+    });
+  }
   const more = (rows, n, label) => {
     const hide = rows.slice(n); if (!hide.length) return;
     hide.forEach(r => r.classList.add("more-hidden"));
@@ -542,6 +554,7 @@ function render() {
   if (isDemo()) el.insertAdjacentHTML("afterbegin", `<div class="demo-bar"><b>🧪 ${esc(T("Demo profile"))}</b><span>${esc(T("Made-up numbers to show how MoneyCompass advises you. Your own data is not touched."))}</span><button class="sv-btn" data-leave-demo>${esc(T("Start with my own data"))} →</button></div>`);
   el.querySelectorAll("[data-demo]").forEach(b => b.onclick = () => { startDemo(); App.rebuild(); });
   el.querySelectorAll("[data-leave-demo]").forEach(b => b.onclick = () => { leaveDemo(); App.rebuild(); });
+  el.querySelectorAll("[data-tour]").forEach(b => b.onclick = () => openTour());
   el.querySelectorAll("[data-import-start]").forEach(b => b.onclick = () => smartImport());
   shorten(el);
   bindBin(el);
@@ -594,8 +607,10 @@ async function start() {
   const isNew = d0.Incomes.length + d0.Expenses.length + d0.Holdings.length + d0.Offers.length === 0;
   // Order at start: Terms (once) → Welcome back (continue, load a profile or start fresh) → What's new → guide or promotion reminder
   const afterTerms = () => welcome(() => {
-    if (hasNews(isNew)) openNews(false, () => { if (shouldShowGuide()) openGuide(); });
-    else if (shouldShowGuide()) openGuide(); else promoReminder();
+    const guideOrPromo = () => { if (shouldShowGuide()) openGuide(); else promoReminder(); };
+    const afterNews = () => shouldTour() ? openTour(guideOrPromo) : guideOrPromo();
+    if (hasNews(isNew)) openNews(false, () => { if (shouldTour()) openTour(() => { if (shouldShowGuide()) openGuide(); }); else if (shouldShowGuide()) openGuide(); });
+    else afterNews();
   });
   startLock(buildShell);
   startBackup(() => drawBackupBar(saveProfileFile));

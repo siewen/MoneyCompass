@@ -56,7 +56,6 @@ export const Overview = {
     const income = Calc.totalIncome(d), avg = Calc.spending(d);
     const spending = avg.essential + avg.nonEssential, left = income - spending;
     const both = income > 0 && avg.monthsUsed > 0;
-    const top = Advisor.analyse(d)[0];
     const p = Calc.portfolio(d);
     const months = ChartData.trend(dAll);
     const showTrend = months.some(m => m.income > 0 || m.expenses > 0);
@@ -184,7 +183,6 @@ export const Overview = {
     const due = duePromos(d)[0];
     if (due) sugg.push({ ic: "clock", cls: "warn", go: "portfolio", text: due.p.ended ? T("The promotion at {0} ended on {1} – see where to move the money", due.h.Name, fmtDate(due.p.end)) : T("The promotion at {0} ends in {1} days – see where to move the money", due.h.Name, due.p.daysLeft) });
     else { const m = moves(d)[0]; if (m) sugg.push({ ic: "trend", go: "portfolio", text: T("Your savings could earn about {0} more at {1} – see Savings", pln(m.gain), m.o.Bank) }); }
-    if (top) sugg.push({ ic: "bulb", go: top.route || "", text: T("Best next step: {0}", top.title) });
     if (sugg.length) x.push(card(`<div class="next-list">${sugg.map(s => `<button class="next-item ${s.cls || ""}" data-go="${s.go}">${ICONS[s.ic]}<span>${esc(s.text)}</span>${s.go ? "<i>→</i>" : ""}</button>`).join("")}</div>`, "fixed next-card no-sugg"));
     x.push(card(`<div class="link" data-go="portfolio">${headingTip(T("Your savings"), headTip)}${state ? `<span class="status-chip ${state}">${esc(state === "good" ? T("Growing") : state === "warn" ? T("Slow") : T("Shrinking"))}</span>` : ""}
       ${headline}${bars}${growthLine}${p.total > 0 ? savingsFacts(d, p) : hint(T("Add your savings in the Savings tab to see this chart."))}</div>`, "savings-card status-" + (state || "none")));
