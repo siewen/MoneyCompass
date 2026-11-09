@@ -841,6 +841,8 @@ export const NEW = {
 "1 category has a limit": "1 kategoria ma limit",
 "1 active loan or debt": "1 aktywny kredyt lub dług",
 "1 transaction remains uncategorized.": "1 transakcja nie ma kategorii.",
+"From {0} counted opportunities": "Z {0} policzonych możliwości",
+"per year, rough estimate": "rocznie, szacunkowo",
 "Spending exceeds income: monthly deficit {0}": "Wydatki przekraczają dochody: miesięczny deficyt {0}",
 "Monthly Deficit": "Miesięczny deficyt",
 "Negative Savings Rate": "Ujemna stopa oszczędności",

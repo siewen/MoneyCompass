@@ -2656,3 +2656,8 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .bp-ov-b .ring-t b{font-size:17px!important}
 .dz svg.oc .oc-ax,.bp-fcc svg.oc .oc-ax{font-size:16.5px}
 .dz svg.oc{margin-top:6px}
+
+/* mobile: Problem / Opportunity boxes stack so text is never cut */
+@media(max-width:640px){.oa-boxes{grid-template-columns:1fr!important}.oa-boxes .oa-box p{font-size:.92rem}}
+/* tall empty history cards: no forced height */
+.nw-hist-card .empty,.nwh-empty{min-height:0}
