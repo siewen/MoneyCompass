@@ -595,6 +595,8 @@
 :root[data-theme="hell"][data-design]:not([data-theme="hell"]) .data-menu{background:#f0f6f4}
 :root[data-theme="hell"][data-design]:not([data-theme="hell"]) .tab .ti{color:#298061}
 :root[data-theme="hell"][data-design]:not([data-theme="hell"]) .tab:not(.on) .ti{color:#48786a}
+:root[data-theme="hell"] .sv2-chip{background:rgba(127,127,127,0.09)}
+:root[data-theme="hell"] .sv2-chip.down{color:#a00808}
 /* Hand-written Light theme fixes (appended by make-hell.py): neutral page, no green glow, calm cards */
 :root[data-theme="hell"] body{background:#CDD3D0 !important}
 :root[data-theme="hell"] .sidebar,:root[data-theme="hell"] aside{background:#D8DEDB !important}

@@ -2258,3 +2258,14 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 :root[data-design]:not([data-theme="hell"]) .me-menu .mi{color:#34d399}
 :root[data-design]:not([data-theme="hell"]) .tab .ti{color:#6fd1ae}
 :root[data-design]:not([data-theme="hell"]) .tab:not(.on) .ti{color:#7fbfa6}
+
+/* Your Savings window */
+.sv2-hero{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;border-radius:16px;background:linear-gradient(135deg,rgba(52,211,153,.18),rgba(52,211,153,.04));border:1px solid rgba(52,211,153,.25)}
+.sv2-hero small{display:block;opacity:.75}.sv2-hero>div>b{display:block;font-size:34px;line-height:1.15;margin:2px 0 8px}
+.sv2-chip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12.5px;background:rgba(127,127,127,.18)}
+.sv2-chip.up{background:rgba(52,211,153,.2);color:#34d399}.sv2-chip.down{background:rgba(248,113,113,.2);color:#f87171}
+.sv2-donut{width:120px;flex:none}.sv2-donut svg{width:100%;height:auto}
+.sv2-split{display:flex;flex-direction:column;gap:8px}
+.sv2-bar{height:12px;border-radius:99px;background:#eda100;overflow:hidden}.sv2-bar i{display:block;height:100%;background:#34d399;border-radius:99px}
+.sv2-leg{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px}.sv2-leg u{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;background:#34d399}.sv2-leg u.o{background:#eda100}
+.sv2-row .ow-t b u{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px}

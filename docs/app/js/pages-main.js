@@ -273,12 +273,16 @@ export const Overview = {
         ${rk.length ? rk.map(y => `<div class="ow-row"><span class="ow-t"><b>${esc(y.o.Name)}</b><i style="width:${Math.max(6, Math.round(y.r.net / top * 100))}%"></i></span><span>${esc(rate2(y.r.effective))}</span><b class="good">${esc(pln(y.r.net))}</b></div>`).join("") : `<p class="hint mc-empty">${esc(T("No offers saved yet. Add them in the Compare offers tab, or with the Compare button in Optimize my finances."))}</p>`}`, "savings", T("Open Compare Offers"));
     });
     el.querySelector('[data-action="ov-sav"]')?.addEventListener("click", () => {
-      const tot = hold.reduce((a, h) => a + h.value, 0) || 1;
+      const tot = hold.reduce((a, h) => a + h.value, 0) || 1, PAL = ["#34d399", "#3b9bea", "#eda100", "#e87ba4", "#8b5cf6", "#22c7a0"];
+      const col = i => PAL[i % PAL.length], safePct = Math.round(p.safe / tot * 100), growth = svCh === null ? null : (svCh >= 0 ? "+" : "−") + Math.abs(Math.round(svCh * 10) / 10).toString().replace(".", ",") + "%";
       ovWin("pig", T("Your Savings"), T("Where your savings are and how they are growing."),
-        `<div class="ow-bigs">${big(T("Total Savings"), esc(pln(p.total)))}${big(T("Growth (YTD)"), svCh === null ? "–" : esc((svCh >= 0 ? "+" : "−") + Math.abs(Math.round(svCh * 10) / 10).toString().replace(".", ",") + "%"), "good")}</div>
-        <div class="ow-bigs">${big(T("Safe savings"), esc(pln(p.safe)))}${big(T("Higher-risk savings"), esc(pln(p.risky)))}</div>
+        `<div class="sv2-hero"><div><small>${esc(T("Total Savings"))}</small><b>${esc(pln(p.total))}</b>
+            <span class="sv2-chip ${svCh === null ? "" : svCh >= 0 ? "up" : "down"}">${growth === null ? esc(T("Not enough history yet")) : "↗ " + esc(growth) + " " + esc(T("Growth (YTD)"))}</span></div>
+          ${hold.length ? `<div class="sv2-donut">${donut(hold.map((h, i) => ({ label: h.label, value: h.value, color: col(i) })), "", "")}</div>` : ""}</div>
+        <div class="sv2-split"><div class="sv2-bar"><i style="width:${safePct}%"></i></div>
+          <div class="sv2-leg"><span><u class="g"></u>${esc(T("Safe savings"))} <b>${esc(pln(p.safe))}</b></span><span><u class="o"></u>${esc(T("Higher-risk savings"))} <b>${esc(pln(p.risky))}</b></span></div></div>
         <h4>${esc(T("Accounts & Holdings"))}</h4>
-        ${hold.length ? hold.map(h => `<div class="ow-row"><span class="ow-t"><b>${esc(h.label)}</b><i style="width:${Math.max(4, Math.round(h.value / tot * 100))}%"></i></span><span>${Math.round(h.value / tot * 100)}%</span><b>${esc(pln(h.value))}</b></div>`).join("") : `<p class="hint mc-empty">${esc(T("No savings added yet."))}</p>`}`, "portfolio", T("Open Savings"));
+        ${hold.length ? hold.map((h, i) => `<div class="ow-row sv2-row"><span class="ow-t"><b><u style="background:${col(i)}"></u>${esc(h.label)}</b><i style="width:${Math.max(4, Math.round(h.value / tot * 100))}%;background:${col(i)}"></i></span><span>${Math.round(h.value / tot * 100)}%</span><b>${esc(pln(h.value))}</b></div>`).join("") : `<p class="hint mc-empty">${esc(T("No savings added yet."))}</p>`}`, "portfolio", T("Open Savings"));
     });
     el.querySelector('[data-action="ov-more"]')?.addEventListener("click", () => {
       const rows = [
