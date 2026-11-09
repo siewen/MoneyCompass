@@ -80,8 +80,8 @@ export function lineChart(labels, series, opt = {}) {
 }
 function lineChart0(labels, series, opt = {}) {
   const all = series.flatMap(s => s.vals.filter(v => v != null));
-  const hi = Math.max(1, ...all), lo = Math.min(0, ...all);
-  const max = niceMax(hi), min = lo < 0 ? -niceMax(-lo) : 0;
+  const lo = Math.min(0, ...all), hi = Math.max(lo < 0 ? 0 : 1, ...all);
+  const max = hi <= 0 ? 0 : niceMax(hi), min = lo < 0 ? -niceMax(-lo) : 0;
   const f = frame(labels.map(m => ({ month: String(m) })), min, max);
   const mk = s => {
     const pts = s.vals.map((v, i) => v == null ? null : [f.x(i), f.y(v), v]).filter(Boolean);

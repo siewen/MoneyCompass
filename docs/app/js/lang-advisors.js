@@ -208,6 +208,7 @@ export const ADV = {
 "{0} min": "{0} min",
 "{0} h": "{0} godz.",
 "Optimization Center": "Centrum Optymalizacji",
+"Open Optimization Center": "Otwórz Centrum Optymalizacji",
 "Add your income, spending and savings first. Then every advisor looks for ways to earn or save more, and this page ranks them for you.": "Najpierw dodaj dochody, wydatki i oszczędności. Potem każdy doradca szuka sposobów na zarobienie lub zaoszczędzenie więcej, a ta strona układa je w kolejności.",
 "Open Inflows": "Otwórz Wpływy",
 "Try the demo profile": "Wypróbuj profil demo",
