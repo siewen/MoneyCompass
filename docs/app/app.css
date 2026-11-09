@@ -2288,3 +2288,14 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .tx-src{margin:6px 0;padding-left:18px;display:flex;flex-direction:column;gap:4px}.tx-src a{color:#34d399}
 .tx-how{margin-top:8px}.tx-how summary{cursor:pointer;font-weight:600}.tx-srcc{margin-top:16px}
 .tx-disc{margin-top:14px;padding:12px 14px;border-radius:12px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);font-size:13px}.tx-disc p{margin:6px 0 0;opacity:.9}
+
+/* Taxes: extras list */
+.tx-left{display:flex;flex-direction:column;gap:16px}
+.tx-list{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.tx-it{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:rgba(127,127,127,.07);border:1px solid var(--line,rgba(255,255,255,.08))}
+.tx-ic{font-size:20px}.tx-n{flex:1;min-width:0;display:flex;flex-direction:column}.tx-n small{opacity:.7}
+.tx-a{display:flex;align-items:center;gap:6px}.tx-a input{width:90px;text-align:right}.tx-a em{font-style:normal;opacity:.6}
+.tx-tot{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;opacity:.85;margin-bottom:8px}
+.tx-add{border:1px dashed var(--line,rgba(255,255,255,.18));border-radius:14px;padding:12px 14px;margin-top:10px}.tx-add h4{margin:0 0 8px}
+.tx-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.tx-f{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}@media(max-width:560px){.tx-f{grid-template-columns:1fr}}
