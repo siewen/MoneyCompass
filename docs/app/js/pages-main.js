@@ -111,7 +111,7 @@ export const Overview = {
     const dIn = have2 ? deltaTag(last.income, prevM.income) : "", dOut = have2 ? deltaTag(last.expenses, prevM.expenses, false) : "";
     const dLeft = have2 ? deltaTag(last.income - last.expenses, prevM.income - prevM.expenses) : "";
     const dRate = have2 && last.income > 0 && prevM.income > 0 ? deltaTag((last.income - last.expenses) / last.income * 100, (prevM.income - prevM.expenses) / prevM.income * 100, true, true) : "";
-    const hr = new Date().getHours(), first = (currentName() || "").trim().split(/\s+/)[0] || "";
+    const hr = new Date().getHours(), nm0 = (currentName() || "").trim(), first = nm0 === T("Demo User") ? nm0 : nm0.split(/\s+/)[0] || "";
     const hello = hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
     const hero = `<div class="ov-hero"><div class="ov-hi"><h2>${esc(T(hello))}${first ? ", " + esc(first) : ""}!</h2><p>${esc(T("Here's your financial overview for {0}", monthName(today())))}</p></div>
       <div class="ov-quote">${esc(T("“Discipline today."))}<br>${esc(T("Freedom tomorrow.”"))}</div>
