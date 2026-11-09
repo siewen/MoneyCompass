@@ -2604,3 +2604,12 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .ov-pair{grid-template-columns:1fr!important;gap:12px}.ov-pair .oa-advs{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))!important}
 .ovo-calm .ovo-btn{background:transparent!important;border:1px solid rgba(46,220,154,.4)!important;color:#2EDC9A!important;font-size:14px!important;padding:10px 18px!important;box-shadow:none!important;animation:none!important}
 .ovo-calm{padding:12px 18px!important}
+
+/* Fill the row: equal-height cards, content centred, no dead space */
+.ovr2{align-items:stretch!important}.ovr2>.nw-card{align-self:stretch!important;display:flex;flex-direction:column}
+.ovr2>.nw-card>:not(.ni-fh):not(.oc-head):not(.legend){margin-top:auto;margin-bottom:auto}
+.ovr2 .oc{max-height:none!important;width:100%;height:auto}
+.ovr2e{align-items:stretch}.ovr2e>.nw-card{display:flex;flex-direction:column}
+.ovr2e .ovb-b{margin-top:auto!important}
+.ov-pair .oa-act{padding:12px 0}
+.ovr2e .ovb-b{align-self:flex-start}
