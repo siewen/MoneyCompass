@@ -566,6 +566,11 @@ function render() {
     ev.stopPropagation();
     if (x.dataset.go) App.go(x.dataset.go);
   }));
+  // Keyboard: every clickable card can be reached with Tab and opened with Enter or Space
+  el.querySelectorAll("[data-go]:not(button):not(a)").forEach(x => {
+    x.tabIndex = 0; x.setAttribute("role", "link");
+    x.addEventListener("keydown", ev => { if ((ev.key === "Enter" || ev.key === " ") && ev.target === x) { ev.preventDefault(); x.click(); } });
+  });
   el.querySelectorAll('[data-action="optimize"]').forEach(b => b.onclick = openOptimize);
   el.querySelectorAll("[data-open-opt]").forEach(b => b.onclick = e => { e.stopPropagation(); openOptimize(); });
   el.querySelectorAll('[data-action="export"]').forEach(b => b.onclick = openExport);

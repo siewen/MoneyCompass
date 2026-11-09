@@ -2613,3 +2613,10 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .ovr2e .ovb-b{margin-top:auto!important}
 .ov-pair .oa-act{padding:12px 0}
 .ovr2e .ovb-b{align-self:flex-start}
+
+/* Friendlier to use: clear hover and keyboard focus on everything clickable */
+.ni-page [data-go],.ni-page .ovo{transition:transform .15s,box-shadow .15s,border-color .15s,background .15s}
+.ni-page .nw-card[data-go]:hover,.ni-page .kpi.clk:hover{transform:translateY(-2px);border-color:rgba(46,220,154,.45);box-shadow:0 8px 22px rgba(0,0,0,.28)}
+.ni-page .nw-card[data-go]{cursor:pointer}
+.ni-page [data-go]:focus-visible,.ni-page button:focus-visible,.ni-page summary:focus-visible{outline:2px solid #2EDC9A;outline-offset:2px;border-radius:12px}
+@media(prefers-reduced-motion:reduce){.ni-page [data-go]:hover{transform:none}}
