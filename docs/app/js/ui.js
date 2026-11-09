@@ -126,8 +126,17 @@ document.addEventListener("focusin", e => { if (e.target instanceof HTMLSelectEl
 // ---------- Category lists with a search box ----------
 // Every category list (it has "＋ New category…") opens a small picker instead of the plain list: type to filter, ↑↓ and Enter to choose.
 const isCatSelect = el => el instanceof HTMLSelectElement && !el.disabled && !!el.querySelector('option[value="__new__"]');
+let coreMod = null; import("./core.js").then(m => { coreMod = m; });
+/** Make the list match the categories that exist now: add new ones (also ones created in "Edit categories…" meanwhile), drop deleted ones. */
+function syncCatSelect(sel) {
+  if (!coreMod) return;
+  const names = coreMod.categories().map(c => c.Name), nw = sel.querySelector('option[value="__new__"]');
+  [...sel.options].forEach(o => { if (o.value !== "__new__" && !names.includes(o.value) && o.value !== sel.value) o.remove(); });
+  names.forEach(n => { if (!sel.querySelector(`option[value="${CSS.escape(n)}"]`)) { const o = document.createElement("option"); o.value = n; o.textContent = coreMod.categoryLabel(n); sel.insertBefore(o, nw); } });
+}
 function openCatPicker(sel) {
   document.querySelector(".cat-pop")?.remove();
+  syncCatSelect(sel);
   sel.dataset.prev = sel.value;
   const r = sel.getBoundingClientRect(), opts = [...sel.options];
   const pop = document.createElement("div"); pop.className = "cat-pop";
@@ -142,7 +151,10 @@ function openCatPicker(sel) {
   const plain = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const draw = () => {
     const q = plain(input.value.trim());
+    const own = new Set((coreMod?.State.data.Categories || []).map(c => c.Name));
     shown = opts.filter(o => o.value === "__new__" || !q || plain(o.textContent).includes(q));
+    // Your own categories first, so a new one is right at the top
+    shown = [...shown.filter(o => own.has(o.value)), ...shown.filter(o => !own.has(o.value))];
     active = Math.max(0, Math.min(active, shown.length - 1));
     list.innerHTML = shown.map((o, i) => `<button type="button" class="cat-opt${o.value === sel.value ? " cur" : ""}${i === active ? " act" : ""}${o.value === "__new__" ? " new" : ""}" data-i="${i}">${esc(o.textContent)}</button>`).join("");
     list.querySelector(".act")?.scrollIntoView({ block: "nearest" });
@@ -156,6 +168,7 @@ function openCatPicker(sel) {
   const outside = e => { if (!pop.contains(e.target) && e.target !== sel) close(); };
   list.onclick = e => { const b = e.target.closest("[data-i]"); if (b) pick(shown[+b.dataset.i]); };
   pop.querySelector(".cat-edit").onclick = async () => { close(); (await import("./pages-main.js")).manageCategories(); };
+  pop.querySelector(".cat-edit").dataset.sel = "1";
   input.oninput = () => { active = 0; draw(); };
   input.onkeydown = e => {
     if (e.key === "ArrowDown") { active = Math.min(shown.length - 1, active + 1); draw(); e.preventDefault(); }
@@ -163,7 +176,7 @@ function openCatPicker(sel) {
     else if (e.key === "Enter") { pick(shown[active]); e.preventDefault(); }
     else if (e.key === "Escape" || e.key === "Tab") { close(); e.preventDefault(); e.stopPropagation(); }
   };
-  active = Math.max(0, opts.findIndex(o => o.value === sel.value));
+  active = 0;
   draw();
   setTimeout(() => { document.addEventListener("pointerdown", outside, true); input.focus(); }, 0);
 }
