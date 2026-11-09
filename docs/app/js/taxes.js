@@ -3,6 +3,7 @@
 import { T, State, save, pln, num, plain, uuid } from "./core.js";
 import { esc, card, field, numInput, textInput, select, check, confirmBox, toast } from "./ui.js";
 import { pageHead } from "./page-head.js";
+import { donut } from "./charts.js";
 import { TAX, TAX_SOURCES } from "./tax-rates.js";
 
 const r2 = x => Math.round(x * 100) / 100;
@@ -62,7 +63,7 @@ export const Taxes = {
   render(el) {
     const P = plan();
     const head = pageHead({ icon: "percent", title: T("Taxes"), sub: T("A rough estimate for Poland: gross and net pay, taxes and the bracket you are in."),
-      kpis: [{ l: T("Rates valid for"), v: String(TAX.year), icon: "star" }, { l: T("Income tax"), v: "12% / 32%", icon: "percent", cls: "rate" }, { l: T("Tax-free amount a year"), v: pln(TAX.pit.taxFree), icon: "coins" }, { l: T("32% starts above (a year)"), v: pln(TAX.pit.threshold), icon: "bars", cls: "left" }] });
+      kpis: [{ l: T("Rates valid for"), v: String(TAX.year), icon: "star", attr: ' data-txgo="sources"' }, { l: T("Income tax"), v: "12% / 32%", icon: "percent", cls: "rate", attr: ' data-txgo="how"' }, { l: T("Tax-free amount a year"), v: pln(TAX.pit.taxFree), icon: "coins", attr: ' data-txgo="how"' }, { l: T("32% starts above (a year)"), v: pln(TAX.pit.threshold), icon: "bars", cls: "left", attr: ' data-txgo="bracket"' }] });
     const itemsHtml = () => {
       const it = P.items, tot = k => it.filter(x => x.kind === k).reduce((a, x) => a + (x.amount || 0), 0);
       return `<div class="nw-ch"><h3>${esc(T("Extras and benefits"))}</h3></div>
@@ -97,11 +98,11 @@ export const Taxes = {
       ${card(`<h3>${esc(T("Where the numbers come from"))}</h3>
         <p class="hint">${esc(T("Rates and limits for {0}, checked {1}. They are kept in one file inside MoneyCompass and updated once a year.", TAX.year, TAX.checked))}</p>
         <ul class="tx-src">${TAX_SOURCES.map(([n, u]) => `<li><a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(T(n))} ↗</a></li>`).join("")}</ul>
-        <details class="tx-how"><summary>${esc(T("How the estimate is calculated"))}</summary><ol class="hint">
+        <details class="tx-how" id="tx-how"><summary>${esc(T("How the estimate is calculated"))}</summary><ol class="hint">
           <li>${esc(T("Social insurance: pension {0}%, disability {1}%, sickness {2}% of the gross. Pension and disability stop above {3} a year.", TAX.zus.pension * 100, TAX.zus.disability * 100, (TAX.zus.sickness * 100).toFixed(2).replace(/\.?0+$/, ""), pln(TAX.zusYearLimit)))}</li>
           <li>${esc(T("Health insurance: {0}% of the gross minus social insurance (not deductible from tax).", TAX.health * 100))}</li>
           <li>${esc(T("Income tax: gross − social insurance − costs of earning income ({0} or {1} a month) = tax base; {2}% up to {3} a year, {4}% above; minus {5} for the tax-free amount.", pln(TAX.kup.standard), pln(TAX.kup.raised), TAX.pit.low * 100, pln(TAX.pit.threshold), TAX.pit.high * 100, pln(TAX.pit.taxFree * TAX.pit.low)))}</li>
-          <li>${esc(T("Net = gross − insurance − tax. Twelve months of the same pay, the tax is settled over the whole year."))}</li></ol></details>`, "ov-card tx-srcc")}
+          <li>${esc(T("Net = gross − insurance − tax. Twelve months of the same pay, the tax is settled over the whole year."))}</li></ol></details>`, "ov-card tx-srcc\" id=\"tx-sources")}
       <div class="tx-disc"><b>⚠ ${esc(T("Important"))}</b>
         <p>${esc(T("This is a rough estimate for information only. It is not tax, legal or payroll advice, and it may differ from your real pay slip, because of bonuses, overtime, other contracts, reliefs, rounding, changes in the law and your personal tax return. MoneyCompass does not guarantee that the figures are correct or up to date and is not liable for decisions made on them. Check your real numbers with your payroll department, the tax office (KAS/ZUS) or a tax adviser."))}</p></div></div>`;
     const form = el.querySelector("#tax-form"), out = el.querySelector("#tax-out"), box = el.querySelector("#tx-items");
@@ -115,10 +116,15 @@ export const Taxes = {
       const hint = y.over > 0 ? T("About {0} a year of your income is taxed at 32%.", pln(y.over))
         : barPct >= 85 ? T("You are close to the 32% bracket: only {0} a year left in the 12% bracket.", pln(y.room))
         : T("You are in the 12% bracket, with {0} a year of room before 32% starts.", pln(y.room));
-      out.innerHTML = card(`<div class="tx-big"><div><small>${esc(y.bonus ? T("Net pay in a normal month") : T("Net pay per month"))}</small><b class="good">${esc(pln(f.net))}</b>${y.bonus ? `<small>${esc(T("Average over the year: {0}", pln(y.netMonth)))}</small>` : ""}</div><div><small>${esc(T("Gross pay per month"))}</small><b>${esc(pln(y.gross))}</b></div></div>
+      const mo = f.pension + f.disability + f.sickness, parts = [[T("Net pay"), f.net, "#34d399"], [T("Social insurance"), mo, "#3b9bea"], [T("Health insurance"), f.health, "#8b5cf6"], [T("Income tax"), f.tax, "#f59e0b"], ...(o.ppk ? [[T("PPK"), f.ppk, "#ec4899"]] : []), ...(f.deduct ? [[T("Other deductions"), f.deduct, "#94a3b8"]] : [])].filter(x => x[1] > 0), sumP = parts.reduce((a, x) => a + x[1], 0) || 1;
+      out.innerHTML = card(`<div class="tx-hero"><div class="tx-hero-l"><small>${esc(y.bonus ? T("Net pay in a normal month") : T("Net pay per month"))}</small><b class="good">${esc(pln(f.net))}</b>
+          <span class="tx-chip">💚 ${esc(T("You keep {0} of your gross pay.", Math.round(y.netYear / y.grossYear * 100) + "%"))}</span>
+          ${y.bonus ? `<small>${esc(T("Average over the year: {0}", pln(y.netMonth)))}</small>` : ""}<small>${esc(T("Gross pay per month"))}: <b>${esc(pln(y.gross))}</b></small></div>
+          <div class="tx-donut">${donut(parts.map(x => ({ label: x[0], value: x[1], color: x[2] })), "", "")}</div></div>
+        <div class="tx-leg">${parts.map(x => `<span><u style="background:${x[2]}"></u>${esc(x[0])} <b>${Math.round(x[1] / sumP * 100)}%</b></span>`).join("")}</div>
         <h4>${esc(T("Where the gross pay goes (per month)"))}</h4>
         ${row(T("Pension insurance"), f.pension)}${row(T("Disability insurance"), f.disability)}${row(T("Sickness insurance"), f.sickness)}${row(T("Health insurance"), f.health)}${row(T("Income tax advance"), f.tax)}${o.ppk ? row(T("PPK (your share)"), f.ppk) : ""}${f.deduct ? row(T("Other deductions"), f.deduct) : ""}${row(T("Net pay"), f.net, "tx-net")}
-        <h4>${esc(T("Your tax bracket"))}</h4>
+        <h4 id="tx-bracket">${esc(T("Your tax bracket"))}</h4>
         <div class="tx-bar"><i style="width:${barPct}%"></i></div>
         <div class="tx-bl"><span>0</span><span>12%</span><span>${esc(pln(p.threshold))} → 32%</span></div>
         <p class="tx-hint ${y.over > 0 || barPct >= 85 ? "warn" : ""}">${esc(hint)}</p>
@@ -147,6 +153,12 @@ export const Taxes = {
     form.addEventListener("input", () => { P.amount = form.amount.value; save(); draw(); });
     form.addEventListener("change", () => { P.raised = form.raised.checked; P.pit2 = form.pit2.checked; P.under26 = form.under26.checked; P.ppk = form.ppk.checked; save(); draw(); });
     el.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { P.mode = b.dataset.mode; P.amount = ""; save(); Taxes.render(el); });
+    el.querySelectorAll("[data-txgo]").forEach(k => k.onclick = () => {
+      const w = k.dataset.txgo, t = el.querySelector(w === "bracket" ? "#tx-bracket" : w === "how" ? "#tx-how" : "#tx-sources");
+      if (w === "how" && t) t.open = true;
+      t?.scrollIntoView({ behavior: "smooth", block: "center" });
+      t?.classList.add("flash"); setTimeout(() => t?.classList.remove("flash"), 1200);
+    });
     bindItems(); draw();
   }
 };

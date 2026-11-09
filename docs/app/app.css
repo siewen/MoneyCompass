@@ -2300,3 +2300,15 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .tx-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .tx-f{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}@media(max-width:560px){.tx-f{grid-template-columns:1fr}}
 .tx-pl{margin:0 0 12px;padding:8px 12px;border-radius:12px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);font-size:13.5px}
+
+/* Taxes: premium touches */
+.tx-hero{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;border-radius:18px;background:radial-gradient(120% 140% at 0% 0%,rgba(52,211,153,.22),rgba(52,211,153,.04) 60%);border:1px solid rgba(52,211,153,.28);box-shadow:0 10px 30px rgba(16,185,129,.12)}
+.tx-hero-l{display:flex;flex-direction:column;gap:6px}.tx-hero-l small{opacity:.8}
+.tx-hero-l>b.good{font-size:44px;line-height:1.05;letter-spacing:-.5px}
+.tx-chip{align-self:flex-start;padding:4px 12px;border-radius:99px;background:rgba(52,211,153,.18);color:#34d399;font-size:13px;font-weight:600}
+.tx-donut{width:132px;flex:none}.tx-donut svg{width:100%;height:auto;filter:drop-shadow(0 4px 14px rgba(52,211,153,.25))}
+.tx-leg{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 2px 4px;font-size:13px}.tx-leg u{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.tx-page .kpi.clk{cursor:pointer;transition:transform .2s,box-shadow .2s}.tx-page .kpi.clk:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(16,185,129,.2)}
+.tx-it{transition:border-color .2s,transform .2s}.tx-it:hover{border-color:rgba(52,211,153,.5);transform:translateX(2px)}
+.tx-page .ov-card{transition:box-shadow .25s}.tx-page .ov-card:hover{box-shadow:0 10px 28px rgba(0,0,0,.25)}
+.tx-bar i{background:linear-gradient(90deg,#10b981,#34d399)}
