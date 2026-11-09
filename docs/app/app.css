@@ -2620,3 +2620,28 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .ni-page .nw-card[data-go]{cursor:pointer}
 .ni-page [data-go]:focus-visible,.ni-page button:focus-visible,.ni-page summary:focus-visible{outline:2px solid #2EDC9A;outline-offset:2px;border-radius:12px}
 @media(prefers-reduced-motion:reduce){.ni-page [data-go]:hover{transform:none}}
+
+/* ===== Overview finish: one radius system (16 cards / 12 inner boxes / pills), even 14px rhythm ===== */
+.ni-page>*{margin-top:0!important;margin-bottom:14px!important}
+.ni-page .nw-card{border-radius:16px}
+.ni-page .oa-box,.ni-page .oa-adv,.ni-page .kpi{border-radius:12px}
+.ni-page .oa-box{background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.09)}
+.ni-page .oa-b-good{background:linear-gradient(135deg,rgba(46,220,154,.14),rgba(46,220,154,.03));border-color:rgba(46,220,154,.3)}
+.ni-page .oa-b-bad{background:linear-gradient(135deg,rgba(245,158,11,.14),rgba(245,158,11,.03));border-color:rgba(245,158,11,.3)}
+.ni-page .oa-bi{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,.08);font-size:15px}
+.ni-page .oa-box small{letter-spacing:.06em}
+.ni-page .oa-text{font-size:1.05rem;line-height:1.45}
+.ni-page .oa-act{border-radius:12px;padding:12px 8px;transition:background .15s}
+.ni-page .oa-act:hover{background:rgba(255,255,255,.04)}
+.ni-page .oa-n{width:26px;height:26px;display:inline-grid;place-items:center;border-radius:50%;background:rgba(46,220,154,.2);color:#2EDC9A;font-weight:800;font-size:13px}
+.ni-page .oa-adv{background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.08)}
+.ni-page .oa-ah b{font-size:.92rem}
+.ni-page .oa-sub{padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.03)}
+.ni-page .ov-wins button,.ni-page .oa-badge{border-radius:999px}
+/* bottom pair: one calm row, number left, action right */
+.ovr2e .nw-card{padding:16px 20px}.ovr2e .ovb-r{display:flex;align-items:baseline;gap:12px}
+.ovr2e .ovh-big{font-size:28px}
+.ovr2e .ovb-hold div{padding:4px 0;border-bottom:1px solid rgba(255,255,255,.06)}.ovr2e .ovb-hold div:last-child{border:0}
+/* charts: slightly more air */
+.ni-page .ovr2 .nw-card{padding:18px 20px}
+.ovr2 .oc{max-height:260px!important}

@@ -22,13 +22,16 @@ function frame(months, min, max) {
 /** Income and expenses as two bars per month. */
 export function ovBars(months) {
   const max = niceMax(Math.max(1, ...months.flatMap(m => [m.income, m.expenses])));
-  const f = frame(months, 0, max), bw = Math.min(14, f.inner / f.n / 2.6);
+  const f = frame(months, 0, max), bw = Math.min(26, f.inner / f.n / 2.2);
   const bars = months.map((m, i) => {
     const cx = f.x(i), op = m.current ? ' opacity=".55"' : "";
-    const bar = (v, c, dx) => v > 0 ? `<rect x="${cx + dx}" y="${f.y(v)}" width="${bw}" height="${f.y(0) - f.y(v)}" rx="2.5" fill="${c}"${op}><title>${esc(m.month)}: ${spaced(v)}</title></rect>` : "";
-    return bar(m.income, C_IN, -bw - 1) + bar(m.expenses, C_OUT, 1);
+    // rounded top, soft gradient: the bar fades towards the baseline
+    const bar = (v, c, gid, dx) => { if (!(v > 0)) return ""; const x = cx + dx, y = f.y(v), h = f.y(0) - y, r = Math.min(6, bw / 2, h);
+      return `<path d="M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + bw - r}Q${x + bw},${y} ${x + bw},${y + r}V${y + h}Z" fill="url(#${gid})"${op}><title>${esc(m.month)}: ${spaced(v)}</title></path>`; };
+    return bar(m.income, C_IN, "ovg-in", -bw - 2) + bar(m.expenses, C_OUT, "ovg-out", 2);
   }).join("");
-  return `<svg class="oc" viewBox="0 0 ${W} ${H}" role="img">${f.g}${bars}</svg>`;
+  const defs = `<defs><linearGradient id="ovg-in" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C_IN}"/><stop offset="1" stop-color="${C_IN}" stop-opacity=".45"/></linearGradient><linearGradient id="ovg-out" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C_OUT}"/><stop offset="1" stop-color="${C_OUT}" stop-opacity=".45"/></linearGradient></defs>`;
+  return `<svg class="oc" viewBox="0 0 ${W} ${H}" role="img">${defs}${f.g}${bars}</svg>`;
 }
 
 /** Lines with dots: income, expenses and what is left over (dashed). */
