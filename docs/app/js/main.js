@@ -473,7 +473,7 @@ function finishClose(fileSaved) {
     if (window.closed) return;
     // The browser would not close the window: sign out by locking the app instead (no error message)
     closing = false;
-    lock();
+    lock(null, T("Your data is saved. Your browser does not let MoneyCompass close itself – you can close this window now."));
   }, 400);
 }
 

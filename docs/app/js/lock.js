@@ -85,7 +85,7 @@ let locked = false, last = Date.now(), fails = 0, waitUntil = 0, after = null, r
 export const isLocked = () => locked;
 
 /** Show the lock screen. Without a PIN (only the timer is on) one click opens MoneyCompass again. */
-export function lock(next = null) {
+export function lock(next = null, note = "") {
   if (locked) return;
   locked = true; after = next;
   document.body.classList.add("is-locked");
@@ -95,7 +95,7 @@ export function lock(next = null) {
   el.innerHTML = `<div class="lock-box">
     <img src="../logo.svg" alt="" class="lock-logo">
     <h2>${esc(currentName())}</h2>
-    <p class="hint">${esc(hasPin() ? T("Enter your PIN to open MoneyCompass.") : T("MoneyCompass was locked because it was not used for a while."))}</p>
+    <p class="hint">${esc(note || (hasPin() ? T("Enter your PIN to open MoneyCompass.") : T("MoneyCompass was locked because it was not used for a while.")))}</p>
     ${hasPin() ? `<input class="pin-input" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="• • • •" aria-label="${esc(T("PIN"))}">
       <p class="lock-error bad" hidden></p>` : ""}
     <button class="btn main lock-open">🔓 ${esc(T("Open"))}</button>
