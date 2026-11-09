@@ -605,8 +605,12 @@ async function start() {
   buildShell();
   const d0 = State.data;
   const isNew = d0.Incomes.length + d0.Expenses.length + d0.Holdings.length + d0.Offers.length === 0;
+  // Link from the website (app/?demo=1): an empty profile starts with the demo profile right away (after the terms)
+  let wantDemo = false;
+  try { wantDemo = isNew && new URLSearchParams(location.search).get("demo") === "1"; } catch { /* ignore */ }
   // Order at start: Terms (once) → Welcome back (continue, load a profile or start fresh) → What's new → guide or promotion reminder
   const afterTerms = () => welcome(() => {
+    if (wantDemo) { wantDemo = false; try { startDemo(); history.replaceState(null, "", location.pathname + location.hash); App.rebuild(); } catch { /* ignore */ } return; }
     const guideOrPromo = () => { if (shouldShowGuide()) openGuide(); else promoReminder(); };
     const afterNews = () => shouldTour() ? openTour(guideOrPromo) : guideOrPromo();
     if (hasNews(isNew)) openNews(false, () => { if (shouldTour()) openTour(() => { if (shouldShowGuide()) openGuide(); }); else if (shouldShowGuide()) openGuide(); });
