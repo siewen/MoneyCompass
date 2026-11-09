@@ -188,33 +188,44 @@ export const Taxes = {
       ${field(T("Other deductions from income at the tax return (zł per year)"), numInput("relief", plain(P.relief), "0"))}
       ${field(T("Children (under 18, or studying)"), select("kids", [0, 1, 2, 3, 4, 5, 6].map(n => [String(n), String(n)]), String(P.kids || 0)))}</div>
       <div id="tx-famres" class="hint"></div>`;
+    let TAB = "overview";
+    const showTab = t => { TAB = t; el.querySelectorAll("[data-pane]").forEach(p => { p.hidden = p.dataset.pane !== t; }); el.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === t)); el.querySelector(".tp-tabs")?.scrollIntoView({ behavior: "smooth", block: "nearest" }); };
+    const kpiRow = v => [[T("Net per month"), v[0], "coins", "overview", "in"], [T("Tax per year"), v[1], "percent", "year", "rate"], [T("Effective tax rate"), v[2], "bars", "overview", "left"], [T("Yearly tax return"), v[3], "star", "year", "src"]].map(([l, x, ic, go, cl]) => kpi(l, x == null ? "–" : x, ic, go, cl)).join("");
     const kpi = (l, v, icon, go, cls = "in") => `<div class="kpi static clk" data-txgo="${go}"><span class="kpi-ic ${cls}">${si(IC[icon] || IC.bars)}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b>${esc(v)}</b></span></div>`;
+    const acc = (id, ic, title, body, open) => `<details class="tp-acc" id="acc-${id}"${open ? " open" : ""}><summary><span class="tp-hi">${ic}</span><b>${esc(T(title))}</b><em class="tp-accs" id="accs-${id}"></em>${chev}</summary><div class="tp-accb">${body}</div></details>`;
+    const TABS = [["overview", "🧮", "Overview"], ["monthly", "📅", "Monthly"], ["year", "📈", "Year & tax return"], ["rules", "📚", "Sources & rules"]];
     el.innerHTML = `<div class="ni-page tx-page tp">
-      <div class="tp-head"><span class="tp-logo">⚖️</span><div><h2>${esc(T("Taxes & Payroll Intelligence Center"))}</h2><p>${esc(T("Estimate salary, taxes, contributions and discover optimization opportunities."))}</p></div>
+      <div class="tp-head"><span class="tp-logo">⚖️</span><div><h2>${esc(T("Taxes & Payroll Intelligence Center"))}</h2><p>${esc(T("Estimate salary, taxes, contributions and discover optimization opportunities."))}</p><span class="tp-yr">${esc(T("Tax year {0}", TAX.year))}</span></div>
         <label class="tp-country"><svg class="tp-flag" viewBox="0 0 28 20" width="22" height="16" aria-hidden="true"><rect width="28" height="10" fill="#f8fafc"/><rect y="10" width="28" height="10" fill="#dc2626"/></svg> <select disabled aria-label="${esc(T("Country"))}"><option>${esc(T("Poland"))}</option></select></label></div>
-      <div class="ov-kpis">${kpi(T("Tax Year"), String(TAX.year), "star", "sources")}${kpi(T("Primary Income Tax Rate"), "12%", "percent", "how", "rate")}${kpi(T("Tax-Free Amount"), pln(TAX.pit.taxFree), "coins", "how")}${kpi(T("32% Threshold"), pln(TAX.pit.threshold), "bars", "bracket", "left")}</div>
+      <div class="ov-kpis" id="tx-kpis">${kpiRow([])}</div>
       <p class="tx-pl"><svg class="tp-flag" viewBox="0 0 28 20" width="22" height="16" aria-hidden="true"><rect width="28" height="10" fill="#f8fafc"/><rect y="10" width="28" height="10" fill="#dc2626"/></svg> ${esc(T("Poland only for now: these are Polish rules for {0}. Other countries may follow.", TAX.year))}</p>
-      <div class="tp-main">
-        <div class="tp-left">
-          <div class="nw-card ov-card tp-card"><div class="tp-h"><span class="tp-hi">💼</span><h3>${esc(T("Salary Inputs"))}</h3></div>
+      <div class="tp2">
+        <aside class="tp2-side"><div class="nw-card ov-card tp-card tp-sidecard">
+          <div class="tp-h"><span class="tp-hi">🎛️</span><h3>${esc(T("Your situation"))}</h3></div>
+          ${acc("pay", "💼", "Salary & contract", `
             <form id="tax-form">
               ${field(T("Contract Type"), select("contract", CONTRACTS.map(([k, n]) => [k, T(n)]), CT))}
               <div class="tp-two-in">${field(CT === "b2b" ? T("Revenue (without VAT, per month)") : T("Gross Salary (brutto, per month)"), numInput("amount", P.mode === "gross" ? plain(P.amount) : "", T("e.g. {0}", "10000")))}${field(CT === "b2b" ? T("Take-home (netto, per month)") : T("Net Salary (netto, per month)"), numInput("netamount", P.mode === "net" ? plain(P.amount) : "", T("e.g. {0}", "7200")))}</div><p class="hint">${esc(T("Type either one: the other is calculated for you."))}</p>
               ${CT === "b2b" ? field(T("Business costs (per month, without VAT)"), numInput("costs", plain(P.costs), "0")) : ""}
               ${settingsHtml()}
               <p class="hint tp-cnote">${esc(T(CNOTE[CT]))}</p>
-            </form></div>
-          <div class="nw-card ov-card tp-card" id="tx-jobs">${jobsHtml()}</div>
-          <div class="nw-card ov-card tp-card" id="tx-fam">${famHtml()}</div>
-          <div class="nw-card ov-card tp-card" id="tx-items">${itemsHtml()}</div></div>
-        <div class="tp-right">
-          <div class="nw-card ov-card tp-card" id="tx-sum"></div>
-          <div class="tp-two"><div class="nw-card ov-card tp-card" id="tx-brk"></div><div class="nw-card ov-card tp-card" id="tx-ins"></div></div></div>
-      </div>
-      <div class="nw-card ov-card tp-card" id="tx-all" style="margin-top:14px" hidden></div>
-      <div class="nw-card ov-card tp-card" id="tx-mon" style="margin-top:14px"></div>
-      <div class="tp-two tp-bot"><div class="nw-card ov-card tp-card" id="tx-ann"></div>
-        <div class="nw-card ov-card tp-card tp-src" id="tx-sources"><div class="tp-srch"><span class="tp-info">i</span><h3>${esc(T("Official Sources"))}</h3></div>
+            </form>`, true)}
+          ${acc("jobs", "👥", "More incomes", `<div id="tx-jobs">${jobsHtml()}</div>`, false)}
+          ${acc("fam", "👨‍👩‍👧", "Family & tax return", `<div id="tx-fam">${famHtml()}</div>`, false)}
+          ${acc("items", "🎁", "Benefits, bonuses & sick leave", `<div id="tx-items">${itemsHtml()}</div>`, false)}
+        </div></aside>
+        <section class="tp2-main">
+          <div class="tp-tabs" role="tablist">${TABS.map(([k, ic, n]) => `<button type="button" role="tab" class="tp-tab${k === TAB ? " on" : ""}" data-tab="${k}">${ic} ${esc(T(n))}</button>`).join("")}</div>
+          <div class="tp-pane" data-pane="overview"${TAB === "overview" ? "" : " hidden"}>
+            <div class="nw-card ov-card tp-card" id="tx-sum"></div>
+            <div class="tp-two"><div class="nw-card ov-card tp-card" id="tx-brk"></div><div class="nw-card ov-card tp-card" id="tx-ins"></div></div></div>
+          <div class="tp-pane" data-pane="monthly"${TAB === "monthly" ? "" : " hidden"}>
+            <div class="nw-card ov-card tp-card" id="tx-mon"></div></div>
+          <div class="tp-pane" data-pane="year"${TAB === "year" ? "" : " hidden"}>
+            <div class="nw-card ov-card tp-card" id="tx-all" hidden></div>
+            <div class="nw-card ov-card tp-card" id="tx-ann"></div></div>
+          <div class="tp-pane" data-pane="rules"${TAB === "rules" ? "" : " hidden"}>
+            <div class="nw-card ov-card tp-card tp-src" id="tx-sources"><div class="tp-srch"><span class="tp-info">i</span><h3>${esc(T("Official Sources"))}</h3></div>
           <div class="tx-chips">${SRC_CHIPS.map(([n, u]) => `<a class="chip" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(T(n))} ↗</a>`).join("")}</div>
           <p class="hint">${esc(T("Rates and limits for {0}, checked {1}. They are kept in one file inside MoneyCompass and updated once a year.", TAX.year, TAX.checked))}</p>
           <details class="tx-how" id="tx-how"><summary>${esc(T("How the estimate is calculated"))}</summary><ol class="hint">
@@ -222,16 +233,18 @@ export const Taxes = {
             <li>${esc(T("Health insurance: {0}% of the gross minus social insurance (not deductible from tax).", TAX.health * 100))}</li>
             <li>${esc(T("Income tax: gross − social insurance − costs of earning income ({0} or {1} a month) = tax base; {2}% up to {3} a year, {4}% above; minus {5} for the tax-free amount.", pln(TAX.kup.standard), pln(TAX.kup.raised), TAX.pit.low * 100, pln(TAX.pit.threshold), TAX.pit.high * 100, pln(TAX.pit.taxFree * TAX.pit.low)))}</li>
             <li>${esc(T("Net = gross − insurance − tax. Twelve months of the same pay, the tax is settled over the whole year."))}</li></ol></details></div></div>
+        </section>
+      </div>
       <div class="tx-disc"><b>⚠ ${esc(T("Important"))}</b>
         <p>${esc(T("This is a rough estimate for information only. It is not tax, legal or payroll advice, and it may differ from your real pay slip, because of bonuses, overtime, other contracts, reliefs, rounding, changes in the law and your personal tax return. MoneyCompass does not guarantee that the figures are correct or up to date and is not liable for decisions made on them. Check your real numbers with your payroll department, the tax office (KAS/ZUS) or a tax adviser."))}</p></div></div>`;
-    const form = el.querySelector("#tax-form"), box = el.querySelector("#tx-items");
+    el.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => showTab(b.dataset.tab));    const form = el.querySelector("#tax-form"), box = el.querySelector("#tx-items");
     const set = (id, html) => { el.querySelector("#" + id).innerHTML = html; };
     const empty = T("Enter a gross salary to see the estimate.");
     const draw = () => {
       const v = num(P.amount) || 0, o = planOpts(P);
       const other = P.mode === "gross" ? form.netamount : form.amount;
       const head = (ic, t) => `<div class="tp-h"><span class="tp-hi">${ic}</span><h3>${esc(t)}</h3></div>`;
-      if (!(v > 0)) { el.querySelector("#tx-all").hidden = true; other.value = ""; for (const [id, ic, t] of [["tx-sum", "🧮", "Payroll Summary"], ["tx-brk", "🥧", "Salary Breakdown"], ["tx-ins", "💡", "MoneyCompass Optimization Insights"], ["tx-ann", "📈", "Annual Projection"], ["tx-mon", "📅", "Monthly Payment Overview"]]) set(id, head(ic, T(t)) + `<p class="hint mc-empty">${esc(empty)}</p>`); return; }
+      if (!(v > 0)) { el.querySelector("#tx-all").hidden = true; el.querySelector("#tx-kpis").innerHTML = kpiRow([]); other.value = ""; for (const [id, ic, t] of [["tx-sum", "🧮", "Payroll Summary"], ["tx-brk", "🥧", "Salary Breakdown"], ["tx-ins", "💡", "MoneyCompass Optimization Insights"], ["tx-ann", "📈", "Annual Projection"], ["tx-mon", "📅", "Monthly Payment Overview"]]) set(id, head(ic, T(t)) + `<p class="hint mc-empty">${esc(empty)}</p>`); return; }
       const g = P.mode === "gross" ? v : grossFromNet(v, o), y = calcYear(g, o), f = y.first, p = TAX.pit;
       const extras = P.jobs.map(j => ({ j, y: calcYear(num(j.amount) || 0, { pit2: !!j.pit2 }) })).filter(e => e.y.grossYear > 0), ALL = [y, ...extras.map(e => e.y)];
       const sumA = k => ALL.reduce((a, x) => a + x[k], 0);
@@ -274,6 +287,9 @@ export const Taxes = {
       const S = extras.length ? { gross: sumA("gross"), net: sf("net"), tax: sf("tax"), health: sf("health"), mo: sf("pension") + sf("disability") + sf("sickness"), ppk: sf("ppk"), deduct: sf("deduct"), taxable: baseAll, over: Math.max(0, baseAll - p.threshold), room: Math.max(0, p.threshold - baseAll), eff: A.grossYear > 0 ? (socY + hlY + trueTax) / A.grossYear * 100 : 0, netMonth: (A.netYear - diffAll) / 12 }
         : { gross: y.gross, net: f.net, tax: f.tax, health: f.health, mo: f.pension + f.disability + f.sickness, ppk: f.ppk, deduct: f.deduct, taxable: y.taxable, over: y.over, room: y.room, eff: y.grossYear > 0 ? (y.social + y.health + y.tax) / y.grossYear * 100 : 0, netMonth: y.netMonth };
       const eff = S.eff, mo = S.mo;
+      el.querySelector("#tx-kpis").innerHTML = kpiRow([pln(S.net), pln(extras.length || fam.own ? trueTax : A.tax), pcx(eff), Math.abs(diffAll) <= 1 ? T("About even") : diffAll > 0 ? T("Pay {0}", pln(diffAll)) : T("Back {0}", pln(-diffAll))]);
+      { const set2 = (id, t) => { const e2 = el.querySelector("#accs-" + id); if (e2) e2.textContent = t; };
+        set2("jobs", P.jobs.length ? String(P.jobs.length) : ""); set2("items", P.items.length ? String(P.items.length) : ""); set2("fam", ({ single: "", joint: T("Joint"), parent: T("Single parent"), separate: T("Separate") })[P.status || "single"] + (P.kids ? (P.status && P.status !== "single" ? " · " : "") + T("{0} children", P.kids) : "")); }
       const util = Math.min(100, Math.round(S.taxable / p.threshold * 100)), within = S.over <= 0;
       const rev = o.contract === "b2b", flat = rev && o.taxForm !== "scale";
       const row = (l, a, cls = "") => `<div class="tp-r ${cls}"><span>${esc(l)}</span><b>${esc(pln(a))}</b></div>`;
@@ -360,13 +376,8 @@ export const Taxes = {
       save(); if (n === "contract" || n === "taxForm" || n === "zus" || (n === "student" && P.student)) { if (n === "student") P.under26 = true; Taxes.render(el); return; } draw();
     });
     form.addEventListener("input", ev => { const nn = ev.target.name; if (nn === "costs" || nn === "raiseGross" || nn === "zusPlusIncome") { P[nn] = ev.target.value; save(); draw(); } });
-    el.querySelector("#tx-items").hidden = CT !== "uop";
-    el.querySelectorAll("[data-txgo]").forEach(k => k.onclick = () => {
-      const w = k.dataset.txgo, t = el.querySelector(w === "bracket" ? "#tx-sum" : w === "how" ? "#tx-how" : "#tx-sources");
-      if (w === "how" && t) t.open = true;
-      t?.scrollIntoView({ behavior: "smooth", block: "center" });
-      t?.classList.add("flash"); setTimeout(() => t?.classList.remove("flash"), 1200);
-    });
+    el.querySelector("#acc-items").hidden = CT !== "uop";
+    el.querySelector("#tx-kpis").onclick = ev => { const k = ev.target.closest("[data-txgo]"); if (k) showTab(k.dataset.txgo); };
     bindItems(); bindJobs(); draw();
   }
 };

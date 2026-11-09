@@ -2380,3 +2380,34 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .sv-go:hover{background:rgba(16,185,129,.12)}
 .sv-go b{color:#34d399;white-space:nowrap}
 .nw-card.flash{box-shadow:0 0 0 3px rgba(52,211,153,.65);transition:box-shadow .3s}
+
+/* Taxes & Payroll: redesigned layout (inputs on the left, tabs on the right) */
+.tp .tp-head{align-items:center}
+.tp .tp-yr{display:inline-block;margin-top:6px;padding:2px 12px;border-radius:99px;font-size:.78rem;font-weight:700;background:rgba(52,211,153,.14);color:#34d399;border:1px solid rgba(52,211,153,.35)}
+.tp .tp2{display:grid;grid-template-columns:minmax(320px,400px) minmax(0,1fr);gap:16px;align-items:start;margin-top:14px}
+.tp .tp2-side{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto;scrollbar-width:thin}
+.tp .tp2-main{display:flex;flex-direction:column;gap:14px;min-width:0}
+.tp .tp-pane{display:flex;flex-direction:column;gap:16px}
+.tp .tp-pane[hidden]{display:none}
+.tp .tp-sidecard{padding:16px}
+.tp .tp-acc{border-top:1px solid var(--border,rgba(255,255,255,.1));padding:2px 0}
+.tp .tp-acc>summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;padding:10px 0;font-size:.95rem}
+.tp .tp-acc>summary::-webkit-details-marker{display:none}
+.tp .tp-acc>summary b{flex:1}
+.tp .tp-acc>summary .tp-hi{width:30px;height:30px;font-size:15px}
+.tp .tp-acc>summary svg{transition:transform .2s;opacity:.7}
+.tp .tp-acc[open]>summary svg{transform:rotate(90deg)}
+.tp .tp-accs{font-style:normal;font-size:.75rem;color:#34d399;background:rgba(52,211,153,.12);border-radius:99px;padding:1px 9px}
+.tp .tp-accs:empty{display:none}
+.tp .tp-accb{padding:2px 0 12px}
+.tp .tp-accb>div>.tp-h{display:none}
+.tp .tp-accb .tx-add{margin-top:6px}
+.tp .tp-tabs{display:flex;gap:4px;flex-wrap:wrap;background:rgba(255,255,255,.05);border-radius:14px;padding:4px}
+.tp .tp-tab{flex:1;min-width:max-content;background:none;border:0;color:#CFE0DA;padding:9px 14px;border-radius:11px;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
+.tp .tp-tab:hover{background:rgba(255,255,255,.07)}
+.tp .tp-tab.on{background:#12936A;color:#fff;box-shadow:0 4px 14px rgba(18,147,106,.35)}
+.tp .ov-kpis .kpi{cursor:pointer}
+.tp .ov-kpis .kpi:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.3)}
+@media(max-width:1100px){.tp .tp2{grid-template-columns:1fr}.tp .tp2-side{position:static;max-height:none;overflow:visible}}
+@media(max-width:760px){.tp .tp-tab{padding:8px 10px;font-size:.8rem}}
+.tp-mt th{white-space:normal;line-height:1.2}.tp .tp-mt th,.tp .tp-mt td{padding-left:7px;padding-right:7px}
