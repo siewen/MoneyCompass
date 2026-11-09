@@ -1,7 +1,7 @@
 {
- "Usd": 3.9321,
- "Eur": 4.3925,
- "ExchangeDate": "2026-11-06",
+ "Usd": 3.9199,
+ "Eur": 4.3873,
+ "ExchangeDate": "2026-11-09",
  "ReferenceRate": 3.75,
  "ReferenceSince": "2026-03-05",
  "Bonds": [
@@ -150,6 +150,6 @@
    "Details": "1 000 - 2 000 000 zł · Konto osobiste Nowe środki"
   }
  ],
- "OffersChecked": "2026-11-08T11:55:02.888Z",
- "Updated": "2026-11-08T11:55:02.888Z"
+ "OffersChecked": "2026-11-09T13:51:58.810Z",
+ "Updated": "2026-11-09T13:51:58.810Z"
 }
