@@ -88,7 +88,7 @@ export function assess(c) {
   const doNothing = !s.has ? T("Nothing changes, and you stay without a clear picture.") : bad ? bad.doNothing : opp ? opp.doNothing : T("Nothing bad. Your situation stays as it is.");
 
   // next actions: the most urgent state first, one action per title, at most three
-  const act = [], add = x => { if (x.title && !act.some(a => a.title === x.title)) act.push(x); };
+  const act = [], add = x => { if (x.title && !act.some(a => a.title === x.title || (a.go === x.go && a.btn === x.btn))) act.push(x); };
   if (!s.has) { add({ icon: "💶", title: T("Add your income"), desc: T("Your salary and other income."), btn: T("Open Inflows"), go: "income" }); add({ icon: "🛒", title: T("Add your spending"), desc: T("Enter or import your expenses."), btn: T("Open Outflows"), go: "expenses" }); add({ icon: "🏦", title: T("Add your savings"), desc: T("Bank accounts and cash, with their interest."), btn: T("Open Savings"), go: "portfolio" }); }
   else r.states.forEach(x => x.actions.forEach(add));
   lastAssessment = r;
@@ -96,16 +96,21 @@ export function assess(c) {
 }
 
 /** The bands for the top of the Overview: assessment + wealth score, next actions, advisor team. */
-export function assessmentHtml(a, wealth, wl) {
+export function assessmentHtml(a, wealth, wl, part = "all") {
   const S = STATES[a.state];
   const box = (ic, label, txt, cls) => `<div class="oa-box oa-b-${cls}"><span class="oa-bi">${ic}</span><div><small>${esc(label)}</small><p>${esc(txt)}</p></div></div>`;
   const act = a.actions.map((x, i) => `<div class="oa-act"><span class="oa-n">${i + 1}</span><span class="oa-ai">${x.icon}</span><div><b>${esc(x.title)}</b><p>${esc(x.desc)}</p></div>${x.go.startsWith("@") ? `<button class="sv-btn" data-action="${x.go.slice(1)}">${esc(x.btn)} →</button>` : `<button class="sv-btn" data-go="${x.go}">${esc(x.btn)} →</button>`}</div>`).join("");
   const pot = a.potential.total, has = a.snap.has;
   const potSrc = sourcesHtml(a.potential.counted.flatMap(x => x.sources));
   const stale = staleHtml(oldestSource(a.states));
-  const potLine = stale + (has && pot > 0 ? `<div class="oa-pot"><span><small>${esc(T("Potential improvement"))}</small><b>${esc(pln(pot))} <i>${esc(T("per year"))}</i></b></span><span><small>${esc(T("Confidence"))}</small><b>${pc(a.confidence)}</b></span>${potSrc ? `<span class="oa-ps">${potSrc}</span>` : ""}</div>` : "");
+  const potLine = stale + (has && pot > 0 ? `<div class="oa-pot"><span><small>${esc(T("Confidence"))}</small><b>${pc(a.confidence)}</b></span>${potSrc ? `<span class="oa-ps">${potSrc}</span>` : ""}</div>` : "");
   const sec = a.secondary.filter(x => x.kind !== "positive");
-  const team = groupByAdvisor(a.states.filter(x => x.kind !== "positive")).map(g => `<div class="oa-adv"><div class="oa-ah"><span>${g.icon}</span><b>${esc(T(g.name))}</b></div>${g.list.map(x => `<button class="oa-st" data-go="${x.target.startsWith("@") ? g.route : x.target}" style="--k:${KIND_COLOR[x.kind]}"><i></i><span><b>${esc(x.title)}</b>${x.annualImpact > 0 && (x.kind !== "opportunity" || x.potential > 0) ? `<em>${esc(pln(x.annualImpact))} ${esc(T("per year"))}</em>` : ""}</span></button>`).join("")}</div>`).join("");
+  const seenT = new Set(), uniq = a.states.filter(x => { if (x.kind === "positive" || seenT.has(x.title)) return false; seenT.add(x.title); return true; });
+  const team = groupByAdvisor(uniq).map(g => `<div class="oa-adv"><div class="oa-ah"><span>${g.icon}</span><b>${esc(T(g.name))}</b></div>${g.list.map(x => `<button class="oa-st" data-go="${x.target.startsWith("@") ? g.route : x.target}" style="--k:${KIND_COLOR[x.kind]}"><i></i><span><b>${esc(x.title)}</b>${x.annualImpact > 0 && (x.kind !== "opportunity" || x.potential > 0) ? `<em>${esc(pln(x.annualImpact))} ${esc(T("per year"))}</em>` : ""}</span></button>`).join("")}</div>`).join("");
+  const nextH = `<div class="nw-card oa-next"><div class="oa-top"><h3>${esc(T("Next Actions"))}</h3><small>${esc(T("In this order"))}</small></div>${act || `<p class="hint">${esc(T("No action needed right now."))}</p>`}</div>`;
+  const teamH = sec.length || a.primary && a.primary.kind !== "positive" ? `<details class="nw-card oa-team"${uniq.length > 4 ? "" : " open"}><summary class="oa-top"><h3>${esc(T("Your advisors"))}</h3><small>${esc(uniq.length === 1 ? T("1 insight") : T("{0} insights", uniq.length))} · ${esc(T("Each advisor looks at its own part of your money"))}</small></summary><div class="oa-advs">${team}</div></details>` : "";
+  if (part === "next") return `<div class="ov-solo" style="--st:${S.color}">${nextH}</div>`;
+  if (part === "team") return teamH ? `<div class="ov-solo">${teamH}</div>` : "";
   return `<section class="ov-assess" style="--st:${S.color}">
     <div class="nw-card oa-main"><div class="oa-top"><span class="oa-badge">${S.icon} ${esc(T(S.name))}</span><h3>${esc(T("Financial Assessment"))}</h3>${a.primary && a.state !== "start" ? `<span class="oa-by">${esc(T("Led by"))} ${esc(T(groupByAdvisor([a.primary])[0].name))}</span>` : ""}</div>
       <p class="oa-text">${esc(a.text)}</p>
@@ -114,8 +119,6 @@ export function assessmentHtml(a, wealth, wl) {
       ${potLine}
       <small class="oa-note">${esc(T("General information based on your own numbers. It is not personal financial advice."))} <button class="oa-tour" data-tour>${esc(T("Take the tour"))}</button></small></div>
     <div class="nw-card oa-score" data-go="portfolio"><small>${esc(T("Wealth Score"))}</small>${a.state === "start" ? ring(0, "–", "/100", 132) : ring(wealth, String(wealth), "/100", 132)}<b>${esc(a.state === "start" ? T("Add your data") : wl)}</b></div>
-    <div class="nw-card oa-next"><div class="oa-top"><h3>${esc(T("Next Actions"))}</h3><small>${esc(T("In this order"))}</small></div>${act || `<p class="hint">${esc(T("No action needed right now."))}</p>`}</div>
-    ${sec.length || a.primary && a.primary.kind !== "positive" ? `<div class="nw-card oa-team"><div class="oa-top"><h3>${esc(T("Your advisors"))}</h3><small>${esc(T("Each advisor looks at its own part of your money"))}</small></div><div class="oa-advs">${team}</div></div>` : ""}
   </section>`;
 }
 

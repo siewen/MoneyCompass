@@ -2,6 +2,7 @@
 export const NEW = {
 "pl": {
 "You keep {0} of your income. Wealth score: {1}/100.": "Zostaje Ci {0} dochodu. Wskaźnik: {1}/100.",
+"You keep {0} of your income.": "Zostaje Ci {0} dochodu.",
 "Emergency fund complete": "Poduszka finansowa kompletna",
 "Debt-free": "Bez długów",
 "{0} months in a row with money left over": "{0} miesiące z rzędu z nadwyżką",
@@ -341,6 +342,7 @@ export const NEW = {
 "Move savings to {0}": "Przenieś oszczędności do {0}",
 "No suggestion right now": "Brak propozycji w tej chwili",
 "Potential: +{0}/month": "Potencjał: +{0}/mies.",
+"Potential: +{0} per year": "Potencjał: +{0} rocznie",
 "Risk: Low": "Ryzyko: niskie",
 "Expected Improvement": "Oczekiwana poprawa",
 "View Opportunity": "Zobacz okazję",

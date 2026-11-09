@@ -633,6 +633,7 @@
 :root[data-theme="hell"] .why-b p{color:#253832}
 :root[data-theme="hell"] .stale{color:#a86f00}
 :root[data-theme="hell"] .src-old{color:#a86d00}
+:root[data-theme="hell"] .ovo .ovh-big small{color:#4b645d}
 /* Hand-written Light theme fixes (appended by make-hell.py): neutral page, no green glow, calm cards */
 :root[data-theme="hell"] body{background:#CDD3D0 !important}
 :root[data-theme="hell"] .sidebar,:root[data-theme="hell"] aside{background:#D8DEDB !important}
