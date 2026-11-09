@@ -20,7 +20,7 @@ export const NetWorth = {
   render(el) {
     const r = currentAssessment();
     if (!r || !r.snap.has) {
-      el.innerHTML = `<div class="ox"><div class="nw-card ox-empty"><h3>💎 ${esc(T("Net Worth"))}</h3><p>${esc(T("Add your savings and loans first. MoneyCompass then tracks what you own minus what you owe, month by month."))}</p><button class="sv-btn" data-go="portfolio">${esc(T("Open Savings"))} →</button></div></div>`;
+      el.innerHTML = `<div class="ox"><div class="nw-card ox-empty"><h3>💎 ${esc(T("Net Worth"))}</h3><p>${esc(T("Add your savings and loans first. MoneyCompass then tracks what you own minus what you owe, month by month."))}</p><div class="oa-start"><button class="sv-btn" data-go="portfolio">${esc(T("Open Savings"))} →</button><button class="sv-btn sec" data-demo>🧪 ${esc(T("Try the demo profile"))}</button></div></div></div>`;
       return;
     }
     const s = r.snap, n = s.nw, w = wealthFacts(s), P = s.plan, hist = n.history;

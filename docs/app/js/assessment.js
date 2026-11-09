@@ -1,6 +1,6 @@
 // The Financial Assessment of the Overview: the banner (state, explanation, problem / opportunity / risk / if-you-do-nothing,
 // potential improvement), the Wealth Score, the Next Actions and the advisor team – all built from the Financial State Engine.
-import { T, pln } from "./core.js";
+import { T, pln, fmtDate, parseDate, today } from "./core.js";
 import { esc } from "./ui.js";
 import { ring } from "./page-head.js";
 import { advise, opportunities, groupByAdvisor, ADVISORS } from "./engine/index.js";
@@ -16,6 +16,19 @@ export const STATES = {
   start:       { name: "Getting started",          color: "#94A3B8", icon: "🌱" },
 };
 const pc = v => Math.round(v * 100) + "%";
+/** "Source: bank offers (checked 03.11.2026) · your own entries": where a number comes from. Older than two weeks is marked. */
+export function sourcesHtml(list) {
+  const seen = new Set(), items = (list || []).filter(x => x && !seen.has(x.name) && seen.add(x.name));
+  if (!items.length) return "";
+  const part = x => {
+    if (!x.date) return esc(x.name);
+    let d = null, text = "";
+    try { d = parseDate(String(x.date).slice(0, 10)); text = fmtDate(d); } catch { /* keep raw */ }
+    const old = d && !isNaN(d) && (today() - d) / 86400000 > 14;
+    return `${esc(x.name)} (${esc(T("checked {0}", text || String(x.date)))}${old ? ` · <b class="src-old">${esc(T("may be out of date"))}</b>` : ""})`;
+  };
+  return `<small class="src">${esc(T("Source"))}: ${items.map(part).join(" · ")}</small>`;
+}
 const KIND_COLOR = { problem: "#F87171", risk: "#FBBF24", opportunity: "#22D3EE", positive: "#34D399" };
 
 /** c: the raw figures of the page (see engine/snapshot.js). Returns everything the banner shows. */
@@ -59,12 +72,14 @@ export function assessmentHtml(a, wealth, wl) {
   const box = (ic, label, txt, cls) => `<div class="oa-box oa-b-${cls}"><span class="oa-bi">${ic}</span><div><small>${esc(label)}</small><p>${esc(txt)}</p></div></div>`;
   const act = a.actions.map((x, i) => `<div class="oa-act"><span class="oa-n">${i + 1}</span><span class="oa-ai">${x.icon}</span><div><b>${esc(x.title)}</b><p>${esc(x.desc)}</p></div>${x.go.startsWith("@") ? `<button class="sv-btn" data-action="${x.go.slice(1)}">${esc(x.btn)} →</button>` : `<button class="sv-btn" data-go="${x.go}">${esc(x.btn)} →</button>`}</div>`).join("");
   const pot = a.potential.total, has = a.snap.has;
-  const potLine = has && pot > 0 ? `<div class="oa-pot"><span><small>${esc(T("Potential improvement"))}</small><b>${esc(pln(pot))} <i>${esc(T("per year"))}</i></b></span><span><small>${esc(T("Confidence"))}</small><b>${pc(a.confidence)}</b></span></div>` : "";
+  const potSrc = sourcesHtml(a.potential.counted.flatMap(x => x.sources));
+  const potLine = has && pot > 0 ? `<div class="oa-pot"><span><small>${esc(T("Potential improvement"))}</small><b>${esc(pln(pot))} <i>${esc(T("per year"))}</i></b></span><span><small>${esc(T("Confidence"))}</small><b>${pc(a.confidence)}</b></span>${potSrc ? `<span class="oa-ps">${potSrc}</span>` : ""}</div>` : "";
   const sec = a.secondary.filter(x => x.kind !== "positive");
   const team = groupByAdvisor(a.states.filter(x => x.kind !== "positive")).map(g => `<div class="oa-adv"><div class="oa-ah"><span>${g.icon}</span><b>${esc(T(g.name))}</b></div>${g.list.map(x => `<button class="oa-st" data-go="${x.target.startsWith("@") ? g.route : x.target}" style="--k:${KIND_COLOR[x.kind]}"><i></i><span><b>${esc(x.title)}</b>${x.annualImpact > 0 && (x.kind !== "opportunity" || x.potential > 0) ? `<em>${esc(pln(x.annualImpact))} ${esc(T("per year"))}</em>` : ""}</span></button>`).join("")}</div>`).join("");
   return `<section class="ov-assess" style="--st:${S.color}">
     <div class="nw-card oa-main"><div class="oa-top"><span class="oa-badge">${S.icon} ${esc(T(S.name))}</span><h3>${esc(T("Financial Assessment"))}</h3>${a.primary && a.state !== "start" ? `<span class="oa-by">${esc(T("Led by"))} ${esc(T(groupByAdvisor([a.primary])[0].name))}</span>` : ""}</div>
       <p class="oa-text">${esc(a.text)}</p>
+      ${a.state === "start" ? `<div class="oa-start"><button class="sv-btn" data-import-start>⬆ ${esc(T("Import a bank statement"))}</button><button class="sv-btn sec" data-demo>🧪 ${esc(T("Try the demo profile"))}</button><small>${esc(T("The demo is a separate profile with made-up numbers. Your own data is not touched."))}</small></div>` : ""}
       <div class="oa-boxes">${box("⚠️", T("Biggest problem"), a.problem, "bad")}${box("📈", T("Biggest opportunity"), a.win, "good")}${box("🛡️", T("Main risk"), a.risk, "warn")}${box("⏳", T("If you do nothing"), a.doNothing, "wait")}</div>
       ${potLine}
       <small class="oa-note">${esc(T("General information based on your own numbers. It is not personal financial advice."))}</small></div>
@@ -82,7 +97,7 @@ export function advisorPanelHtml(type) {
   const worth = list.filter(x => x.kind !== "positive");
   const pot = list.reduce((m, x) => x.potential > 0 ? m + x.potential : m, 0);
   const row = x => { const b = x.actions[0];
-    return `<div class="ap-row"><i style="background:${KIND_COLOR[x.kind]}"></i><div class="ap-t"><b>${esc(x.title)}</b>${x.annualImpact > 0 && (x.kind !== "opportunity" || x.potential > 0) ? `<em>${esc(pln(x.annualImpact))} ${esc(T("per year"))}</em>` : ""}<p>${esc(x.text)}</p>${x.doNothing && x.kind !== "positive" ? `<p class="ap-dn">⏳ ${esc(x.doNothing)}</p>` : ""}</div>
+    return `<div class="ap-row"><i style="background:${KIND_COLOR[x.kind]}"></i><div class="ap-t"><b>${esc(x.title)}</b>${x.annualImpact > 0 && (x.kind !== "opportunity" || x.potential > 0) ? `<em>${esc(pln(x.annualImpact))} ${esc(T("per year"))}</em>` : ""}<p>${esc(x.text)}</p>${x.doNothing && x.kind !== "positive" ? `<p class="ap-dn">⏳ ${esc(x.doNothing)}</p>` : ""}${x.kind !== "positive" ? sourcesHtml(x.sources) : ""}</div>
       ${b ? (b.go.startsWith("@") ? `<button class="sv-btn" data-action="${b.go.slice(1)}">${esc(b.btn)} →</button>` : `<button class="sv-btn" data-go="${b.go}">${esc(b.btn)} →</button>`) : ""}</div>`; };
   return `<section class="nw-card adv-panel"><div class="ap-h"><span class="ap-ic">${A.icon}</span><div><h3>${esc(T(A.name))}</h3><small>${worth.length ? esc(worth.length === 1 ? T("1 insight") : T("{0} insights", worth.length)) + (pot > 0 ? " · " + esc(T("potential {0} per year", pln(pot))) : "") : esc(T("Nothing to report"))}</small></div><button class="sv-btn ap-oc" data-go="optcenter">${esc(T("Optimization Center"))} →</button></div>
     ${list.length ? list.slice(0, 5).map(row).join("") : `<p class="hint ap-ok">✓ ${esc(T("Your {0} found nothing that needs attention.", T(A.name)))}</p>`}</section>`;

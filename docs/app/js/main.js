@@ -24,6 +24,7 @@ import { NetWorth } from "./networth.js";
 import { Investments } from "./investments.js";
 import { promoReminder } from "./advice.js";
 import { advisorPanelHtml } from "./assessment.js";
+import { startDemo, leaveDemo, isDemo } from "./demo.js";
 import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile, openLanguage, setLanguage } from "./dialogs.js";
 
 const ACCENT = { overview: "#0F766E", optcenter: "#0891B2", networth: "#7C3AED", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", taxes: "#0F766E", investments: "#CA8A04", reports: "#0E7490", savings: "#7E22CE" };
@@ -497,6 +498,27 @@ function finishClose(fileSaved) {
 
 function about() { import("./about-help.js").then(x => x.openAbout({ install, installed })); }
 
+/** Phone: long pages get shorter. Cards fold behind their title (the first ones stay open) and long lists show only the first few rows. */
+function shorten(el) {
+  if (!matchMedia("(max-width: 700px)").matches) return;
+  const cards = [...el.querySelectorAll(".ox .nwp-grid > .nw-card, .ox .nwp-grid3 > .nw-card, .oa-team")];
+  cards.forEach((c, i) => {
+    const h = c.querySelector(":scope > .oa-top"); if (!h) return;
+    const keep = c.classList.contains("nwp-chart") || (i === 1 && c.closest(".ox"));
+    h.classList.add("fold-h"); if (!keep) c.classList.add("folded");
+    h.addEventListener("click", () => c.classList.toggle("folded"));
+  });
+  const more = (rows, n, label) => {
+    const hide = rows.slice(n); if (!hide.length) return;
+    hide.forEach(r => r.classList.add("more-hidden"));
+    const b = document.createElement("button"); b.className = "sv-btn sec more-btn"; b.textContent = T(label, hide.length) + " ↓";
+    b.onclick = () => { hide.forEach(r => r.classList.remove("more-hidden")); b.remove(); };
+    rows[n - 1].after(b);
+  };
+  el.querySelectorAll(".adv-panel").forEach(p => more([...p.querySelectorAll(".ap-row")], 2, "Show {0} more"));
+  more([...el.querySelectorAll(".ox-card")], 3, "Show {0} more");
+}
+
 function render() {
   const page = tabs().find(t => t.route === current) || Overview;
   document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b.dataset.tab === page.route));
@@ -517,6 +539,11 @@ function render() {
   page.render(el);
   const ADV_PAGE = { portfolio: "savings", loans: "debt", emergency: "safety", networth: "wealth", investments: "investment", budget: "goal" };   // the advisor that speaks at the top of the page
   if (ADV_PAGE[page.route]) { try { el.insertAdjacentHTML("afterbegin", advisorPanelHtml(ADV_PAGE[page.route])); } catch (e) { console.warn(e); } }
+  if (isDemo()) el.insertAdjacentHTML("afterbegin", `<div class="demo-bar"><b>🧪 ${esc(T("Demo profile"))}</b><span>${esc(T("Made-up numbers to show how MoneyCompass advises you. Your own data is not touched."))}</span><button class="sv-btn" data-leave-demo>${esc(T("Start with my own data"))} →</button></div>`);
+  el.querySelectorAll("[data-demo]").forEach(b => b.onclick = () => { startDemo(); App.rebuild(); });
+  el.querySelectorAll("[data-leave-demo]").forEach(b => b.onclick = () => { leaveDemo(); App.rebuild(); });
+  el.querySelectorAll("[data-import-start]").forEach(b => b.onclick = () => smartImport());
+  shorten(el);
   bindBin(el);
   const grid = el.querySelector(".grid");
   if (grid) grid.dataset.key = "web2:" + page.route;   // "web2": the new standard order of the cards (orders saved for the old one are not used)
@@ -538,6 +565,7 @@ Object.assign(App, {
     if (route === "goals") route = "budget";
     if (!tabs().some(t => t.route === route)) route = "overview";
     current = route; render(); fitTabs(); window.scrollTo(0, 0);
+    try { document.querySelector(".tab.active")?.scrollIntoView({ inline: "center", block: "nearest" }); } catch { /* old browser */ }
     const tab = document.querySelector(`[data-tab="${route}"]`);
     // Phones: the tabs scroll sideways, so bring the chosen one into view. Wider screens: "More ▾" holds the rest,
     // so the tab row must start at the left (otherwise "Overview" ends up half hidden under the logo)

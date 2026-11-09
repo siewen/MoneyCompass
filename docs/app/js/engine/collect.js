@@ -1,8 +1,9 @@
 // Collects the extra facts the Savings, Loans and Emergency advisors need from the saved data and today's offers.
 // The result is merged into the snapshot. (Everything else in the snapshot comes from the page figures.)
-import { Calc, promo, currentRate, loanPlan, State, goalSaved, parseDate, today, moduleOn } from "../core.js";
+import { T, Calc, promo, currentRate, loanPlan, State, goalSaved, parseDate, today, moduleOn } from "../core.js";
 import { investFacts } from "../investments.js";
 import { Rates } from "../rates.js";
+import { TAX } from "../tax-rates.js";
 import { moves } from "../advice.js";
 import { extraEffect, paymentFor, switchCost } from "../debts.js";
 
@@ -57,8 +58,18 @@ export function collectExtras(d = State.data) {
     .filter(g => g.target > 0 && g.saved < g.target && g.date).map(g => { const dt = parseDate(g.date);
       return { ...g, remaining: g.target - g.saved, months: (dt.getFullYear() - t.getFullYear()) * 12 + dt.getMonth() - t.getMonth(), overdue: dt < t }; })
     .sort((a, b) => parseDate(a.date) - parseDate(b.date));
+  // Where the numbers come from, and when that was checked (shown next to every gain)
+  const src = {
+    offers: { name: T("Bank savings and deposit offers"), date: Rates.checked },
+    loanOffers: { name: T("Loan offers from bank rankings"), date: Rates.loansChecked },
+    fx: { name: T("NBP exchange rates"), date: Rates.data.ExchangeDate },
+    tax: { name: T("Polish tax and ZUS rules {0}", TAX.year), date: TAX.checked },
+    guarantee: { name: T("Deposit guarantee (BFG): 100 000 EUR per person and bank"), date: null },
+    own: { name: T("Your own entries"), date: null },
+    assumption: { name: T("Your own assumptions (not a forecast)"), date: null },
+  };
   return {
-    accounts, bestRate, loansX, nw, plan, goals, invest: moduleOn("investments") ? investFacts(d) : null,
+    src, accounts, bestRate, loansX, nw, plan, goals, invest: moduleOn("investments") ? investFacts(d) : null,
     moves: moves(d).map(m => ({ id: m.h.Id, name: m.h.Name, bank: m.o.Bank, moved: m.moved, gain: m.gain })),
     debtFreeMonths: loansX.length && left.every(m => m !== null) ? Math.max(...left) : null,
     efMonths: +d.Settings.EmergencyMonths || 0,

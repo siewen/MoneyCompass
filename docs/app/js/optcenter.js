@@ -2,7 +2,7 @@
 // Compare Offers (the marketplace) helps you do it.
 import { T, pln } from "./core.js";
 import { esc } from "./ui.js";
-import { currentAssessment } from "./assessment.js";
+import { currentAssessment, sourcesHtml } from "./assessment.js";
 import { improvements, rankScore, groupByAdvisor, potentialOf } from "./engine/index.js";
 
 const pc = v => Math.round(v * 100) + "%";
@@ -15,7 +15,7 @@ export const OptCenter = {
   render(el) {
     const r = currentAssessment();
     if (!r || !r.snap.has) {
-      el.innerHTML = `<div class="ox"><div class="nw-card ox-empty"><h3>💡 ${esc(T("Optimization Center"))}</h3><p>${esc(T("Add your income, spending and savings first. Then every advisor looks for ways to earn or save more, and this page ranks them for you."))}</p><button class="sv-btn" data-go="income">${esc(T("Open Inflows"))} →</button></div></div>`;
+      el.innerHTML = `<div class="ox"><div class="nw-card ox-empty"><h3>💡 ${esc(T("Optimization Center"))}</h3><p>${esc(T("Add your income, spending and savings first. Then every advisor looks for ways to earn or save more, and this page ranks them for you."))}</p><div class="oa-start"><button class="sv-btn" data-go="income">${esc(T("Open Inflows"))} →</button><button class="sv-btn sec" data-demo>🧪 ${esc(T("Try the demo profile"))}</button></div></div></div>`;
       return;
     }
     const list = improvements(r), counted = new Set(potentialOf(r.states).counted.map(s => s.id));
@@ -25,7 +25,7 @@ export const OptCenter = {
       return `<article class="nw-card ox-card${counted.has(s.id) || s.potential <= 0 ? "" : " ox-alt"}"><div class="ox-rk">${i + 1}</div>
         <div class="ox-body"><div class="ox-t"><span class="ox-adv">${by.icon} ${esc(T(by.name))}</span><h4>${esc(s.title)}</h4></div><p>${esc(s.text)}</p>
           <div class="ox-m"><span><small>${esc(T("Impact"))}</small><b>${s.impactScore}/100</b></span><span><small>${esc(T("Confidence"))}</small><b>${pc(s.confidence)}</b></span><span><small>${esc(T("Risk"))}</small><b>${esc(T(LVL[s.risk]))}</b></span><span><small>${esc(T("Difficulty"))}</small><b>${esc(T(LVL[s.difficulty]))}</b></span><span><small>${esc(T("Time"))}</small><b>${esc(mins(s.minutes))}</b></span></div>
-          ${s.doNothing ? `<p class="ox-dn">⏳ ${esc(s.doNothing)}</p>` : ""}${counted.has(s.id) || s.potential <= 0 ? "" : `<p class="ox-dn">${esc(T("Uses the same money as a better option above, so it is not added to the total."))}</p>`}</div>
+          ${s.doNothing ? `<p class="ox-dn">⏳ ${esc(s.doNothing)}</p>` : ""}${sourcesHtml(s.sources)}${counted.has(s.id) || s.potential <= 0 ? "" : `<p class="ox-dn">${esc(T("Uses the same money as a better option above, so it is not added to the total."))}</p>`}</div>
         <div class="ox-side"><small>${esc(s.potential > 0 ? T("Potential gain") : T("No yearly gain counted"))}</small><b>${s.potential > 0 ? esc(pln(s.potential)) : "–"}</b><i>${esc(s.potential > 0 ? T("per year") : T("insight"))}</i>${x ? (x.go.startsWith("@") ? `<button class="sv-btn" data-action="${x.go.slice(1)}">${esc(x.btn)} →</button>` : `<button class="sv-btn" data-go="${x.go}">${esc(x.btn)} →</button>`) : ""}</div></article>`; };
     const body = list.length ? `<div data-ox="rank">${list.map(card).join("")}</div>
       <div data-ox="adv" hidden>${groupByAdvisor(list).map(g => `<h3 class="ox-gh">${g.icon} ${esc(T(g.name))}</h3>${g.list.map(card.bind(null)).map((h, k) => h).join("")}`).join("")}</div>`

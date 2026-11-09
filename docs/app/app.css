@@ -2488,3 +2488,20 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
   .oa-advs{grid-template-columns:1fr}
 }
 @media(max-width:700px){.ovb-sp{min-width:0!important;flex:1 1 100%!important}.ovb-r{flex-wrap:wrap!important}}
+
+.src{display:block;margin-top:6px;opacity:.6;font-size:.76rem;line-height:1.4}.src-old{color:#fbbf24;opacity:1}
+.oa-ps{flex:1;min-width:220px}.oa-ps .src{margin:0}
+
+.oa-start{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 14px}.oa-start small{opacity:.65;flex-basis:100%}
+.sv-btn.sec{background:transparent!important;color:inherit!important;border:1px solid rgba(255,255,255,.22)!important;box-shadow:none!important}
+.demo-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 16px;margin-bottom:12px;border-radius:14px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35)}.demo-bar span{flex:1;min-width:200px;opacity:.85;font-size:.88rem}
+
+/* Phone: foldable cards, "show more" and a tab bar whose labels do not overlap */
+.fold-h{cursor:pointer;position:relative}
+@media(max-width:700px){
+  .fold-h::after{content:"▾";margin-left:auto;opacity:.7;transition:transform .15s}
+  .folded>:not(.fold-h){display:none!important}.folded>.fold-h::after{transform:rotate(-90deg)}
+  .more-hidden{display:none!important}.more-btn{width:100%;margin:8px 0 0}
+  :root[data-design] .tab{flex:0 0 auto!important;min-width:64px!important;max-width:96px}
+  :root[data-design] .tab .tl{display:block;max-width:88px;overflow:hidden;text-overflow:ellipsis}
+}

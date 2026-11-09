@@ -49,6 +49,7 @@ export function makeState(s) {
     difficulty: s.difficulty || "medium",          // easy | medium | hard
     minutes: s.minutes ?? 30,                      // time it takes to do
     impactScore: clamp(Math.round(s.impactScore ?? severity * 12 + clamp(annualImpact / Math.max(1, s.income12 || 12000) * 200, 0, 40)), 0, 100),
+    sources: s.sources || [],                      // [{ name, date }]: where the numbers come from and when they were checked
     source: s.source || "",                        // which advisor registered it
   };
 }
