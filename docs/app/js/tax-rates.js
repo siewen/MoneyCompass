@@ -9,5 +9,14 @@ export const TAX = {
   health: 0.09,                    // health insurance, % of (gross − social insurance); not deductible from tax
   pit: { low: 0.12, high: 0.32, threshold: 120000, taxFree: 30000 },   // tax-free amount 30 000 zł = 3 600 zł less tax a year
   kup: { standard: 250, raised: 300 },   // costs of earning income, zł per month (raised = you work in another town)
+  ppk: { employee: 0.02, employer: 0.015 },   // PPK (employee pension plan): employer share is taxable income
   youngLimit: 85528,               // under-26 relief: no income tax on income up to this amount a year
 };
+
+// Where the figures come from (official sources). Check them once a year together with the numbers above.
+export const TAX_SOURCES = [
+  ["Social insurance (ZUS): contribution rates and limits", "https://www.zus.pl/baza-wiedzy/skladki-wskazniki-odsetki"],
+  ["Income tax (PIT): rates, tax-free amount, costs of earning income", "https://www.podatki.gov.pl/pit/"],
+  ["Ministry of Finance", "https://www.gov.pl/web/finanse"],
+  ["Employee capital plans (PPK)", "https://www.mojeppk.pl"],
+];
