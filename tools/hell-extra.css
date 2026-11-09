@@ -1,14 +1,15 @@
 /* Hand-written Light theme fixes (appended by make-hell.py): neutral page, no green glow, calm cards */
-:root[data-theme="hell"] body{background:#E7EAE9 !important}
-:root[data-theme="hell"] .sidebar,:root[data-theme="hell"] aside{background:#F1F3F2 !important}
-:root[data-theme="hell"] .rp-sum,:root[data-theme="hell"] .rp-trend,:root[data-theme="hell"] .dz-band,:root[data-theme="hell"] .rec-band{background:#F4F6F5 !important}
-:root[data-theme="hell"] .popup.nw-win{background:#F1F3F2 !important}
-:root[data-theme="hell"] .import-dlg{background:#F1F3F2 !important}
-:root[data-theme="hell"] .nw-card,:root[data-theme="hell"] .card,:root[data-theme="hell"] .kpi{border:1px solid #D5DAD8 !important;box-shadow:0 1px 2px rgba(20,30,26,.05)}
-:root[data-theme="hell"] .topbar,:root[data-theme="hell"] .banner{background:#F1F3F2 !important}
+:root[data-theme="hell"] body{background:#CDD3D0 !important}
+:root[data-theme="hell"] .sidebar,:root[data-theme="hell"] aside{background:#D8DEDB !important}
+:root[data-theme="hell"] .rp-sum,:root[data-theme="hell"] .rp-trend,:root[data-theme="hell"] .dz-band,:root[data-theme="hell"] .rec-band{background:#DDE3E0 !important}
+:root[data-theme="hell"] .popup.nw-win{background:#D8DEDB !important}
+:root[data-theme="hell"] .import-dlg{background:#D8DEDB !important}
+:root[data-theme="hell"] .nw-card,:root[data-theme="hell"] .card,:root[data-theme="hell"] .kpi{border:1px solid #BCC4C0 !important;box-shadow:0 1px 2px rgba(20,30,26,.05)}
+:root[data-theme="hell"] .topbar,:root[data-theme="hell"] .banner{background:#D8DEDB !important}
 /* big figures never spill out of their card */
 :root[data-theme="hell"] .ct-details,:root[data-theme="hell"] .nw-pill{background:#D7F0E5 !important;color:#0B5D3F !important;border:1px solid #9FD8BC !important}
-:root[data-theme="hell"] .cmp-calc input,:root[data-theme="hell"] .cmp-calc select{background:#fff !important;color:#14201B !important;border:1px solid #C9D0CD !important}
+:root[data-theme="hell"] .cmp-calc input,:root[data-theme="hell"] .cmp-calc select{background:#EBEFED !important;color:#17251F !important;border:1px solid #C9D0CD !important}
 :root[data-theme="hell"] .switch span{background:#BFC8C4 !important}
 :root[data-theme="hell"] .switch input:checked + span{background:#16B97D !important}
 :root[data-theme="hell"] .opt-tab.on{background:#12A06C !important;color:#fff !important;border-color:#12A06C !important}
+:root[data-theme="hell"] header.top,:root[data-theme="hell"] .top{background:#D8DEDB !important}
