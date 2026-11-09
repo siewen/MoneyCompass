@@ -31,18 +31,21 @@ let ovPeriod = "n3";
 document.addEventListener("change", e => { if (e.target?.name === "ov-per") { ovPeriod = e.target.value; App.refresh(); } });
 export function setSearch(text) { flt.text = text; }
 /** "↑ +12% vs. previous month": the last finished month against the one before (pp = difference in percentage points). */
-function deltaTag(cur, prev, upIsGood = true, pp = false) {
+function deltaTag(cur, prev, upIsGood = true, pp = false, neutral = false) {
   if (cur === null || prev === null) return "";
   const diff = pp ? cur - prev : (Math.abs(prev) > 0 ? (cur - prev) / Math.abs(prev) * 100 : NaN);
   if (!isFinite(diff)) return "";
   const r = Math.abs(diff) < 10 ? Math.round(diff * 10) / 10 : Math.round(diff), good = r === 0 || (r > 0) === upIsGood;
-  return `<em class="delta ${good ? "good" : "bad"}">${r >= 0 ? "↑" : "↓"} ${r >= 0 ? "+" : "−"}${String(Math.abs(r)).replace(".", ",")}${pp ? " pp" : "%"} <small>${esc(T("vs. previous month"))}</small></em>`;
+  // a jump of more than 100% says little as a percentage: show the change in money instead
+  const txt = !pp && Math.abs(r) > 100 ? `${cur - prev >= 0 ? "+" : "−"}${pln0(Math.abs(cur - prev))}` : `${r >= 0 ? "+" : "−"}${String(Math.abs(r)).replace(".", ",")}${pp ? " pp" : "%"}`;
+  return `<em class="delta ${neutral ? "flat" : good ? "good" : "bad"}">${r >= 0 ? "↑" : "↓"} ${txt} <small>${esc(T("vs. last full month"))}</small></em>`;
 }
 const ic = (d, s = 22) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 
 // ================================================================= Overview
 
 let ovRange = 6;
+const pln0 = v => Math.abs(v || 0) >= 1000 ? pln(Math.round(v)).replace(/[.,]00(?!\d)/, "") : pln(v);
 const rate2 = v => (Math.round(v * 100) / 100).toString().replace(".", ",") + "%";
 export const Overview = {
   route: "overview", title: "Overview",
@@ -109,9 +112,9 @@ export const Overview = {
 
     // ---- Tiles: icon, value and the change against the previous month ----
     const prevM = done[done.length - 2], have2 = last && prevM;
-    const dIn = have2 ? deltaTag(last.income, prevM.income) : "", dOut = have2 ? deltaTag(last.expenses, prevM.expenses, false) : "";
+    const dIn = have2 ? deltaTag(last.income, prevM.income) : "", dOut = have2 ? deltaTag(last.expenses, prevM.expenses, false, false, left >= 0 && income > 0 && left / income >= .2) : "";
     const dLeft = have2 ? deltaTag(last.income - last.expenses, prevM.income - prevM.expenses) : "";
-    const dRate = have2 && last.income > 0 && prevM.income > 0 ? deltaTag((last.income - last.expenses) / last.income * 100, (prevM.income - prevM.expenses) / prevM.income * 100, true, true) : "";
+    const dRate = have2 && last.income > 0 && prevM.income > 0 ? deltaTag((last.income - last.expenses) / last.income * 100, (prevM.income - prevM.expenses) / prevM.income * 100, true, true, left >= 0 && income > 0 && left / income >= .2) : "";
     const hr = new Date().getHours(), nm0 = (currentName() || "").trim(), first = nm0 === T("Demo User") ? nm0 : nm0.split(/\s+/)[0] || "";
     const hello = hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
     const hero = `<div class="ov-hero"><div class="ov-hi"><h2>${esc(T(hello))}${first ? ", " + esc(first) : ""}!</h2><p>${esc(T("Here's your financial overview for {0}", monthName(today())))}</p></div>
@@ -203,16 +206,15 @@ export const Overview = {
     const mv0 = moves(d)[0];
     const asm = assess({ has: income > 0 || spending > 0 || p.total > 0 || debt > 0, income, spending, left, both, svRate, emF, target, safe: p.safe, total: p.total, covered, debt, essential: essentialMonth, months: avg.monthsUsed, ...collectExtras(dAll),
       loans: loansAll.map(l => ({ name: l.Name, rate: +l.RatePercent || 0, pay: +l.MonthlyPayment || 0, rem: l.Remaining })), wealth, mv: mv0 ? { gain: mv0.gain, bank: mv0.o.Bank, moved: mv0.moved } : null });
-    const assessBand = assessmentHtml(asm, wealth, wl), nextBand = assessmentHtml(asm, wealth, wl, "next"), teamBand = assessmentHtml(asm, wealth, wl, "team");
-    const kp = (l, v, ic2, cls, dl) => { const g = goAttr(l); return `<div class="kpi static${g ? " clk" : ""}"${g}><span class="kpi-ic ${cls}">${si(IC[ic2])}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b>${v}</b>${dl || ""}</span></div>`; };
-    const head = `<div class="pg-title"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T(hello))}${first ? ", " + esc(first) : ""}!</h2><p>${esc(T("Overview for: {0}", per.label))}${both ? " · " + esc(T("You keep {0} of your income.", savingsRateText(left, income))) : ""}</p></div>
-      <label class="ov-per" title="${esc(T("Choose the period"))}"><span>📅</span><select name="ov-per"><option value="all"${ovPeriod === "all" ? " selected" : ""}>${esc(T("All data"))}</option>${[2, 3, 6].map(k => `<option value="n${k}"${ovPeriod === "n" + k ? " selected" : ""}>${esc(T("Last {0} months", k))}</option>`).join("")}${per.months.length ? `<optgroup label="${esc(T("Single month"))}">${per.months.map(m => `<option value="m:${m.key}"${ovPeriod === "m:" + m.key ? " selected" : ""}>${esc(monthName(m.start))}</option>`).join("")}</optgroup>` : ""}</select></label></div>
-      ${(() => { let st = 0; for (let i = done.length - 1; i >= 0 && done[i].income - done[i].expenses > 0; i--) st++;
+    const assessBand = assessmentHtml(asm, wealth, wl), pairBand = assessmentHtml(asm, wealth, wl, "pair");
+    const kp = (l, v, ic2, cls, dl) => { const mainK = cls.includes("main"); const g = goAttr(l); return `<div class="kpi static${g ? " clk" : ""}${mainK ? " kpi-main" : ""}"${g}><span class="kpi-ic ${cls.replace(" main", "").replace(" neg", "")}">${si(IC[ic2])}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b${cls.includes("neg") ? ' class="bad"' : ""}>${v}</b>${dl || ""}</span></div>`; };
+    const head = `<div class="pg-title"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T(hello))}${first ? ", " + esc(first) : ""}!</h2><p>${esc(T("Overview for: {0}", per.label))}${both ? " · " + esc(left < 0 ? T("Spending exceeds income: monthly deficit {0}", pln0(-left)) : T("You keep {0} of your income.", savingsRateText(left, income))) : ""}</p>${(() => { let st = 0; for (let i = done.length - 1; i >= 0 && done[i].income - done[i].expenses > 0; i--) st++;
         const w = [target > 0 && emF >= 1 ? ["🛡️ " + T("Emergency fund complete"), "emergency"] : null, debt <= 0 && d.Loans.length ? ["🎉 " + T("Debt-free"), "loans"] : null, st >= 2 ? ["🔥 " + T("{0} months in a row with money left over", st), "reports"] : null, both && svRate >= 0.2 ? ["🏆 " + T("Saving over 20% of your income"), "portfolio"] : null].filter(Boolean);
-        return w.length ? `<div class="ov-wins">${w.map(x => `<button type="button" data-go="${x[1]}">${esc(x[0])}</button>`).join("")}</div>` : ""; })()}
+        return w.length ? `<div class="ov-wins">${w.map(x => `<button type="button" data-go="${x[1]}">${esc(x[0])}</button>`).join("")}</div>` : ""; })()}</div>
+      <label class="ov-per" title="${esc(T("Choose the period"))}"><span>📅</span><select name="ov-per"><option value="all"${ovPeriod === "all" ? " selected" : ""}>${esc(T("All data"))}</option>${[2, 3, 6].map(k => `<option value="n${k}"${ovPeriod === "n" + k ? " selected" : ""}>${esc(T("Last {0} months", k))}</option>`).join("")}${per.months.length ? `<optgroup label="${esc(T("Single month"))}">${per.months.map(m => `<option value="m:${m.key}"${ovPeriod === "m:" + m.key ? " selected" : ""}>${esc(monthName(m.start))}</option>`).join("")}</optgroup>` : ""}</select></label></div>
       ${assessBand}
       @@OPT@@
-      <div class="ov-kpis ovkp">${kp(T("Income per Month"), esc(pln(income)), "wallet", "in", dIn)}${kp(T("Spending per Month"), esc(avg.monthsUsed ? pln(spending) : "–"), "cart", "out", dOut)}${kp(T("Remaining Money"), esc(both ? pln(left) : "–"), "pig", "left", dLeft)}${kp(T("Savings Rate"), esc(both ? savingsRateText(left, income) : "–"), "percent", "rate", dRate)}</div>`;
+      <div class="ov-kpis ovkp">${kp(T("Income per Month"), esc(pln0(income)), "wallet", "in", dIn)}${kp(T("Spending per Month"), esc(avg.monthsUsed ? pln0(spending) : "–"), "cart", "out", dOut)}${kp(both && left < 0 ? T("Monthly Deficit") : T("Remaining Money"), esc(both ? pln0(left) : "–"), "pig", "left main" + (both && left < 0 ? " neg" : ""), dLeft)}${kp(both && left < 0 ? T("Negative Savings Rate") : T("Savings Rate"), esc(both ? savingsRateText(left, income) : "–"), "percent", "rate" + (both && left < 0 ? " neg" : ""), dRate)}</div>`;
     let hk = hist.map(([k, v]) => ({ k, v: v - debt }));
     if (hk.length < 2) {   // not enough recorded history: estimate backwards from today using each month's surplus
       const ms = months.filter(m => m.income > 0 || m.expenses > 0).slice(-6); let run = netWorth; const est = [];
@@ -227,10 +229,10 @@ export const Overview = {
     const svVals = hk.length >= 2 ? hk.map(x => x.v + debt) : hist.map(x => x[1]), svCh = svVals.length >= 2 && svVals[0] > 0 ? (svVals[svVals.length - 1] - svVals[0]) / svVals[0] * 100 : null;
     const emTone = emF >= 1 ? T("Complete") : emF >= .5 ? T("On track") : T("Building up");
     const health = `<div class="nw-card ovh"><div class="ni-fh"><span class="rp-si i-res">${si(IC.bars, 26)}</span><h3>${esc(T("Financial Health Overview"))}</h3></div>
-      <div class="ovh-row"><div class="clk" data-go="portfolio"><small>${esc(T("Net Worth"))}</small><b class="ovh-big" style="font-size:${Math.min(26, Math.floor(230 / (pln(netWorth).length * 0.66)))}px;white-space:nowrap">${esc(pln(netWorth))}</b>${chTag(nwCh)}<small>${esc(T("vs. last month"))}</small></div>
-        <div class="dv clk" data-go="portfolio"><small>${esc(T("Total Savings"))}</small><b class="ovh-big">${esc(pln(p.total))}</b>${svCh === null ? "" : chTag(svCh)}<small>${esc(T("Growth (YTD)"))}</small></div>
-        <div class="dv ovh-em clk" data-go="emergency"><small>${esc(T("Emergency Fund"))}</small><div class="ovh-emr">${ring(emF * 100, Math.round(Math.min(100, emF * 100)) + "%", "", 76)}<span><b>${esc(pln(p.safe))}</b><small>${esc(target > 0 ? T("Target: {0}", pln(target)) : T("No target set"))}</small></span></div></div>
-        <div class="dv clk" data-go="loans"><small>${esc(T("Debt Position"))}</small><b class="ovh-big">${esc(pln(debt))}</b><small>${esc(debt > 0 ? T("{0} loan(s)", loansAll.length) : T("Debt-free"))}</small></div></div>
+      <div class="ovh-row"><div class="clk" data-go="portfolio"><small>${esc(T("Net Worth"))}</small><b class="ovh-big" style="font-size:${Math.min(26, Math.floor(230 / (pln(netWorth).length * 0.66)))}px;white-space:nowrap">${esc(pln0(netWorth))}</b>${chTag(nwCh)}<small>${esc(T("vs. last month"))}</small></div>
+        <div class="dv clk" data-go="portfolio"><small>${esc(T("Total Savings"))}</small><b class="ovh-big">${esc(pln0(p.total))}</b>${svCh === null ? "" : chTag(svCh)}<small>${esc(T("Growth (YTD)"))}</small></div>
+        <div class="dv ovh-em clk" data-go="emergency"><small>${esc(T("Emergency Fund"))}</small><div class="ovh-emr">${ring(emF * 100, Math.round(Math.min(100, emF * 100)) + "%", "", 76)}<span><b>${esc(pln0(p.safe))}</b><small>${esc(target > 0 ? T("Target: {0}", pln0(target)) : T("No target set"))}</small></span></div></div>
+        <div class="dv clk" data-go="loans"><small>${esc(T("Debt Position"))}</small><b class="ovh-big">${esc(pln0(debt))}</b><small>${esc(debt > 0 ? T("{0} loan(s)", loansAll.length) : T("Debt-free"))}</small></div></div>
       <div class="ovh-ch">${nwChart}</div></div>`;
     const ovN = ovRange, mN = months.slice(-ovN);
     const incExp = `<div class="nw-card dz ovc"><div class="ni-fh"><span class="rp-si i-res">${si(IC.bank, 24)}</span><h3>${esc(T("Income vs Expenses"))}</h3><select class="ni-sel" data-ovr>${[3, 6, 12].map(n => `<option value="${n}"${n === ovN ? " selected" : ""}>${n} ${esc(T("Months"))}</option>`).join("")}</select></div>${legendKeys([{ color: C_IN, label: T("Income") }, { color: C_OUT, label: T("Expenses") }])}${showTrend ? ovBars(mN) : hint(T("Add income and expenses to see this chart."))}</div>`;
@@ -239,15 +241,15 @@ export const Overview = {
     const loanPay = loansAll.reduce((x, y) => x + (+y.MonthlyPayment || 0), 0);
     const lnCard = `<div class="nw-card dz ovc ovs"><div class="ni-fh"><span class="rp-si i-res">${si(IC.wallet, 24)}</span><h3>${esc(T("Loans & Debts"))}</h3></div><b class="ovh-huge">${esc(pln(loanPay))}</b><small>${esc(T("per month"))}</small><button class="sv-btn ghost" data-go="loans">${esc(T("View Details"))} →</button></div>`;
     const mv = moves(d)[0], potY = asm.potential.total, bestOpp = asm.potential.counted[0], gainM = potY / 12;
-    const optBand = `<div class="nw-card ovo"><div class="ovo-a"><span class="rp-si i-res">${si(IC.bulb, 34)}</span><div><h3>${esc(T("Optimization Opportunities"))}</h3><small>${esc(T("Additional Return Available"))}</small><b class="ovh-big good">${potY > 0 ? "+" + esc(pln(potY)) + " <small>" + esc(T("per year")) + "</small>" : "–"}</b></div></div>
-      <div class="ovo-b dv"><span class="rp-si i-res">${si(IC.trend, 34)}</span><div><small>${esc(T("Best Opportunity"))}</small><b>${esc(bestOpp ? bestOpp.title : T("No suggestion right now"))}</b>${potY > 0 ? `<small class="good">${esc(T("Potential: +{0} per year", pln(potY)))} &nbsp;|&nbsp; ${esc(T("Risk: Low"))}</small>` : ""}</div></div>
-      <div class="ovo-c dv"><small>${esc(T("Expected Improvement"))}</small><b class="ovh-big good">${potY > 0 && p.total > 0 ? "+" + Math.round(potY / p.total * 100 * 10) / 10 + "%" : "–"}</b></div>
-      <span class="ovo-bars" aria-hidden="true"><i style="height:20%"></i><i style="height:32%"></i><i style="height:45%"></i><i style="height:60%"></i><i style="height:76%"></i><i style="height:100%"></i></span><button class="sv-btn ovo-btn" data-action="optimize">${esc(T("View Opportunity"))} →</button></div>`;
+    const nOpp = asm.potential.counted.length, bestGain = bestOpp ? (bestOpp.potential || 0) : 0, pctBase = potY > 0 && p.total > 0 ? Math.round(potY / p.total * 1000) / 10 : null;
+    const optBand = `<div class="nw-card ovo ovo-flag"><div class="ovo-a"><span class="rp-si i-res">${si(IC.bulb, 34)}</span><div><h3>${esc(T("Optimization Opportunities"))}</h3><small>${esc(T("Additional return available"))}</small><b class="ovh-big good">${potY > 0 ? "+" + esc(pln0(potY)) + " <small>" + esc(T("per year")) + "</small>" : "–"}</b>${potY > 0 ? `<small>${esc(nOpp === 1 ? T("1 opportunity") : T("{0} opportunities", nOpp))}${pctBase !== null ? " · " + esc(T("+{0}% on your {1} of savings", String(pctBase).replace(".", ","), pln0(p.total))) : ""}</small>` : ""}</div></div>
+      <div class="ovo-b dv"><div><small>${esc(T("Best opportunity"))}</small><b>${esc(bestOpp ? bestOpp.title : T("No suggestion right now"))}</b>${potY > 0 && bestGain > 0 ? `<small class="good">${esc(T("Potential: +{0} per year", pln0(bestGain)))} &nbsp;|&nbsp; ${esc(T("Risk: Low"))}</small>` : ""}</div></div>
+      <button class="sv-btn ovo-btn" data-action="optimize">${esc(T("View Opportunity"))} →</button></div>`;
     const bestO = Rates.bestOffer();
     const cmpCard = `<div class="nw-card dz ovc"><div class="ni-fh"><span class="rp-si i-res">${si(IC.bank, 24)}</span><h3>${esc(T("Compare Offers"))}</h3><button class="pm-btn" data-action="ov-cmp" title="${esc(T("Your saved offers"))}">±</button></div><div class="ovb-r"><div><small>${esc(T("Best Available Offer"))}</small><b class="ovh-big">${bestO ? esc(rate2(bestO.Rate)) + " p.a." : "–"}</b></div></div><button class="sv-btn ghost ovb-b" data-go="savings">${esc(T("Compare Now"))} →</button></div>`;
-    const savCard = `<div class="nw-card dz ovc"><div class="ni-fh"><span class="rp-si i-res">${si(IC.pig, 24)}</span><h3>${esc(T("Your Savings"))}</h3><button class="pm-btn" data-action="ov-sav" title="${esc(T("Details"))}">±</button></div><div class="ovb-r"><div><small>${esc(T("Total Savings"))}</small><b class="ovh-big">${esc(pln(p.total))}</b></div><div class="ovb-sp">${spark(svVals, "#2EDC9A")}</div></div></div>`;
+    const savCard = `<div class="nw-card dz ovc"><div class="ni-fh"><span class="rp-si i-res">${si(IC.pig, 24)}</span><h3>${esc(T("Your Savings"))}</h3><button class="pm-btn" data-action="ov-sav" title="${esc(T("Details"))}">±</button></div>${hold.length ? `<div class="ovb-hold">${hold.slice(0, 3).map(h => `<div><span>${esc(h.label)}</span><b>${Math.round(h.value / Math.max(1, p.total) * 100)}%</b></div>`).join("")}</div>` : `<p class="hint">${esc(T("No savings added yet."))}</p>`}</div>`;
     const riskPct = p.total > 0 ? p.risky / p.total : 0, risk = riskPct < .1 ? T("Low") : riskPct < .3 ? T("Medium") : T("High");
-    el.innerHTML = `<div class="ni-page">${head.replace("@@OPT@@", optBand)}${warn}${health}${nextBand}${teamBand}<div class="ovr2">${incExp}${catCard}</div><div class="ovr4">${efCard}${lnCard}${cmpCard}${savCard}</div></div>`;
+    el.innerHTML = `<div class="ni-page">${head.replace("@@OPT@@", optBand)}${warn}${health}${pairBand}<div class="ovr2">${incExp}${catCard}</div><div class="ovr4">${efCard}${lnCard}${cmpCard}${savCard}</div></div>`;
     el.querySelector("[data-ovr]")?.addEventListener("change", e => { ovRange = +e.target.value; App.refresh(); });
     const openOv = (title, html) => {
       const pp = popup("", { width: 1100, cls: "nw-win pm-win" }), orig = App.refresh;

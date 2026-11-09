@@ -22,7 +22,7 @@ export function goalAdvise(s) {
     } else {
       const sh = Math.max(0, req - (used - avail)), m = sh > 0 ? Math.ceil(g.remaining / sh) : null, lateBy = m ? Math.max(0, m - left) : null;
       out.push({ id: "goal-at-risk-" + g.id, sources: S(s, "own"), advisorType: "goal", kind: "risk", severity: left <= 3 ? 3 : 2, title: T("Goal At Risk"),
-        text: T("{0} needs {1} a month, but you can set aside about {2}.", g.name, pln(req), pln(sh)), annualImpact: (req - sh) * 12, potential: 0, confidence: s.confidence * 0.9, difficulty: "medium", minutes: 30,
+        text: sh > 0 ? T("{0} needs {1} a month, but you can set aside about {2}.", g.name, pln(req), pln(sh)) : T("{0} needs {1} a month, but there is no money left to set aside.", g.name, pln(req)), annualImpact: (req - sh) * 12, potential: 0, confidence: s.confidence * 0.9, difficulty: "medium", minutes: 30,
         doNothing: m ? T("At this pace you reach {0} of the target by {1}, and it is complete only {2} months later.", pc((g.saved + sh * left) / g.target), fmtDate(g.date), lateBy) : T("Without money set aside for it, it will not be reached."),
         actions: go(T("Raise the monthly amount"), T("Or move the date.")) });
       firstGap = firstGap || { ...g, per: req };

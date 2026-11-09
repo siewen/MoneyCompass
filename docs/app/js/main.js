@@ -125,9 +125,9 @@ function buildShell() {
         <span class="me-more" aria-hidden="true">⌄</span></button>
     </div>
     ${license.isPro ? "" : `<div class="free-bar">${esc(T("Free web version."))} <a href="${DOWNLOAD_URL}" target="_blank" rel="noopener">${esc(T("Download the Windows app"))}</a> · <a href="#" data-act="profile">${esc(T("Enter license key"))}</a></div>`}
-    <div id="backup-bar" class="backup-bar" hidden></div>
     <div class="page-head"><h1 id="page-title"></h1><button class="btn main small head-import" id="head-import" hidden></button></div>
     <main id="page"></main>
+    <div id="backup-bar" class="backup-bar" hidden></div>
     <button class="help-fab" data-act="help-menu" title="${esc(T("Help & About"))}">?</button>`;
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => App.go(b.dataset.tab));
   // Pro: drag a page up or down in the side menu to change the order

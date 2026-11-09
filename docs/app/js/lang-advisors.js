@@ -108,6 +108,7 @@ export const ADV = {
 "See your goals": "Zobacz swoje cele",
 "Goal At Risk": "Cel zagrożony",
 "{0} needs {1} a month, but you can set aside about {2}.": "{0} wymaga {1} miesięcznie, ale możesz odkładać około {2}.",
+"{0} needs {1} a month, but there is no money left to set aside.": "{0} wymaga {1} miesięcznie, ale nie zostaje już nic do odłożenia.",
 "At this pace you reach {0} of the target by {1}, and it is complete only {2} months later.": "W tym tempie do {1} osiągniesz {0} celu, a pełną kwotę dopiero {2} mies. później.",
 "Without money set aside for it, it will not be reached.": "Bez odkładania pieniędzy cel nie zostanie osiągnięty.",
 "Raise the monthly amount": "Zwiększ kwotę miesięczną",

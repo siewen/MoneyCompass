@@ -837,6 +837,16 @@ export const NEW = {
 "Can be reduced or postponed.": "Można ograniczyć lub odłożyć.",
 "Examples: Entertainment, Travel, Shopping": "Przykłady: rozrywka, podróże, zakupy",
 "Category Usage": "Zastosowanie kategorii",
-"This category will be available in:": "Ta kategoria będzie dostępna w:"
+"This category will be available in:": "Ta kategoria będzie dostępna w:",
+"Spending exceeds income: monthly deficit {0}": "Wydatki przekraczają dochody: miesięczny deficyt {0}",
+"Monthly Deficit": "Miesięczny deficyt",
+"Negative Savings Rate": "Ujemna stopa oszczędności",
+"vs. last full month": "vs. ostatni pełny miesiąc",
+"{0} confidence": "Pewność: {0}",
+"Start with the opportunity above.": "Zacznij od okazji powyżej.",
+"Additional return available": "Dodatkowy zysk do uzyskania",
+"1 opportunity": "1 możliwość",
+"+{0}% on your {1} of savings": "+{0}% przy Twoich oszczędnościach ({1})",
+"Best opportunity": "Najlepsza możliwość"
 }
 };
