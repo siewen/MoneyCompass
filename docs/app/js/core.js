@@ -130,7 +130,7 @@ export function profiles() {
   return idx.ids.map(id => {
     let s = {};
     try { s = JSON.parse(store.get("mc-p:" + id))?.Settings || {}; } catch { /* empty */ }
-    return { id, name: id === State.id ? currentName() : (s.ProfileName || T("Me")), current: id === State.id };
+    return { id, name: id === State.id ? currentName() : (s.ProfileName || T("Demo User")), current: id === State.id };
   }).sort((a, b) => a.name.localeCompare(b.name));
 }
 export function switchTo(id) { save(); const idx = readIndex(); idx.current = id; writeIndex(idx); loadCurrent(); }
@@ -158,7 +158,7 @@ export const setPicture = url => url ? store.set("mc-pic:" + State.id, url) : st
 export function currentName() {
   const n = (State.data.Settings.ProfileName || "").trim();
   if (n) return n;
-  return license.current?.name || T("Me");
+  return license.current?.name || T("Demo User");
 }
 export function initials(name) {
   const w = name.split(" ").filter(Boolean);
