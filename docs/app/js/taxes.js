@@ -59,10 +59,10 @@ export function planOpts(P) {
 }
 
 export const Taxes = {
-  route: "taxes", title: "Taxes",
+  route: "taxes", title: "Tax Planner",
   render(el) {
     const P = plan();
-    const head = pageHead({ icon: "percent", title: T("Taxes"), sub: T("A rough estimate for Poland: gross and net pay, taxes and the bracket you are in."),
+    const head = pageHead({ icon: "percent", title: T("Tax Planner"), sub: T("A rough estimate for Poland: gross and net pay, taxes and the bracket you are in."),
       kpis: [{ l: T("Rates valid for"), v: String(TAX.year), icon: "star", attr: ' data-txgo="sources"' }, { l: T("Income tax"), v: "12% / 32%", icon: "percent", cls: "rate", attr: ' data-txgo="how"' }, { l: T("Tax-free amount a year"), v: pln(TAX.pit.taxFree), icon: "coins", attr: ' data-txgo="how"' }, { l: T("32% starts above (a year)"), v: pln(TAX.pit.threshold), icon: "bars", cls: "left", attr: ' data-txgo="bracket"' }] });
     const itemsHtml = () => {
       const it = P.items, tot = k => it.filter(x => x.kind === k).reduce((a, x) => a + (x.amount || 0), 0);
