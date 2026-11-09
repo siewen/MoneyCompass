@@ -21,6 +21,10 @@ export const TAX = {
     health: { min: 432.54, minJan: 314.96, scale: 0.09, linear: 0.049, lump: [[60000, 5537.18], [300000, 9228.64], [Infinity, 16611.55]] },   // lump: yearly revenue limit → base; 9% of the base
     lumpRates: [0.17, 0.15, 0.14, 0.125, 0.12, 0.10, 0.085, 0.055, 0.03, 0.02],
   },
+  family: {   // yearly tax return (PIT): child relief and who can use it
+    childRelief: [0, 1112.04, 2224.08, 4224.12, 6924.12], childExtra: 2700,   // a year, for 1, 2, 3, 4 children, and for every child after the 4th
+    limitOne: { joint: 112000, other: 56000 },   // with ONE child the relief needs an income below this (married or single parent: 112 000, others: 56 000 per parent)
+  },
   ppk: { employee: 0.02, employer: 0.015 },   // PPK (employee pension plan): employer share is taxable income
   youngLimit: 85528,               // under-26 relief: no income tax on income up to this amount a year
 };

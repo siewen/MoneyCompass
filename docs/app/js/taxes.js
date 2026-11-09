@@ -169,6 +169,12 @@ export const Taxes = {
       ${P.jobs.length ? `<div class="tx-list">${P.jobs.map(j => `<div class="tx-it"><span class="tx-ic">💼</span><span class="tx-n"><input type="text" value="${esc(j.name)}" data-job-name="${j.id}" aria-label="${esc(T("Name"))}"><small>${esc(T("Employment contract, gross per month"))}</small></span>
         <span class="tx-a"><input type="text" inputmode="decimal" value="${esc(plain(j.amount))}" data-job-amount="${j.id}" aria-label="${esc(T("Amount"))}"><em>zł</em></span><button class="icon-btn danger" data-job-del="${j.id}" title="${esc(T("Delete"))}">🗑</button></div>`).join("")}</div>` : ""}
       <button type="button" class="btn second" data-add-job>＋ ${esc(T("Add another income"))}</button>`;
+    const famHtml = () => `<div class="tp-h"><span class="tp-hi">👨‍👩‍👧</span><h3>${esc(T("Family & Yearly Tax Return"))}</h3></div>
+      <p class="hint">${esc(T("In Poland the income tax depends on your marital status, your children and the type of income. It does not depend on whether you are a man or a woman."))}</p>
+      <div class="tx-f">${field(T("Your situation"), select("status", [["single", T("Single")], ["joint", T("Married – joint tax return with my spouse")], ["separate", T("Married – separate tax returns")], ["parent", T("Single parent (raising a child alone)")]], P.status || "single"))}
+      ${(P.status || "single") === "joint" ? field(T("Spouse: gross pay per month (employment contract)"), numInput("spouse", plain(P.spouse), "0")) : ""}
+      ${field(T("Children (under 18, or studying)"), select("kids", [0, 1, 2, 3, 4, 5, 6].map(n => [String(n), String(n)]), String(P.kids || 0)))}</div>
+      <div id="tx-famres" class="hint"></div>`;
     const kpi = (l, v, icon, go, cls = "in") => `<div class="kpi static clk" data-txgo="${go}"><span class="kpi-ic ${cls}">${si(IC[icon] || IC.bars)}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b>${esc(v)}</b></span></div>`;
     el.innerHTML = `<div class="ni-page tx-page tp">
       <div class="tp-head"><span class="tp-logo">⚖️</span><div><h2>${esc(T("Taxes & Payroll Intelligence Center"))}</h2><p>${esc(T("Estimate salary, taxes, contributions and discover optimization opportunities."))}</p></div>
@@ -186,6 +192,7 @@ export const Taxes = {
               <p class="hint tp-cnote">${esc(T(CNOTE[CT]))}</p>
             </form></div>
           <div class="nw-card ov-card tp-card" id="tx-jobs">${jobsHtml()}</div>
+          <div class="nw-card ov-card tp-card" id="tx-fam">${famHtml()}</div>
           <div class="nw-card ov-card tp-card" id="tx-items">${itemsHtml()}</div></div>
         <div class="tp-right">
           <div class="nw-card ov-card tp-card" id="tx-sum"></div>
@@ -217,9 +224,32 @@ export const Taxes = {
       const sumA = k => ALL.reduce((a, x) => a + x[k], 0);
       const mm = extras.length ? y.months.map((x, i) => { const r = { m: x.m, bonus: x.bonus, high: ALL.some(a => a.months[i].high) }; for (const k of ["gross", "net", "tax", "ins", "ppk", "deduct"]) r[k] = ALL.reduce((a, z) => a + z.months[i][k], 0); return r; }) : y.months;
       const A = { grossYear: sumA("grossYear"), netYear: sumA("netYear"), tax: sumA("tax") };
+      const baseAll = ALL.reduce((a, x) => a + x.taxable, 0), pt = TAX.pit, F = TAX.family;
+      const fam = (() => {   // yearly tax return: marital status, spouse, children
+        const own = !(o.contract === "b2b" && o.taxForm !== "scale"), st = own ? (P.status || "single") : "single";
+        const fT = b => Math.max(0, b <= pt.threshold ? b * pt.low - pt.taxFree * pt.low : pt.threshold * pt.low - pt.taxFree * pt.low + (b - pt.threshold) * pt.high);
+        let spW = 0, spB = 0; if (st === "joint" && num(P.spouse) > 0) { const sp = calcYear(num(P.spouse), { pit2: true }); spB = sp.taxable; spW = sp.tax; }
+        const combined = baseAll + spB, separate = fT(baseAll) + fT(spB), liab = st === "joint" ? 2 * fT(combined / 2) : st === "parent" ? 2 * fT(baseAll / 2) : fT(baseAll);
+        const n = own ? Math.max(0, Math.round(num(P.kids) || 0)) : 0; let relief = 0;
+        if (n > 0) { relief = n <= 4 ? F.childRelief[n] : F.childRelief[4] + (n - 4) * F.childExtra; if (n === 1 && (st === "joint" ? combined : baseAll) > (st === "joint" || st === "parent" ? F.limitOne.joint : F.limitOne.other)) relief = 0; }
+        relief = Math.min(relief, liab);
+        const liabNet = liab - relief, share = combined > 0 ? baseAll / combined : 1;
+        return { own, st, n, relief, liabNet, share, spW, diff: own ? liabNet - (A.tax + spW) : 0, saving: st === "joint" ? separate - fT(combined / 2) * 2 : st === "parent" ? fT(baseAll) - 2 * fT(baseAll / 2) : 0 };
+      })();
+      const trueTax = fam.own ? fam.liabNet * fam.share : A.tax, diffAll = fam.diff;
+      { const fr = el.querySelector("#tx-famres"), li = [];
+        if (!fam.own) li.push(T("Family options apply to the scale tax (12% / 32%) and to employment-type contracts."));
+        else {
+          if (fam.st === "joint") li.push(num(P.spouse) > 0 ? (fam.saving > 1 ? T("A joint tax return saves you about {0} a year compared to two separate returns.", pln(fam.saving)) : T("A joint tax return brings little here: both incomes are similar.")) : T("Enter your spouse's gross pay to see how a joint tax return changes the tax."));
+          if (fam.st === "joint") li.push(T("Joint return: married the whole year with joint property, and neither of you uses flat tax or lump-sum tax for business income. The income of both is added, halved, and the tax doubled."));
+          if (fam.st === "parent") li.push(fam.saving > 1 ? T("Filing as a single parent saves you about {0} a year (the tax is calculated on half of the income and doubled).", pln(fam.saving)) : T("Filing as a single parent brings little at this income."));
+          if (fam.n > 0) li.push(fam.relief > 0 ? T("Child relief lowers your yearly tax by {0}.", pln(fam.relief)) : T("With one child, the relief is lost when the income is above {0}.", pln(fam.st === "joint" || fam.st === "parent" ? TAX.family.limitOne.joint : TAX.family.limitOne.other)));
+          if (fam.n > 0 && fam.st !== "joint" && fam.st !== "parent") li.push(T("If both parents claim the relief, it is split between you."));
+        }
+        fr.innerHTML = li.map(x => `<p>${esc(x)}</p>`).join(""); }
       { const box2 = el.querySelector("#tx-all"); box2.hidden = !extras.length;
         if (extras.length) {
-          const base = ALL.reduce((a, x) => a + x.taxable, 0), pt = TAX.pit, red = pt.taxFree * pt.low, trueTax = Math.max(0, base <= pt.threshold ? base * pt.low - red : pt.threshold * pt.low - red + (base - pt.threshold) * pt.high), diff = trueTax - A.tax;
+          const base = baseAll, diff = diffAll;
           const nm = [T("Main income"), ...extras.map(e => e.j.name || T("Other income"))];
           box2.innerHTML = head("👥", T("All Incomes Together")) + `<div class="tp-mt-wrap"><table class="tp-mt"><thead><tr><th>${esc(T("Income"))}</th><th>${esc(T("Gross (brutto)"))}</th><th>${esc(T("Net (netto)"))}</th><th>${esc(T("Tax paid"))} / ${esc(T("per year"))}</th></tr></thead><tbody>
             ${ALL.map((x, i) => `<tr><td>${esc(nm[i])}</td><td>${esc(pln(x.gross))}</td><td><b class="good">${esc(pln(x.first.net))}</b></td><td>${esc(pln(x.tax))}</td></tr>`).join("")}</tbody>
@@ -227,22 +257,26 @@ export const Taxes = {
             <p class="${Math.abs(diff) > 1 ? "tp-warn" : "hint"}">${esc(Math.abs(diff) <= 1 ? T("Your yearly tax return should come out about even.") : diff > 0 ? T("Your employers together withhold about {0} too little. At your yearly tax return (PIT-37) you will probably pay about {0} more. Keep this money aside.", pln(diff)) : T("Your employers together withhold about {0} too much. You will probably get about {0} back with your yearly tax return (PIT-37).", pln(-diff)))}</p>
             <p class="hint">${esc(T("Combined income for the year: {0} tax base. Social insurance is counted for every income separately here; if your pay is above the yearly limit, ask your employer about it.", pln(base)))}</p>`; } }
       if (document.activeElement !== other) other.value = plain(P.mode === "gross" ? f.net : g);
-      const mo = f.pension + f.disability + f.sickness, deductions = y.social + y.health + y.tax, eff = y.grossYear > 0 ? deductions / y.grossYear * 100 : 0;
-      const util = Math.min(100, Math.round(y.taxable / p.threshold * 100)), within = y.over <= 0;
+      const sf = k => ALL.reduce((a, x) => a + x.first[k], 0), socY = sumA("social"), hlY = sumA("health");
+      const S = extras.length ? { gross: sumA("gross"), net: sf("net"), tax: sf("tax"), health: sf("health"), mo: sf("pension") + sf("disability") + sf("sickness"), ppk: sf("ppk"), deduct: sf("deduct"), taxable: baseAll, over: Math.max(0, baseAll - p.threshold), room: Math.max(0, p.threshold - baseAll), eff: A.grossYear > 0 ? (socY + hlY + trueTax) / A.grossYear * 100 : 0, netMonth: (A.netYear - diffAll) / 12 }
+        : { gross: y.gross, net: f.net, tax: f.tax, health: f.health, mo: f.pension + f.disability + f.sickness, ppk: f.ppk, deduct: f.deduct, taxable: y.taxable, over: y.over, room: y.room, eff: y.grossYear > 0 ? (y.social + y.health + y.tax) / y.grossYear * 100 : 0, netMonth: y.netMonth };
+      const eff = S.eff, mo = S.mo;
+      const util = Math.min(100, Math.round(S.taxable / p.threshold * 100)), within = S.over <= 0;
       const rev = o.contract === "b2b", flat = rev && o.taxForm !== "scale";
       const row = (l, a, cls = "") => `<div class="tp-r ${cls}"><span>${esc(l)}</span><b>${esc(pln(a))}</b></div>`;
       set("tx-sum", head("🧮", T("Payroll Summary")) + `<div class="tp-sum">
-        <div class="tp-s1">${row(rev ? T("Revenue") : T("Gross Salary"), y.gross)}${row(rev ? T("Take-home") : y.bonus ? T("Net Salary (normal month)") : T("Net Salary"), f.net, "tp-net")}${row(T("Income Tax"), f.tax)}${row(T("Health Insurance"), f.health)}${row(T("Social Security"), mo)}${o.ppk ? row(T("PPK (your share)"), f.ppk) : ""}${f.deduct ? row(rev ? T("Business costs") : T("Other deductions"), f.deduct) : ""}
-          ${y.bonus ? `<small class="hint">${esc(T("Average over the year: {0}", pln(y.netMonth)))}</small>` : ""}</div>
+        <div class="tp-s1">${row(rev ? T("Revenue") : T("Gross Salary"), S.gross)}${row(rev ? T("Take-home") : y.bonus ? T("Net Salary (normal month)") : T("Net Salary"), S.net, "tp-net")}${row(T("Income Tax"), S.tax)}${row(T("Health Insurance"), S.health)}${row(T("Social Security"), mo)}${o.ppk ? row(T("PPK (your share)"), S.ppk) : ""}${S.deduct ? row(rev ? T("Business costs") : T("Other deductions"), S.deduct) : ""}
+          ${diffAll > 1 ? row(T("To pay at tax return (yearly)"), diffAll, "warn") : diffAll < -1 ? row(T("Back at tax return (yearly)"), -diffAll) : ""}
+          ${y.bonus || extras.length || y.months.some(x => x.sick) ? `<small class="hint">${esc(T("Average over the year: {0}", pln(S.netMonth)))}</small>` : ""}</div>
         <div class="tp-s2"><small>${esc(T("Effective Tax Rate"))}</small>${ring(Math.min(100, eff), pcx(eff), "", 150)}<small class="hint">${esc(T("Insurance and tax together"))}</small></div>
-        <div class="tp-s3">${flat ? `<small>${esc(T("Tax form"))}</small><b>${esc(o.taxForm === "lump" ? T("Lump-sum tax {0}%", (o.lumpRate || 0.12) * 100) : T("Flat tax 19%"))}</b><small>${esc(T("Tax base (year)"))}</small><b>${esc(pln(y.taxable))}</b><small class="hint">${esc(T("No 12% / 32% brackets with this tax form."))}</small>` : `<small>${esc(T("Tax Bracket Status"))}</small><b class="${within ? "good" : "warn"}">${within ? "✅ " + esc(T("Within Threshold")) : "⚠️ " + esc(T("Above the 32% threshold"))}</b>
-          <small>${esc(T("Current Annual Income"))}</small><b>${esc(pln(y.taxable))}</b><small>${esc(T("Threshold Utilization"))}</small>
+        <div class="tp-s3">${flat ? `<small>${esc(T("Tax form"))}</small><b>${esc(o.taxForm === "lump" ? T("Lump-sum tax {0}%", (o.lumpRate || 0.12) * 100) : T("Flat tax 19%"))}</b><small>${esc(T("Tax base (year)"))}</small><b>${esc(pln(S.taxable))}</b><small class="hint">${esc(T("No 12% / 32% brackets with this tax form."))}</small>` : `<small>${esc(T("Tax Bracket Status"))}</small><b class="${within ? "good" : "warn"}">${within ? "✅ " + esc(T("Within Threshold")) : "⚠️ " + esc(T("Above the 32% threshold"))}</b>
+          <small>${esc(T("Current Annual Income"))}</small><b>${esc(pln(S.taxable))}</b><small>${esc(T("Threshold Utilization"))}</small>
           <div class="tp-util"><div class="tx-bar"><i style="width:${util}%"></i></div><b>${util}%</b></div>
-          <small class="hint">${esc(within ? T("{0} a year of room before 32% starts.", pln(y.room)) : T("{0} a year is taxed at 32%.", pln(y.over)))}</small>`}</div></div>`);
-      const parts = [[T("Net Pay"), f.net, "#34d399"], [T("Tax"), f.tax, "#f59e0b"], [T("Social Security"), mo, "#3b9bea"], [T("Health Insurance"), f.health, "#8b5cf6"], ...(o.ppk ? [[T("PPK"), f.ppk, "#ec4899"]] : []), ...(f.deduct ? [[T("Other deductions"), f.deduct, "#94a3b8"]] : [])].filter(x => x[1] > 0), sumP = parts.reduce((a, x) => a + x[1], 0) || 1;
-      set("tx-brk", head("🥧", T("Salary Breakdown")) + `<div class="tp-brk"><div class="tx-donut">${donut(parts.map(x => ({ label: x[0], value: x[1], color: x[2] })), "", "")}<div class="tp-dc"><b>${esc(pln(f.net))}</b><small>${esc(T("Net Pay"))}</small></div></div>
+          <small class="hint">${esc(within ? T("{0} a year of room before 32% starts.", pln(S.room)) : T("{0} a year is taxed at 32%.", pln(S.over)))}</small>`}</div></div>`);
+      const parts = [[T("Net Pay"), S.net, "#34d399"], [T("Tax"), S.tax, "#f59e0b"], [T("Social Security"), mo, "#3b9bea"], [T("Health Insurance"), S.health, "#8b5cf6"], ...(o.ppk ? [[T("PPK"), S.ppk, "#ec4899"]] : []), ...(S.deduct ? [[T("Other deductions"), S.deduct, "#94a3b8"]] : [])].filter(x => x[1] > 0), sumP = parts.reduce((a, x) => a + x[1], 0) || 1;
+      set("tx-brk", head("🥧", T("Salary Breakdown")) + `<div class="tp-brk"><div class="tx-donut">${donut(parts.map(x => ({ label: x[0], value: x[1], color: x[2] })), "", "")}<div class="tp-dc"><b>${esc(pln(S.net))}</b><small>${esc(T("Net Pay"))}</small></div></div>
         <div class="tx-leg col">${parts.map(x => `<span><u style="background:${x[2]}"></u>${esc(x[0])} <b>${Math.round(x[1] / sumP * 100)}%</b></span>`).join("")}</div></div>`);
-      const ins = insights(g, o, y), ben = ins.reduce((a, x) => a + x.v, 0);
+      const ins = insights(g, o, y); if (extras.length && Math.abs(diffAll) > 1) ins.unshift({ t: T("Plan for the tax return"), d: diffAll > 0 ? T("Your incomes together are taxed higher than your employers withhold. Keep about {0} aside for the yearly tax return. Submitting PIT-2 at only one employer is correct; check with your payroll departments.", pln(diffAll)) : T("You should get about {0} back with your yearly tax return.", pln(-diffAll)), v: 0 }); const ben = ins.reduce((a, x) => a + x.v, 0);
       set("tx-ins", head("💡", T("MoneyCompass Optimization Insights")) + `<div class="tp-ib"><div><small>${esc(T("Potential Annual Benefit"))}</small><b class="good">${ben > 0 ? "+" + esc(pln(ben)) : "–"}</b></div><div><small>${esc(T("Recommendations Found"))}</small><b>${ins.length}</b></div></div>
         <ol class="tp-tips">${ins.slice(0, 3).map(x => `<li>${esc(x.t)}</li>`).join("")}</ol><button type="button" class="btn main" data-ins-details>${esc(T("View Details"))} →</button>`);
       el.querySelector("[data-ins-details]").onclick = () => popup(`<div class="nw-hd"><span class="nw-hi">💡</span><div><h2>${esc(T("Optimization Insights"))}</h2><p class="nw-sub">${esc(T("Ideas to keep more of your pay. Check them with your payroll department or a tax adviser."))}</p></div><button class="nw-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
@@ -254,6 +288,7 @@ export const Taxes = {
           </tbody><tfoot><tr><td>${esc(T("Year"))}</td><td>${esc(pln(sum("gross")))}</td><td><b class="good">${esc(pln(sum("net")))}</b></td><td>${esc(pln(sum("tax")))}</td><td>${esc(pln(sum("ins")))}</td><td>${esc(pln(sum("ppk")))}</td><td>${esc(pln(sum("deduct")))}</td></tr></tfoot></table></div>
           ${(() => { const k = M.findIndex(x => x.high); if (k < 0) return ""; const a = M[k + 1] && !M[k + 1].bonus ? M[k + 1] : M[k]; return `<p class="tp-warn">${esc(T("From {0} your income since January is above {1}, so the tax goes up from 12% to 32% on the rest of the year. Your net falls from about {2} to about {3} a month.", mn(M[k].m), pln(TAX.pit.threshold), pln(M[0].net), pln(a.net)))}</p>`; })()}
           ${M.some(x => x.sick) ? `<p class="hint">🤒 ${esc(T("Sick leave: you get {0}% of your pay after social insurance (per day = that amount / 30). Your employer pays the first {1} days of the year, ZUS pays from day {2}. If you entered the net pay yourself, that number is used for the month.", TAX.sick.rate * 100, TAX.sick.employerDays, TAX.sick.employerDays + 1))}</p>` : ""}
+          ${extras.length ? `<p class="hint">${esc(T("With more than one income, the tax in this table is what your employers withhold. The difference to the real yearly tax is settled in your tax return (see above)."))}</p>` : ""}
           <div class="tp-exp"><button class="btn main" data-mon-csv>⬇ ${esc(T("Export to Excel (CSV)"))}</button><button class="btn second" data-mon-print>🖨 ${esc(T("Print / save as PDF"))}</button></div>
           <p class="hint">${esc(T("Month by month, as it would arrive on your account. Polish payroll counts your income from January onward, so the tax steps up in the month the total passes the threshold. A month with a bonus 🎁 pays more tax. Estimate only."))}</p>`); }
       { const M = mm, nf = v => (Math.round(v * 100) / 100).toFixed(2).replace(".", ","), loc = document.documentElement.lang || "en", mn = i => new Date(2026, i, 1).toLocaleString(loc, { month: "long" });
@@ -264,9 +299,9 @@ export const Taxes = {
         el.querySelector("[data-mon-print]").onclick = () => { const w = window.open("", "_blank"); if (!w) { toast(T("Allow pop-ups to print.")); return; }
           w.document.write(`<!doctype html><meta charset="utf-8"><title>MoneyCompass – ${esc(T("Monthly Payment Overview"))}</title><style>body{font:14px system-ui,sans-serif;margin:28px;color:#111}table{border-collapse:collapse;width:100%}th,td{padding:6px 8px;border-bottom:1px solid #ddd;text-align:right}th:first-child,td:first-child{text-align:left}tfoot td{font-weight:700;border-top:2px solid #111}small{color:#555}</style><h2>${esc(T("Monthly Payment Overview"))} – ${esc(String(TAX.year))}</h2><table><thead><tr>${hd.map(h => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => `<td>${i ? esc(pln(c)) : esc(c)}</td>`).join("")}</tr>`).join("")}</tbody><tfoot><tr>${tot.map((c, i) => `<td>${i ? esc(pln(c)) : esc(c)}</td>`).join("")}</tr></tfoot></table><p><small>${esc(T("Estimate only, not tax advice. Polish rules for {0}.", TAX.year))}</small></p>`);
           w.document.close(); w.focus(); setTimeout(() => w.print(), 300); }; }
-      if (extras.length) el.querySelector("#tx-sum").insertAdjacentHTML("beforeend", `<p class="hint" style="margin-top:8px">${esc(T("This summary shows your main income only. All incomes together are in the table below."))}</p>`);
-      set("tx-ann", head("📈", T("Annual Projection")) + `<div class="tp-ann"><div><small>${esc(T("Annual Gross"))}</small><b>${esc(pln(A.grossYear))}</b></div><div><small>${esc(T("Annual Net"))}</small><b class="good">${esc(pln(A.netYear))}</b></div><div><small>${esc(T("Annual Taxes"))}</small><b>${esc(pln(A.tax))}</b></div></div>
-        <p class="hint">${esc(T("You keep {0} of your gross pay.", Math.round(A.netYear / A.grossYear * 100) + "%"))}${y.grossYear > TAX.zusYearLimit ? " " + esc(T("Pension and disability insurance stop once your gross for the year passes {0}.", pln(TAX.zusYearLimit))) : ""}${y.benefit ? " " + esc(T("Benefits are taxed like pay but you do not receive them as cash, so they only lower your net.")) : ""}</p>`);
+      if (extras.length) el.querySelector("#tx-sum").insertAdjacentHTML("beforeend", `<p class="hint" style="margin-top:8px">${esc(T("Main income and your other incomes together. Details for each income are in the table below."))}</p>`);
+      set("tx-ann", head("📈", T("Annual Projection")) + `<div class="tp-ann"><div><small>${esc(T("Annual Gross"))}</small><b>${esc(pln(A.grossYear))}</b></div><div><small>${esc(T("Annual Net"))}</small><b class="good">${esc(pln(A.netYear - diffAll))}</b></div><div><small>${esc(T("Annual Taxes"))}</small><b>${esc(pln(extras.length ? trueTax : A.tax))}</b></div></div>
+        <p class="hint">${esc(T("You keep {0} of your gross pay.", Math.round((A.netYear - diffAll) / A.grossYear * 100) + "%"))}${y.grossYear > TAX.zusYearLimit ? " " + esc(T("Pension and disability insurance stop once your gross for the year passes {0}.", pln(TAX.zusYearLimit))) : ""}${y.benefit ? " " + esc(T("Benefits are taxed like pay but you do not receive them as cash, so they only lower your net.")) : ""}</p>`);
     };
     const bindItems = () => {
       const f = box.querySelector("#tx-add"), setMo = () => { const k = f.kind.value, sk = k === "sick"; box.querySelector(".tx-mo").hidden = !(k === "bonus" || sk); box.querySelector(".tx-sk").hidden = !sk; box.querySelector(".tx-am").hidden = sk && f.how.value === "auto"; };
@@ -284,6 +319,9 @@ export const Taxes = {
         if (await confirmBox(T("Delete this item?"), it.name, T("Delete"), T("Cancel"), true)) { P.items = P.items.filter(x => x !== it); save(); box.innerHTML = itemsHtml(); bindItems(); draw(); }
       });
     };
+    const fb = el.querySelector("#tx-fam");
+    fb.addEventListener("change", ev => { const n = ev.target.name; if (n === "status" || n === "kids") { P[n] = n === "kids" ? +ev.target.value : ev.target.value; save(); if (n === "status") { fb.innerHTML = famHtml(); } draw(); } });
+    fb.addEventListener("input", ev => { if (ev.target.name === "spouse") { P.spouse = ev.target.value; save(); draw(); } });
     const jb = el.querySelector("#tx-jobs");
     const bindJobs = () => {
       jb.querySelector("[data-add-job]").onclick = () => { P.jobs.push({ id: uuid(), name: T("Second job"), amount: 0 }); save(); jb.innerHTML = jobsHtml(); bindJobs(); jb.querySelector(`[data-job-amount="${P.jobs[P.jobs.length - 1].id}"]`)?.focus(); draw(); };
