@@ -2666,3 +2666,11 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .nwp-grid>.nwp-chart{align-self:stretch;display:flex;flex-direction:column}
 .nwp-chart>p.hint{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;margin:10px 0 0;padding:18px 22px;border:1px dashed rgba(53,211,153,.35);border-radius:14px;background:rgba(53,211,153,.05);color:var(--muted,#9fb3aa);line-height:1.5}
 .nwp-chart>p.hint::before{content:"🌱";font-size:26px;margin-right:14px}
+
+/* older pages: action buttons sit at the card bottom, bigger bar-chart text */
+.nw-card.dz{display:flex;flex-direction:column}
+.nw-card.dz>.ex-opt,.nw-card.dz>.btn.main:last-child{margin-top:auto}
+.dz svg.oc.cb .oc-ax{font-size:18px}
+
+/* onboarding window must never run off-screen: scroll inside it */
+.guide-popup.nw-gd{max-height:calc(100vh - 24px);overflow-y:auto;overscroll-behavior:contain}

@@ -100,5 +100,5 @@ function lineChart0(labels, series, opt = {}) {
 /** Single-series columns with the value above each bar. */
 export function colBars(labels, vals, color = "#22E39A") {
   const max = niceMax(Math.max(1, ...vals)), f = frame(labels.map(m => ({ month: String(m) })), 0, max), bw = Math.min(34, f.inner / f.n / 1.8);
-  return `<svg class="oc" viewBox="0 0 ${W} ${H}" role="img">${f.g}${vals.map((v, i) => v > 0 ? `<rect x="${f.x(i) - bw / 2}" y="${f.y(v)}" width="${bw}" height="${f.y(0) - f.y(v)}" rx="4" fill="${color}" style="filter:drop-shadow(0 0 5px ${color})"/><text x="${f.x(i)}" y="${f.y(v) - 5}" text-anchor="middle" class="oc-ax" fill="#fff">${spaced(v)}</text>` : "").join("")}</svg>`;
+  return `<svg class="oc cb" viewBox="0 0 ${W} ${H}" role="img">${f.g}${vals.map((v, i) => v > 0 ? `<rect x="${f.x(i) - bw / 2}" y="${f.y(v)}" width="${bw}" height="${f.y(0) - f.y(v)}" rx="4" fill="${color}" style="filter:drop-shadow(0 0 5px ${color})"/><text x="${f.x(i)}" y="${f.y(v) - 5}" text-anchor="middle" class="oc-ax" fill="#fff">${spaced(v)}</text>` : "").join("")}</svg>`;
 }
