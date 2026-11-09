@@ -65,7 +65,7 @@ export function adviceCard(d) {
         <span class="hint">${esc(T("to {0}", offerName(m.o)))} · ${rate(m.o.Rate)} ${esc(m.promoEnd ? T("instead of {0} (then {1})", rate(m.now), rate(m.after)) : T("instead of {0}", rate(m.now)))} · ${esc(T("{0} days", m.days))}${m.o.MaxAmount > 0 ? " · " + esc(T("up to {0}", pln(m.o.MaxAmount))) : ""}</span>
         ${m.promoEnd ? `<span class="hint warn">⏰ ${esc(T("Best moved when your promotion ends on {0}.", fmtDate(m.promoEnd)))}</span>` : ""}</div>
       <div class="right"><b class="good">+${pln(m.gain)}</b><span class="hint">${esc(T("more after tax"))}</span></div>
-      <div class="row-actions"><a class="btn second small" href="${esc(Rates.link(m.o))}" target="_blank" rel="noopener">${esc(T("Open offer"))}</a>
+      <div class="row-actions"><button class="btn second small" data-offer-info="${i}">${esc(T("View Offer"))}</button>
         <button class="btn go small" data-moved="${i}">✔ ${esc(T("I moved it"))}</button></div></div>`).join("")}</div>`;
     if (!license.isPro && all.length > 1) body += `<p class="hint">🔒 ${esc(T("{0} more suggestions for your other savings with MoneyCompass Pro.", all.length - 1))}</p>`;
     body += hint(T("Promotions are usually for new money and need a personal account in that bank and some card payments – check the bank's terms. Offers checked {0}. This is a calculation, not financial advice.", fmtDate(checked)));
@@ -76,6 +76,7 @@ export function adviceCard(d) {
 export function bindAdvice(el, d) {
   const all = moves(d), shown = license.isPro ? all : all.slice(0, 1);
   el.querySelectorAll("[data-moved]").forEach(b => b.onclick = () => movedIt(shown[+b.dataset.moved]));
+  el.querySelectorAll("[data-offer-info]").forEach(b => b.onclick = () => offerInfo(shown[+b.dataset.offerInfo]));
 }
 
 /** "I moved it": a new savings entry for the offer – with the promotion end date, so MoneyCompass reminds you in time. */
@@ -110,4 +111,26 @@ export function promoReminder() {
     if (b.dataset.r === "show") App.go("portfolio");
   });
   return true;
+}
+
+
+/** Information page for one recommended offer; the bank's own site is one click further. */
+function offerInfo(m) {
+  if (!m) return;
+  const o = m.o, nm = offerName(o), lim = o.MaxAmount > 0 ? pln(o.MaxAmount) : T("no limit");
+  const pp = popup("", { width: 720, cls: "nw-win sc-win" });
+  const notes = [];
+  if (m.promoEnd) notes.push(T("Best moved when your promotion ends on {0}.", fmtDate(m.promoEnd)));
+  notes.push(T("Promotions are usually for new money and need a personal account in that bank and some card payments – check the bank's terms."));
+  notes.push(T("Deposits are guaranteed by the BFG up to €100,000 per bank."));
+  pp.el.innerHTML = `<div class="nw-hd"><span class="nw-hi">🏦</span><div><h2>${esc(o.Bank || nm)}</h2><p class="nw-sub">${esc(o.Name || T("Savings offer"))}</p></div><button class="nw-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
+    <div class="sc-body oi-body">
+      <div class="ow-bigs"><div class="ow-big"><small>${esc(T("Interest rate"))}</small><b class="good">${esc(rate(o.Rate))}</b></div><div class="ow-big"><small>${esc(T("Additional Annual Profit"))}</small><b class="good">+${esc(pln(m.gain))}</b></div></div>
+      <div class="oi-card"><h4>${esc(T("What to move"))}</h4><p>${esc(T("Move {0} from {1}", pln(m.moved), m.h.Name))} → <b>${esc(nm)}</b></p>
+        <p class="hint">${esc(T("instead of {0}", rate(m.now)))} · ${esc(T("{0} days", m.days))} · ${esc(T("Limit"))}: ${esc(lim)}</p></div>
+      ${o.Details ? `<div class="oi-card"><h4>${esc(T("Conditions"))}</h4><p>${esc(o.Details)}</p></div>` : ""}
+      <ul class="oi-notes">${notes.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
+      <p class="hint">${esc(T("This is a calculation, not financial advice."))}</p>
+    </div>
+    <div class="nw-ft"><button class="btn second" data-close>${esc(T("Close"))}</button><a class="btn main" href="${esc(Rates.link(o))}" target="_blank" rel="noopener">${esc(T("Go to the bank's website"))} ↗</a></div>`;
 }
