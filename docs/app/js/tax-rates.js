@@ -9,6 +9,7 @@ export const TAX = {
   health: 0.09,                    // health insurance, % of (gross − social insurance); not deductible from tax
   pit: { low: 0.12, high: 0.32, threshold: 120000, taxFree: 30000 },   // tax-free amount 30 000 zł = 3 600 zł less tax a year
   kup: { standard: 250, raised: 300 },   // costs of earning income, zł per month (raised = you work in another town)
+  sick: { rate: 0.8, employerDays: 33 },   // sick leave: 80% of the pay after social insurance; the employer pays the first 33 days a year, ZUS from day 34
   ppk: { employee: 0.02, employer: 0.015 },   // PPK (employee pension plan): employer share is taxable income
   youngLimit: 85528,               // under-26 relief: no income tax on income up to this amount a year
 };

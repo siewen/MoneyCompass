@@ -14,25 +14,31 @@ const r2 = x => Math.round(x * 100) / 100;
 export function calcYear(gross, o = {}) {
   const z = TAX.zus, kup = (o.raisedCosts ? TAX.kup.raised : TAX.kup.standard), ben = o.benefit || 0, bonuses = o.bonuses || [], bonus = bonuses.reduce((a, b) => a + b.amount, 0);
   gross += o.allowance || 0;
-  let cum = 0, pen = 0, dis = 0, sick = 0, health = 0, base = 0, first = null, ppkEmp = 0, ppkEr = 0; const months = []; const pit = TAX.pit, red = o.pit2 === false ? 0 : pit.taxFree * pit.low, ex = o.under26 ? TAX.youngLimit : 0; let tPaid = 0, taxableC = 0;
+  let cum = 0, pen = 0, dis = 0, sick = 0, health = 0, base = 0, first = null, ppkEmp = 0, ppkEr = 0; const months = []; const pit = TAX.pit, red = o.pit2 === false ? 0 : pit.taxFree * pit.low, ex = o.under26 ? TAX.youngLimit : 0; let tPaid = 0, taxableC = 0, zTax = 0, sickDays = 0;
+  if (o.sick && o.sick.length) { var normal = calcYear(gross - (o.allowance || 0), { ...o, sick: [] }).first; }
   for (let m = 0; m < 12; m++) {
-    const g = gross + ben + bonuses.filter(b => b.month === m).reduce((a, b) => a + b.amount, 0), pb = Math.min(g, Math.max(0, TAX.zusYearLimit - cum)); cum += g;
-    const p = pb * z.pension, d = pb * z.disability, s = g * z.sickness, soc = p + d + s, h = (g - soc) * TAX.health;
+    const sk = (o.sick || []).filter(x => x.month === m), sd = Math.min(30, sk.reduce((a, x) => a + (x.days || 0), 0)), manualNet = sk.find(x => x.net > 0);
+    // sick leave (auto): 80% of the pay after social insurance, per day = / 30. The employer pays the first 33 days of the year, ZUS the rest.
+    let dE = 0, dZ = 0; if (sd > 0 && !manualNet) { dE = Math.max(0, Math.min(sd, TAX.sick.employerDays - sickDays)); dZ = sd - dE; } sickDays += sd;
+    const daily = gross * (1 - z.pension - z.disability - z.sickness) / 30 * TAX.sick.rate, sickPay = daily * dE, zusBen = daily * dZ, hz = zusBen * TAX.health, tz = zusBen * pit.low; zTax += tz;
+    const g = gross * (30 - dE - dZ) / 30 + sickPay + ben + bonuses.filter(b => b.month === m).reduce((a, b) => a + b.amount, 0), pb = Math.min(g, Math.max(0, TAX.zusYearLimit - cum)); cum += g;
+    const p = pb * z.pension, d = pb * z.disability, s = (g - sickPay) * z.sickness, soc = p + d + s, h = (g - soc) * TAX.health;
     const pe = o.ppk ? g * TAX.ppk.employee : 0, pr = o.ppk ? g * TAX.ppk.employer : 0;
-    pen += p; dis += d; sick += s; health += h; ppkEmp += pe; ppkEr += pr; base += Math.max(0, g - soc - kup + pr);
+    pen += p; dis += d; sick += s; health += h + hz; ppkEmp += pe; ppkEr += pr; base += Math.max(0, g - soc - kup + pr);
     // Polish payroll: tax is settled on the running total since January, so the 12% → 32% change happens in the month the total passes the threshold
     taxableC = Math.max(0, base - ex);
     const tCum = Math.max(tPaid, taxableC <= pit.threshold ? Math.max(0, taxableC * pit.low - red * (m + 1) / 12) : pit.threshold * pit.low - red + (taxableC - pit.threshold) * pit.high);
-    months.push({ m, gross: g - ben, ins: p + d + s + h, ppk: pe, tax: tCum - tPaid, high: taxableC > pit.threshold, bonus: bonuses.filter(b => b.month === m).reduce((a, b) => a + b.amount, 0) }); tPaid = tCum;
+    months.push({ m, gross: g - ben + zusBen, ins: p + d + s + h + hz, ppk: pe, tax: tCum - tPaid + tz, sick: sd, manualNet: manualNet ? manualNet.net : 0, high: taxableC > pit.threshold, bonus: bonuses.filter(b => b.month === m).reduce((a, b) => a + b.amount, 0) }); tPaid = tCum;
     if (!first) first = { pension: r2(p), disability: r2(d), sickness: r2(s), health: r2(h), ppk: r2(pe), base: Math.max(0, g - soc - kup + pr) };
   }
-  const B = Math.round(base), taxable = taxableC, tax = tPaid;
-  const social = pen + dis + sick, grossYear = gross * 12 + bonus, deductYear = (o.deduct || 0) * 12;
-  const netYear = grossYear - social - health - tax - ppkEmp - deductYear;   // benefits are taxed but not paid in cash: they cancel out below
+  const B = Math.round(base), taxable = taxableC, tax = tPaid + zTax;
+  const social = pen + dis + sick, grossYear = months.reduce((a, x) => a + x.gross, 0), deductYear = (o.deduct || 0) * 12;
+  let netYear = 0;   // benefits are taxed but not paid in cash: they cancel out below
+  for (const x of months) { x.deduct = o.deduct || 0; x.net = x.manualNet || (x.gross - x.ins - x.ppk - x.tax - x.deduct); netYear += x.net; }
   const cashYear = netYear;
-  for (const x of months) { x.deduct = o.deduct || 0; x.net = x.gross - x.ins - x.ppk - x.tax - x.deduct; }
   first.tax = r2(months[0].tax); first.deduct = r2(o.deduct || 0); first.base = Math.round(first.base);
-  first.net = r2(gross - first.pension - first.disability - first.sickness - first.health - first.ppk - first.tax - first.deduct);
+  if (normal) Object.assign(first, normal);
+  else first.net = r2(gross - first.pension - first.disability - first.sickness - first.health - first.ppk - first.tax - first.deduct);
   return { months, gross, grossYear, social: r2(social), health: r2(health), tax: r2(tax), ppk: r2(ppkEmp), deductYear: r2(deductYear), netYear: r2(cashYear), netMonth: r2(cashYear / 12), base: B, taxable, first, benefit: ben, bonus,
     over: Math.max(0, taxable - pit.threshold), room: Math.max(0, pit.threshold - taxable), effective: grossYear > 0 ? (social + health + tax) / grossYear : 0 };
 }
@@ -49,15 +55,17 @@ const KINDS = {
   allowance: ["➕", "Extra pay every month (gross)"],
   benefit: ["🏥", "Benefit from the employer (taxed, not paid in cash)"],
   deduct: ["➖", "Deduction from net pay every month"],
+  sick: ["🤒", "Sick leave (L4)"],
 };
-const SHORT = { bonus: "Bonus", allowance: "Monthly extra pay", benefit: "Benefit", deduct: "Deduction from net" };
-const PRESETS = [["Private medical care", "benefit"], ["Sport card", "benefit"], ["Medical care for my child", "benefit"], ["Bonus", "bonus"], ["Meal allowance", "allowance"], ["Union fee", "deduct"], ["Loan instalment", "deduct"]];
+const SHORT = { bonus: "Bonus", allowance: "Monthly extra pay", benefit: "Benefit", deduct: "Deduction from net", sick: "Sick leave" };
+const PRESETS = [["Private medical care", "benefit"], ["Sport card", "benefit"], ["Medical care for my child", "benefit"], ["Bonus", "bonus"], ["Meal allowance", "allowance"], ["Union fee", "deduct"], ["Loan instalment", "deduct"], ["Sick leave", "sick"]];
 const MONTHS = () => Array.from({ length: 12 }, (_, i) => [String(i), new Intl.DateTimeFormat(undefined, { month: "long" }).format(new Date(2026, i, 1))]);
 const plan = () => { const s = State.data.Settings; if (!s.TaxPlan) s.TaxPlan = { mode: "gross", amount: "", raised: false, pit2: true, under26: false, ppk: false, items: [] }; if (!Array.isArray(s.TaxPlan.items)) s.TaxPlan.items = []; if (!Array.isArray(s.TaxPlan.jobs)) s.TaxPlan.jobs = []; return s.TaxPlan; };
 /** The saved extras → the options of the calculation. */
 export function planOpts(P) {
   const it = P.items || [], sum = k => it.filter(x => x.kind === k).reduce((a, x) => a + (x.amount || 0), 0);
   return { raisedCosts: P.raised, pit2: P.pit2, under26: P.under26, ppk: P.ppk, allowance: sum("allowance"), benefit: sum("benefit"), deduct: sum("deduct"),
+    sick: it.filter(x => x.kind === "sick" && x.days > 0).flatMap(x => { const out = []; let m = +x.month >= 0 ? +x.month : 0, d = x.days; if (x.manual) return [{ month: m, days: Math.min(30, d), net: x.amount || 0 }]; while (d > 0 && m < 12) { out.push({ month: m, days: Math.min(30, d), net: 0 }); d -= 30; m++; } return out; }),
     bonuses: it.filter(x => x.kind === "bonus").map(x => ({ amount: x.amount || 0, month: +x.month >= 0 ? +x.month : 11 })) };
 }
 
@@ -82,13 +90,13 @@ export const Taxes = {
     const itemsHtml = () => {
       const it = P.items, tot = k => it.filter(x => x.kind === k).reduce((a, x) => a + (x.amount || 0), 0);
       return `<div class="tp-h"><span class="tp-hi">🎁</span><h3>${esc(T("Employee Benefits"))}</h3></div>
-        ${it.length ? `<div class="tx-list">${it.map(x => `<div class="tx-it" data-id="${x.id}"><span class="tx-ic">${KINDS[x.kind][0]}</span><span class="tx-n"><b>${esc(x.name)}</b><small>${esc(T(SHORT[x.kind]))}${x.kind === "bonus" ? " · " + esc(MONTHS()[+x.month >= 0 ? +x.month : 11][1]) : ""}</small></span>
-          <span class="tx-a"><input type="text" inputmode="decimal" value="${esc(plain(x.amount))}" data-it-amount="${x.id}" aria-label="${esc(T("Amount"))}"><em>zł</em></span><button class="icon-btn danger" data-it-del="${x.id}" title="${esc(T("Delete"))}">🗑</button></div>`).join("")}</div>
+        ${it.length ? `<div class="tx-list">${it.map(x => `<div class="tx-it" data-id="${x.id}"><span class="tx-ic">${KINDS[x.kind][0]}</span><span class="tx-n"><b>${esc(x.name)}</b><small>${esc(T(SHORT[x.kind]))}${x.kind === "bonus" ? " · " + esc(MONTHS()[+x.month >= 0 ? +x.month : 11][1]) : ""}${x.kind === "sick" ? " · " + esc(MONTHS()[+x.month >= 0 ? +x.month : 0][1]) + " · " + esc(T("{0} days", x.days)) + " · " + esc(x.manual ? T("amount entered by you") : T("calculated")) : ""}</small></span>
+          ${x.kind === "sick" && !x.manual ? `<span class="tx-a"><em>${esc(T("{0} days", x.days))}</em></span>` : `<span class="tx-a"><input type="text" inputmode="decimal" value="${esc(plain(x.amount))}" data-it-amount="${x.id}" aria-label="${esc(T("Amount"))}"><em>zł</em></span>`}<button class="icon-btn danger" data-it-del="${x.id}" title="${esc(T("Delete"))}">🗑</button></div>`).join("")}</div>
           <div class="tx-tot">${["bonus", "allowance", "benefit", "deduct"].filter(k => tot(k)).map(k => `<span>${KINDS[k][0]} ${esc(pln(tot(k)))}</span>`).join("")}</div>` : `<p class="hint mc-empty">${esc(T("No extras yet. Add bonuses, medical care, a sport card or deductions below."))}</p>`}
         <form id="tx-add" class="tx-add"><details class="tp-fold"${it.length ? "" : " open"}><summary><span>＋ ${esc(T("Add an item"))}</span>${chev}</summary>
           <div class="tx-chips">${PRESETS.map(([n, k]) => `<button type="button" class="chip" data-preset="${esc(n)}|${k}">${esc(T(n))}</button>`).join("")}</div>
           <div class="tx-f">${field(T("Name"), textInput("name", "", T("e.g. {0}", "Private medical care")))}${field(T("Type"), select("kind", Object.entries(KINDS).map(([k, v]) => [k, T(v[1])]), "benefit"))}
-          ${field(T("Amount (zł)"), numInput("amount", "", "0"))}<span class="tx-mo" hidden>${field(T("Paid in"), select("month", MONTHS(), "11"))}</span></div>
+          <span class="tx-am">${field(T("Amount (zł)"), numInput("amount", "", "0"))}</span><span class="tx-sk" hidden>${field(T("Days of sick leave"), numInput("days", "", "10"))}${field(T("How to count it"), select("how", [["auto", T("Calculate for me")], ["manual", T("I enter the net pay I got")]], "auto"))}</span><span class="tx-mo" hidden>${field(T("Paid in"), select("month", MONTHS(), "11"))}</span></div>
           <button type="button" class="btn main" data-add-item>＋ ${esc(T("Add"))}</button></details></form>`;
     };
     const jobsHtml = () => `<div class="tp-h"><span class="tp-hi">👥</span><h3>${esc(T("More Incomes"))}</h3></div>
@@ -179,9 +187,10 @@ export const Taxes = {
         <div class="nw-ft"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`, { width: 600, cls: "nw-win sc-win" });
       { const loc = document.documentElement.lang || "en", mn = i => new Date(2026, i, 1).toLocaleString(loc, { month: "short" }), M = mm, sum = k => M.reduce((a, x) => a + x[k], 0);
         set("tx-mon", head("📅", T("Monthly Payment Overview")) + `<div class="tp-mt-wrap"><table class="tp-mt"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Gross (brutto)"))}</th><th>${esc(T("Net (netto)"))}</th><th>${esc(T("Tax paid"))}</th><th>${esc(T("Insurance (ZUS + health)"))}</th><th>${esc(T("PPK"))}</th><th>${esc(T("Deductions"))}</th></tr></thead><tbody>
-          ${M.map(x => `<tr class="${x.high ? "hi" : ""}${x.bonus ? " bon" : ""}"><td>${esc(mn(x.m))}${x.bonus ? " 🎁" : ""}${x.high ? ` <span class="tp-c32">32%</span>` : ""}</td><td>${esc(pln(x.gross))}</td><td><b class="good">${esc(pln(x.net))}</b></td><td>${esc(pln(x.tax))}</td><td>${esc(pln(x.ins))}</td><td>${esc(pln(x.ppk))}</td><td>${esc(pln(x.deduct))}</td></tr>`).join("")}
+          ${M.map(x => `<tr class="${x.high ? "hi" : ""}${x.bonus ? " bon" : ""}"><td>${esc(mn(x.m))}${x.bonus ? " 🎁" : ""}${x.sick ? " 🤒" : ""}${x.high ? ` <span class="tp-c32">32%</span>` : ""}</td><td>${esc(pln(x.gross))}</td><td><b class="good">${esc(pln(x.net))}</b></td><td>${esc(pln(x.tax))}</td><td>${esc(pln(x.ins))}</td><td>${esc(pln(x.ppk))}</td><td>${esc(pln(x.deduct))}</td></tr>`).join("")}
           </tbody><tfoot><tr><td>${esc(T("Year"))}</td><td>${esc(pln(sum("gross")))}</td><td><b class="good">${esc(pln(sum("net")))}</b></td><td>${esc(pln(sum("tax")))}</td><td>${esc(pln(sum("ins")))}</td><td>${esc(pln(sum("ppk")))}</td><td>${esc(pln(sum("deduct")))}</td></tr></tfoot></table></div>
           ${(() => { const k = M.findIndex(x => x.high); if (k < 0) return ""; const a = M[k + 1] && !M[k + 1].bonus ? M[k + 1] : M[k]; return `<p class="tp-warn">${esc(T("From {0} your income since January is above {1}, so the tax goes up from 12% to 32% on the rest of the year. Your net falls from about {2} to about {3} a month.", mn(M[k].m), pln(TAX.pit.threshold), pln(M[0].net), pln(a.net)))}</p>`; })()}
+          ${M.some(x => x.sick) ? `<p class="hint">🤒 ${esc(T("Sick leave: you get {0}% of your pay after social insurance (per day = that amount / 30). Your employer pays the first {1} days of the year, ZUS pays from day {2}. If you entered the net pay yourself, that number is used for the month.", TAX.sick.rate * 100, TAX.sick.employerDays, TAX.sick.employerDays + 1))}</p>` : ""}
           <div class="tp-exp"><button class="btn main" data-mon-csv>⬇ ${esc(T("Export to Excel (CSV)"))}</button><button class="btn second" data-mon-print>🖨 ${esc(T("Print / save as PDF"))}</button></div>
           <p class="hint">${esc(T("Month by month, as it would arrive on your account. Polish payroll counts your income from January onward, so the tax steps up in the month the total passes the threshold. A month with a bonus 🎁 pays more tax. Estimate only."))}</p>`); }
       { const M = mm, nf = v => (Math.round(v * 100) / 100).toFixed(2).replace(".", ","), loc = document.documentElement.lang || "en", mn = i => new Date(2026, i, 1).toLocaleString(loc, { month: "long" });
@@ -197,13 +206,14 @@ export const Taxes = {
         <p class="hint">${esc(T("You keep {0} of your gross pay.", Math.round(A.netYear / A.grossYear * 100) + "%"))}${y.grossYear > TAX.zusYearLimit ? " " + esc(T("Pension and disability insurance stop once your gross for the year passes {0}.", pln(TAX.zusYearLimit))) : ""}${y.benefit ? " " + esc(T("Benefits are taxed like pay but you do not receive them as cash, so they only lower your net.")) : ""}</p>`);
     };
     const bindItems = () => {
-      const f = box.querySelector("#tx-add"), setMo = () => { box.querySelector(".tx-mo").hidden = f.kind.value !== "bonus"; };
-      f.kind.onchange = setMo; setMo();
+      const f = box.querySelector("#tx-add"), setMo = () => { const k = f.kind.value, sk = k === "sick"; box.querySelector(".tx-mo").hidden = !(k === "bonus" || sk); box.querySelector(".tx-sk").hidden = !sk; box.querySelector(".tx-am").hidden = sk && f.how.value === "auto"; };
+      f.kind.onchange = setMo; f.how.onchange = setMo; setMo();
       box.querySelectorAll("[data-preset]").forEach(b => b.onclick = () => { const [n, k] = b.dataset.preset.split("|"); f.name.value = T(n); f.kind.value = k; setMo(); f.amount.focus(); });
       box.querySelector("[data-add-item]").onclick = () => {
-        const amount = num(f.amount.value), name = f.name.value.trim();
-        if (!name || !(amount > 0)) { toast(T("Please enter a name and an amount bigger than 0."), "bad"); return; }
-        P.items.push({ id: uuid(), name, kind: f.kind.value, amount, month: f.kind.value === "bonus" ? +f.month.value : null }); save(); box.innerHTML = itemsHtml(); bindItems(); draw();
+        const sk = f.kind.value === "sick", manual = sk && f.how.value === "manual", days = sk ? Math.min(120, Math.round(num(f.days.value) || 0)) : 0, amount = num(f.amount.value) || 0, name = f.name.value.trim() || (sk ? T("Sick leave") : "");
+        if (sk && !(days > 0)) { toast(T("Please enter the number of sick days (1 to 120)."), "bad"); return; }
+        if (!name || (!sk || manual) && !(amount > 0)) { toast(T("Please enter a name and an amount bigger than 0."), "bad"); return; }
+        P.items.push({ id: uuid(), name, kind: f.kind.value, amount: sk && !manual ? 0 : amount, month: f.kind.value === "bonus" || sk ? +f.month.value : null, days, manual }); save(); box.innerHTML = itemsHtml(); bindItems(); draw();
       };
       box.querySelectorAll("[data-it-amount]").forEach(i => i.onchange = () => { const it = P.items.find(x => x.id === i.dataset.itAmount); if (it) { it.amount = num(i.value) || 0; save(); box.innerHTML = itemsHtml(); bindItems(); draw(); } });
       box.querySelectorAll("[data-it-del]").forEach(b => b.onclick = async () => {
