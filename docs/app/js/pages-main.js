@@ -255,9 +255,41 @@ export const Overview = {
       const close = pp.close; pp.close = (...a) => { App.refresh = orig; close(...a); };
       pp.el.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", ev => { if (ev.target.closest("button,a,input,select") && ev.target.closest("button,a,input,select") !== b) return; const r = b.dataset.go; pp.close(); if (r) App.go(r); }));
     };
-    el.querySelector('[data-action="ov-more"]')?.addEventListener("click", () => openOv(T("All details"), `<div class="ov-grid">${g.join("")}</div><div class="grid">${x.join("")}</div>`));
-    el.querySelector('[data-action="ov-sav"]')?.addEventListener("click", () => openOv(T("Your Savings"), `<div class="grid">${x.filter(c => /savings-card/.test(c)).join("")}</div>`));
-    el.querySelector('[data-action="ov-cmp"]')?.addEventListener("click", () => openOv(T("Compare Offers"), `<div class="grid">${x.filter(c => !/savings-card|next-card/.test(c)).join("")}</div>`));
+    // ---- The three ± windows: a clear summary each, with a button to the full page ----
+    const ovWin = (icon, title, sub, body, go, goLabel) => {
+      const pp = popup(`<div class="nw-hd"><span class="nw-hi">${{ bank: "🏦", pig: "🐖", check: "✅" }[icon] || "•"}</span><div><h2>${esc(title)}</h2><p class="nw-sub">${esc(sub)}</p></div><button class="nw-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
+        <div class="sc-body ow-body">${body}</div>
+        <div class="nw-ft"><button class="btn second" data-close>${esc(T("Close"))}</button>${go ? `<button class="btn main" data-ogo="${go}">${esc(goLabel)} →</button>` : ""}</div>`, { width: 680, cls: "nw-win sc-win" });
+      pp.el.querySelectorAll("[data-ogo],[data-orow]").forEach(b => b.onclick = () => { const r = b.dataset.ogo || b.dataset.orow; pp.close(); if (r) App.go(r); });
+    };
+    const big = (l, v, c = "") => `<div class="ow-big"><small>${esc(l)}</small><b class="${c}">${v}</b></div>`;
+    const tone = ok => ok ? "good" : "warn";
+    el.querySelector('[data-action="ov-cmp"]')?.addEventListener("click", () => {
+      const rk = d.Offers.map(o => ({ o, r: Calc.savings(o) })).filter(y => y.o.Amount > 0).sort((a, b) => b.r.net - a.r.net).slice(0, 5), top = rk[0]?.r.net || 1;
+      ovWin("bank", T("Compare Offers"), T("Your saved savings offers and the best rate right now."),
+        `<div class="ow-bigs">${big(T("Best Available Offer"), bestO ? esc(rate2(bestO.Rate)) + " p.a." : "–")}${big(T("Additional Annual Profit"), mv ? "+" + esc(pln(mv.gain)) : "–", "good")}</div>
+        ${bestO ? `<p class="ow-note">🏦 ${esc(T("Best rate right now: {0} – {1} ({2}).", bestO.Bank, bestO.Name || bestO.Bank, rate2(bestO.Rate)))}</p>` : ""}
+        <h4>${esc(T("Your saved offers"))}</h4>
+        ${rk.length ? rk.map(y => `<div class="ow-row"><span class="ow-t"><b>${esc(y.o.Name)}</b><i style="width:${Math.max(6, Math.round(y.r.net / top * 100))}%"></i></span><span>${esc(rate2(y.r.effective))}</span><b class="good">${esc(pln(y.r.net))}</b></div>`).join("") : `<p class="hint mc-empty">${esc(T("No offers saved yet. Add them in the Compare offers tab, or with the Compare button in Optimize my finances."))}</p>`}`, "savings", T("Open Compare Offers"));
+    });
+    el.querySelector('[data-action="ov-sav"]')?.addEventListener("click", () => {
+      const tot = hold.reduce((a, h) => a + h.value, 0) || 1;
+      ovWin("pig", T("Your Savings"), T("Where your savings are and how they are growing."),
+        `<div class="ow-bigs">${big(T("Total Savings"), esc(pln(p.total)))}${big(T("Growth (YTD)"), svCh === null ? "–" : esc((svCh >= 0 ? "+" : "−") + Math.abs(Math.round(svCh * 10) / 10).toString().replace(".", ",") + "%"), "good")}</div>
+        <div class="ow-bigs">${big(T("Safe savings"), esc(pln(p.safe)))}${big(T("Higher-risk savings"), esc(pln(p.risky)))}</div>
+        <h4>${esc(T("Accounts & Holdings"))}</h4>
+        ${hold.length ? hold.map(h => `<div class="ow-row"><span class="ow-t"><b>${esc(h.label)}</b><i style="width:${Math.max(4, Math.round(h.value / tot * 100))}%"></i></span><span>${Math.round(h.value / tot * 100)}%</span><b>${esc(pln(h.value))}</b></div>`).join("") : `<p class="hint mc-empty">${esc(T("No savings added yet."))}</p>`}`, "portfolio", T("Open Savings"));
+    });
+    el.querySelector('[data-action="ov-more"]')?.addEventListener("click", () => {
+      const rows = [
+        [T("Emergency Fund"), target > 0 ? Math.round(Math.min(1, emF) * 100) + "%" : "–", target > 0 && emF >= 1, target > 0 ? (emF >= 1 ? T("Your safe money covers the whole target.") : T("Your safe money covers {0}% of the target.", Math.round(emF * 100))) : T("Set your emergency fund target first."), "emergency"],
+        [T("Savings Rate"), both ? savingsRateText(left, income) : "–", both && svRate >= 0.2, T("Saving 20% or more of your income is a strong habit."), "budget"],
+        [T("Debt Health"), debt <= 0 ? T("Good") : income > 0 && debt / (income * 12) < .5 ? T("Good") : T("Watch"), debt <= 0 || (income > 0 && debt / (income * 12) < .5), debt <= 0 ? T("You have no debt.") : T("Your debt is {0} – under half a year's income is healthy.", pln(debt)), "loans"],
+        [T("Investment Risk"), risk, riskPct < .3, T("{0}% of your savings is in higher-risk places.", Math.round(riskPct * 100)), "portfolio"]];
+      ovWin("check", T("Financial Status"), T("How the four things behind your Wealth Score look."),
+        `<div class="ow-score"><div class="ow-ring" style="--p:${wealth}"><b>${wealth}</b><small>/100</small></div><div><b>${esc(wl)}</b><p>${esc(T("Your Wealth Score mixes emergency fund, savings rate and debt."))}</p></div></div>
+        ${rows.map(r => `<button type="button" class="ow-st ${tone(r[2])}" data-orow="${r[4]}"><span><b>${esc(r[0])}</b><small>${esc(r[3])}</small></span><em>${esc(String(r[1]))}</em><i>→</i></button>`).join("")}`, "", "");
+    });
     el.querySelectorAll("[data-savview]").forEach(b => b.onclick = ev => {
       ev.stopPropagation(); d.Settings.SavingsView = b.dataset.savview || null; save(); App.refresh();
     });
