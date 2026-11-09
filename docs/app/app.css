@@ -2346,3 +2346,12 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .tp .tx-add{border:0;padding:0;margin-top:8px}.tp .tx-add .tp-fold{padding:10px 0 0}.tp .tx-it{padding:8px 10px}.tp .tx-n small{font-size:12px}.tp .tx-a input{width:76px}
 .tp-logo{font-size:30px}
 .tp-two-in{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tp-flag{border-radius:3px;box-shadow:0 0 0 1px rgba(255,255,255,.25);vertical-align:-3px}
+
+/* Taxes & Payroll: monthly payment overview */
+.tp-mt-wrap{overflow-x:auto}
+.tp-mt{width:100%;border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums}
+.tp-mt th,.tp-mt td{padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line,rgba(255,255,255,.08))}
+.tp-mt th:first-child,.tp-mt td:first-child{text-align:left}
+.tp-mt th{font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;opacity:.7;font-weight:600}
+.tp-mt tr.bon td{background:rgba(16,185,129,.1)}
+.tp-mt tfoot td{font-weight:700;border-top:2px solid rgba(16,185,129,.5);border-bottom:0}

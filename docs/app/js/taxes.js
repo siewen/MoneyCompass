@@ -14,12 +14,13 @@ const r2 = x => Math.round(x * 100) / 100;
 export function calcYear(gross, o = {}) {
   const z = TAX.zus, kup = (o.raisedCosts ? TAX.kup.raised : TAX.kup.standard), ben = o.benefit || 0, bonuses = o.bonuses || [], bonus = bonuses.reduce((a, b) => a + b.amount, 0);
   gross += o.allowance || 0;
-  let cum = 0, pen = 0, dis = 0, sick = 0, health = 0, base = 0, first = null, ppkEmp = 0, ppkEr = 0;
+  let cum = 0, pen = 0, dis = 0, sick = 0, health = 0, base = 0, first = null, ppkEmp = 0, ppkEr = 0; const months = [];
   for (let m = 0; m < 12; m++) {
     const g = gross + ben + bonuses.filter(b => b.month === m).reduce((a, b) => a + b.amount, 0), pb = Math.min(g, Math.max(0, TAX.zusYearLimit - cum)); cum += g;
     const p = pb * z.pension, d = pb * z.disability, s = g * z.sickness, soc = p + d + s, h = (g - soc) * TAX.health;
     const pe = o.ppk ? g * TAX.ppk.employee : 0, pr = o.ppk ? g * TAX.ppk.employer : 0;
     pen += p; dis += d; sick += s; health += h; ppkEmp += pe; ppkEr += pr; base += Math.max(0, g - soc - kup + pr);
+    months.push({ m, gross: g - ben, ins: p + d + s + h, ppk: pe, bonus: bonuses.filter(b => b.month === m).reduce((a, b) => a + b.amount, 0) });
     if (!first) first = { pension: r2(p), disability: r2(d), sickness: r2(s), health: r2(h), ppk: r2(pe), base: Math.max(0, g - soc - kup + pr) };
   }
   const B = Math.round(base), pit = TAX.pit, red = o.pit2 === false ? 0 : pit.taxFree * pit.low;
@@ -30,9 +31,11 @@ export function calcYear(gross, o = {}) {
   const cashYear = netYear;
   // a normal month (without the yearly bonus): tax from the same year without the bonus
   const t0 = bonus ? calcYear(gross - (o.allowance || 0), { ...o, bonuses: [] }).tax : tax;
+  { const extra = tax - t0, bs = months.reduce((a, x) => a + x.bonus, 0);
+    for (const x of months) { x.tax = t0 / 12 + (bs > 0 ? extra * x.bonus / bs : 0); x.deduct = o.deduct || 0; x.net = x.gross - x.ins - x.ppk - x.tax - x.deduct; } }
   first.tax = r2(t0 / 12); first.deduct = r2(o.deduct || 0); first.base = Math.round(first.base);
   first.net = r2(gross - first.pension - first.disability - first.sickness - first.health - first.ppk - first.tax - first.deduct);
-  return { gross, grossYear, social: r2(social), health: r2(health), tax: r2(tax), ppk: r2(ppkEmp), deductYear: r2(deductYear), netYear: r2(cashYear), netMonth: r2(cashYear / 12), base: B, taxable, first, benefit: ben, bonus,
+  return { months, gross, grossYear, social: r2(social), health: r2(health), tax: r2(tax), ppk: r2(ppkEmp), deductYear: r2(deductYear), netYear: r2(cashYear), netMonth: r2(cashYear / 12), base: B, taxable, first, benefit: ben, bonus,
     over: Math.max(0, taxable - pit.threshold), room: Math.max(0, pit.threshold - taxable), effective: grossYear > 0 ? (social + health + tax) / grossYear : 0 };
 }
 /** Find the gross pay that gives the wanted net pay per month (bisection). */
@@ -114,6 +117,7 @@ export const Taxes = {
           <div class="nw-card ov-card tp-card" id="tx-sum"></div>
           <div class="tp-two"><div class="nw-card ov-card tp-card" id="tx-brk"></div><div class="nw-card ov-card tp-card" id="tx-ins"></div></div></div>
       </div>
+      <div class="nw-card ov-card tp-card" id="tx-mon" style="margin-top:14px"></div>
       <div class="tp-two tp-bot"><div class="nw-card ov-card tp-card" id="tx-ann"></div>
         <div class="nw-card ov-card tp-card tp-src" id="tx-sources"><div class="tp-srch"><span class="tp-info">i</span><h3>${esc(T("Official Sources"))}</h3></div>
           <div class="tx-chips">${SRC_CHIPS.map(([n, u]) => `<a class="chip" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(T(n))} ↗</a>`).join("")}</div>
@@ -132,7 +136,7 @@ export const Taxes = {
       const v = num(P.amount) || 0, o = planOpts(P);
       const other = P.mode === "gross" ? form.netamount : form.amount;
       const head = (ic, t) => `<div class="tp-h"><span class="tp-hi">${ic}</span><h3>${esc(t)}</h3></div>`;
-      if (!(v > 0)) { other.value = ""; for (const [id, ic, t] of [["tx-sum", "🧮", "Payroll Summary"], ["tx-brk", "🥧", "Salary Breakdown"], ["tx-ins", "💡", "MoneyCompass Optimization Insights"], ["tx-ann", "📈", "Annual Projection"]]) set(id, head(ic, T(t)) + `<p class="hint mc-empty">${esc(empty)}</p>`); return; }
+      if (!(v > 0)) { other.value = ""; for (const [id, ic, t] of [["tx-sum", "🧮", "Payroll Summary"], ["tx-brk", "🥧", "Salary Breakdown"], ["tx-ins", "💡", "MoneyCompass Optimization Insights"], ["tx-ann", "📈", "Annual Projection"], ["tx-mon", "📅", "Monthly Payment Overview"]]) set(id, head(ic, T(t)) + `<p class="hint mc-empty">${esc(empty)}</p>`); return; }
       const g = P.mode === "gross" ? v : grossFromNet(v, o), y = calcYear(g, o), f = y.first, p = TAX.pit;
       if (document.activeElement !== other) other.value = plain(P.mode === "gross" ? f.net : g);
       const mo = f.pension + f.disability + f.sickness, deductions = y.social + y.health + y.tax, eff = y.grossYear > 0 ? deductions / y.grossYear * 100 : 0;
@@ -155,6 +159,11 @@ export const Taxes = {
       el.querySelector("[data-ins-details]").onclick = () => popup(`<div class="nw-hd"><span class="nw-hi">💡</span><div><h2>${esc(T("Optimization Insights"))}</h2><p class="nw-sub">${esc(T("Ideas to keep more of your pay. Check them with your payroll department or a tax adviser."))}</p></div><button class="nw-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
         <div class="sc-body" style="display:grid;gap:10px">${ins.map((x, i) => `<div class="nw-card" style="padding:14px"><b>${i + 1}. ${esc(x.t)}</b><p style="margin:6px 0">${esc(x.d)}</p>${x.v > 0 ? `<b class="good">+${esc(pln(x.v))} / ${esc(T("per year"))}</b>` : ""}</div>`).join("")}</div>
         <div class="nw-ft"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`, { width: 600, cls: "nw-win sc-win" });
+      { const loc = document.documentElement.lang || "en", mn = i => new Date(2026, i, 1).toLocaleString(loc, { month: "short" }), M = y.months, sum = k => M.reduce((a, x) => a + x[k], 0);
+        set("tx-mon", head("📅", T("Monthly Payment Overview")) + `<div class="tp-mt-wrap"><table class="tp-mt"><thead><tr><th>${esc(T("Month"))}</th><th>${esc(T("Gross (brutto)"))}</th><th>${esc(T("Net (netto)"))}</th><th>${esc(T("Tax paid"))}</th><th>${esc(T("Insurance (ZUS + health)"))}</th><th>${esc(T("PPK"))}</th><th>${esc(T("Deductions"))}</th></tr></thead><tbody>
+          ${M.map(x => `<tr${x.bonus ? ' class="bon"' : ""}><td>${esc(mn(x.m))}${x.bonus ? " 🎁" : ""}</td><td>${esc(pln(x.gross))}</td><td><b class="good">${esc(pln(x.net))}</b></td><td>${esc(pln(x.tax))}</td><td>${esc(pln(x.ins))}</td><td>${esc(pln(x.ppk))}</td><td>${esc(pln(x.deduct))}</td></tr>`).join("")}
+          </tbody><tfoot><tr><td>${esc(T("Year"))}</td><td>${esc(pln(sum("gross")))}</td><td><b class="good">${esc(pln(sum("net")))}</b></td><td>${esc(pln(sum("tax")))}</td><td>${esc(pln(sum("ins")))}</td><td>${esc(pln(sum("ppk")))}</td><td>${esc(pln(sum("deduct")))}</td></tr></tfoot></table></div>
+          <p class="hint">${esc(T("Month by month, as it would arrive on your account. A month with a bonus 🎁 pays more tax. Estimate only."))}</p>`); }
       set("tx-ann", head("📈", T("Annual Projection")) + `<div class="tp-ann"><div><small>${esc(T("Annual Gross"))}</small><b>${esc(pln(y.grossYear))}</b></div><div><small>${esc(T("Annual Net"))}</small><b class="good">${esc(pln(y.netYear))}</b></div><div><small>${esc(T("Annual Taxes"))}</small><b>${esc(pln(y.tax))}</b></div></div>
         <p class="hint">${esc(T("You keep {0} of your gross pay.", Math.round(y.netYear / y.grossYear * 100) + "%"))}${y.grossYear > TAX.zusYearLimit ? " " + esc(T("Pension and disability insurance stop once your gross for the year passes {0}.", pln(TAX.zusYearLimit))) : ""}${y.benefit ? " " + esc(T("Benefits are taxed like pay but you do not receive them as cash, so they only lower your net.")) : ""}</p>`);
     };
