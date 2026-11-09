@@ -747,7 +747,7 @@ export const Expenses = {
       setTimeout(() => f.amount.focus(), 80);
     };
     el.querySelector('[data-action="ex-add"]').onclick = () => openAdd(null, el.querySelector('[name="qdate"]')?.value);
-    el.querySelectorAll("[data-quick]").forEach(b => b.onclick = () => openAdd(b.dataset.quick, el.querySelector('[name="qdate"]')?.value));
+    el.querySelectorAll("[data-quick]").forEach(b => b.onclick = () => { flt.cat = b.dataset.quick; App.refresh(); openWin(T("Outflow history"), "table", "hist", 1000, () => { flt.cat = ""; App.refresh(); }); });
     el.querySelectorAll('[data-action="ex-optimize"]').forEach(b => b.addEventListener("click", () => App.openOptimize()));
     el.querySelector('[data-action="sort-other"]')?.addEventListener("click", () => sortOther(() => App.refresh()));
     const bindHist = root => {
@@ -768,11 +768,11 @@ export const Expenses = {
       const clr = root.querySelector('[data-action="f-clear"]'); if (clr) clr.onclick = () => { Object.assign(flt, { cat: "", text: "", ess: "", rep: false, min: "", max: "", days: "" }); App.refresh(); };
     }
     };
-    const openWin = (title, icon, key, wide) => {
+    const openWin = (title, icon, key, wide, onClose) => {
       const pp = popup("", { width: wide, cls: "nw-win pm-win" }), orig = App.refresh;
       const draw = () => { pp.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC[icon], 24)}</span><h3>${esc(title)}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="grid bp-flat ex-pop">${lastEx[key]}</div>`; bindHist(pp.el); bindExpenseRows(pp.el); bindBin(pp.el); };
       App.refresh = (...a) => { orig(...a); if (!pp.closed) draw(); };
-      const close = pp.close; pp.close = (...a) => { App.refresh = orig; close(...a); };
+      const close = pp.close; pp.close = (...a) => { App.refresh = orig; close(...a); onClose?.(); };
       draw();
     };
     el.querySelector('[data-action="ex-hist"]')?.addEventListener("click", () => openWin(T("Outflow history"), "table", "hist", 1000));
