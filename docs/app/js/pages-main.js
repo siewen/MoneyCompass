@@ -202,7 +202,7 @@ export const Overview = {
     const wealth = Math.round(40 * Math.min(1, emF) + 30 * Math.min(1, Math.max(0, svRate) / 0.2) + 30 * (debt <= 0 ? 1 : income > 0 ? Math.max(0, 1 - debt / (income * 12)) : 0));
     const wl = wealth >= 80 ? T("Excellent") : wealth >= 60 ? T("Good") : wealth >= 40 ? T("Fair") : T("Needs attention");
     const mv0 = moves(d)[0];
-    const assessBand = assessmentHtml(assess({ has: income > 0 || spending > 0 || p.total > 0 || debt > 0, income, spending, left, both, svRate, emF, target, safe: p.safe, total: p.total, covered, debt,
+    const assessBand = assessmentHtml(assess({ has: income > 0 || spending > 0 || p.total > 0 || debt > 0, income, spending, left, both, svRate, emF, target, safe: p.safe, total: p.total, covered, debt, essential: essentialMonth, months: avg.monthsUsed,
       loans: loansAll.map(l => ({ name: l.Name, rate: +l.RatePercent || 0, pay: +l.MonthlyPayment || 0, rem: l.Remaining })), wealth, mv: mv0 ? { gain: mv0.gain, bank: mv0.o.Bank, moved: mv0.moved } : null }), wealth, wl);
     const kp = (l, v, ic2, cls, dl) => { const g = goAttr(l); return `<div class="kpi static${g ? " clk" : ""}"${g}><span class="kpi-ic ${cls}">${si(IC[ic2])}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b>${v}</b>${dl || ""}</span></div>`; };
     const head = `<div class="pg-title"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T(hello))}${first ? ", " + esc(first) : ""}!</h2><p>${esc(T("Overview for: {0}", per.label))}${both ? " · " + esc(T("You keep {0} of your income. Wealth score: {1}/100.", savingsRateText(left, income), wealth)) : ""}</p></div>
