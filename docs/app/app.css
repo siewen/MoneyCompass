@@ -2269,3 +2269,18 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .sv2-bar{height:12px;border-radius:99px;background:#eda100;overflow:hidden}.sv2-bar i{display:block;height:100%;background:#34d399;border-radius:99px}
 .sv2-leg{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px}.sv2-leg u{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;background:#34d399}.sv2-leg u.o{background:#eda100}
 .sv2-row .ow-t b u{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px}
+
+/* Taxes module */
+.tx-grid{display:grid;grid-template-columns:minmax(280px,1fr) 1.2fr;gap:16px;align-items:start}
+@media(max-width:860px){.tx-grid{grid-template-columns:1fr}}
+.tx-mode{display:flex;gap:8px;margin:8px 0 12px}
+.tx-big{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
+.tx-big small{display:block;opacity:.7}.tx-big b{font-size:28px}
+.tx-r{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border,rgba(255,255,255,.08))}
+.tx-r.tx-net{font-weight:700;border-bottom:0;color:#34d399}
+.tx-bar{position:relative;height:12px;border-radius:99px;background:rgba(237,161,0,.35);overflow:hidden;margin-top:8px}.tx-bar i{display:block;height:100%;background:#34d399;border-radius:99px}
+.tx-bl{display:flex;justify-content:space-between;font-size:12px;opacity:.75;margin-top:4px}
+.tx-hint{margin:8px 0 2px;font-weight:600}.tx-hint.warn{color:#fbbf24}
+.tx-disc{margin-top:12px}
+.tx-page h4{margin:14px 0 6px}
+.tx-note{display:block;margin-top:4px;opacity:.8;font-size:12px}.tx-note a{color:#34d399}

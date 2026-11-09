@@ -18,11 +18,12 @@ import { hasNews, openNews } from "./news.js";
 import { Overview, Income, Expenses, Emergency, Portfolio, bindBin, setSearch, manageCategories } from "./pages-main.js";
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
 import { Calendar } from "./calendar.js";
+import { Taxes } from "./taxes.js";
 import { promoReminder } from "./advice.js";
 import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile, openLanguage, setLanguage } from "./dialogs.js";
 
-const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", investments: "#CA8A04", reports: "#0E7490", savings: "#7E22CE" };
-const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget, calendar: Calendar };
+const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", taxes: "#0F766E", investments: "#CA8A04", reports: "#0E7490", savings: "#7E22CE" };
+const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget, calendar: Calendar, taxes: Taxes };
 let current = "overview";
 
 function tabs() {
@@ -58,6 +59,7 @@ const TAB_ICON = {
   goals: I('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.500"/>'),
   loans: I('<path d="M3 9l9-5 9 5z"/><path d="M5.500 9v9M10 9v9M14 9v9M18.500 9v9"/><path d="M3 21h18"/>'),
   budget: I('<rect x="5" y="4" width="14" height="17" rx="2.500"/><path d="M9 2.500h6v3H9zM9 11h6M9 15h6"/>'),
+  taxes: I('<circle cx="8" cy="8" r="2.500"/><circle cx="16" cy="16" r="2.500"/><path d="M18 5L6 19"/>'),
   calendar: I('<rect x="3" y="5" width="18" height="16" rx="2.500"/><path d="M3 10h18M8 3v4M16 3v4M8 14h2M12 14h2M8 17.500h2"/>'),
   investments: I('<path d="M3 17l5-5 4 3 8-8"/><path d="M15 7h5v5"/><path d="M3 21h18"/>'),
   savings: I('<path d="M12 4v16M7 20h10M5 7h14"/><path d="M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z"/>'),

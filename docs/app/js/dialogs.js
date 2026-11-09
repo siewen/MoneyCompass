@@ -202,7 +202,7 @@ export function openOptions() {
   const secOk = pinOn, modsOn = MODULES.filter(m => s.Modules.includes(m.code)).length;
   const hd = (i, t, tip = "") => `<div class="st-h">${ico(i)}<h3>${esc(t)}</h3></div>`;
   const rowI = (i, label, val, good = true) => `<div class="st-row">${ico(i)}<span class="st-l">${esc(label)}</span><span class="st-v ${good ? "good" : ""}">${good ? ok : ""}${esc(val)}</span></div>`;
-  const modI = { loans: "bank", budget: "pie", calendar: "cal" };
+  const modI = { loans: "bank", budget: "pie", calendar: "cal", taxes: "coins" };
   const tabs = App.tabList();
   const p = popup(`<div class="nw-hd"><span class="nw-hi">${ico("gear")}</span><h2>${esc(T("Settings & Preferences"))}</h2><button class="nw-x" data-close aria-label="Close">✕</button></div>
     <div class="nw-g4 nw-sum">${tl("globe", T("Language"), (LANGS.find(x => x[0] === lang()) || [0, lang()])[1])}${tl("coins", T("Currency"), s.Currency || "PLN")}${tl("shield", T("Security"), pinOn ? T("Protected") : T("No PIN"))}${tl("cloud", T("Backup"), bkOn ? T("Enabled") : T("Off"))}</div>

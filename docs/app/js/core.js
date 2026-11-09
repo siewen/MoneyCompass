@@ -320,6 +320,7 @@ export const MODULES = [
   { code: "loans", name: "Loans & debts", description: "Credits and loans: what is left to pay, monthly payments and when you are debt-free." },
   { code: "budget", name: "Budget plan", description: "Monthly limits per expense category and your savings goals: how much to set aside each month." },
   { code: "calendar", name: "Calendar", description: "Everything that comes back every month – salary, bills, subscriptions, savings – in a calendar, with a preview of the next 1 to 12 months." },
+  { code: "taxes", name: "Taxes", description: "A rough estimate of gross and net pay in Poland: insurance, income tax and the tax bracket you are in. Rates are kept in one file and updated each year." },
   // Investments module: moved out (kept in modules-archive/investments for a separate app).
 ];
 /** What is saved for a goal: the balance of its linked savings account, or the amount typed in. */
