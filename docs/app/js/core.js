@@ -169,14 +169,14 @@ export function initials(name) {
 
 // ---------------------------------------------------------------- translations
 
-export const LANGS = [["en", "English"], ["de", "Deutsch"], ["fr", "Français"], ["pl", "Polski"]];
+export const LANGS = [["en", "English"], ["pl", "Polski"]];
 export function lang() {
   const s = State.data.Settings;
   if (!LANGS.some(l => l[0] === s.Language)) {
     let pick = "";
     try { pick = store.get("mc-lang") || ""; } catch { /* none */ }
     if (!LANGS.some(l => l[0] === pick)) pick = (navigator.language || "en").slice(0, 2).toLowerCase();
-    s.Language = LANGS.some(l => l[0] === pick) ? pick : "pl";   // made for Poland: Polish unless the browser speaks English, German or French
+    s.Language = LANGS.some(l => l[0] === pick) ? pick : "pl";   // made for Poland: Polish unless the browser speaks English
     save();
   }
   return s.Language;
@@ -204,12 +204,10 @@ export const fromPln = v => { const r = plnRate(mainCur()); return r > 0 ? v / r
 export function monthsCount(n) {
   switch (lang()) {
     case "pl": return n === 1 ? "1 miesiąc" : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? `${n} miesiące` : `${n} miesięcy`;
-    case "de": return n === 1 ? "1 Monat" : `${n} Monate`;
-    case "fr": return `${n} mois`;
     default: return n === 1 ? "1 month" : `${n} months`;
   }
 }
-const locales = { en: "en-GB", de: "de-DE", fr: "fr-FR", pl: "pl-PL" };
+const locales = { en: "en-GB", pl: "pl-PL" };
 export const locale = () => locales[lang()];
 export const monthName = d => { const s = parseDate(d).toLocaleDateString(locale(), { month: "long", year: "numeric" }); return s.charAt(0).toUpperCase() + s.slice(1); };
 export const monthShort = d => parseDate(d).toLocaleDateString(locale(), { month: "short" }).replace(".", "");

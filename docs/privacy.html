@@ -61,63 +61,11 @@
   <h2>Kontakt</h2>
   <p class="contact"></p>
 </article>
-
-<article lang="de" id="de">
-  <h1>Datenschutzerklärung</h1>
-  <p class="date">Zuletzt aktualisiert: 31. Oktober 2026</p>
-  <h2>Kurz gesagt</h2>
-  <p>MoneyCompass sammelt, sendet und verkauft keine personenbezogenen Daten. Alles, was Sie eingeben, bleibt auf Ihrem eigenen Computer.</p>
-  <h2>Was gespeichert wird, und wo</h2>
-  <p>Ihre Einnahmen, Ausgaben, Ersparnisse, Profile, Ihr Profilbild, Berichte und Lizenzschlüssel werden nur im MoneyCompass-Ordner auf Ihrem Computer gespeichert. Es gibt kein Konto, keine Anmeldung und keine Cloud. Deinstallation oder Update löschen diese Daten nicht; Sie können sie selbst in der App (Daten löschen) oder in diesem Ordner löschen.</p>
-  <h2>Im Browser</h2>
-  <p>Die Browserversion (siewen.github.io/MoneyCompass/app) speichert Ihre Einträge nur in Ihrem Browser auf Ihrem Gerät (lokaler Speicher). Sie werden nie an einen Server gesendet. Browserdaten löschen entfernt sie – speichern Sie Ihre Profildatei als Sicherung.</p>
-  <h2>Was die App herunterlädt</h2>
-  <ul>
-    <li>Öffentliche Wechselkurse und Zinssätze der Polnischen Nationalbank (NBP).</li>
-    <li>Öffentliche Zinsen für Staatsanleihen und Bankangebote für Sparkonten und Festgeld.</li>
-    <li>Informationen zur neuesten Version von GitHub und das Update selbst, wenn Sie auf Aktualisieren klicken.</li>
-  </ul>
-  <p>Diese Anfragen enthalten keine personenbezogenen Daten. Wie bei jeder Internetanfrage sieht der Server Ihre IP-Adresse.</p>
-  <h2>Import von Kontoauszügen</h2>
-  <p>Eine importierte CSV-Datei wird nur auf Ihrem Computer gelesen. Sie wird nie hochgeladen.</p>
-  <h2>Lizenz</h2>
-  <p>Wenn Sie Pro kaufen, verwenden wir Ihren Namen und Ihre E-Mail-Adresse nur, um Ihren Lizenzschlüssel zu erstellen und Ihnen zu senden. Der Schlüssel enthält Name, E-Mail-Adresse und Gültigkeitsdatum; er wird auf Ihrem Computer ohne Serververbindung geprüft.</p>
-  <h2>Diese Website</h2>
-  <p>Diese Website wird von GitHub Pages gehostet. Sie verwendet keine Cookies und kein Tracking. Sie merkt sich nur die gewählte Sprache in Ihrem Browser. GitHub kann technische Daten wie IP-Adressen protokollieren; siehe die Datenschutzerklärung von GitHub.</p>
-  <h2>Kontakt</h2>
-  <p class="contact"></p>
-</article>
-
-<article lang="fr" id="fr">
-  <h1>Politique de confidentialité</h1>
-  <p class="date">Dernière mise à jour : 31 octobre 2026</p>
-  <h2>En bref</h2>
-  <p>MoneyCompass ne collecte, n'envoie et ne vend aucune donnée personnelle. Tout ce que vous saisissez reste sur votre ordinateur.</p>
-  <h2>Ce qui est enregistré, et où</h2>
-  <p>Vos revenus, dépenses, épargne, profils, photo de profil, rapports et clé de licence sont enregistrés uniquement dans le dossier MoneyCompass de votre ordinateur. Pas de compte, pas de connexion, pas de cloud. La désinstallation ou la mise à jour ne suppriment pas ces données ; vous pouvez les supprimer vous-même dans l'application (Supprimer les données) ou dans ce dossier.</p>
-  <h2>Dans le navigateur</h2>
-  <p>La version navigateur (siewen.github.io/MoneyCompass/app) enregistre vos saisies uniquement dans votre navigateur sur votre appareil (stockage local). Elles ne sont jamais envoyées à un serveur. Effacer les données du navigateur les supprime – enregistrez votre fichier de profil comme sauvegarde.</p>
-  <h2>Ce que l'application télécharge</h2>
-  <ul>
-    <li>Les cours de change et taux d'intérêt publics de la Banque nationale de Pologne (NBP).</li>
-    <li>Les taux publics des obligations d'État et les offres bancaires pour comptes d'épargne et dépôts.</li>
-    <li>Les informations sur la dernière version depuis GitHub, et la mise à jour elle-même quand vous cliquez sur Mettre à jour.</li>
-  </ul>
-  <p>Ces requêtes ne contiennent aucune donnée personnelle. Comme pour toute requête Internet, le serveur voit votre adresse IP.</p>
-  <h2>Import de relevés bancaires</h2>
-  <p>Un fichier CSV importé est lu uniquement sur votre ordinateur. Il n'est jamais envoyé.</p>
-  <h2>Licence</h2>
-  <p>Lorsque vous achetez Pro, nous utilisons votre nom et votre adresse e-mail uniquement pour créer votre clé de licence et vous l'envoyer. La clé contient le nom, l'adresse e-mail et la date de validité ; elle est vérifiée sur votre ordinateur sans contacter de serveur.</p>
-  <h2>Ce site</h2>
-  <p>Ce site est hébergé par GitHub Pages. Il n'utilise ni cookies ni suivi. Il mémorise seulement la langue choisie dans votre navigateur. GitHub peut enregistrer des données techniques comme les adresses IP ; voir la déclaration de confidentialité de GitHub.</p>
-  <h2>Contact</h2>
-  <p class="contact"></p>
-</article>
 </main>
 
 <script>
 const CONTACT = ""; // same address as on index.html
-const SOON = { en: "Contact address coming soon.", pl: "Adres kontaktowy wkrótce.", de: "Kontaktadresse folgt.", fr: "Adresse de contact bientôt." };
+const SOON = { en: "Contact address coming soon.", pl: "Adres kontaktowy wkrótce." };
 function show() {
   let lang = location.hash.slice(1);
   if (!SOON[lang]) { try { lang = localStorage.getItem("mc-lang") || ""; } catch (e) {} }

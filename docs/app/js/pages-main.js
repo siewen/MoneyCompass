@@ -7,7 +7,7 @@ import {
   addCategory, removeCategory, updateCategory, ICON_CHOICES, OTHER, license, moduleOn, FREQUENCIES, ONE_TIME, RECEIVED, LOAN_CATEGORY, netFromGross, loanPlan, currentRate, duePromos, freqLabel, customFrequency, parseCustom, repeatingExpenses, setReceivedRepeat, receivedRepeatOn, setRepeat, seriesKey, toBin, restoreFromBin, binLabel,
   matchKey, lang, learnCategory, similarExpenses, setCategory, goalSaved, savingsRateText, mainCur, currentName } from "./core.js";
 import { pageHead, band, si, IC, ring } from "./page-head.js";
-const LOC = () => ({ en: "en-GB", de: "de-DE", fr: "fr-FR", pl: "pl-PL" })[lang()] || "en-GB";
+const LOC = () => ({ en: "en-GB", pl: "pl-PL" })[lang()] || "en-GB";
 import { emergencyDash, iconizeCards, dcard, PM } from "./dash.js";
 import { lineChart } from "./ov-charts.js";
 import { assess, assessmentHtml, setAssessSource } from "./assessment.js";

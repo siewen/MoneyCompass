@@ -412,7 +412,7 @@ export function openHelp(guide = false) {
 export async function openExport() { (await import("./export-dialog.js")).openExportDialog(); }
 
 // ---------- Language: from the 🌐 button in the top bar and from the guide ----------
-export const FLAGS = { en: "🇬🇧", de: "🇩🇪", fr: "🇫🇷", pl: "🇵🇱" };
+export const FLAGS = { en: "🇬🇧", pl: "🇵🇱" };
 export function setLanguage(code) {
   const s = State.data.Settings;
   if (s.Language === code) return;

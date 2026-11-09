@@ -4,8 +4,6 @@
   var L = {
     en: { tag: isPriv ? "Privacy" : "Legal", other: isPriv ? "Terms of use" : "Privacy policy", priv: "Privacy policy", terms: "Terms of use", home: "Back to MoneyCompass", toc: "On this page", top: "Back to top" },
     pl: { tag: isPriv ? "Prywatność" : "Prawne", other: isPriv ? "Regulamin" : "Polityka prywatności", priv: "Polityka prywatności", terms: "Regulamin", home: "Wróć do MoneyCompass", toc: "Na tej stronie", top: "Do góry" },
-    de: { tag: isPriv ? "Datenschutz" : "Rechtliches", other: isPriv ? "Nutzungsbedingungen" : "Datenschutzerklärung", priv: "Datenschutzerklärung", terms: "Nutzungsbedingungen", home: "Zurück zu MoneyCompass", toc: "Auf dieser Seite", top: "Nach oben" },
-    fr: { tag: isPriv ? "Confidentialité" : "Mentions légales", other: isPriv ? "Conditions d'utilisation" : "Politique de confidentialité", priv: "Politique de confidentialité", terms: "Conditions d'utilisation", home: "Retour à MoneyCompass", toc: "Sur cette page", top: "Haut de page" }
   };
   var otherFile = isPriv ? "terms.html" : "privacy.html";
   function build() {
@@ -17,7 +15,7 @@
     if (!hdr) { hdr = document.createElement("header"); hdr.className = "lg-top"; document.body.prepend(hdr); }
     hdr.innerHTML = '<div class="wrap top"><a class="brand" href="index.html"><img src="logo.svg?v=2" alt=""> <span>Money<b>Compass</b></span></a>' +
       '<div class="lg-links"><a href="index.html">← ' + t.home + '</a><a href="' + otherFile + "#" + lang + '">' + t.other + '</a>' +
-      '<nav class="langs">' + ["pl", "en", "de", "fr"].map(function (l) { return '<a href="#' + l + '"' + (l === lang ? ' class="on"' : "") + ">" + l.toUpperCase() + "</a>"; }).join("") + "</nav></div></div>";
+      '<nav class="langs">' + ["pl", "en"].map(function (l) { return '<a href="#' + l + '"' + (l === lang ? ' class="on"' : "") + ">" + l.toUpperCase() + "</a>"; }).join("") + "</nav></div></div>";
     if (!art.dataset.built) {
       art.dataset.built = "1";
       var h1 = art.querySelector("h1"), date = art.querySelector(".date");
