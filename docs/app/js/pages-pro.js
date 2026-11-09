@@ -210,6 +210,7 @@ export function offerDetailWindow(bankRows, A, idx) {
 
 const IKE = 28260, IKZE = 11304, IKZE_SELF = 16956, LIMITS_YEAR = 2026;
 const BOND_NAMES = { OTS: "3 months · fixed", ROR: "1 year · variable", DOR: "2 years · variable", TOS: "3 years · fixed", COI: "4 years · inflation-linked", EDO: "10 years · inflation-linked", ROS: "6 years · family bond (800+)", ROD: "12 years · family bond (800+)" };
+let optCats = [];
 const TAB_NAMES = { income: "Inflows", expenses: "Outflows", emergency: "Emergency fund", portfolio: "Savings", savings: "Compare offers" };
 
 let optTab = "plan";
@@ -226,7 +227,12 @@ export async function openOptimize() {
       const l = D().Loans.find(x => x.Id === s.dataset.loanKind); if (l) { l.Kind = s.value; save(); draw(); } }; });
     const showTab = k => { p.el.querySelectorAll("[data-optp]").forEach(x => x.hidden = x.dataset.optp !== k); p.el.querySelectorAll("[data-opttab]").forEach(x => x.classList.toggle("on", x.dataset.opttab === k)); optTab = k; };
     p.el.querySelectorAll("[data-opttab]").forEach(b => b.onclick = () => showTab(b.dataset.opttab));
-    p.el.querySelectorAll("[data-optscroll]").forEach(b => b.onclick = () => showTab("plan"));
+    p.el.querySelectorAll("[data-optcat]").forEach(b => b.onclick = () => {
+      const c = optCats.find(x => x.k === b.dataset.optcat); if (!c) return;
+      const q = popup(`<div class="nw-hd"><span class="nw-hi">${si(IC[c.icon], 22)}</span><div><h2>${esc(c.name)}</h2><p class="nw-sub">${esc(T("{0} opportunities", c.list.length))}</p></div><button class="nw-x" data-close aria-label="Close">✕</button></div>
+        <div class="sc-body" style="display:grid;gap:10px">${c.list.map((a, n) => `<div class="nw-card" style="padding:14px"><b>${esc(a.title)}</b><p style="margin:6px 0">${esc(a.text)}</p>${a.benefit > 0 ? `<b class="good">+${esc(pln(a.benefit))} / ${esc(T("per year"))}</b>` : ""}${a.route ? `<div style="margin-top:8px"><button class="sv-btn" data-go="${n}">${esc(T("Go to {0} →", T(TAB_NAMES[a.route] || "Overview")))}</button></div>` : ""}</div>`).join("")}</div>`, { width: 600, cls: "nw-win sc-win" });
+      q.el.querySelectorAll("[data-go]").forEach(g => g.onclick = () => { const a = c.list[+g.dataset.go]; q.close(); p.close(); App.go(a.route); });
+    });
     showTab(optTab);
     p.el.querySelector('[data-action="refresh-rates"]').onclick = () => Rates.refresh(true);
     const openOd = o => { const A = exampleAmount(), rows = bankRowsFor(A), i = rows.findIndex(x => x.o === o); if (i >= 0) offerDetailWindow(rows, A, i); };
@@ -266,13 +272,13 @@ function optHero(d, advice, gain, parts) {
       ${mv ? `<button class="sv-btn opt-go" data-od-top="1">${esc(T("Details"))} →</button>` : top.route ? `<button class="sv-btn opt-go" data-route="${top.route}">${esc(T("Go to {0} →", T(TAB_NAMES[top.route] || "Overview")))}</button>` : ""}</div></div>` : "";
   const cats = [["warning", T("Risks & warnings"), "warn"], ["safety", T("Safety net"), "shield"], ["money", T("Earn more"), "coins"], ["tip", T("Smart tips"), "bulb"], ["insight", T("Insights"), "bars"]]
     .map(([k, name, icon]) => ({ k, name, icon, list: advice.filter(a => a.kind === k) })).filter(c => c.list.length);
-  const catRow = cats.length ? `<div class="opt-cats">${cats.map(c => { const sum = c.list.reduce((x, a) => x + (a.benefit || 0), 0); return `<div class="nw-card opt-cat"><div class="opt-ch"><span class="opt-ki sm">${si(IC[c.icon], 22)}</span><div><b>${esc(c.name)}</b><small>${esc(T("{0} opportunities", c.list.length))}</small></div></div><b class="opt-cv">${sum > 0 ? "+" + esc(pln(sum)) : "–"}</b><small>${esc(T("per year"))}</small><button class="sv-btn ghost" data-optscroll>${esc(T("View Opportunities"))}</button></div>`; }).join("")}</div>` : "";
+  const catRow = cats.length ? `<div class="opt-cats">${cats.map(c => { const sum = c.list.reduce((x, a) => x + (a.benefit || 0), 0); return `<div class="nw-card opt-cat"><div class="opt-ch"><span class="opt-ki sm">${si(IC[c.icon], 22)}</span><div><b>${esc(c.name)}</b><small>${esc(T("{0} opportunities", c.list.length))}</small></div></div><b class="opt-cv">${sum > 0 ? "+" + esc(pln(sum)) : "–"}</b><small>${esc(T("per year"))}</small><button class="sv-btn ghost" data-optcat="${c.k}">${esc(T("View Opportunities"))}</button></div>`; }).join("")}</div>` : "";
   const ov = (icon, l, v, sub) => `<div><span class="opt-oi">${si(IC[icon], 22)}</span><span><small>${esc(l)}</small><b>${v}</b><em>${esc(sub)}</em></span></div>`;
   const quickSum = advice.filter(a => a.kind === "money").reduce((x, a) => x + (a.benefit || 0), 0), maxB = Math.max(1, gain);
   const bar = (l, v) => `<div class="opt-b"><i style="height:${Math.max(4, v / maxB * 100)}%"></i><small>${esc(l)}</small><b>${esc(pln(v))}</b></div>`;
   const low = `<div class="opt-low"><div class="nw-card opt-ov"><h3>${esc(T("Your Financial Overview"))}</h3><small>${esc(T("Key figures from your data"))}</small><div class="opt-ovr">${ov("wallet", T("Total Income"), esc(pln(inc)), T("per month"))}${ov("cart", T("Total Expenses"), esc(avg.monthsUsed ? pln(spend) : "–"), T("per month"))}${ov("pig", T("Total Savings"), esc(pln(p.total)), T("all accounts"))}${ov("bank", T("Total Debt"), esc(pln(debt)), T("{0} loan(s)", d.Loans.filter(l => l.Remaining > 0).length))}${ov("shield", T("Emergency Fund"), esc(pln(p.safe)), em.target > 0 ? T("Target: {0}", pln(em.target)) : "")}</div></div>
     <div class="nw-card opt-imp"><h3>${esc(T("Projected Impact"))}</h3><small>${esc(T("Your potential financial improvement per year"))}</small><div class="opt-bars">${bar(T("Current"), 0)}${bar(T("Earn more"), quickSum)}${bar(T("All opportunities"), gain)}</div></div></div>`;
-  parts.cats = catRow; parts.low = low;
+  parts.cats = catRow; parts.low = low; optCats = cats;
   return `<div class="opt-hero"><div class="opt-hd"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T("Financial Optimization Center"))}</h2><p>${esc(T("Discover the highest-impact actions to improve your financial future."))}</p></div></div>
     <div class="opt-kpis">${kp(T("Annual Improvement Potential"), esc(pln(gain)), T("Based on {0} opportunities", advice.length), "bars", "good")}${kp(T("Active Opportunities"), String(advice.length), T("Across all financial categories"), "bulb")}${kp(T("Quick Wins"), String(quick.length), T("Steps you can do today"), "bolt")}${kp(T("Optimization Score") + scoreInfoBtn(T("Optimization Score"), score + " / 100", hc.map(x => ({ label: x.label, state: x.state, detail: x.value + " · " + T("Goal: {0}", x.aim) })), T("The share of the checks below that are green. Each check compares your own numbers with a common rule of thumb.")), score + " / 100", score >= 80 ? T("Excellent! You're on the right track.") : T("Room to improve – see the steps below."), "gauge", "good")}</div>
     ${hero}</div>`;

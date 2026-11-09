@@ -330,14 +330,20 @@ export function openDelete() {
     ["offers", T("Saved savings offers"), d.Offers.length], ["emergency", T("Emergency fund settings"), T("monthly costs, yearly costs, months, buffer")],
     ["rates", T("Exchange rates"), ""], ["modules", T("Modules: loans, budget and goals, calendar"), d.Goals.length + d.Loans.length + d.Budgets.length + (d.Recurring || []).length + (d.Investments || []).length],
     ["categories", T("Your own expense categories"), d.Categories.length || T("none")], ["bin", T("Deleted items"), (d.Deleted || []).length]];
-  const p = popup(`<h2 class="popup-title bad">🗑 ${esc(T("Delete data"))}</h2>${hint(T("Choose exactly what to delete."))}
-    <label class="check select-all"><input type="checkbox" data-all><span><b>${esc(T("Select all"))}</b></span></label><hr>
-    ${parts.map(x => check(x[0], `${x[1]}${x[2] !== "" ? ` (${x[2]})` : ""}`, false)).join("")}
-    ${hint(T("Tip: save your profile first (click your name → Profile), so you can load it again if you change your mind."))}
-    <div class="popup-buttons"><button class="btn second" data-close>${esc(T("Cancel"))}</button><button class="btn danger" data-go>${esc(T("Delete"))}</button></div>`, { width: 560 });
+  const ICO = { incomes: "💵", expenses: "🧾", holdings: "🏦", offers: "⭐", emergency: "🛡️", rates: "💱", modules: "🧩", categories: "🏷️", bin: "🗑️" };
+  const cnt = x => (x[2] === "" || typeof x[2] !== "number" ? "" : `<span class="dl-n">${esc(String(x[2]))}</span>`);
+  const p = popup(`<div class="nw-hd"><span class="nw-hi dl-hi">🗑</span><div><h2>${esc(T("Delete data"))}</h2><p class="nw-sub">${esc(T("Choose exactly what to delete."))}</p></div><button class="nw-x" data-close aria-label="Close">✕</button></div>
+    <div class="sc-body dl-body">
+      <label class="dl-all"><input type="checkbox" data-all><span><b>${esc(T("Select all"))}</b></span><em data-cnt></em></label>
+      <div class="dl-grid">${parts.map(x => `<label class="dl-item${x[2] === 0 ? " zero" : ""}"><input type="checkbox" name="${x[0]}"><span class="dl-ic">${ICO[x[0]] || "•"}</span><span class="dl-t">${esc(x[1])}${x[2] !== "" && typeof x[2] !== "number" ? `<small class="dl-s">${esc(String(x[2]))}</small>` : ""}</span>${cnt(x)}</label>`).join("")}</div>
+      <div class="dl-tip"><span>🛡️</span><p>${esc(T("Tip: save your profile first (click your name → Profile), so you can load it again if you change your mind."))}</p></div>
+    </div>
+    <div class="nw-ft"><button class="btn second" data-close>${esc(T("Cancel"))}</button><button class="btn danger" data-go disabled>${esc(T("Delete"))}</button></div>`, { width: 640, cls: "nw-win sc-win" });
   const boxes = parts.map(x => p.el.querySelector(`input[name="${x[0]}"]`)), all = p.el.querySelector("[data-all]");
-  all.onchange = () => boxes.forEach(b => { b.checked = all.checked; });
-  boxes.forEach(b => b.onchange = () => { all.checked = boxes.every(x => x.checked); all.indeterminate = !all.checked && boxes.some(x => x.checked); });
+  const goBtn = p.el.querySelector("[data-go]"), cntEl = p.el.querySelector("[data-cnt]");
+  const upd = () => { const n = boxes.filter(x => x.checked).length; goBtn.disabled = !n; goBtn.textContent = n ? `${T("Delete")} (${n})` : T("Delete"); cntEl.textContent = n ? T("{0} selected", n) : ""; p.el.querySelectorAll(".dl-item").forEach(l => l.classList.toggle("on", l.querySelector("input").checked)); };
+  all.onchange = () => { boxes.forEach(b => { b.checked = all.checked; }); upd(); };
+  boxes.forEach(b => b.onchange = () => { all.checked = boxes.every(x => x.checked); all.indeterminate = !all.checked && boxes.some(x => x.checked); upd(); });
   p.el.querySelector("[data-go]").onclick = async () => {
     const v = values(p.el); delete v[""];
     if (!Object.values(v).some(Boolean)) { p.close(); return; }

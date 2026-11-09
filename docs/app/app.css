@@ -2126,3 +2126,21 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .sv-hv{font-size:.88rem !important}.sv-hr{min-width:44px !important}
 .sv-hn b{overflow-wrap:break-word}
 .ovr4 .ni-fh h3{white-space:normal !important}
+/* Delete data window */
+.dl-hi{background:rgba(239,68,68,.15) !important;color:#f87171 !important}
+.dl-body{display:grid;gap:12px}
+.dl-all{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);cursor:pointer}
+.dl-all em{margin-left:auto;font-style:normal;font-size:13px;color:#f87171}
+.dl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dl-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);cursor:pointer;min-height:64px}
+.dl-item:hover{border-color:rgba(248,113,113,.5)}
+.dl-item.on{background:rgba(239,68,68,.12);border-color:#ef4444}
+.dl-item.zero:not(.on){opacity:.55}
+.dl-item input,.dl-all input{accent-color:#ef4444;width:18px;height:18px;flex:none}
+.dl-ic{font-size:20px;flex:none}.dl-t{font-size:14px;line-height:1.3;flex:1}
+.dl-n{flex:none;font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;background:rgba(255,255,255,.1)}
+.dl-tip{display:flex;gap:10px;padding:12px 14px;border-radius:12px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25)}
+.dl-tip p{margin:0;font-size:13.5px;color:#b9cbc4}
+.nw-ft .btn.danger[disabled]{opacity:.45;cursor:not-allowed}
+@media(max-width:560px){.dl-grid{grid-template-columns:1fr}}
+.dl-s{display:block;font-size:11.5px;color:#8fa59d;margin-top:2px}.dl-n{white-space:nowrap}
