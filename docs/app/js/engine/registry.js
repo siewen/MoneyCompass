@@ -30,19 +30,24 @@ export function runEngine(snap, isOn = () => true) {
   return { states, primary, secondary: states.filter(s => s !== primary), byAdvisor, potential: potentialOf(states), confidence: snap.confidence };
 }
 
-/** Total yearly improvement: in each pot only the best opportunity counts, so one zloty is never claimed twice. */
+/** Total yearly improvement without double counting. An opportunity names the money it uses (`pot`, one name or a list);
+ *  the biggest ones are taken first, and one that touches money already counted is left out of the total. */
 export function potentialOf(states) {
-  const best = new Map();
-  for (const s of states) {
-    if (s.potential <= 0) continue;
-    const key = s.pot || "own:" + s.id;
-    if (!best.has(key) || best.get(key).potential < s.potential) best.set(key, s);
+  const used = new Set(), counted = [];
+  for (const s of [...states].filter(x => x.potential > 0).sort((a, b) => b.potential - a.potential)) {
+    const pots = [].concat(s.pot || ("own:" + s.id));
+    if (pots.some(p => used.has(p))) continue;
+    pots.forEach(p => used.add(p)); counted.push(s);
   }
-  return { total: [...best.values()].reduce((a, s) => a + s.potential, 0), counted: [...best.values()] };
+  return { total: counted.reduce((a, s) => a + s.potential, 0), counted };
 }
 
 /** Opportunities of all advisors, best first – the list the Optimization Center will show. */
 export const opportunities = res => res.states.filter(s => s.kind === "opportunity").sort((a, b) => b.potential - a.potential || b.confidence - a.confidence);
+/** Everything that would improve the money situation (opportunities, and problems that have a yearly gain when fixed), best first.
+ *  The order weighs the gain by how sure it is, how easy it is and how risky: a sure, easy 500 beats an uncertain, hard 800. */
+export const rankScore = s => s.potential * s.confidence * ({ easy: 1.2, medium: 1, hard: 0.8 }[s.difficulty] || 1) * ({ low: 1, medium: 0.9, high: 0.75 }[s.risk] || 1);
+export const improvements = res => res.states.filter(s => s.potential > 0 || s.kind === "opportunity").sort((a, b) => rankScore(b) - rankScore(a));
 /** Groups states by advisor team: [{ type, name, icon, route, list }]. */
 export const groupByAdvisor = states => Object.entries(states.reduce((m, s) => ((m[s.advisorType] ||= []).push(s), m), {})).map(([type, list]) => ({ type, ...ADVISORS[type], list }));
 
@@ -53,5 +58,5 @@ export function overallStatus(snap, res) {
   if ((snap.neg && snap.emF < 0.25) || snap.wealth < 30) return "critical";
   if (snap.neg || (snap.both && snap.svRate < 0.05) || snap.lowEF || snap.wealth < 55) return "warning";
   if (snap.wealth < 75 || !snap.fullEF || (snap.both && snap.svRate < 0.2)) return "stable";
-  return res.states.some(s => s.id === "better-deposit") ? "opportunity" : "healthy";
+  return res.states.some(s => s.id.startsWith("better-deposit")) ? "opportunity" : "healthy";
 }

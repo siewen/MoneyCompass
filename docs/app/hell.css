@@ -621,6 +621,8 @@
 :root[data-theme="hell"] .oa-box.oa-b-wait .oa-bi{color:#2e07a1}
 :root[data-theme="hell"] .oa-adv{background:rgba(23,38,34,0.036);border:1px solid rgba(23,38,34,0.104)}
 :root[data-theme="hell"] .oa-st:hover{background:rgba(23,38,34,0.054)}
+:root[data-theme="hell"] .ox-tabs button{border:1px solid rgba(23,38,34,0.182)}
+:root[data-theme="hell"] .ap-row{border-top:1px solid rgba(23,38,34,0.104)}
 /* Hand-written Light theme fixes (appended by make-hell.py): neutral page, no green glow, calm cards */
 :root[data-theme="hell"] body{background:#CDD3D0 !important}
 :root[data-theme="hell"] .sidebar,:root[data-theme="hell"] aside{background:#D8DEDB !important}
@@ -647,3 +649,8 @@
 :root[data-theme="hell"] .oa-adv{background:rgba(0,0,0,.03) !important;border-color:rgba(0,0,0,.09) !important}
 :root[data-theme="hell"] .oa-st:hover{background:rgba(0,0,0,.05) !important}
 :root[data-theme="hell"] .oa-pot{background:rgba(16,185,129,.1) !important}
+:root[data-theme="hell"] .ox-tabs button{border-color:rgba(0,0,0,.18) !important}
+:root[data-theme="hell"] .ox-tabs button.on{border-color:#12936A !important}
+:root[data-theme="hell"] .ox-side b{color:#0f7a58 !important}
+:root[data-theme="hell"] .ap-row{border-top-color:rgba(0,0,0,.09) !important}
+:root[data-theme="hell"] .ap-t em{color:#0f7a58 !important}

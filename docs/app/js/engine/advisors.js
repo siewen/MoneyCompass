@@ -34,21 +34,35 @@ function financial(s) {
 
 /** Financial Safety Advisor: the emergency fund. */
 function safety(s) {
-  if (!s.has || s.fullEF) return [];
+  if (!s.has) return [];
+  const extra = [];
+  if (s.target > 0 && s.efMonths > 0 && s.efMonths < 3) extra.push({ id: "ef-target-low", advisorType: "safety", kind: "risk", severity: 2, title: T("Emergency Target Too Low"),
+    text: T("Your target is only {0} months of essential costs. Most advisors suggest 3 to 6 months.", s.efMonths), confidence: 0.8, difficulty: "easy", minutes: 5,
+    doNothing: T("A job loss of a few months could use up the fund too early."), actions: [{ icon: "🛡️", title: T("Raise the target to 3 months"), desc: T("Set it in the Emergency Fund tab."), btn: T("Open Emergency Fund"), go: "emergency" }] });
+  if (s.fullEF && s.surplus > s.target * 0.5 && s.surplus > 5000) extra.push({ id: "ef-surplus", advisorType: "safety", kind: "opportunity", severity: 1, title: T("Money Above the Emergency Fund"),
+    text: T("You hold {0} more than your emergency target. Money you will not need soon can work harder.", pln(s.surplus)), confidence: s.confidence, difficulty: "easy", minutes: 20,
+    doNothing: T("Idle money loses value over time."), actions: [{ icon: "🔍", title: T("Compare offers"), desc: T("Find the best safe rate for it."), btn: T("Compare Offers"), go: "portfolio" }] });
+  if (!s.fullEF && s.target > 0 && s.left > 0) {
+    const gap = Math.max(0, s.target - s.safe), m = gap / s.left, m2 = gap / (s.left * 1.5);
+    extra.push({ id: "ef-plan", advisorType: "safety", kind: "opportunity", severity: 1, title: T("Emergency Fund Plan"),
+      text: T("Saving {0} a month, your fund is complete in about {1} months. With 50% more, in about {2}.", pln(s.left), Math.ceil(m), Math.ceil(m2)), confidence: s.confidence * 0.9, difficulty: "medium", minutes: 15,
+      doNothing: T("You stay exposed for about {0} months.", Math.ceil(m)), actions: [{ icon: "🛡️", title: T("Build your emergency fund"), desc: T("Still missing {0}.", pln(gap)), btn: T("Open Emergency Fund"), go: "emergency" }] });
+  }
+  if (s.fullEF) return extra;
   const none = s.target <= 0 || s.safe <= 0, cost = s.essential || 0;
   const btn = { icon: "🛡️", title: T("Build your emergency fund"), desc: s.target > 0 ? T("Still missing {0}.", pln(Math.max(0, s.target - s.safe))) : T("Aim for 3 to 6 months of essential costs."), btn: T("Open Emergency Fund"), go: "emergency" };
   const dn = cost > 0 ? T("An unexpected bill or a lost month of income ({0}) would go straight onto a loan or a card.", pln(cost)) : T("An unexpected bill or a lost job would go straight onto a loan or a card.");
   if (none) return [{ id: "missing-ef", advisorType: "safety", kind: "problem", severity: 4, title: T("Missing Emergency Fund"),
-    text: s.target > 0 ? T("Your emergency fund is only {0} complete.", pc(Math.min(1, s.emF || 0))) : T("You have no emergency fund yet."), confidence: s.confidence, difficulty: "hard", minutes: 60, doNothing: dn, actions: [btn] }];
+    text: s.target > 0 ? T("Your emergency fund is only {0} complete.", pc(Math.min(1, s.emF || 0))) : T("You have no emergency fund yet."), confidence: s.confidence, difficulty: "hard", minutes: 60, doNothing: dn, actions: [btn] }, ...extra];
   const low = s.emF < 0.5;
   return [{ id: low ? "low-ef" : "partial-ef", advisorType: "safety", kind: low ? "problem" : "risk", severity: s.emF < 0.25 ? 4 : low ? 3 : 2,
     title: low ? T("Low Emergency Fund") : T("Emergency Fund Incomplete"),
-    text: T("Your emergency fund covers only {0} months of essential costs.", dec(s.covered || 0)), confidence: s.confidence, minutes: 30, doNothing: dn, actions: [btn] }];
+    text: T("Your emergency fund covers only {0} months of essential costs.", dec(s.covered || 0)), confidence: s.confidence, minutes: 30, doNothing: dn, actions: [btn] }, ...extra];
 }
 
 /** Debt Advisor: loan payments and expensive debt. */
 function debt(s) {
-  if (!s.has || !s.loans.length) return [];
+  if (!s.has || (!s.loans.length && !(s.loansX || []).length)) return [];
   const out = [], d = s.dear;
   const dearBtn = d ? [{ icon: "💳", title: T("Reduce your most expensive debt"), desc: T("{0} at {1}% is the first to pay down.", d.name || T("Your loan"), dec(d.rate)), btn: T("Open Loans"), go: "loans" }] : [];
   if (s.dti > 0.35) out.push({ id: "debt-risk", advisorType: "debt", kind: "problem", severity: s.dti > 0.5 ? 5 : 4, title: T("Debt Risk"),
@@ -60,8 +74,33 @@ function debt(s) {
     const yr = d.rem * d.rate / 100;
     const gain = s.surplus > 0 ? Math.min(d.rem, s.surplus) * d.rate / 100 : Math.max(0, s.left) * 12 * d.rate / 100 / 2;   // with spare money now, or with extra payments over the year
     out.push({ id: "expensive-debt", advisorType: "debt", kind: "opportunity", severity: 3, title: T("Expensive Debt"),
-      text: T("{0} costs you {1}% interest.", d.name || T("A loan"), dec(d.rate)), annualImpact: yr, potential: gain, pot: "surplus", confidence: s.confidence * 0.8, minutes: 30,
+      text: T("{0} costs you {1}% interest.", d.name || T("A loan"), dec(d.rate)), annualImpact: yr, potential: gain, pot: ["surplus", "loan:" + (d.id || d.name)], confidence: s.confidence * 0.8, minutes: 30,
       doNothing: T("{0} keeps costing you up to {1} in interest every year.", d.name || T("It"), pln(yr)), actions: dearBtn });
+  }
+  for (const x of s.loansX || []) {
+    const id = x.id || x.name;
+    if (x.refi && x.refi.net > Math.max(1000, x.refi.costs) && x.months > 0) {
+      const yr = x.refi.diff * 12;
+      out.push({ id: "refinance-" + id, advisorType: "debt", kind: "opportunity", severity: 3, title: T("Refinance Opportunity"),
+        text: T("{0}: with {1} at {2} you could pay about {3} less per month, {4} after switching costs.", x.name || T("Your loan"), x.refi.bank, dec(x.refi.rate) + "%", pln(x.refi.diff), pln(x.refi.net)),
+        annualImpact: yr, potential: yr, pot: ["loan:" + id], confidence: s.confidence * 0.6, risk: "medium", difficulty: "hard", minutes: 240,   // your own offer depends on your credit history
+        doNothing: T("You keep paying about {0} more per year than the best offer on the market.", pln(yr)),
+        actions: [{ icon: "🔁", title: T("Compare loan offers"), desc: T("Your bank's real offer depends on your income and credit history."), btn: T("Open Loans"), go: "loans" }] });
+    }
+    if (x.extra && x.months > 12) {
+      const yr = x.extra.saved / (x.months / 12);
+      out.push({ id: "extra-payment-" + id, advisorType: "debt", kind: "opportunity", severity: 2, title: T("Pay Off Faster"),
+        text: T("{0}: paying {1} more each month saves about {2} interest and ends {3} months earlier.", x.name || T("Your loan"), pln(x.extra.more), pln(x.extra.saved), x.extra.monthsEarlier),
+        annualImpact: yr, potential: yr, pot: ["cash", "loan:" + id], confidence: s.confidence * 0.9, difficulty: "medium", minutes: 15,
+        doNothing: T("You keep paying interest for {0} months longer.", x.extra.monthsEarlier),
+        actions: [{ icon: "💳", title: T("Pay {0} more each month", pln(x.extra.more)), desc: T("Ask your bank to apply it to the capital."), btn: T("Open Loans"), go: "loans" }] });
+    }
+  }
+  if (s.debtFreeMonths > 0) {
+    const m = s.debtFreeMonths, y = Math.floor(m / 12), r = m % 12;
+    out.push({ id: "debt-free", advisorType: "debt", kind: "positive", severity: 1, title: T("Debt-Free Date"),
+      text: T("At the current payments you are debt-free in {0}.", (y ? (y === 1 ? T("1 year") : T("{0} years", y)) + " " : "") + (r || !y ? (r === 1 ? T("1 month") : T("{0} months", r)) : "")), confidence: s.confidence,
+      actions: [{ icon: "💳", title: T("See your loans"), desc: T("Repayment plan of every loan."), btn: T("Open Loans"), go: "loans" }] });
   }
   return out;
 }
@@ -69,10 +108,30 @@ function debt(s) {
 /** Savings Advisor: where the savings sit. */
 function savings(s) {
   const out = [];
-  if (s.gain > 0 && s.mv) out.push({ id: "better-deposit", advisorType: "savings", kind: "opportunity", severity: 2, title: T("Better Deposit Available"),
-    text: T("Move {0} to {1}: about {2} more per year.", pln(s.mv.moved || 0), s.mv.bank, pln(s.gain)), annualImpact: s.gain, potential: s.gain, pot: "surplus", confidence: 0.8, difficulty: "easy", minutes: 20,
-    doNothing: T("You keep earning {0} less per year than you could.", pln(s.gain)),
-    actions: [{ icon: "📈", title: T("Earn {0} more per year", pln(s.gain)), desc: T("Move savings to {0}.", s.mv.bank), btn: T("View Opportunity"), go: "@optimize" }] });
+  // One idea per account that could earn more. Different accounts add up; the biggest one also shares the "surplus" money with debt repayment.
+  const mv = s.moves && s.moves.length ? s.moves : s.gain > 0 && s.mv ? [{ id: "", name: "", bank: s.mv.bank, moved: s.mv.moved, gain: s.gain }] : [];
+  mv.forEach((m, k) => out.push({ id: "better-deposit" + (m.id ? "-" + m.id : ""), advisorType: "savings", kind: "opportunity", severity: 2, title: T("Better Deposit Available"),
+    text: T("Move {0} to {1}: about {2} more per year.", pln(m.moved || 0), m.bank, pln(m.gain)), annualImpact: m.gain, potential: m.gain, pot: k === 0 ? ["surplus", "move:" + m.id] : ["move:" + m.id], confidence: 0.8, difficulty: "easy", minutes: 20,
+    doNothing: T("You keep earning {0} less per year than you could.", pln(m.gain)),
+    actions: [{ icon: "📈", title: T("Earn {0} more per year", pln(m.gain)), desc: T("Move savings to {0}.", m.bank), btn: T("View Opportunity"), go: "@optimize" }] }));
+  for (const a of s.accounts || []) {
+    if (a.promo && a.promo.daysLeft <= 45 && a.promo.now > a.promo.after) {
+      const loss = a.amount * (a.promo.now - a.promo.after) / 100 * 0.81;
+      out.push({ id: "promo-ending-" + a.id, advisorType: "savings", kind: "risk", severity: a.promo.daysLeft <= 14 ? 3 : 2, title: T("Promotion Ending"),
+        text: T("{0} pays {1} for only {2} more days, then {3}.", a.name, dec(a.promo.now) + "%", a.promo.daysLeft, dec(a.promo.after) + "%"),
+        annualImpact: loss, confidence: 0.9, minutes: 20,   // not added to the potential: the better-deposit idea already counts this money
+        doNothing: T("From then on you earn about {0} less per year on this money.", pln(loss)),
+        actions: [{ icon: "📈", title: T("Move it before the promotion ends"), desc: T("See where this money earns more."), btn: T("View Opportunity"), go: "@optimize" }] });
+    }
+    if (a.place === "Bank" && s.eurPln > 0 && a.amount > 100000 * s.eurPln) out.push({ id: "guarantee-" + a.id, advisorType: "savings", kind: "risk", severity: 2, title: T("Above the Deposit Guarantee"),
+      text: T("{0} holds {1}. The Polish deposit guarantee covers up to 100 000 EUR per person and bank.", a.name, pln(a.amount)), confidence: 0.6, difficulty: "easy", minutes: 30,
+      doNothing: T("If that bank failed, the part above the guarantee could be lost."),
+      actions: [{ icon: "🏦", title: T("Spread savings over more banks"), desc: T("Keep each bank below the guarantee limit."), btn: T("Open Savings"), go: "portfolio" }] });
+  }
+  if (s.has && s.total > 0 && s.total - (s.safe || 0) > s.total * 0.5 && !s.fullEF) out.push({ id: "risky-share", advisorType: "savings", kind: "risk", severity: 3, title: T("Too Much in Risky Assets"),
+    text: T("{0} of your money is not in safe savings, while your emergency fund is not complete.", pc((s.total - s.safe) / s.total)), confidence: s.confidence, difficulty: "medium", minutes: 30,
+    doNothing: T("A fall in the markets could hit you just when you need cash."),
+    actions: [{ icon: "🛡️", title: T("Fill the emergency fund first"), desc: T("Keep it in safe money."), btn: T("Open Emergency Fund"), go: "emergency" }] });
   if (s.has && s.total <= 0) out.push({ id: "no-savings", advisorType: "savings", kind: "problem", severity: 2, title: T("No Savings Yet"), text: T("Add your savings so MoneyCompass can find better offers."), confidence: s.confidence,
     actions: [{ icon: "🏦", title: T("Add your savings"), desc: T("So MoneyCompass can find better offers."), btn: T("Open Savings"), go: "portfolio" }] });
   return out;

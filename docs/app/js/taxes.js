@@ -111,6 +111,14 @@ export function planOpts(P) {
 const chev = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
 const SRC_CHIPS = [["Ministry of Finance", TAX_SOURCES[2][1]], ["ZUS", TAX_SOURCES[0][1]], ["PIT regulations", TAX_SOURCES[1][1]], ["PPK", TAX_SOURCES[3][1]]];
 
+/** For the Tax Advisor: the saved plan worked out without opening the page. null while no salary is entered. */
+export function taxFacts() {
+  const P = plan(), v = num(P.amount) || 0;
+  if (!(v > 0)) return null;
+  const o = planOpts(P), g = P.mode === "gross" ? v : grossFromNet(v, o), y = calcYear(g, o);
+  return { g, o, y, ins: insights(g, o, y), bracket: o.contract !== "b2b" || o.taxForm === "scale" ? { over: y.over, room: y.room, share: y.taxable / TAX.pit.threshold } : null };
+}
+
 /** Ways to keep more of the pay, worked out from the entered numbers. */
 function insights(g, o, y) {
   const list = [];

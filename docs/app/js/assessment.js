@@ -3,7 +3,7 @@
 import { T, pln } from "./core.js";
 import { esc } from "./ui.js";
 import { ring } from "./page-head.js";
-import { advise, opportunities, groupByAdvisor } from "./engine/index.js";
+import { advise, opportunities, groupByAdvisor, ADVISORS } from "./engine/index.js";
 
 /** The overall states (plus "start" when there is no data yet): colour, icon and name. */
 export const STATES = {
@@ -19,6 +19,11 @@ const pc = v => Math.round(v * 100) + "%";
 const KIND_COLOR = { problem: "#F87171", risk: "#FBBF24", opportunity: "#22D3EE", positive: "#34D399" };
 
 /** c: the raw figures of the page (see engine/snapshot.js). Returns everything the banner shows. */
+/** The last result. Other pages ask for a fresh one with currentAssessment(): the Overview registers how to work it out. */
+export let lastAssessment = null;
+let source = null;
+export const setAssessSource = f => { source = f; };
+export function currentAssessment() { if (source) { try { source(); } catch (e) { console.warn("assessment failed", e); } } return lastAssessment; }
 export function assess(c) {
   const r = advise(c), s = r.snap, st = r.status, P = r.primary;
   const lead = {
@@ -44,6 +49,7 @@ export function assess(c) {
   const act = [], add = x => { if (x.title && !act.some(a => a.title === x.title)) act.push(x); };
   if (!s.has) { add({ icon: "💶", title: T("Add your income"), desc: T("Your salary and other income."), btn: T("Open Inflows"), go: "income" }); add({ icon: "🛒", title: T("Add your spending"), desc: T("Enter or import your expenses."), btn: T("Open Outflows"), go: "expenses" }); add({ icon: "🏦", title: T("Add your savings"), desc: T("Bank accounts and cash, with their interest."), btn: T("Open Savings"), go: "portfolio" }); }
   else r.states.forEach(x => x.actions.forEach(add));
+  lastAssessment = r;
   return { ...r, state: st, text, problem, win, risk, doNothing, actions: act.slice(0, 3), dti: s.dti };
 }
 
@@ -66,4 +72,18 @@ export function assessmentHtml(a, wealth, wl) {
     <div class="nw-card oa-next"><div class="oa-top"><h3>${esc(T("Next Actions"))}</h3><small>${esc(T("In this order"))}</small></div>${act || `<p class="hint">${esc(T("No action needed right now."))}</p>`}</div>
     ${sec.length || a.primary && a.primary.kind !== "positive" ? `<div class="nw-card oa-team"><div class="oa-top"><h3>${esc(T("Your advisors"))}</h3><small>${esc(T("Each advisor looks at its own part of your money"))}</small></div><div class="oa-advs">${team}</div></div>` : ""}
   </section>`;
+}
+
+/** The panel at the top of an advisor's page: that advisor's states with what happens if you do nothing and what to do. */
+export function advisorPanelHtml(type) {
+  const r = currentAssessment(), A = ADVISORS[type];
+  if (!r || !A || !r.snap.has) return "";
+  const list = (r.byAdvisor[type] || []).filter(x => x.kind !== "positive" || true);
+  const worth = list.filter(x => x.kind !== "positive");
+  const pot = list.reduce((m, x) => x.potential > 0 ? m + x.potential : m, 0);
+  const row = x => { const b = x.actions[0];
+    return `<div class="ap-row"><i style="background:${KIND_COLOR[x.kind]}"></i><div class="ap-t"><b>${esc(x.title)}</b>${x.annualImpact > 0 ? `<em>${esc(pln(x.annualImpact))} ${esc(T("per year"))}</em>` : ""}<p>${esc(x.text)}</p>${x.doNothing && x.kind !== "positive" ? `<p class="ap-dn">⏳ ${esc(x.doNothing)}</p>` : ""}</div>
+      ${b ? (b.go.startsWith("@") ? `<button class="sv-btn" data-action="${b.go.slice(1)}">${esc(b.btn)} →</button>` : `<button class="sv-btn" data-go="${b.go}">${esc(b.btn)} →</button>`) : ""}</div>`; };
+  return `<section class="nw-card adv-panel"><div class="ap-h"><span class="ap-ic">${A.icon}</span><div><h3>${esc(T(A.name))}</h3><small>${worth.length ? esc(T("{0} insights", worth.length)) + (pot > 0 ? " · " + esc(T("potential {0} per year", pln(pot))) : "") : esc(T("Nothing to report"))}</small></div><button class="sv-btn ap-oc" data-go="optcenter">${esc(T("Optimization Center"))} →</button></div>
+    ${list.length ? list.slice(0, 5).map(row).join("") : `<p class="hint ap-ok">✓ ${esc(T("Your {0} found nothing that needs attention.", T(A.name)))}</p>`}</section>`;
 }

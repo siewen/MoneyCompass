@@ -24,3 +24,8 @@
 :root[data-theme="hell"] .oa-adv{background:rgba(0,0,0,.03) !important;border-color:rgba(0,0,0,.09) !important}
 :root[data-theme="hell"] .oa-st:hover{background:rgba(0,0,0,.05) !important}
 :root[data-theme="hell"] .oa-pot{background:rgba(16,185,129,.1) !important}
+:root[data-theme="hell"] .ox-tabs button{border-color:rgba(0,0,0,.18) !important}
+:root[data-theme="hell"] .ox-tabs button.on{border-color:#12936A !important}
+:root[data-theme="hell"] .ox-side b{color:#0f7a58 !important}
+:root[data-theme="hell"] .ap-row{border-top-color:rgba(0,0,0,.09) !important}
+:root[data-theme="hell"] .ap-t em{color:#0f7a58 !important}

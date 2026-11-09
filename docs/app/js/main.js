@@ -19,15 +19,17 @@ import { Overview, Income, Expenses, Emergency, Portfolio, bindBin, setSearch, m
 import { Savings, Goals, Loans, Budget, openOptimize, openBankImport } from "./pages-pro.js";
 import { Calendar } from "./calendar.js";
 import { Taxes } from "./taxes.js";
+import { OptCenter } from "./optcenter.js";
 import { promoReminder } from "./advice.js";
+import { advisorPanelHtml } from "./assessment.js";
 import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile, openLanguage, setLanguage } from "./dialogs.js";
 
-const ACCENT = { overview: "#0F766E", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", taxes: "#0F766E", investments: "#CA8A04", reports: "#0E7490", savings: "#7E22CE" };
+const ACCENT = { overview: "#0F766E", optcenter: "#0891B2", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", taxes: "#0F766E", investments: "#CA8A04", reports: "#0E7490", savings: "#7E22CE" };
 const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget, calendar: Calendar, taxes: Taxes };
 let current = "overview";
 
 function tabs() {
-  const list = [Overview, Income, Expenses, Emergency, Portfolio];
+  const list = [Overview, OptCenter, Income, Expenses, Emergency, Portfolio];
   // Savings goals are part of the Budget plan (Pro), not a tab of their own
   for (const m of MODULES) if (moduleOn(m.code) && m.code !== "goals") list.push(MODULE_PAGES[m.code]);
   list.push(Savings, Reports);
@@ -51,6 +53,7 @@ export function moveTab(route, target) {
 // Line icons for the tabs (shown in the beta design's side menu)
 const I = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const TAB_ICON = {
+  optcenter: I('<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.500 10.900c.700.600 1 1.300 1 2.100h5c0-.800.300-1.500 1-2.100A6 6 0 0 0 12 3z"/>'),
   overview: I('<path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/>'),
   income: I('<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18"/><circle cx="16.5" cy="15" r="1.2"/>'),
   expenses: I('<path d="M3 4h2l2.5 11h10l2-8H6.500"/><circle cx="9" cy="19.500" r="1.400"/><circle cx="17" cy="19.500" r="1.400"/>'),
@@ -509,6 +512,8 @@ function render() {
   const el = document.getElementById("page");
   const y = window.scrollY;
   page.render(el);
+  const ADV_PAGE = { portfolio: "savings", loans: "debt", emergency: "safety" };   // the advisor that speaks at the top of the page
+  if (ADV_PAGE[page.route]) { try { el.insertAdjacentHTML("afterbegin", advisorPanelHtml(ADV_PAGE[page.route])); } catch (e) { console.warn(e); } }
   bindBin(el);
   const grid = el.querySelector(".grid");
   if (grid) grid.dataset.key = "web2:" + page.route;   // "web2": the new standard order of the cards (orders saved for the old one are not used)
