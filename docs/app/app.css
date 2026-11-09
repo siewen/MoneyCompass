@@ -2601,3 +2601,4 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 @media(max-width:700px){.ovr2e{grid-template-columns:1fr}}
 .ov-pair{align-items:start!important}.ov-pair .oa-next{display:block}.ov-pair .oa-next .oa-act{align-content:normal}
 .ovr2e .nw-card{min-height:0}
+.ov-pair{grid-template-columns:1fr!important;gap:12px}.ov-pair .oa-advs{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))!important}
