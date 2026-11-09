@@ -15,14 +15,14 @@ function financial(s) {
     const yr = -s.left * 12;
     out.push({ id: "overspending", sources: S(s, "own"), advisorType: "financial", kind: "problem", severity: s.emF < 0.25 ? 5 : 4,
       title: T("Overspending"), text: T("You spend {0} more than you earn each month.", pln(-s.left)),
-      annualImpact: yr, potential: yr, pot: "cash", confidence: s.confidence, risk: "low", difficulty: "hard", minutes: 120,
+      annualImpact: yr, potential: 0, pot: "cash", confidence: s.confidence, risk: "low", difficulty: "hard", minutes: 120,
       doNothing: s.runway ? T("In 12 months you will have spent {0} more than you earned. At this pace your savings last about {1} months.", pln(yr), dec(s.runway)) : T("In 12 months you will have spent {0} more than you earned, which means new debt.", pln(yr)),
       actions: [{ icon: "✂️", title: T("Cut spending by {0} a month", pln(-s.left)), desc: T("Look at your biggest categories first."), btn: T("Open Outflows"), go: "expenses" }] });
   } else if (s.both && s.svRate < 0.2) {
     const more = Math.max(0, s.income * 0.2 - Math.max(0, s.left)) * 12, tiny = s.svRate < 0.05;
     out.push({ id: "low-savings", sources: S(s, "own"), advisorType: "financial", kind: tiny ? "problem" : "opportunity", severity: tiny ? 3 : 2,
       title: T("High Savings Potential"), text: T("You keep only {0} of your income. Saving 20% would put {1} more aside each year.", pc(Math.max(0, s.svRate)), pln(more)),
-      annualImpact: more, potential: more, pot: "cash", confidence: s.confidence * 0.9, risk: "low", difficulty: "medium", minutes: 30,
+      annualImpact: more, potential: 0, pot: "cash", confidence: s.confidence * 0.9, risk: "low", difficulty: "medium", minutes: 30,
       doNothing: T("At this pace you add only {0} to your savings in 12 months.", pln(Math.max(0, s.left) * 12)),
       actions: [{ icon: "🎯", title: tiny ? T("Save at least 10% first") : T("Save 20% of your income"), desc: T("Move money to savings on payday, before you spend."), btn: T("Open Outflows"), go: "expenses" }] });
   } else if (s.both && s.fullEF && s.dti <= 0.2) {

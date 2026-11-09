@@ -3,6 +3,7 @@
 import { TABLE } from "./lang-table.js";
 import { EXTRA } from "./lang-extra.js";
 import { NEW } from "./lang-new.js";
+import { ADV } from "./lang-advisors.js";
 
 // ---------------------------------------------------------------- storage helpers
 
@@ -183,7 +184,7 @@ export function lang() {
 export function T(english, ...args) {
   const l = lang();
   let text = english;
-  if (l !== "en") text = (TABLE[l] && TABLE[l][english]) || (EXTRA[l] && EXTRA[l][english]) || (NEW[l] && NEW[l][english]) || english;
+  if (l !== "en") text = (TABLE[l] && TABLE[l][english]) || (EXTRA[l] && EXTRA[l][english]) || (NEW[l] && NEW[l][english]) || (ADV[l] && ADV[l][english]) || english;
   if (text.includes("zł")) text = withCurrency(text);
   return args.length ? text.replace(/\{(\d+)\}/g, (m, i) => (args[i] ?? m)) : text;
 }
