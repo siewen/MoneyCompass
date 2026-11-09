@@ -2480,3 +2480,11 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .nwp-fi{display:flex;gap:20px;align-items:center;flex-wrap:wrap}.nwp-fr{text-align:center;max-width:150px}.nwp-fl{flex:1;min-width:230px}
 .nwp-form{margin-top:12px}
 @media(max-width:900px){.nwp-grid,.nwp-grid3{grid-template-columns:1fr}}
+
+/* Phone: the optimization strip and the new pages must not make the page wider than the screen */
+@media(max-width:700px){
+  .ovo{grid-template-columns:1fr!important}.ovo-b{flex-wrap:wrap!important;min-width:0!important}.ovo-b>*{min-width:0}.sv-btn.ovo-btn{width:100%;padding:14px 16px;white-space:normal}
+  .ox-head h2{display:none}.ox-kpis b{font-size:1.2rem;overflow-wrap:anywhere}.ox-card{overflow-wrap:anywhere}
+  .oa-advs{grid-template-columns:1fr}
+}
+@media(max-width:700px){.ovb-sp{min-width:0!important;flex:1 1 100%!important}.ovb-r{flex-wrap:wrap!important}}

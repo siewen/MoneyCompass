@@ -21,12 +21,13 @@ import { Calendar } from "./calendar.js";
 import { Taxes } from "./taxes.js";
 import { OptCenter } from "./optcenter.js";
 import { NetWorth } from "./networth.js";
+import { Investments } from "./investments.js";
 import { promoReminder } from "./advice.js";
 import { advisorPanelHtml } from "./assessment.js";
 import { openProfile, openOptions, openHelp, openExport, openImport, openDelete, avatar, loadProfileFile, saveProfileFile, openLanguage, setLanguage } from "./dialogs.js";
 
 const ACCENT = { overview: "#0F766E", optcenter: "#0891B2", networth: "#7C3AED", income: "#1D4ED8", expenses: "#C2410C", emergency: "#B45309", portfolio: "#15803D", goals: "#0E7490", loans: "#BE123C", budget: "#4338CA", calendar: "#0369A1", taxes: "#0F766E", investments: "#CA8A04", reports: "#0E7490", savings: "#7E22CE" };
-const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget, calendar: Calendar, taxes: Taxes };
+const MODULE_PAGES = { goals: Goals, loans: Loans, budget: Budget, calendar: Calendar, taxes: Taxes, investments: Investments };
 let current = "overview";
 
 function tabs() {

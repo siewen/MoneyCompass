@@ -66,7 +66,6 @@ export function normalise(d) {
   if (!Array.isArray(out.Settings.Modules)) out.Settings.Modules = [];
   // Savings goals are now part of the Budget plan: whoever used goals gets the Budget plan ("goals" stays for the Windows app)
   if (out.Settings.Modules.includes("goals") && !out.Settings.Modules.includes("budget")) out.Settings.Modules.push("budget");
-  out.Settings.Modules = out.Settings.Modules.filter(m => m !== "investments"); // module moved to its own app
   // Older loans had a "Last payment" typed in by hand: now it is worked out from the amount, payment and interest
   for (const l of out.Loans) if (!l.Planned && l.Remaining > 0) planLoan(l);
   return out;
@@ -321,7 +320,7 @@ export const MODULES = [
   { code: "budget", name: "Budget plan", description: "Monthly limits per expense category and your savings goals: how much to set aside each month." },
   { code: "calendar", name: "Calendar", description: "Everything that comes back every month – salary, bills, subscriptions, savings – in a calendar, with a preview of the next 1 to 12 months." },
   { code: "taxes", name: "Taxes & Payroll", description: "A rough estimate of gross and net pay in Poland: insurance, income tax and the tax bracket you are in. Rates are kept in one file and updated each year." },
-  // Investments module: moved out (kept in modules-archive/investments for a separate app).
+  { code: "investments", name: "Investments", description: "Crypto platforms and brokers in one place: what you hold, how it is spread, what it costs and how healthy the portfolio is. Beta." },
 ];
 /** What is saved for a goal: the balance of its linked savings account, or the amount typed in. */
 export function goalSaved(g, d = State.data) {
