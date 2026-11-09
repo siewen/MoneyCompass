@@ -456,7 +456,7 @@ export const Income = {
         <div class="gross-box"${f.Type === "Salary" && f.Currency === "PLN" ? "" : " hidden"}>
           <div class="cat-row">${field(T("Gross salary per month (brutto, optional)"), numInput("gross", plain(f.Gross), T("e.g. {0}", "10000")))}
           ${button("→ " + esc(T("Calculate net")), "calc-net", "second small")}</div>
-          <p class="hint">${esc(T("Estimate for an employment contract (umowa o pracę) in Poland: social and health insurance and income tax. Bonuses, a sport card (Multisport), PPK, the under-26 relief, overtime or another kind of contract change your net pay."))}</p>
+          <p class="hint">${esc(T("Estimate for an employment contract (umowa o pracę) in Poland: social and health insurance and income tax. Bonuses, a sport card, PPK, the under-26 relief, overtime or another kind of contract change your net pay."))}</p>
         </div>
         ${field(T("Net Amount"), numInput("amount", plain(f.Amount), T("e.g. 8500 (what you actually receive, after tax)")))}</div>
       <div class="inc-side"><div class="inc-prev"><span>${esc(T("Net Income Preview"))}</span><b id="inc-prev">${esc(pln(num(preview) || 0))}</b>

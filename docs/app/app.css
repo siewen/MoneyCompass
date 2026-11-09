@@ -2345,3 +2345,4 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .tp-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.28)}
 .tp .tx-add{border:0;padding:0;margin-top:8px}.tp .tx-add .tp-fold{padding:10px 0 0}.tp .tx-it{padding:8px 10px}.tp .tx-n small{font-size:12px}.tp .tx-a input{width:76px}
 .tp-logo{font-size:30px}
+.tp-two-in{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tp-flag{border-radius:3px;box-shadow:0 0 0 1px rgba(255,255,255,.25);vertical-align:-3px}

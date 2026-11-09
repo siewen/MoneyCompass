@@ -50,7 +50,7 @@ const KINDS = {
   deduct: ["➖", "Deduction from net pay every month"],
 };
 const SHORT = { bonus: "Bonus", allowance: "Monthly extra pay", benefit: "Benefit", deduct: "Deduction from net" };
-const PRESETS = [["Medicover", "benefit"], ["Sport card (Multisport)", "benefit"], ["Medicover for my child", "benefit"], ["Bonus", "bonus"], ["Meal allowance", "allowance"], ["Union fee", "deduct"], ["Loan instalment", "deduct"]];
+const PRESETS = [["Private medical care", "benefit"], ["Sport card", "benefit"], ["Medical care for my child", "benefit"], ["Bonus", "bonus"], ["Meal allowance", "allowance"], ["Union fee", "deduct"], ["Loan instalment", "deduct"]];
 const MONTHS = () => Array.from({ length: 12 }, (_, i) => [String(i), new Intl.DateTimeFormat(undefined, { month: "long" }).format(new Date(2026, i, 1))]);
 const plan = () => { const s = State.data.Settings; if (!s.TaxPlan) s.TaxPlan = { mode: "gross", amount: "", raised: false, pit2: true, under26: false, ppk: false, items: [] }; if (!Array.isArray(s.TaxPlan.items)) s.TaxPlan.items = []; return s.TaxPlan; };
 /** The saved extras → the options of the calculation. */
@@ -83,31 +83,30 @@ export const Taxes = {
       return `<div class="tp-h"><span class="tp-hi">🎁</span><h3>${esc(T("Employee Benefits"))}</h3></div>
         ${it.length ? `<div class="tx-list">${it.map(x => `<div class="tx-it" data-id="${x.id}"><span class="tx-ic">${KINDS[x.kind][0]}</span><span class="tx-n"><b>${esc(x.name)}</b><small>${esc(T(SHORT[x.kind]))}${x.kind === "bonus" ? " · " + esc(MONTHS()[+x.month >= 0 ? +x.month : 11][1]) : ""}</small></span>
           <span class="tx-a"><input type="text" inputmode="decimal" value="${esc(plain(x.amount))}" data-it-amount="${x.id}" aria-label="${esc(T("Amount"))}"><em>zł</em></span><button class="icon-btn danger" data-it-del="${x.id}" title="${esc(T("Delete"))}">🗑</button></div>`).join("")}</div>
-          <div class="tx-tot">${["bonus", "allowance", "benefit", "deduct"].filter(k => tot(k)).map(k => `<span>${KINDS[k][0]} ${esc(pln(tot(k)))}</span>`).join("")}</div>` : `<p class="hint mc-empty">${esc(T("No extras yet. Add bonuses, Medicover, a sport card or deductions below."))}</p>`}
+          <div class="tx-tot">${["bonus", "allowance", "benefit", "deduct"].filter(k => tot(k)).map(k => `<span>${KINDS[k][0]} ${esc(pln(tot(k)))}</span>`).join("")}</div>` : `<p class="hint mc-empty">${esc(T("No extras yet. Add bonuses, medical care, a sport card or deductions below."))}</p>`}
         <form id="tx-add" class="tx-add"><details class="tp-fold"${it.length ? "" : " open"}><summary><span>＋ ${esc(T("Add an item"))}</span>${chev}</summary>
           <div class="tx-chips">${PRESETS.map(([n, k]) => `<button type="button" class="chip" data-preset="${esc(n)}|${k}">${esc(T(n))}</button>`).join("")}</div>
-          <div class="tx-f">${field(T("Name"), textInput("name", "", T("e.g. {0}", "Medicover")))}${field(T("Type"), select("kind", Object.entries(KINDS).map(([k, v]) => [k, T(v[1])]), "benefit"))}
+          <div class="tx-f">${field(T("Name"), textInput("name", "", T("e.g. {0}", "Private medical care")))}${field(T("Type"), select("kind", Object.entries(KINDS).map(([k, v]) => [k, T(v[1])]), "benefit"))}
           ${field(T("Amount (zł)"), numInput("amount", "", "0"))}<span class="tx-mo" hidden>${field(T("Paid in"), select("month", MONTHS(), "11"))}</span></div>
           <button type="button" class="btn main" data-add-item>＋ ${esc(T("Add"))}</button></details></form>`;
     };
     const kpi = (l, v, icon, go, cls = "in") => `<div class="kpi static clk" data-txgo="${go}"><span class="kpi-ic ${cls}">${si(IC[icon] || IC.bars)}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b>${esc(v)}</b></span></div>`;
     el.innerHTML = `<div class="ni-page tx-page tp">
       <div class="tp-head"><span class="tp-logo">⚖️</span><div><h2>${esc(T("Taxes & Payroll Intelligence Center"))}</h2><p>${esc(T("Estimate salary, taxes, contributions and discover optimization opportunities."))}</p></div>
-        <label class="tp-country">🇵🇱 <select disabled aria-label="${esc(T("Country"))}"><option>${esc(T("Poland"))}</option></select></label></div>
+        <label class="tp-country"><svg class="tp-flag" viewBox="0 0 28 20" width="22" height="16" aria-hidden="true"><rect width="28" height="10" fill="#f8fafc"/><rect y="10" width="28" height="10" fill="#dc2626"/></svg> <select disabled aria-label="${esc(T("Country"))}"><option>${esc(T("Poland"))}</option></select></label></div>
       <div class="ov-kpis">${kpi(T("Tax Year"), String(TAX.year), "star", "sources")}${kpi(T("Primary Income Tax Rate"), "12%", "percent", "how", "rate")}${kpi(T("Tax-Free Amount"), pln(TAX.pit.taxFree), "coins", "how")}${kpi(T("32% Threshold"), pln(TAX.pit.threshold), "bars", "bracket", "left")}</div>
-      <p class="tx-pl">🇵🇱 ${esc(T("Poland only for now: these are Polish rules for {0}. Other countries may follow.", TAX.year))}</p>
+      <p class="tx-pl"><svg class="tp-flag" viewBox="0 0 28 20" width="22" height="16" aria-hidden="true"><rect width="28" height="10" fill="#f8fafc"/><rect y="10" width="28" height="10" fill="#dc2626"/></svg> ${esc(T("Poland only for now: these are Polish rules for {0}. Other countries may follow.", TAX.year))}</p>
       <div class="tp-main">
         <div class="tp-left">
           <div class="nw-card ov-card tp-card"><div class="tp-h"><span class="tp-hi">💼</span><h3>${esc(T("Salary Inputs"))}</h3></div>
             <form id="tax-form">
               ${field(T("Contract Type"), select("contract", [["uop", T("Employment Contract")]], "uop"))}
-              ${field(P.mode === "gross" ? T("Gross Salary (per month)") : T("Net Salary (per month)"), numInput("amount", plain(P.amount), T("e.g. {0}", "10000")))}
+              <div class="tp-two-in">${field(T("Gross Salary (brutto, per month)"), numInput("amount", P.mode === "gross" ? plain(P.amount) : "", T("e.g. {0}", "10000")))}${field(T("Net Salary (netto, per month)"), numInput("netamount", P.mode === "net" ? plain(P.amount) : "", T("e.g. {0}", "7200")))}</div><p class="hint">${esc(T("Type either one: the other is calculated for you."))}</p>
               <details class="tp-fold"><summary><span>⚙️ ${esc(T("Tax Settings"))}</span>${chev}</summary>
                 ${check("raised", T("Raised costs of earning income (you work in another town)"), P.raised)}
                 ${check("pit2", T("Tax-free amount used at your employer (PIT-2 submitted)"), P.pit2)}
                 ${check("under26", T("Under 26 – no income tax up to {0} a year", pln(TAX.youngLimit)), P.under26)}</details>
               <details class="tp-fold"><summary><span>🎚️ ${esc(T("Advanced Options"))}</span>${chev}</summary>
-                <div class="tx-mode"><button type="button" class="chip${P.mode === "gross" ? " on" : ""}" data-mode="gross">${esc(T("I know the gross"))}</button><button type="button" class="chip${P.mode === "net" ? " on" : ""}" data-mode="net">${esc(T("I know the net"))}</button></div>
                 ${check("ppk", T("I take part in PPK (you pay {0}%, the employer {1}%)", TAX.ppk.employee * 100, TAX.ppk.employer * 100), P.ppk)}</details>
             </form></div>
           <div class="nw-card ov-card tp-card" id="tx-items">${itemsHtml()}</div></div>
@@ -131,9 +130,11 @@ export const Taxes = {
     const empty = T("Enter a gross salary to see the estimate.");
     const draw = () => {
       const v = num(P.amount) || 0, o = planOpts(P);
+      const other = P.mode === "gross" ? form.netamount : form.amount;
       const head = (ic, t) => `<div class="tp-h"><span class="tp-hi">${ic}</span><h3>${esc(t)}</h3></div>`;
-      if (!(v > 0)) { for (const [id, ic, t] of [["tx-sum", "🧮", "Payroll Summary"], ["tx-brk", "🥧", "Salary Breakdown"], ["tx-ins", "💡", "MoneyCompass Optimization Insights"], ["tx-ann", "📈", "Annual Projection"]]) set(id, head(ic, T(t)) + `<p class="hint mc-empty">${esc(empty)}</p>`); return; }
+      if (!(v > 0)) { other.value = ""; for (const [id, ic, t] of [["tx-sum", "🧮", "Payroll Summary"], ["tx-brk", "🥧", "Salary Breakdown"], ["tx-ins", "💡", "MoneyCompass Optimization Insights"], ["tx-ann", "📈", "Annual Projection"]]) set(id, head(ic, T(t)) + `<p class="hint mc-empty">${esc(empty)}</p>`); return; }
       const g = P.mode === "gross" ? v : grossFromNet(v, o), y = calcYear(g, o), f = y.first, p = TAX.pit;
+      if (document.activeElement !== other) other.value = plain(P.mode === "gross" ? f.net : g);
       const mo = f.pension + f.disability + f.sickness, deductions = y.social + y.health + y.tax, eff = y.grossYear > 0 ? deductions / y.grossYear * 100 : 0;
       const util = Math.min(100, Math.round(y.taxable / p.threshold * 100)), within = y.over <= 0;
       const row = (l, a, cls = "") => `<div class="tp-r ${cls}"><span>${esc(l)}</span><b>${esc(pln(a))}</b></div>`;
@@ -173,9 +174,8 @@ export const Taxes = {
       });
     };
     form.onsubmit = ev => ev.preventDefault();
-    form.addEventListener("input", () => { P.amount = form.amount.value; save(); draw(); });
+    form.addEventListener("input", ev => { const n = ev.target.name; if (n === "amount" || n === "netamount") { P.mode = n === "amount" ? "gross" : "net"; P.amount = ev.target.value; save(); draw(); } });
     form.addEventListener("change", () => { P.raised = form.raised.checked; P.pit2 = form.pit2.checked; P.under26 = form.under26.checked; P.ppk = form.ppk.checked; save(); draw(); });
-    el.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { P.mode = b.dataset.mode; P.amount = ""; save(); Taxes.render(el); });
     el.querySelectorAll("[data-txgo]").forEach(k => k.onclick = () => {
       const w = k.dataset.txgo, t = el.querySelector(w === "bracket" ? "#tx-sum" : w === "how" ? "#tx-how" : "#tx-sources");
       if (w === "how" && t) t.open = true;
