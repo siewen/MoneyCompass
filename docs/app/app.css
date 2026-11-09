@@ -2191,3 +2191,5 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .ov-per{margin-left:auto;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12)}
 .ov-per select{background:transparent;color:inherit;border:0;font:inherit;font-weight:600;cursor:pointer;max-width:220px}
 .ov-per select option,.ov-per select optgroup{background:#1b2420;color:#eaf5f0}
+.ov-wins button{padding:7px 14px;border-radius:99px;font:inherit;font-size:13.5px;font-weight:600;background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(250,204,21,.12));border:1px solid rgba(52,211,153,.4);color:#d9fbe9;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.ov-wins button:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(52,211,153,.25)}
