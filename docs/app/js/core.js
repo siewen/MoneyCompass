@@ -460,6 +460,19 @@ export function isRecurringPayment(e, r, n) {
   return !!word && matchKey(e.Description).includes(word);
 }
 export const Calc = {
+  /** How many of the latest months with outflows count as "your data" (3 normally; the Overview period picker changes it for one render). */
+  maxMonths: 3,
+  /** Overview period: "all", "n2", "n3", "n6" (latest months) or "m:<year*12+month>" (one month). Returns the data limited to it. */
+  scope(d, period) {
+    const months = this.groupMonths(this.countedExpenses(d));
+    let from = null, to = null, n = 3, label = "";
+    if (period === "all") { n = 999; label = T("All data"); }
+    else if (/^n\d+$/.test(period)) { n = +period.slice(1); const m = months.slice(0, n); if (m.length) from = m[m.length - 1].start; label = T("Last {0} months", n); }
+    else if (period.startsWith("m:")) { const m = months.find(x => x.key === +period.slice(2)); n = 1; if (m) { from = m.start; to = addMonths(m.start, 1); label = monthName(m.start); } }
+    else { const m = months.slice(0, 3); if (m.length) from = m[m.length - 1].start; label = T("Last {0} months", 3); }
+    const inR = x => { const t = parseDate(x.Date); return (!from || t >= from) && (!to || t < to); };
+    return { data: from || to ? { ...d, Expenses: d.Expenses.filter(inR), Received: d.Received.filter(inR), Transfers: d.Transfers.filter(inR) } : d, n, label, months };
+  },
   emergency(s) {
     const monthly = (s.MonthlyEssentials || 0) + (s.YearlyCosts || 0) / 12;
     const buffer = 1 + (s.BufferPercent || 0) / 100;
@@ -478,7 +491,7 @@ export const Calc = {
    *  first to the last entry (a whole month when it starts and ends near the month's edges). "units" is the number
    *  of months this is worth – e.g. one week of October ≈ 0,23 – used to turn totals into "per month". */
   coverage(d) {
-    const months = this.groupMonths(this.countedExpenses(d)).slice(0, 3);
+    const months = this.groupMonths(this.countedExpenses(d)).slice(0, this.maxMonths);
     if (!months.length) return { months: [], units: 0, days: 0, partial: false, from: null, to: null };
     const all = [...d.Expenses, ...d.Received, ...d.Transfers].map(x => parseDate(x.Date)).filter(x => x && !isNaN(x));
     let units = 0, days = 0, partial = false, from = null, to = null;
@@ -562,7 +575,7 @@ export const Calc = {
   },
   /** The same months as the expense averages (or this month when there are no expenses yet). */
   basisMonths(d) {
-    const months = this.groupMonths(this.countedExpenses(d)).slice(0, 3).map(m => m.start);
+    const months = this.groupMonths(this.countedExpenses(d)).slice(0, this.maxMonths).map(m => m.start);
     return months.length ? months : [monthStart(today())];
   },
   recurringPerMonth(d) {
@@ -578,7 +591,7 @@ export const Calc = {
   },
   spending(d) {
     const cov = this.coverage(d);
-    const avg = { ...this.averages(this.countedExpenses(d), 3, cov.units), estimate: cov.partial, days: cov.days, from: cov.from, to: cov.to };
+    const avg = { ...this.averages(this.countedExpenses(d), this.maxMonths, cov.units), estimate: cov.partial, days: cov.days, from: cov.from, to: cov.to };
     const loans = this.loanPayments(d), rec = this.recurringPerMonth(d);
     if (loans <= 0 && rec.essential + rec.other <= 0) return avg;
     return { ...avg, essential: avg.essential + loans + rec.essential, nonEssential: avg.nonEssential + rec.other, monthsUsed: Math.max(1, avg.monthsUsed) };

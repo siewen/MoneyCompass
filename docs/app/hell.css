@@ -573,6 +573,8 @@
 :root[data-theme="hell"] .popup .bk-btns .btn.second{color:#0c1311 !important}
 :root[data-theme="hell"] .ov-wins span{color:#109850}
 :root[data-theme="hell"] .mc-tip p{color:#7c702c}
+:root[data-theme="hell"] .ov-per{background:#E1E6E3;border:1px solid rgba(23,38,34,0.156)}
+:root[data-theme="hell"] .ov-per select option,:root[data-theme="hell"] .ov-per select optgroup{background:#f7f9f9;color:#0c1311}
 /* Hand-written Light theme fixes (appended by make-hell.py): neutral page, no green glow, calm cards */
 :root[data-theme="hell"] body{background:#CDD3D0 !important}
 :root[data-theme="hell"] .sidebar,:root[data-theme="hell"] aside{background:#D8DEDB !important}

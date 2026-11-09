@@ -25,6 +25,8 @@ const tile = (label, value, route, colors, cls = "", tip = "", delta = "") =>
   `<button class="tile" data-go="${route}"${tip ? ` data-tip="${esc(tip)}"` : ""} style="--t1:${colors[0]};--t2:${colors[1]};--t3:${colors[2]};--t4:${colors[3]}">
      <span>${esc(label)}</span><b class="${cls}">${value}</b>${delta}</button>`;
 /** Search from the top bar: opens Outflows with the word in its search box. */
+let ovPeriod = "n3";
+document.addEventListener("change", e => { if (e.target?.name === "ov-per") { ovPeriod = e.target.value; App.refresh(); } });
 export function setSearch(text) { flt.text = text; }
 /** "↑ +12% vs. previous month": the last finished month against the one before (pp = difference in percentage points). */
 function deltaTag(cur, prev, upIsGood = true, pp = false) {
@@ -43,13 +45,18 @@ const rate2 = v => (Math.round(v * 100) / 100).toString().replace(".", ",") + "%
 export const Overview = {
   route: "overview", title: "Overview",
   render(el) {
-    const d = D();
+    const dAll = D(), per = Calc.scope(dAll, ovPeriod);
+    Calc.maxMonths = per.n;
+    try { return this.render0(el, dAll, per); } finally { Calc.maxMonths = 3; }
+  },
+  render0(el, dAll, per) {
+    const d = per.data;
     const income = Calc.totalIncome(d), avg = Calc.spending(d);
     const spending = avg.essential + avg.nonEssential, left = income - spending;
     const both = income > 0 && avg.monthsUsed > 0;
     const top = Advisor.analyse(d)[0];
     const p = Calc.portfolio(d);
-    const months = ChartData.trend(d);
+    const months = ChartData.trend(dAll);
     const showTrend = months.some(m => m.income > 0 || m.expenses > 0);
     const cats = ChartData.categories(d);
     const target = Calc.emergency(d.Settings).target;
@@ -194,7 +201,8 @@ export const Overview = {
     const wealth = Math.round(40 * Math.min(1, emF) + 30 * Math.min(1, Math.max(0, svRate) / 0.2) + 30 * (debt <= 0 ? 1 : income > 0 ? Math.max(0, 1 - debt / (income * 12)) : 0));
     const wl = wealth >= 80 ? T("Excellent") : wealth >= 60 ? T("Good") : wealth >= 40 ? T("Fair") : T("Needs attention");
     const kp = (l, v, ic2, cls, dl) => { const g = goAttr(l); return `<div class="kpi static${g ? " clk" : ""}"${g}><span class="kpi-ic ${cls}">${si(IC[ic2])}</span><span class="kpi-t"><span class="kpi-l">${esc(l)}</span><b>${v}</b>${dl || ""}</span></div>`; };
-    const head = `<div class="pg-title"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T(hello))}${first ? ", " + esc(first) : ""}!</h2><p>${esc(both ? T("You keep {0} of your income. Wealth score: {1}/100.", savingsRateText(left, income), wealth) : T("Your complete financial overview and personalized insights."))}</p></div></div>
+    const head = `<div class="pg-title"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T(hello))}${first ? ", " + esc(first) : ""}!</h2><p>${esc(T("Overview for: {0}", per.label))}${both ? " · " + esc(T("You keep {0} of your income. Wealth score: {1}/100.", savingsRateText(left, income), wealth)) : ""}</p></div>
+      <label class="ov-per" title="${esc(T("Choose the period"))}"><span>📅</span><select name="ov-per"><option value="all"${ovPeriod === "all" ? " selected" : ""}>${esc(T("All data"))}</option>${[2, 3, 6].map(k => `<option value="n${k}"${ovPeriod === "n" + k ? " selected" : ""}>${esc(T("Last {0} months", k))}</option>`).join("")}${per.months.length ? `<optgroup label="${esc(T("Single month"))}">${per.months.map(m => `<option value="m:${m.key}"${ovPeriod === "m:" + m.key ? " selected" : ""}>${esc(monthName(m.start))}</option>`).join("")}</optgroup>` : ""}</select></label></div>
       ${(() => { let st = 0; for (let i = done.length - 1; i >= 0 && done[i].income - done[i].expenses > 0; i--) st++;
         const w = [target > 0 && emF >= 1 ? "🛡️ " + T("Emergency fund complete") : "", debt <= 0 && d.Loans.length ? "🎉 " + T("Debt-free") : "", st >= 2 ? "🔥 " + T("{0} months in a row with money left over", st) : "", both && svRate >= 0.2 ? "🏆 " + T("Saving over 20% of your income") : ""].filter(Boolean);
         return w.length ? `<div class="ov-wins">${w.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""; })()}
