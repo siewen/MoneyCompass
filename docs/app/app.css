@@ -2661,3 +2661,8 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 @media(max-width:640px){.oa-boxes{grid-template-columns:1fr!important}.oa-boxes .oa-box p{font-size:.92rem}}
 /* tall empty history cards: no forced height */
 .nw-hist-card .empty,.nwh-empty{min-height:0}
+
+/* sparse-data cards: no stretched empty space, empty states look intentional */
+.nwp-grid>.nwp-chart{align-self:stretch;display:flex;flex-direction:column}
+.nwp-chart>p.hint{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;margin:10px 0 0;padding:18px 22px;border:1px dashed rgba(53,211,153,.35);border-radius:14px;background:rgba(53,211,153,.05);color:var(--muted,#9fb3aa);line-height:1.5}
+.nwp-chart>p.hint::before{content:"🌱";font-size:26px;margin-right:14px}

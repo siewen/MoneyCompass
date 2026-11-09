@@ -644,6 +644,7 @@
 :root[data-theme="hell"] .ni-page .oa-adv{background:linear-gradient(135deg,rgba(23,38,34,0.045),rgba(23,38,34,0.013));border:1px solid rgba(23,38,34,0.104)}
 :root[data-theme="hell"] .ni-page .oa-sub{background:rgba(23,38,34,0.027)}
 :root[data-theme="hell"] .ovr2e .ovb-hold div{border-bottom:1px solid rgba(23,38,34,0.078)}
+:root[data-theme="hell"] .nwp-chart>p.hint{color:var(--muted,#48645c)}
 /* Hand-written Light theme fixes (appended by make-hell.py): neutral page, no green glow, calm cards */
 :root[data-theme="hell"] body{background:#CDD3D0 !important}
 :root[data-theme="hell"] .sidebar,:root[data-theme="hell"] aside{background:#D8DEDB !important}
