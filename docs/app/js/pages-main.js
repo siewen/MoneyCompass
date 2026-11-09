@@ -819,8 +819,11 @@ export const Expenses = {
     }
     };
     const openWin = (title, icon, key, wide, onClose) => {
-      const pp = popup("", { width: wide, cls: "nw-win pm-win" }), orig = App.refresh;
-      const draw = () => { pp.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC[icon], 24)}</span><h3>${esc(title)}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="grid bp-flat ex-pop">${lastEx[key]}</div>`; bindHist(pp.el); bindExpenseRows(pp.el); bindBin(pp.el); };
+      const pp = popup("", { width: wide, cls: "nw-win sc-win" }), orig = App.refresh;
+      const EMO = { hist: "🧾", side: "📊" };
+      const draw = () => { pp.el.innerHTML = `<div class="nw-hd"><span class="nw-hi">${EMO[key] || "🧾"}</span><div><h2>${esc(title)}</h2></div><button class="nw-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="sc-body ex2-body"><div class="grid bp-flat ex-pop">${lastEx[key]}</div></div><div class="nw-ft"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
+        pp.el.querySelectorAll(".ex-pop .nw-ch h3, .ex-pop .oc-head h3").forEach(h => { if (h.textContent.trim() === title) { const hd = h.parentElement; if (hd.children.length === 1) hd.remove(); else h.remove(); } });
+        bindHist(pp.el); bindExpenseRows(pp.el); bindBin(pp.el); };
       App.refresh = (...a) => { orig(...a); if (!pp.closed) draw(); };
       const close = pp.close; pp.close = (...a) => { App.refresh = orig; close(...a); onClose?.(); };
       draw();

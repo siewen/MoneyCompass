@@ -2241,3 +2241,7 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .inc2-body .is-row:hover{border-color:rgba(52,211,153,.5)}
 .inc2-body .is-head{border:0;padding:4px 10px}
 .inc2-body .inc-form{gap:24px}
+
+/* Outflow history / transfers windows */
+.ex2-body .ex-pop{display:block;padding:0}
+.ex2-body .ex-pop>.nw-card,.ex2-body .ex-pop>.card{background:transparent;border:0;box-shadow:none;padding:0}
