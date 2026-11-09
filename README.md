@@ -28,7 +28,7 @@ Personal finance for Poland – in your browser or on Windows. Private: your dat
 | 🎯 **Savings & goals** | All your money in one place, promotion reminders, savings goals (Pro) |
 | 🔒 **PIN & lock** | A PIN per profile, automatic lock, backups encrypted with a password (AES-256) |
 
-Made for Poland: NBP rates, treasury bonds, IKE/IKZE and bank offers, checked every day. Available in Polish, English, German and French.
+Made for Poland: NBP rates, treasury bonds, IKE/IKZE and bank offers, checked every day. Available in Polish and English.
 
 ## Privacy
 
