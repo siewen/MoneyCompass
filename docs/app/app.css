@@ -2355,3 +2355,8 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .tp-mt th{font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;opacity:.7;font-weight:600}
 .tp-mt tr.bon td{background:rgba(16,185,129,.1)}
 .tp-mt tfoot td{font-weight:700;border-top:2px solid rgba(16,185,129,.5);border-bottom:0}
+
+.tp-mt tr.hi td{background:rgba(245,158,11,.09)}
+.tp-mt tr.hi.bon td{background:rgba(245,158,11,.16)}
+.tp-c32{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:99px;font-size:.7rem;font-weight:700;background:rgba(245,158,11,.22);color:#f59e0b}
+.tp-warn{margin:12px 0 4px;padding:10px 14px;border-radius:12px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);font-size:.9rem}
