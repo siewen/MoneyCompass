@@ -40,7 +40,7 @@ export const IC = {
 };
 
 /** Where a click on a figure card leads ("#opt" = the Optimize window). Keys are the English card labels. */
-const KGO = { "Income per Month": "income", "Spending per Month": "expenses", "Monthly Surplus": "budget", "Savings Rate": "portfolio",
+const KGO = { "Income per Month": "income", "Spending per Month": "expenses", "Remaining Money": "budget", "Savings Rate": "portfolio",
   "Next Payment": "calendar", "Income Growth Potential": "#opt", "Potential Savings": "#opt", "Savings Opportunity": "#opt", "Potential Monthly Savings": "#opt", "Spending 20% less there saves": "#opt",
   "Emergency Fund Balance": "portfolio", "Months Covered": "expenses", "Annual Interest Projection": "savings", "Savings Health Score": "#opt", "Potential Extra Profit": "#opt", "Additional Profit": "#opt",
   "Monthly Payments": "calendar", "Spent This Month": "expenses", "Planned Savings": "portfolio", "Upcoming Income": "income", "Upcoming Expenses": "expenses", "Scheduled Savings Transfers": "portfolio",

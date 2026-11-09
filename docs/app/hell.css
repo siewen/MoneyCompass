@@ -587,6 +587,9 @@
 :root[data-theme="hell"] .ow-ring small{color:#46645b}
 :root[data-theme="hell"] .ow-st{border:1px solid rgba(23,38,34,0.117);background:rgba(23,38,34,0.027)}
 :root[data-theme="hell"] .ow-st small{color:#46645b}
+:root[data-theme="hell"] .bl2-row{background:var(--card2,rgba(23,38,34,0.036));border:1px solid var(--line,rgba(23,38,34,0.104))}
+:root[data-theme="hell"] .bl2-bar{background:rgba(127,127,127,0.09)}
+:root[data-theme="hell"] .bl2-add{border:1px dashed var(--line,rgba(23,38,34,0.234))}
 /* Hand-written Light theme fixes (appended by make-hell.py): neutral page, no green glow, calm cards */
 :root[data-theme="hell"] body{background:#CDD3D0 !important}
 :root[data-theme="hell"] .sidebar,:root[data-theme="hell"] aside{background:#D8DEDB !important}

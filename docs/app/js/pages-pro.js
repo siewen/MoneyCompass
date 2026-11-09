@@ -647,13 +647,22 @@ export const Budget = {
         { extra: PM("b-goals", T("Edit savings goals")) }) }).firstElementChild); }
     // ± windows: edit, delete and add
     const openLimits = () => {
-      const p = popup("", { width: 720, cls: "nw-win pm-win" });
+      const p = popup("", { width: 720, cls: "nw-win sc-win" });
       const draw = () => {
         const lim = D().Budgets.filter(b => b.MonthlyLimit > 0), tot = lim.reduce((a, b) => a + b.MonthlyLimit, 0);
-        p.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-rank">${si(IC.wallet, 24)}</span><h3>${esc(T("Budget limits"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
-          <div class="bl-sum">${stat(T("Your limits together"), pln(tot))}${D().Goals.length ? stat(T("To set aside for savings goals"), pln(goalsPerMonth(D()))) : ""}</div>
-          <div class="pm-list">${lim.map(b => `<div class="pm-row"><span class="pm-n">${esc(categoryLabel(b.Category))}</span><input type="text" inputmode="decimal" value="${esc(plain(b.MonthlyLimit))}" data-edit-limit="${esc(b.Category)}" aria-label="${esc(T("Limit per month (zł)"))}"><span class="pm-u">zł</span><button class="icon-btn danger" data-del-limit="${esc(b.Category)}" title="${esc(T("Delete"))}">🗑</button></div>`).join("") || `<p class="hint">${esc(T("No limits yet. Set your first one above."))}</p>`}</div>
-          <form id="budget" class="bl-form"><h4>＋ ${esc(T("Set a monthly limit"))}</h4><div class="bl-row">${select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], categories()[0].Name)}${numInput("limit", "", T("Limit per month (zł)"))}${button("＋ " + T("Save limit"), "save-limit", "main")}</div></form>`;
+        const t0 = today(), st = new Date(t0.getFullYear(), t0.getMonth(), 1), spentBy = {};
+        D().Expenses.forEach(e => { const dt = parseDate(e.Date); if (dt >= st) spentBy[e.Category] = (spentBy[e.Category] || 0) + e.Amount; });
+        const spentAll = lim.reduce((a, b) => a + (spentBy[b.Category] || 0), 0);
+        p.el.innerHTML = `<div class="nw-hd"><span class="nw-hi">💶</span><div><h2>${esc(T("Budget limits"))}</h2><p class="nw-sub">${esc(T("Set how much you want to spend per month in each category."))}</p></div><button class="nw-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
+          <div class="sc-body bl2-body">
+            <div class="ow-bigs">${`<div class="ow-big"><small>${esc(T("Your limits together"))}</small><b>${esc(pln(tot))}</b></div><div class="ow-big"><small>${esc(T("Spent this month"))}</small><b class="${spentAll > tot && tot > 0 ? "bad" : ""}">${esc(pln(spentAll))}</b></div>`}</div>
+            ${D().Goals.length ? `<p class="ow-note">🎯 ${esc(T("To set aside for savings goals"))}: <b>${esc(pln(goalsPerMonth(D())))}</b></p>` : ""}
+            <div class="bl2-list">${lim.map(b => { const sp = spentBy[b.Category] || 0, pc = Math.min(100, Math.round(sp / b.MonthlyLimit * 100)), over = sp > b.MonthlyLimit;
+              return `<div class="bl2-row ${over ? "over" : pc >= 80 ? "warn" : ""}"><div class="bl2-top"><b>${esc(categoryLabel(b.Category))}</b><span class="bl2-in"><input type="text" inputmode="decimal" value="${esc(plain(b.MonthlyLimit))}" data-edit-limit="${esc(b.Category)}" aria-label="${esc(T("Limit per month (zł)"))}"><em>zł</em></span><button class="icon-btn danger" data-del-limit="${esc(b.Category)}" title="${esc(T("Delete"))}">🗑</button></div>
+                <div class="bl2-bar"><i style="width:${pc}%"></i></div><small>${esc(T("{0} of {1} spent this month", pln(sp), pln(b.MonthlyLimit)))} · ${over ? esc(T("over by {0}", pln(sp - b.MonthlyLimit))) : esc(T("{0} left", pln(b.MonthlyLimit - sp)))}</small></div>`; }).join("") || `<p class="hint mc-empty">${esc(T("No limits yet. Set your first one below."))}</p>`}</div>
+            <form id="budget" class="bl2-add"><h4>＋ ${esc(T("Set a monthly limit"))}</h4><div class="bl2-f">${select("category", [...categories().map(c => [c.Name, categoryLabel(c.Name)]), NEW_CAT()], categories()[0].Name)}${numInput("limit", "", T("Limit per month (zł)"))}${button("＋ " + T("Save limit"), "save-limit", "main")}</div></form>
+          </div>
+          <div class="nw-ft"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
         const dd = D(), done = () => { save(); App.refresh(); draw(); };
         p.el.querySelectorAll("[data-edit-limit]").forEach(i => i.onchange = () => { const v = num(i.value), b = dd.Budgets.find(x => x.Category === i.dataset.editLimit); if (b && v > 0) { b.MonthlyLimit = v; toast(T("Saved.")); done(); } else { toast(T("Please enter a limit above 0."), "bad"); draw(); } });
         p.el.querySelectorAll("[data-del-limit]").forEach(b => b.onclick = async () => { const cat = b.dataset.delLimit;
@@ -666,14 +675,17 @@ export const Budget = {
       draw();
     };
     const openGoals = () => {
-      const p = popup("", { width: 760, cls: "nw-win pm-win" }), orig = App.refresh; let busy = false;
+      const p = popup("", { width: 760, cls: "nw-win sc-win" }), orig = App.refresh; let busy = false;
       const draw = () => {
         if (busy) return; busy = true;
-        p.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC.flag, 24)}</span><h3>${esc(T("Savings goals"))}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="goals-host bp-flat"></div>`;
+        const gd = D(), gt = gd.Goals.reduce((a, x) => a + x.Target, 0), gs = gd.Goals.reduce((a, x) => a + Math.min(goalSaved(x, gd), x.Target), 0);
+        p.el.innerHTML = `<div class="nw-hd"><span class="nw-hi">🎯</span><div><h2>${esc(T("Savings goals"))}</h2><p class="nw-sub">${esc(T("Save for what matters – a car, a holiday, a flat."))}</p></div><button class="nw-x" data-close aria-label="${esc(T("Close"))}">✕</button></div>
+          <div class="sc-body gl2-body"><div class="ow-bigs gl2-tiles"><div class="ow-big"><small>${esc(T("Goal amount (zł)"))}</small><b>${esc(pln(gt))}</b></div><div class="ow-big"><small>${esc(T("Already saved"))}</small><b class="good">${esc(pln(gs))}</b></div><div class="ow-big"><small>${esc(T("To save per month for all goals"))}</small><b>${esc(pln(goalsPerMonth(gd)))}</b></div></div><div class="goals-host bp-flat"></div></div>
+          <div class="nw-ft"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`;
         const gh = p.el.querySelector(".goals-host"); Goals.render(gh);
         const cs = [...gh.querySelectorAll(".nw-card")];
         if (cs.length >= 3) { const [c1, c2, c3] = cs; c1.querySelector(".nw-ch")?.remove(); c2.querySelector(".nw-ch")?.remove();
-          [...c2.children].forEach(x => c1.appendChild(x)); c2.remove();
+          c1.replaceChildren(); [...c2.children].forEach(x => c1.appendChild(x)); c2.remove();
           const f3 = c3.querySelector(".nw-ch h3"), ttl = f3 ? f3.textContent : T("Add a goal"); c3.querySelector(".nw-ch")?.remove();
           const dt = document.createElement("details"); dt.className = "bl-add"; dt.open = true;
           dt.innerHTML = `<summary>＋ ${esc(ttl)}</summary>`; while (c3.firstChild) dt.appendChild(c3.firstChild); c1.appendChild(dt); c3.remove(); }
