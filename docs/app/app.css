@@ -2232,3 +2232,12 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .gl2-body{display:flex;flex-direction:column;gap:12px}
 .gl2-tiles{grid-template-columns:repeat(3,1fr)}
 @media(max-width:560px){.gl2-tiles{grid-template-columns:1fr}}
+
+/* Income windows */
+.inc2-body{display:flex;flex-direction:column;gap:12px}
+.inc2-body .inc-pop{display:block;padding:0}
+.inc2-body .inc-pop>.card,.inc2-body .inc-pop>.ov-card{background:transparent;border:0;box-shadow:none;padding:0}
+.inc2-body .is-row{padding:12px 10px;border:1px solid var(--line,rgba(255,255,255,.08));border-radius:12px;margin-top:8px;background:rgba(127,127,127,.06)}
+.inc2-body .is-row:hover{border-color:rgba(52,211,153,.5)}
+.inc2-body .is-head{border:0;padding:4px 10px}
+.inc2-body .inc-form{gap:24px}

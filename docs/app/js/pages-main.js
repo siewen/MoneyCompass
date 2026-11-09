@@ -505,8 +505,14 @@ export const Income = {
     el.innerHTML = `<div class="ni-page">${head}${fcBand}<div class="ni-r2">${srcDash}${tlDash}${insDash}</div><div class="ni-r3">${impDash}${allocDash}${addDash}</div>${botBand}</div>`;
     el.querySelectorAll("[data-incr]").forEach(b => b.onclick = () => { incRange = +b.dataset.incr; App.refresh(); });
     const openInc = (key, title, icon, width) => {
-      const pp = popup("", { width, cls: "nw-win pm-win" }), orig = App.refresh; incWin = pp;
-      const draw = () => { pp.el.innerHTML = `<div class="nw-ch pm-head"><span class="rp-si i-res">${si(IC[icon], 24)}</span><h3>${esc(title)}</h3><button class="pm-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="grid bp-flat inc-pop">${lastInc[key]}</div>`; if (key === "add") bindAdd(pp.el); if (key === "src") { bindSrc(pp.el); bindBin(pp.el); } if (key === "imp") bindRec(pp.el); };
+      const pp = popup("", { width, cls: "nw-win sc-win" }), orig = App.refresh; incWin = pp;
+      const EMO = { src: "🏦", add: "＋", imp: "📄" }, SUB = { src: T("Everything you earn – switch a source off to leave it out of the totals."), add: T("Add what you earn so MoneyCompass can show what is left each month."), imp: T("Statements you imported.") };
+      const draw = () => {
+        const ii = Calc.income(D()), act = D().Incomes.filter(x => x.Active && x.Frequency !== ONE_TIME).length;
+        const top = key === "src" ? `<div class="ow-bigs"><div class="ow-big"><small>${esc(T("Monthly Income"))}</small><b class="good">${esc(pln(ii.monthlyTotal))}</b></div><div class="ow-big"><small>${esc(T("Active Sources"))}</small><b>${act}</b></div></div>` : "";
+        pp.el.innerHTML = `<div class="nw-hd"><span class="nw-hi">${EMO[key] || "💶"}</span><div><h2>${esc(title)}</h2><p class="nw-sub">${esc(SUB[key] || "")}</p></div><button class="nw-x" data-close aria-label="${esc(T("Close"))}">✕</button></div><div class="sc-body inc2-body">${top}<div class="grid bp-flat inc-pop">${lastInc[key]}</div></div>${key === "add" ? "" : `<div class="nw-ft"><button class="btn second" data-close>${esc(T("Close"))}</button></div>`}`;
+        pp.el.querySelectorAll(".inc-pop .oc-head h3, .inc-pop .inc-h").forEach(h => { const hd = h.closest(".oc-head"); if (key === "add" || h.textContent.trim() === title) { if (hd && hd.children.length === 1) hd.remove(); else h.remove(); } });
+        if (key === "add") bindAdd(pp.el); if (key === "src") { bindSrc(pp.el); bindBin(pp.el); } if (key === "imp") bindRec(pp.el); };
       App.refresh = (...a) => { orig(...a); if (key === "add") pp.close(); else if (!pp.closed) draw(); };
       const close = pp.close; pp.close = (...a) => { App.refresh = orig; incWin = null; close(...a); };
       draw();
