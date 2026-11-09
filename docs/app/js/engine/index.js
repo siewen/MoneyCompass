@@ -5,6 +5,9 @@ import { runEngine, overallStatus } from "./registry.js";
 import { registerCoreAdvisors } from "./advisors.js";
 import { registerAdvisor } from "./registry.js";
 import { taxAdvise } from "./tax-advisor.js";
+import { wealthAdvise } from "./wealth-advisor.js";
+import { investAdvise } from "./invest-advisor.js";
+import { goalAdvise } from "./goal-advisor.js";
 export { registerAdvisor, unregisterAdvisor, opportunities, improvements, rankScore, groupByAdvisor, potentialOf } from "./registry.js";
 export { ADVISORS } from "./state.js";
 export { makeSnapshot } from "./snapshot.js";
@@ -12,6 +15,9 @@ export { makeSnapshot } from "./snapshot.js";
 /** c = the raw figures (see makeSnapshot). Returns { snap, status, primary, secondary, states, byAdvisor, potential, confidence }. */
 export function advise(c, isOn = moduleOn) {
   registerCoreAdvisors();
+  registerAdvisor({ id: "wealth", advise: wealthAdvise });
+  registerAdvisor({ id: "investment", module: "investments", advise: investAdvise });
+  registerAdvisor({ id: "goal", module: "budget", advise: goalAdvise });
   registerAdvisor({ id: "tax", module: "taxes", advise: taxAdvise });   // only runs while the Taxes module is on
   const snap = makeSnapshot(c), res = runEngine(snap, isOn);
   return { snap, status: overallStatus(snap, res), ...res };

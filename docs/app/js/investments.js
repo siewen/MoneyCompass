@@ -189,6 +189,7 @@ export const Investments = {
           ${field(T("Value today"), numInput("value", p.Value ? plain(p.Value) : "", T("e.g. {0}", "5400")))}</div>`}
           <div class="two">${field(T("Regular investing per month (optional)"), numInput("monthly", p.Monthly ? plain(p.Monthly) : "", T("e.g. {0}", "500")))}
           ${field(T("Currency"), select("currency", [["PLN", "PLN"], ["EUR", "EUR"], ["USD", "USD"]], cur(p)))}</div>
+          <div class="two">${field(T("Yearly cost in % of the value (optional)"), numInput("fee", p.FeePercent ? plain(p.FeePercent) : "", T("e.g. {0}", "0,5")))}</div>
           <div class="buttons">${button(esc(has ? T("Update") : T("Save")), "inv-save", "main")}${has ? button(esc(T("Remove")), "inv-del", "second") : ""}</div>
         </form></details>${has ? "" : "</details>"}`, "inv-card");
     };
@@ -241,7 +242,7 @@ export const Investments = {
         if (!coins && !(inv > 0) && !(val > 0)) { toast(T("Please enter an amount bigger than 0."), "bad"); return; }
         const p = get(id);
         if (!coins) Object.assign(p, { Invested: inv || 0, Value: val || 0 });
-        Object.assign(p, { Monthly: mon > 0 ? mon : 0, Currency: f.currency.value, Updated: isoDate(today()) });
+        Object.assign(p, { Monthly: mon > 0 ? mon : 0, Currency: f.currency.value, FeePercent: f.fee ? Math.max(0, num(f.fee.value) || 0) : 0, Updated: isoDate(today()) });
         notePoint(p); save(); App.refresh(); toast(T("Saved."), "good");
       };
       const del = f.querySelector('[data-action="inv-del"]');
@@ -276,3 +277,14 @@ export const Investments = {
 /** Value of all investments in złoty (counted as risky money in the totals). */
 export const investmentsTotal = d => (d.Investments || []).reduce((s, p) => s + positionValue(p), 0);
 Hooks.investmentsTotal = investmentsTotal;
+
+/** For the Investment Advisor: the positions, their mix and the cost, worked out from the saved data. */
+export function investFacts(d) {
+  const list = (d.Investments || []).filter(p => positionValue(p) > 0 || positionInvested(p) > 0);
+  const positions = list.map(p => { const b = BROKERS.find(x => x.id === p.Broker), value = positionValue(p), invested = positionInvested(p);
+    return { name: b ? b.name : p.Broker, value, invested, ret: invested > 0 ? (value - invested) / invested : null, crypto: !!(b && b.crypto) || coinsOf(p).length > 0, monthly: inPln(p.Monthly, p), fee: +p.FeePercent || 0 }; });
+  const total = positions.reduce((a, x) => a + x.value, 0), top = [...positions].sort((a, b) => b.value - a.value)[0];
+  const wealth = Calc.portfolio(d).total;
+  return { positions, count: positions.length, total, topName: top ? top.name : "", topShare: top && total > 0 ? top.value / total : 0,
+    cryptoShare: total > 0 ? positions.filter(x => x.crypto).reduce((a, x) => a + x.value, 0) / total : 0, shareOfWealth: wealth > 0 ? total / wealth : 0, monthly: positions.reduce((a, x) => a + x.monthly, 0) };
+}

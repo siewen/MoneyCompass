@@ -372,7 +372,8 @@ const fmtMonthKey = k => monthName(new Date(+k.slice(0, 4), +k.slice(5, 7) - 1, 
 function recordSavings(d, total) {
   const now = today(), key = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const h = d.Settings.SavingsHistory || (d.Settings.SavingsHistory = {});
-  if (h[key] !== Math.round(total)) { h[key] = Math.round(total); save(); }
+  const dh = d.Settings.DebtHistory || (d.Settings.DebtHistory = {}), debtNow = Math.round(d.Loans.filter(l => l.Remaining > 0).reduce((a, l) => a + loanPlan(l).remainingNow, 0));
+  if (h[key] !== Math.round(total) || dh[key] !== debtNow) { h[key] = Math.round(total); dh[key] = debtNow; save(); }
 }
 const axis = v => v >= 1000 ? (Math.round(v / 100) / 10).toString().replace(".", ",") + "k" : String(Math.round(v));
 

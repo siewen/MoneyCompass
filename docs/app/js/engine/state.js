@@ -10,7 +10,8 @@ export const ADVISORS = {
   tax:         { name: "Tax Advisor",              icon: "🧾", route: "taxes"     },
   investment:  { name: "Investment Advisor",       icon: "📈", route: "investments" },
   opportunity: { name: "Opportunity Advisor",      icon: "💡", route: "overview"  },
-  wealth:      { name: "Wealth Advisor",           icon: "💎", route: "overview"  },
+  wealth:      { name: "Wealth Advisor",           icon: "💎", route: "networth"  },
+  goal:        { name: "Goal Advisor",             icon: "🎯", route: "budget"    },
 };
 
 /** kind: problem | risk | opportunity | positive.  pot: the money an opportunity uses, so it is never counted twice. */

@@ -1,6 +1,7 @@
 // Collects the extra facts the Savings, Loans and Emergency advisors need from the saved data and today's offers.
 // The result is merged into the snapshot. (Everything else in the snapshot comes from the page figures.)
-import { Calc, promo, currentRate, loanPlan, State } from "../core.js";
+import { Calc, promo, currentRate, loanPlan, State, goalSaved, parseDate, today, moduleOn } from "../core.js";
+import { investFacts } from "../investments.js";
 import { Rates } from "../rates.js";
 import { moves } from "../advice.js";
 import { extraEffect, paymentFor, switchCost } from "../debts.js";
@@ -38,8 +39,26 @@ export function collectExtras(d = State.data) {
     return x;
   });
   const left = loansX.map(x => x.months);
+
+  // Net worth: assets minus debts, month by month from what has been recorded (the current month is always live)
+  const assets = Calc.portfolio(d).total, liab = loansX.reduce((a, x) => a + x.rem, 0), t = today();
+  const key = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}`;
+  const ah = { ...(d.Settings.SavingsHistory || {}) }, dh = d.Settings.DebtHistory || {};
+  ah[key] = assets;
+  let lastDebt = null;
+  const history = Object.entries(ah).sort().map(([k, a]) => { const dk = k === key ? liab : dh[k]; if (dk !== undefined) lastDebt = dk; return { k, assets: a, debt: dk ?? lastDebt ?? liab, net: a - (dk ?? lastDebt ?? liab) }; });
+  const mIdx = k => +k.slice(0, 4) * 12 + +k.slice(5, 7), first = history[0], last = history[history.length - 1];
+  const span = history.length >= 2 ? mIdx(last.k) - mIdx(first.k) : 0, change = history.length >= 2 ? last.net - first.net : 0;
+  const nw = { assets, liabilities: liab, net: assets - liab, history, span, change, monthly: span > 0 ? change / span : 0, pct: first && first.net > 0 && history.length >= 2 ? change / first.net : null };
+  const wp = d.Settings.WealthPlan || {};
+  const plan = { age: +wp.age || 0, retireAge: +wp.retireAge || 65, spend: +wp.spend || 0, ret: wp.ret === undefined || wp.ret === "" ? 4 : +wp.ret, contrib: wp.contrib === undefined || wp.contrib === "" ? null : +wp.contrib };
+
+  const goals = (d.Goals || []).map(g => ({ id: g.Id, name: g.Name, target: +g.Target || 0, saved: goalSaved(g, d), date: g.TargetDate }))
+    .filter(g => g.target > 0 && g.saved < g.target && g.date).map(g => { const dt = parseDate(g.date);
+      return { ...g, remaining: g.target - g.saved, months: (dt.getFullYear() - t.getFullYear()) * 12 + dt.getMonth() - t.getMonth(), overdue: dt < t }; })
+    .sort((a, b) => parseDate(a.date) - parseDate(b.date));
   return {
-    accounts, bestRate, loansX,
+    accounts, bestRate, loansX, nw, plan, goals, invest: moduleOn("investments") ? investFacts(d) : null,
     moves: moves(d).map(m => ({ id: m.h.Id, name: m.h.Name, bank: m.o.Bank, moved: m.moved, gain: m.gain })),
     debtFreeMonths: loansX.length && left.every(m => m !== null) ? Math.max(...left) : null,
     efMonths: +d.Settings.EmergencyMonths || 0,

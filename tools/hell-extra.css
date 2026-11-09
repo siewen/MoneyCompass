@@ -29,3 +29,5 @@
 :root[data-theme="hell"] .ox-side b{color:#0f7a58 !important}
 :root[data-theme="hell"] .ap-row{border-top-color:rgba(0,0,0,.09) !important}
 :root[data-theme="hell"] .ap-t em{color:#0f7a58 !important}
+:root[data-theme="hell"] .nwp-row{border-top-color:rgba(0,0,0,.09) !important}
+:root[data-theme="hell"] .nwp-ms li.done{color:#0f7a58 !important}
