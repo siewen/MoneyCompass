@@ -11,25 +11,27 @@ const r2 = x => Math.round(x * 100) / 100;
 
 /** Twelve months of the same gross pay → monthly and yearly figures.
  *  o: raisedCosts, pit2, under26, bonus (gross, paid once a year, in December), ppk (take part), benefit (taxable employer benefit a month, not paid in cash), deduct (other deductions from net a month) */
-export function calcYear(gross, o = {}) {
+function calcEmp(gross, o = {}) {
+  const ct = o.contract || "uop", noS = !!o.noSocial || ct === "dzielo" || (ct === "zlecenie" && !!o.student), noH = ct === "dzielo" || (ct === "zlecenie" && !!o.student), noSick = ct === "zlecenie" && !o.sickVol; let kupLeft = o.kupRate === TAX.zlecenie.kupCopyright ? TAX.zlecenie.copyrightLimit : Infinity;
   const z = TAX.zus, kup = (o.raisedCosts ? TAX.kup.raised : TAX.kup.standard), ben = o.benefit || 0, bonuses = o.bonuses || [], bonus = bonuses.reduce((a, b) => a + b.amount, 0);
   gross += o.allowance || 0;
-  let cum = 0, pen = 0, dis = 0, sick = 0, health = 0, base = 0, first = null, ppkEmp = 0, ppkEr = 0; const months = []; const pit = TAX.pit, red = o.pit2 === false ? 0 : pit.taxFree * pit.low, ex = o.under26 ? TAX.youngLimit : 0; let tPaid = 0, taxableC = 0, zTax = 0, sickDays = 0;
-  if (o.sick && o.sick.length) { var normal = calcYear(gross - (o.allowance || 0), { ...o, sick: [] }).first; }
+  let cum = 0, pen = 0, dis = 0, sick = 0, health = 0, base = 0, first = null, ppkEmp = 0, ppkEr = 0; const months = []; const pit = TAX.pit, red = o.pit2 === false ? 0 : pit.taxFree * pit.low, ex = o.under26 || (ct === "zlecenie" && o.student) ? TAX.youngLimit : 0; let tPaid = 0, taxableC = 0, zTax = 0, sickDays = 0;
+  if (o.sick && o.sick.length) { var normal = calcEmp(gross - (o.allowance || 0), { ...o, sick: [] }).first; }
   for (let m = 0; m < 12; m++) {
     const sk = (o.sick || []).filter(x => x.month === m), sd = Math.min(30, sk.reduce((a, x) => a + (x.days || 0), 0)), manualNet = sk.find(x => x.net > 0);
     // sick leave (auto): 80% of the pay after social insurance, per day = / 30. The employer pays the first 33 days of the year, ZUS the rest.
     let dE = 0, dZ = 0; if (sd > 0 && !manualNet) { dE = Math.max(0, Math.min(sd, TAX.sick.employerDays - sickDays)); dZ = sd - dE; } sickDays += sd;
     const daily = gross * (1 - z.pension - z.disability - z.sickness) / 30 * TAX.sick.rate, sickPay = daily * dE, zusBen = daily * dZ, hz = zusBen * TAX.health, tz = zusBen * pit.low; zTax += tz;
     const g = gross * (30 - dE - dZ) / 30 + sickPay + ben + bonuses.filter(b => b.month === m).reduce((a, b) => a + b.amount, 0), pb = Math.min(g, Math.max(0, TAX.zusYearLimit - cum)); cum += g;
-    const p = pb * z.pension, d = pb * z.disability, s = (g - sickPay) * z.sickness, soc = p + d + s, h = (g - soc) * TAX.health;
+    const p = noS ? 0 : pb * z.pension, d = noS ? 0 : pb * z.disability, s = noS || noSick ? 0 : (g - sickPay) * z.sickness, soc = p + d + s, h = noH ? 0 : (g - soc) * TAX.health;
+    const kupM = o.kupRate ? Math.min(Math.max(0, g - soc) * o.kupRate, kupLeft) : kup; kupLeft -= kupM;
     const pe = o.ppk ? g * TAX.ppk.employee : 0, pr = o.ppk ? g * TAX.ppk.employer : 0;
-    pen += p; dis += d; sick += s; health += h + hz; ppkEmp += pe; ppkEr += pr; base += Math.max(0, g - soc - kup + pr);
+    pen += p; dis += d; sick += s; health += h + hz; ppkEmp += pe; ppkEr += pr; base += Math.max(0, g - soc - kupM + pr);
     // Polish payroll: tax is settled on the running total since January, so the 12% → 32% change happens in the month the total passes the threshold
     taxableC = Math.max(0, base - ex);
     const tCum = Math.max(tPaid, taxableC <= pit.threshold ? Math.max(0, taxableC * pit.low - red * (m + 1) / 12) : pit.threshold * pit.low - red + (taxableC - pit.threshold) * pit.high);
     months.push({ m, gross: g - ben + zusBen, ins: p + d + s + h + hz, ppk: pe, tax: tCum - tPaid + tz, sick: sd, manualNet: manualNet ? manualNet.net : 0, high: taxableC > pit.threshold, bonus: bonuses.filter(b => b.month === m).reduce((a, b) => a + b.amount, 0) }); tPaid = tCum;
-    if (!first) first = { pension: r2(p), disability: r2(d), sickness: r2(s), health: r2(h), ppk: r2(pe), base: Math.max(0, g - soc - kup + pr) };
+    if (!first) first = { pension: r2(p), disability: r2(d), sickness: r2(s), health: r2(h), ppk: r2(pe), base: Math.max(0, g - soc - kupM + pr) };
   }
   const B = Math.round(base), taxable = taxableC, tax = tPaid + zTax;
   const social = pen + dis + sick, grossYear = months.reduce((a, x) => a + x.gross, 0), deductYear = (o.deduct || 0) * 12;
@@ -42,14 +44,44 @@ export function calcYear(gross, o = {}) {
   return { months, gross, grossYear, social: r2(social), health: r2(health), tax: r2(tax), ppk: r2(ppkEmp), deductYear: r2(deductYear), netYear: r2(cashYear), netMonth: r2(cashYear / 12), base: B, taxable, first, benefit: ben, bonus,
     over: Math.max(0, taxable - pit.threshold), room: Math.max(0, pit.threshold - taxable), effective: grossYear > 0 ? (social + health + tax) / grossYear : 0 };
 }
+/** Own business (B2B): `gross` = revenue a month without VAT; o.costs = business costs a month. Same result shape as calcEmp. */
+function calcB2B(gross, o = {}) {
+  const B = TAX.b2b, pit = TAX.pit, zt = o.zus || "full", Z = B.zus[zt], costs = o.costs || 0, form = o.taxForm || "linear", rate = o.lumpRate || 0.12;
+  const socM = zt === "none" ? 0 : Z.base * (Z.pension + Z.disability + Z.accident + Z.fund + (o.zusSick ? Z.sickness : 0));
+  const socP = zt === "none" ? 0 : Z.base * Z.pension, socD = zt === "none" ? 0 : Z.base * Z.disability, socS = zt === "none" ? 0 : socM - socP - socD;
+  const red = pit.taxFree * pit.low, months = []; let base = 0, tPaid = 0, healthY = 0, taxableC = 0;
+  const lumpHealth = B.health.lump.find(([lim]) => gross * 12 <= lim)[1] * B.health.scale;
+  for (let m = 0; m < 12; m++) {
+    const inc = Math.max(0, gross - costs - socM), min = m === 0 ? B.health.minJan : B.health.min;
+    const h = form === "lump" ? lumpHealth : Math.max(min, inc * (form === "linear" ? B.health.linear : B.health.scale));
+    let tCum;
+    if (form === "linear") { base += inc; taxableC = base; tCum = taxableC * B.linear; }
+    else if (form === "lump") { base += Math.max(0, gross - socM); taxableC = base; tCum = taxableC * rate; }
+    else { base += inc; taxableC = Math.max(0, base - (o.under26 ? TAX.youngLimit : 0)); tCum = Math.max(tPaid, taxableC <= pit.threshold ? Math.max(0, taxableC * pit.low - (o.pit2 === false ? 0 : red) * (m + 1) / 12) : pit.threshold * pit.low - (o.pit2 === false ? 0 : red) + (taxableC - pit.threshold) * pit.high); }
+    tCum = Math.max(tPaid, tCum); healthY += h;
+    months.push({ m, gross, ins: socM + h, ppk: 0, tax: tCum - tPaid, deduct: costs, bonus: 0, sick: 0, high: form === "scale" && taxableC > pit.threshold }); tPaid = tCum;
+  }
+  let netYear = 0; for (const x of months) { x.net = x.gross - x.ins - x.tax - x.deduct; netYear += x.net; }
+  const grossYear = gross * 12, f = months[0], first = { pension: r2(socP), disability: r2(socD), sickness: r2(socS), health: r2(f.ins - socM), ppk: 0, tax: r2(f.tax), deduct: r2(costs), base: Math.round(base / 12), net: r2(f.net) };
+  return { months, gross, grossYear, social: r2(socM * 12), health: r2(healthY), tax: r2(tPaid), ppk: 0, deductYear: r2(costs * 12), netYear: r2(netYear), netMonth: r2(netYear / 12), base: Math.round(base), taxable: taxableC, first, benefit: 0, bonus: 0,
+    over: form === "scale" ? Math.max(0, taxableC - pit.threshold) : 0, room: form === "scale" ? Math.max(0, pit.threshold - taxableC) : 0, effective: grossYear > 0 ? (socM * 12 + healthY + tPaid) / grossYear : 0 };
+}
+export const calcYear = (gross, o = {}) => (o.contract === "b2b" ? calcB2B(gross, o) : calcEmp(gross, o));
 /** Find the gross pay that gives the wanted net pay per month (bisection). */
 export function grossFromNet(net, o) {
   if (!(net > 0)) return 0;
-  let lo = net, hi = net * 3 + 1000;
+  let lo = net, hi = net * 3 + 1000 + (o.costs || 0);
   for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; calcYear(mid, o).first.net < net ? lo = mid : hi = mid; }
   return r2((lo + hi) / 2);
 }
 
+const CONTRACTS = [["uop", "Employment Contract (umowa o pracę)"], ["zlecenie", "Mandate Contract (umowa zlecenie)"], ["dzielo", "Contract for Specific Work (umowa o dzieło)"], ["b2b", "Own Business (B2B / JDG)"]];
+const CNOTE = {
+  uop: "Employment contract: social insurance and health insurance are taken from your pay. Bonuses, benefits, deductions and sick leave can be added below.",
+  zlecenie: "Mandate contract: pension and disability insurance are due unless you are a student under 26 or already employed with at least the minimum wage; health insurance is due (not for students). Costs of earning income: 20%.",
+  dzielo: "Contract for specific work: normally no ZUS and no health insurance. Costs of earning income 20% (50% for copyright work). Income tax 12% / 32%. If the contract is with your own employer, it is treated like an employment contract: use that type.",
+  b2b: "Own business: you pay your own ZUS and health insurance, and the tax form you choose decides the income tax. Not included: the deduction of health insurance from the tax (flat tax and lump sum), reliefs and VAT. Compare the three tax forms in the insights.",
+};
 const KINDS = {
   bonus: ["🎁", "Bonus (gross, once a year)"],
   allowance: ["➕", "Extra pay every month (gross)"],
@@ -60,11 +92,12 @@ const KINDS = {
 const SHORT = { bonus: "Bonus", allowance: "Monthly extra pay", benefit: "Benefit", deduct: "Deduction from net", sick: "Sick leave" };
 const PRESETS = [["Private medical care", "benefit"], ["Sport card", "benefit"], ["Medical care for my child", "benefit"], ["Bonus", "bonus"], ["Meal allowance", "allowance"], ["Union fee", "deduct"], ["Loan instalment", "deduct"], ["Sick leave", "sick"]];
 const MONTHS = () => Array.from({ length: 12 }, (_, i) => [String(i), new Intl.DateTimeFormat(undefined, { month: "long" }).format(new Date(2026, i, 1))]);
-const plan = () => { const s = State.data.Settings; if (!s.TaxPlan) s.TaxPlan = { mode: "gross", amount: "", raised: false, pit2: true, under26: false, ppk: false, items: [] }; if (!Array.isArray(s.TaxPlan.items)) s.TaxPlan.items = []; if (!Array.isArray(s.TaxPlan.jobs)) s.TaxPlan.jobs = []; return s.TaxPlan; };
+const plan = () => { const s = State.data.Settings; if (!s.TaxPlan) s.TaxPlan = { mode: "gross", amount: "", raised: false, pit2: true, under26: false, ppk: false, items: [] }; const q = s.TaxPlan; if (!q.contract) Object.assign(q, { contract: "uop", taxForm: "linear", zus: "full", lumpRate: "0.12", costs: "" }); if (!Array.isArray(s.TaxPlan.items)) s.TaxPlan.items = []; if (!Array.isArray(s.TaxPlan.jobs)) s.TaxPlan.jobs = []; return s.TaxPlan; };
 /** The saved extras → the options of the calculation. */
 export function planOpts(P) {
-  const it = P.items || [], sum = k => it.filter(x => x.kind === k).reduce((a, x) => a + (x.amount || 0), 0);
-  return { raisedCosts: P.raised, pit2: P.pit2, under26: P.under26, ppk: P.ppk, allowance: sum("allowance"), benefit: sum("benefit"), deduct: sum("deduct"),
+  const ct = P.contract || "uop", it = ct === "uop" ? P.items || [] : [], sum = k => it.filter(x => x.kind === k).reduce((a, x) => a + (x.amount || 0), 0);
+  return { contract: ct, student: P.student, sickVol: P.sickVol, noSocial: P.otherJob, kupRate: ct === "zlecenie" || ct === "dzielo" ? (P.copyright ? TAX.zlecenie.kupCopyright : TAX.zlecenie.kup) : 0, zus: P.zus, zusSick: P.zusSick, costs: num(P.costs) || 0, taxForm: P.taxForm, lumpRate: +P.lumpRate || 0.12,
+    raisedCosts: P.raised, pit2: ct === "dzielo" ? false : P.pit2, under26: P.under26, ppk: ct === "uop" && P.ppk, allowance: sum("allowance"), benefit: sum("benefit"), deduct: sum("deduct"),
     sick: it.filter(x => x.kind === "sick" && x.days > 0).flatMap(x => { const out = []; let m = +x.month >= 0 ? +x.month : 0, d = x.days; if (x.manual) return [{ month: m, days: Math.min(30, d), net: x.amount || 0 }]; while (d > 0 && m < 12) { out.push({ month: m, days: Math.min(30, d), net: 0 }); d -= 30; m++; } return out; }),
     bonuses: it.filter(x => x.kind === "bonus").map(x => ({ amount: x.amount || 0, month: +x.month >= 0 ? +x.month : 11 })) };
 }
@@ -75,6 +108,15 @@ const SRC_CHIPS = [["Ministry of Finance", TAX_SOURCES[2][1]], ["ZUS", TAX_SOURC
 /** Ways to keep more of the pay, worked out from the entered numbers. */
 function insights(g, o, y) {
   const list = [];
+  if (o.contract === "b2b") {
+    const forms = [["linear", T("Flat tax 19%")], ["scale", T("Tax scale 12% / 32%")], ...TAX.b2b.lumpRates.filter(r => [0.12, 0.085, 0.15].includes(r)).map(r => ["lump:" + r, T("Lump-sum tax {0}%", r * 100)])];
+    const res = forms.map(([k, n]) => [n, k, calcYear(g, k.startsWith("lump") ? { ...o, taxForm: "lump", lumpRate: +k.split(":")[1] } : { ...o, taxForm: k }).netYear]).sort((a, b) => b[2] - a[2]);
+    const cur = y.netYear, best = res[0];
+    list.push(best[2] - cur > 1 ? { t: T("Compare the tax forms"), d: T("With the same revenue and costs, {0} would leave you about {1} more a year than your current choice. Lump-sum tax depends on your type of business, so check the rate for your activity.", best[0], pln(best[2] - cur)), v: best[2] - cur } : { t: T("Your tax form looks good"), d: T("Among flat tax, tax scale and the lump-sum rates 8.5%, 12% and 15%, your current choice leaves you the most. The best rate for lump-sum tax depends on your type of business."), v: 0 });
+    list.push({ t: T("Check the ZUS options"), d: T("New businesses can use preferential ZUS for 24 months, and later the small ZUS Plus if the income is low. Check with ZUS what applies to you."), v: 0 });
+    return list;
+  }
+  if (o.contract && o.contract !== "uop") { list.push({ t: T("Use the tax reliefs"), d: T("In your yearly tax return you can use reliefs that this estimate does not include, for example for children, internet or donations."), v: 0 }); if (!o.kupRate || o.kupRate < 0.5) list.push({ t: T("Copyright costs of 50%"), d: T("If your work creates copyrighted works (for example software, texts, designs), the costs of earning income can be 50%. Ask your payer or a tax adviser."), v: 0 }); return list; }
   if (!o.raisedCosts) { const d = calcYear(g, { ...o, raisedCosts: true }).netYear - y.netYear; if (d > 1) list.push({ t: T("Check the raised costs of earning income"), d: T("If you work in a different town than you live in, the raised costs ({0} a month) can apply and would give you about {1} more a year.", pln(TAX.kup.raised), pln(d)), v: d }); }
   if (o.pit2 === false) { const d = calcYear(g, { ...o, pit2: true }).netYear - y.netYear; if (d > 1) list.push({ t: T("Submit PIT-2 to your employer"), d: T("With PIT-2 your employer uses the tax-free amount every month: about {0} more a year.", pln(d)), v: d }); }
   if (!o.ppk) list.push({ t: T("Look at PPK"), d: T("With PPK the employer adds {0}% of your gross ({1} a year) to your retirement savings; you pay {2}%. You can leave the plan.", TAX.ppk.employer * 100, pln(y.grossYear * TAX.ppk.employer), TAX.ppk.employee * 100), v: 0 });
@@ -87,6 +129,29 @@ export const Taxes = {
   route: "taxes", title: "Taxes & Payroll",
   render(el) {
     const P = plan(), pcx = n => (Math.round(n * 10) / 10).toString().replace(".", ",") + "%";
+    const CT = P.contract || "uop";
+    const settingsHtml = () => {
+      const fold = (ic, t, body) => `<details class="tp-fold" open><summary><span>${ic} ${esc(T(t))}</span>${chev}</summary>${body}</details>`;
+      if (CT === "uop") return `<details class="tp-fold"><summary><span>⚙️ ${esc(T("Tax Settings"))}</span>${chev}</summary>
+                ${check("raised", T("Raised costs of earning income (you work in another town)"), P.raised)}
+                ${check("pit2", T("Tax-free amount used at your employer (PIT-2 submitted)"), P.pit2)}
+                ${check("under26", T("Under 26 – no income tax up to {0} a year", pln(TAX.youngLimit)), P.under26)}</details>
+              <details class="tp-fold"><summary><span>🎚️ ${esc(T("Advanced Options"))}</span>${chev}</summary>
+                ${check("ppk", T("I take part in PPK (you pay {0}%, the employer {1}%)", TAX.ppk.employee * 100, TAX.ppk.employer * 100), P.ppk)}</details>`;
+      if (CT === "zlecenie") return fold("⚙️", "Tax Settings", `${check("student", T("Student or pupil under 26 (no ZUS and no health insurance from this contract)"), P.student)}
+                ${check("otherJob", T("I also have an employment contract with at least the minimum wage (then only health insurance is due here)"), P.otherJob)}
+                ${check("sickVol", T("I pay voluntary sickness insurance ({0}%)", TAX.zus.sickness * 100), P.sickVol)}
+                ${check("copyright", T("Copyright work (costs of earning income 50% instead of 20%)"), P.copyright)}
+                ${check("pit2", T("Tax-free amount used at this payer (PIT-2 submitted)"), P.pit2)}
+                ${check("under26", T("Under 26 – no income tax up to {0} a year", pln(TAX.youngLimit)), P.under26)}`);
+      if (CT === "dzielo") return fold("⚙️", "Tax Settings", `${check("copyright", T("Copyright work (costs of earning income 50% instead of 20%)"), P.copyright)}
+                ${check("under26", T("Under 26 – no income tax up to {0} a year", pln(TAX.youngLimit)), P.under26)}`);
+      return fold("⚙️", "Business Settings", `${field(T("Tax form"), select("taxForm", [["linear", T("Flat tax 19%")], ["scale", T("Tax scale 12% / 32%")], ["lump", T("Lump-sum tax (ryczałt)")]], P.taxForm || "linear"))}
+                ${P.taxForm === "lump" ? field(T("Lump-sum rate"), select("lumpRate", TAX.b2b.lumpRates.map(r => [String(r), pcx(r * 100)]), String(P.lumpRate || "0.12"))) : ""}
+                ${field(T("ZUS (social insurance)"), select("zus", [["full", T("Full ZUS")], ["pref", T("Preferential ZUS (first 24 months)")], ["none", T("No ZUS (e.g. covered by an employment contract)")]], P.zus || "full"))}
+                ${check("zusSick", T("Voluntary sickness insurance"), P.zusSick)}
+                ${P.taxForm === "scale" ? check("pit2", T("Use the tax-free amount"), P.pit2) : ""}`);
+    };
     const itemsHtml = () => {
       const it = P.items, tot = k => it.filter(x => x.kind === k).reduce((a, x) => a + (x.amount || 0), 0);
       return `<div class="tp-h"><span class="tp-hi">🎁</span><h3>${esc(T("Employee Benefits"))}</h3></div>
@@ -114,14 +179,11 @@ export const Taxes = {
         <div class="tp-left">
           <div class="nw-card ov-card tp-card"><div class="tp-h"><span class="tp-hi">💼</span><h3>${esc(T("Salary Inputs"))}</h3></div>
             <form id="tax-form">
-              ${field(T("Contract Type"), select("contract", [["uop", T("Employment Contract")]], "uop"))}
-              <div class="tp-two-in">${field(T("Gross Salary (brutto, per month)"), numInput("amount", P.mode === "gross" ? plain(P.amount) : "", T("e.g. {0}", "10000")))}${field(T("Net Salary (netto, per month)"), numInput("netamount", P.mode === "net" ? plain(P.amount) : "", T("e.g. {0}", "7200")))}</div><p class="hint">${esc(T("Type either one: the other is calculated for you."))}</p>
-              <details class="tp-fold"><summary><span>⚙️ ${esc(T("Tax Settings"))}</span>${chev}</summary>
-                ${check("raised", T("Raised costs of earning income (you work in another town)"), P.raised)}
-                ${check("pit2", T("Tax-free amount used at your employer (PIT-2 submitted)"), P.pit2)}
-                ${check("under26", T("Under 26 – no income tax up to {0} a year", pln(TAX.youngLimit)), P.under26)}</details>
-              <details class="tp-fold"><summary><span>🎚️ ${esc(T("Advanced Options"))}</span>${chev}</summary>
-                ${check("ppk", T("I take part in PPK (you pay {0}%, the employer {1}%)", TAX.ppk.employee * 100, TAX.ppk.employer * 100), P.ppk)}</details>
+              ${field(T("Contract Type"), select("contract", CONTRACTS.map(([k, n]) => [k, T(n)]), CT))}
+              <div class="tp-two-in">${field(CT === "b2b" ? T("Revenue (without VAT, per month)") : T("Gross Salary (brutto, per month)"), numInput("amount", P.mode === "gross" ? plain(P.amount) : "", T("e.g. {0}", "10000")))}${field(CT === "b2b" ? T("Take-home (netto, per month)") : T("Net Salary (netto, per month)"), numInput("netamount", P.mode === "net" ? plain(P.amount) : "", T("e.g. {0}", "7200")))}</div><p class="hint">${esc(T("Type either one: the other is calculated for you."))}</p>
+              ${CT === "b2b" ? field(T("Business costs (per month, without VAT)"), numInput("costs", plain(P.costs), "0")) : ""}
+              ${settingsHtml()}
+              <p class="hint tp-cnote">${esc(T(CNOTE[CT]))}</p>
             </form></div>
           <div class="nw-card ov-card tp-card" id="tx-jobs">${jobsHtml()}</div>
           <div class="nw-card ov-card tp-card" id="tx-items">${itemsHtml()}</div></div>
@@ -167,15 +229,16 @@ export const Taxes = {
       if (document.activeElement !== other) other.value = plain(P.mode === "gross" ? f.net : g);
       const mo = f.pension + f.disability + f.sickness, deductions = y.social + y.health + y.tax, eff = y.grossYear > 0 ? deductions / y.grossYear * 100 : 0;
       const util = Math.min(100, Math.round(y.taxable / p.threshold * 100)), within = y.over <= 0;
+      const rev = o.contract === "b2b", flat = rev && o.taxForm !== "scale";
       const row = (l, a, cls = "") => `<div class="tp-r ${cls}"><span>${esc(l)}</span><b>${esc(pln(a))}</b></div>`;
       set("tx-sum", head("🧮", T("Payroll Summary")) + `<div class="tp-sum">
-        <div class="tp-s1">${row(T("Gross Salary"), y.gross)}${row(y.bonus ? T("Net Salary (normal month)") : T("Net Salary"), f.net, "tp-net")}${row(T("Income Tax"), f.tax)}${row(T("Health Insurance"), f.health)}${row(T("Social Security"), mo)}${o.ppk ? row(T("PPK (your share)"), f.ppk) : ""}${f.deduct ? row(T("Other deductions"), f.deduct) : ""}
+        <div class="tp-s1">${row(rev ? T("Revenue") : T("Gross Salary"), y.gross)}${row(rev ? T("Take-home") : y.bonus ? T("Net Salary (normal month)") : T("Net Salary"), f.net, "tp-net")}${row(T("Income Tax"), f.tax)}${row(T("Health Insurance"), f.health)}${row(T("Social Security"), mo)}${o.ppk ? row(T("PPK (your share)"), f.ppk) : ""}${f.deduct ? row(rev ? T("Business costs") : T("Other deductions"), f.deduct) : ""}
           ${y.bonus ? `<small class="hint">${esc(T("Average over the year: {0}", pln(y.netMonth)))}</small>` : ""}</div>
         <div class="tp-s2"><small>${esc(T("Effective Tax Rate"))}</small>${ring(Math.min(100, eff), pcx(eff), "", 150)}<small class="hint">${esc(T("Insurance and tax together"))}</small></div>
-        <div class="tp-s3"><small>${esc(T("Tax Bracket Status"))}</small><b class="${within ? "good" : "warn"}">${within ? "✅ " + esc(T("Within Threshold")) : "⚠️ " + esc(T("Above the 32% threshold"))}</b>
+        <div class="tp-s3">${flat ? `<small>${esc(T("Tax form"))}</small><b>${esc(o.taxForm === "lump" ? T("Lump-sum tax {0}%", (o.lumpRate || 0.12) * 100) : T("Flat tax 19%"))}</b><small>${esc(T("Tax base (year)"))}</small><b>${esc(pln(y.taxable))}</b><small class="hint">${esc(T("No 12% / 32% brackets with this tax form."))}</small>` : `<small>${esc(T("Tax Bracket Status"))}</small><b class="${within ? "good" : "warn"}">${within ? "✅ " + esc(T("Within Threshold")) : "⚠️ " + esc(T("Above the 32% threshold"))}</b>
           <small>${esc(T("Current Annual Income"))}</small><b>${esc(pln(y.taxable))}</b><small>${esc(T("Threshold Utilization"))}</small>
           <div class="tp-util"><div class="tx-bar"><i style="width:${util}%"></i></div><b>${util}%</b></div>
-          <small class="hint">${esc(within ? T("{0} a year of room before 32% starts.", pln(y.room)) : T("{0} a year is taxed at 32%.", pln(y.over)))}</small></div></div>`);
+          <small class="hint">${esc(within ? T("{0} a year of room before 32% starts.", pln(y.room)) : T("{0} a year is taxed at 32%.", pln(y.over)))}</small>`}</div></div>`);
       const parts = [[T("Net Pay"), f.net, "#34d399"], [T("Tax"), f.tax, "#f59e0b"], [T("Social Security"), mo, "#3b9bea"], [T("Health Insurance"), f.health, "#8b5cf6"], ...(o.ppk ? [[T("PPK"), f.ppk, "#ec4899"]] : []), ...(f.deduct ? [[T("Other deductions"), f.deduct, "#94a3b8"]] : [])].filter(x => x[1] > 0), sumP = parts.reduce((a, x) => a + x[1], 0) || 1;
       set("tx-brk", head("🥧", T("Salary Breakdown")) + `<div class="tp-brk"><div class="tx-donut">${donut(parts.map(x => ({ label: x[0], value: x[1], color: x[2] })), "", "")}<div class="tp-dc"><b>${esc(pln(f.net))}</b><small>${esc(T("Net Pay"))}</small></div></div>
         <div class="tx-leg col">${parts.map(x => `<span><u style="background:${x[2]}"></u>${esc(x[0])} <b>${Math.round(x[1] / sumP * 100)}%</b></span>`).join("")}</div></div>`);
@@ -233,7 +296,13 @@ export const Taxes = {
     };
     form.onsubmit = ev => ev.preventDefault();
     form.addEventListener("input", ev => { const n = ev.target.name; if (n === "amount" || n === "netamount") { P.mode = n === "amount" ? "gross" : "net"; P.amount = ev.target.value; save(); draw(); } });
-    form.addEventListener("change", () => { P.raised = form.raised.checked; P.pit2 = form.pit2.checked; P.under26 = form.under26.checked; P.ppk = form.ppk.checked; save(); draw(); });
+    form.addEventListener("change", ev => {
+      const n = ev.target.name; if (!n) return;
+      if (ev.target.type === "checkbox") P[n] = ev.target.checked; else if (n === "contract" || n === "taxForm" || n === "lumpRate" || n === "zus") P[n] = ev.target.value;
+      save(); if (n === "contract" || n === "taxForm" || (n === "student" && P.student)) { if (n === "student") P.under26 = true; Taxes.render(el); return; } draw();
+    });
+    form.addEventListener("input", ev => { if (ev.target.name === "costs") { P.costs = ev.target.value; save(); draw(); } });
+    el.querySelector("#tx-items").hidden = CT !== "uop";
     el.querySelectorAll("[data-txgo]").forEach(k => k.onclick = () => {
       const w = k.dataset.txgo, t = el.querySelector(w === "bracket" ? "#tx-sum" : w === "how" ? "#tx-how" : "#tx-sources");
       if (w === "how" && t) t.open = true;
