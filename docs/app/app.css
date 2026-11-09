@@ -2645,3 +2645,14 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 /* charts: slightly more air */
 .ni-page .ovr2 .nw-card{padding:18px 20px}
 .ovr2 .oc{max-height:260px!important}
+
+/* ===== App-wide polish pass: no clipped numbers, no one-letter legends, readable chart text ===== */
+.ov-kpis:not(.ovkp) .kpi .kpi-t b{font-size:clamp(15px,1.45vw,24px)!important;overflow:visible!important;text-overflow:clip!important;white-space:normal!important;overflow-wrap:anywhere;line-height:1.15}
+.ov-kpis:not(.ovkp) .kpi .kpi-t b .nb,.ov-kpis:not(.ovkp) .kpi{min-width:0}
+.dz .dl-row,.dz-card .dl-row{flex-wrap:wrap;justify-content:center}
+.dz .dl-list{flex:1 1 150px;min-width:0}
+.dz .dl-list li span{overflow:visible!important;text-overflow:clip!important;white-space:normal!important}
+.dz .dl-list li{align-items:flex-start}
+.bp-ov-b .ring-t b{font-size:17px!important}
+.dz svg.oc .oc-ax,.bp-fcc svg.oc .oc-ax{font-size:16.5px}
+.dz svg.oc{margin-top:6px}

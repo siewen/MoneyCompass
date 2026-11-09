@@ -1,4 +1,6 @@
 // MoneyCompass Pro: Compare offers, Optimize my finances, Goals, Loans, Budget, bank import.
+import { currentAssessment } from "./assessment.js";
+import { improvements } from "./engine/index.js";
 import { infoBtn as scoreInfoBtn } from "./score-info.js";
 import {
   T, State, save, Calc, Advisor, pln, rate, num, plain, fmtDate, parseDate, isoDate, inputDate, today, addMonths, monthName,
@@ -257,6 +259,7 @@ const exampleAmount = () => { const s = Calc.portfolio(D()).safe; return s > 0 ?
 
 /** Top of the Optimize window: the "Financial Optimization Center" (KPIs, top opportunity, categories, overview, projected impact). */
 function optHero(d, advice, gain, parts) {
+  const eng = currentAssessment(), engOn = !!(eng && eng.snap && eng.snap.has), nCount = engOn ? eng.potential.counted.length : advice.length, nActive = engOn ? improvements(eng).length : advice.length;
   const hc = healthCheck(d), score = hc.length ? Math.round(hc.filter(x => x.state === "good").length / hc.length * 100) : 0;
   const money = advice.filter(a => a.kind === "money" || a.kind === "tip"), quick = advice.filter(a => a.kind !== "warning");
   const mv = moves(d)[0], isDep = !!mv && Rates.deposits.includes(mv.o), p = Calc.portfolio(d), inc = Calc.totalIncome(d), avg = Calc.spending(d), spend = avg.essential + avg.nonEssential;
@@ -280,14 +283,16 @@ function optHero(d, advice, gain, parts) {
     <div class="nw-card opt-imp"><h3>${esc(T("Projected Impact"))}</h3><small>${esc(T("Your potential financial improvement per year"))}</small><div class="opt-bars">${bar(T("Current"), 0)}${bar(T("Earn more"), quickSum)}${bar(T("All opportunities"), gain)}</div></div></div>`;
   parts.cats = catRow; parts.low = low; optCats = cats;
   return `<div class="opt-hero"><div class="opt-hd"><span class="pg-ic">${si(IC.trend, 34)}</span><div><h2>${esc(T("Financial Optimization Center"))}</h2><p>${esc(T("Discover the highest-impact actions to improve your financial future."))}</p></div></div>
-    <div class="opt-kpis">${kp(T("Annual Improvement Potential"), esc(pln(gain)), T("Based on {0} opportunities", advice.length), "bars", "good")}${kp(T("Active Opportunities"), String(advice.length), T("Across all financial categories"), "bulb")}${kp(T("Quick Wins"), String(quick.length), T("Steps you can do today"), "bolt")}${kp(T("Optimization Score") + scoreInfoBtn(T("Optimization Score"), score + " / 100", hc.map(x => ({ label: x.label, state: x.state, detail: x.value + " · " + T("Goal: {0}", x.aim) })), T("The share of the checks below that are green. Each check compares your own numbers with a common rule of thumb.")), score + " / 100", score >= 80 ? T("Excellent! You're on the right track.") : T("Room to improve – see the steps below."), "gauge", "good")}</div>
+    <div class="opt-kpis">${kp(T("Annual Improvement Potential"), esc(pln(gain)), T("Based on {0} opportunities", nCount), "bars", "good")}${kp(T("Active Opportunities"), String(nActive), T("Across all financial categories"), "bulb")}${kp(T("Quick Wins"), String(quick.length), T("Steps you can do today"), "bolt")}${kp(T("Optimization Score") + scoreInfoBtn(T("Optimization Score"), score + " / 100", hc.map(x => ({ label: x.label, state: x.state, detail: x.value + " · " + T("Goal: {0}", x.aim) })), T("The share of the checks below that are green. Each check compares your own numbers with a common rule of thumb.")), score + " / 100", score >= 80 ? T("Excellent! You're on the right track.") : T("Room to improve – see the steps below."), "gauge", "good")}</div>
     ${hero}</div>`;
 }
 
 const RISK_LABEL = { low: "Low risk", mid: "Medium risk", high: "High risk" };
 function optimizeHtml() {
   const d = D(), advice = Advisor.analyse(d);
-  const gain = advice.filter(a => a.kind === "money" || a.kind === "tip").reduce((s, a) => s + a.benefit, 0);
+  // One source of truth: the advisor engine decides the headline potential, so this window agrees with the Overview that opened it
+  const eng = currentAssessment(), engOn = !!(eng && eng.snap && eng.snap.has);
+  const gain = engOn ? eng.potential.total : advice.filter(a => a.kind === "money" || a.kind === "tip").reduce((s, a) => s + a.benefit, 0);
   const r = Rates.data;
   let status;
   if (!d.Settings.OnlineRates) status = T("Current rates are switched off in Settings.");
