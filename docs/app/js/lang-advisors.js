@@ -194,6 +194,7 @@ export const ADV = {
 "{0} holds {1} of your assets.": "{0} przechowuje {1} Twoich aktywów.",
 "One problem with that place hits most of your wealth at once.": "Jeden problem z tym miejscem uderza w większość majątku naraz.",
 "See your asset mix": "Zobacz strukturę aktywów",
+"Spread your assets": "Rozłóż swoje aktywa",
 "Wealth Milestone": "Kamień milowy majątku",
 "You passed {0}. ": "Przekroczyłeś {0}. ",
 "Next milestone: {0}, in about {1} months at your current pace.": "Następny kamień milowy: {0}, za około {1} mies. w obecnym tempie.",

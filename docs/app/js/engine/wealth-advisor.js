@@ -35,7 +35,7 @@ export function wealthAdvise(s) {
   const tot = parts.reduce((a, x) => a + x.v, 0), top = [...parts].sort((a, b) => b.v - a.v)[0];
   if (parts.length >= 2 && tot >= 20000 && top.v / tot > 0.7) out.push({ id: "asset-concentration", sources: S(s, "own"), advisorType: "wealth", kind: "risk", severity: 2, title: T("Asset Concentration"),
     text: T("{0} holds {1} of your assets.", top.name, pc(top.v / tot)), confidence: 0.7, difficulty: "medium", minutes: 60,
-    doNothing: T("One problem with that place hits most of your wealth at once."), actions: goNW(T("See your asset mix"), "") });
+    doNothing: T("One problem with that place hits most of your wealth at once."), actions: goNW(T("Spread your assets"), T("{0} holds {1} of your assets.", top.name, pc(top.v / tot))) });
   // Milestones
   const next = MILESTONES.find(m => m > n.net), reached = [...MILESTONES].reverse().find(m => m <= n.net);
   if (next) {

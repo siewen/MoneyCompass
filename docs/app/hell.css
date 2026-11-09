@@ -636,6 +636,7 @@
 :root[data-theme="hell"] .ovo .ovh-big small{color:#4b645d}
 :root[data-theme="hell"] .ovkp .kpi-main.neg,:root[data-theme="hell"] .ovkp .kpi b.bad{color:#9a0f12}
 :root[data-theme="hell"] .ovkp .delta.flat{color:#4b645d !important}
+:root[data-theme="hell"] .ovh-ch small{color:#4b645d}
 /* Hand-written Light theme fixes (appended by make-hell.py): neutral page, no green glow, calm cards */
 :root[data-theme="hell"] body{background:#CDD3D0 !important}
 :root[data-theme="hell"] .sidebar,:root[data-theme="hell"] aside{background:#D8DEDB !important}

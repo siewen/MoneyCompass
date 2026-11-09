@@ -2591,3 +2591,13 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .oa-cap *{display:inline!important}
 .backup-bar{margin:14px 16px 0 0!important}
 .ov-pair{align-items:stretch!important}.ov-pair .oa-next{display:flex;flex-direction:column}.ov-pair .oa-next .oa-act{flex:1;align-content:center}
+
+/* Overview polish: calmer flagship card, bigger net worth chart, two-card bottom row */
+.ovo-flag{border-color:rgba(46,220,154,.32)!important;background:linear-gradient(100deg,rgba(46,220,154,.12),rgba(46,220,154,.03) 55%,transparent)!important;box-shadow:0 6px 20px rgba(46,220,154,.07)!important}
+.ovo-flag .ovo-a .ovh-big{font-size:34px}
+.ovh-ch{margin-top:14px}.ovh-ch small{display:block;color:#9fb0ab;font-size:12px;margin-bottom:2px}
+.ovh-ch svg{width:100%!important;height:auto!important;max-height:none!important}
+.ovr2e{display:grid;grid-template-columns:1fr 1fr;gap:14px}.ovr2e>.nw-card{margin:0;min-width:0}
+@media(max-width:700px){.ovr2e{grid-template-columns:1fr}}
+.ov-pair{align-items:start!important}.ov-pair .oa-next{display:block}.ov-pair .oa-next .oa-act{align-content:normal}
+.ovr2e .nw-card{min-height:0}

@@ -90,7 +90,7 @@ export function assess(c) {
   // next actions: the most urgent state first, one action per title, at most three
   const act = [], add = x => { if (x.title && !act.some(a => a.title === x.title || (a.go === x.go && a.btn === x.btn))) act.push(x); };
   if (!s.has) { add({ icon: "💶", title: T("Add your income"), desc: T("Your salary and other income."), btn: T("Open Inflows"), go: "income" }); add({ icon: "🛒", title: T("Add your spending"), desc: T("Enter or import your expenses."), btn: T("Open Outflows"), go: "expenses" }); add({ icon: "🏦", title: T("Add your savings"), desc: T("Bank accounts and cash, with their interest."), btn: T("Open Savings"), go: "portfolio" }); }
-  else r.states.forEach(x => x.actions.forEach(add));
+  else r.states.forEach(x => { if (x.kind === "positive" || (x.kind === "opportunity" && !(x.potential > 0))) return; x.actions.forEach(add); });
   lastAssessment = r;
   return { ...r, state: st, text, problem, win, risk, doNothing, actions: act.slice(0, 3), dti: s.dti };
 }
