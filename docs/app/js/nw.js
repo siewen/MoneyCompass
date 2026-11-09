@@ -36,6 +36,7 @@ export const P = {
   cam: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.500"/>',
   pen: '<path d="M4 20l1-4L16 5l3 3L8 19z"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  db: '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.700 3.100 3 7 3s7-1.300 7-3V6M5 12v6c0 1.700 3.100 3 7 3s7-1.300 7-3v-6"/>',
   save: '<path d="M5 3h11l3 3v15H5z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/>',
   folder: '<path d="M3 6h6l2 2h10v11H3z"/>',
   down: '<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',

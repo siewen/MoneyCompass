@@ -428,15 +428,19 @@ async function closeApp() {
   if (!license.isPro) return finishClose(false);   // the demo keeps no backups: nothing to save before closing
   if (choice === "with") { if (await saveProfileFile()) return savedThenClose(); return; }
   if (choice === "without" || choice === "none") return finishClose(false);
-  const p = popup(`<button class="nw-x cl-x" data-c="cancel" aria-label="Close">✕</button>
-    <div class="cl"><span class="cl-ic">${ico("save")}</span><div><h2>${esc(T("Save your data before closing?"))}</h2>
-    <p>${esc(T("Your financial data is already stored locally."))}</p>
-    <p>${esc(T("Saving a profile creates a backup that can be restored later or transferred to another device."))}</p></div></div>
-    <label class="cl-rem"><input type="checkbox" name="remember"><i></i><span>${esc(T("Remember my choice"))}</span></label>
-    <div class="cl-btns"><button class="btn main" data-c="with">${ico("save")}${esc(T("Save Backup and Close"))}</button>
-      <button class="btn second" data-c="without">${esc(T("Close Without Saving"))}</button>
-      <button class="cl-cancel" data-c="cancel">${esc(T("Cancel"))}</button></div>
-    <p class="cl-note">${ico("info")}${esc(T("You can change this later in:"))} <b>${esc(T("Settings → Backup & restore"))}</b></p>`, { width: 640, cls: "nw-win cl-win" });
+  const d = State.data, kb = new Blob([JSON.stringify(d)]).size, size = kb > 1048576 ? (kb / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(kb / 1024)) + " KB";
+  const stat = (ic, n, l) => `<div class="bk-st"><span>${ico(ic)}<b>${esc(String(n))}</b></span><small>${esc(l)}</small></div>`;
+  const p = popup(`<div class="bk-bar"><img src="brand.svg" alt=""><span>MoneyCompass</span><button class="bk-x" data-c="cancel" aria-label="Close">✕</button></div>
+    <div class="bk-main"><span class="bk-ic">${ico("save")}</span><div><h2>${esc(T("Create a Backup Before Closing?"))}</h2>
+    <p>${esc(T("Your financial profile is stored locally on this device."))}</p>
+    <p>${esc(T("Creating a backup allows you to restore your data later or transfer it securely to another device."))}</p></div></div>
+    <div class="bk-prev"><span class="bk-sh">${ico("shield")}</span><div><h3>${esc(T("Backup Preview"))}</h3><div class="bk-sts">
+      ${stat("list", d.Expenses.length, T("Transactions"))}${stat("bank", d.Holdings.length, T("Accounts"))}${stat("cal", d.Budgets.length, T("Budgets"))}${stat("trend", d.Investments.length, T("Investment Portfolios"))}${stat("db", size, T("Backup Size"))}
+    </div></div></div>
+    <label class="cl-rem"><input type="checkbox" name="remember"><i></i><span>${esc(T("Don't show this reminder again"))}</span></label>
+    <div class="bk-btns"><button class="btn second" data-c="cancel">${esc(T("Cancel"))}</button>
+      <button class="btn second" data-c="without">${esc(T("Close Without Backup"))}</button>
+      <button class="btn main" data-c="with">${ico("save")}${esc(T("Create Backup & Close"))}</button></div>`, { width: 760, cls: "nw-win bk-win" });
   p.el.querySelectorAll("[data-c]").forEach(b => b.onclick = () => {
     const c = b.dataset.c;
     p.close();
