@@ -2375,3 +2375,8 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
   .tp .tp-sum>div{border:0 !important}
   .tp-mt th,.tp-mt td{padding:7px 8px}
 }
+
+.sv-go{cursor:pointer;transition:background .15s,transform .15s}
+.sv-go:hover{background:rgba(16,185,129,.12)}
+.sv-go b{color:#34d399;white-space:nowrap}
+.nw-card.flash{box-shadow:0 0 0 3px rgba(52,211,153,.65);transition:box-shadow .3s}

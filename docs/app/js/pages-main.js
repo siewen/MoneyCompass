@@ -1197,7 +1197,7 @@ export const Portfolio = {
         <div class="sv-opg"><small>${esc(T("Additional Annual Profit"))}</small><b>+${esc(pln(m.gain))}</b></div>
         <div class="sv-opb"><button class="sv-btn" data-offer-info="${i}">${si(IC.eye, 16)} ${esc(T("View Offer"))}</button>
           <button class="sv-btn ghost" data-moved="${i}">✓ ${esc(T("I moved it"))}</button></div></div>`).join("") :
-      `<p class="hint">${esc(d.Holdings.some(h => h.Safe && h.Amount > 0) ? T("Your savings already earn about as much as today's best offers. Nothing to move right now.") : T("Add your savings (bank, cash) above, with their interest rate, to see where they would earn more."))}</p>`;
+      `<p class="hint${d.Holdings.some(h => h.Safe && h.Amount > 0) ? "" : " sv-go"}"${d.Holdings.some(h => h.Safe && h.Amount > 0) ? "" : ' data-sv-add role="button" tabindex="0"'}>${esc(d.Holdings.some(h => h.Safe && h.Amount > 0) ? T("Your savings already earn about as much as today's best offers. Nothing to move right now.") : T("Add your savings (bank, cash) above, with their interest rate, to see where they would earn more."))}</p>`;
     const optBand = `<div class="nw-card sv-opp"><div class="sv-oh"><span class="sv-star">${si(IC.star, 40)}</span><div><h3>${esc(T("Wealth Optimization Opportunities"))}</h3><small>${esc(T("Smart recommendations to help you get more from your savings."))}</small></div></div>${dueTxt}<div class="sv-ops${mvShown.length > 1 ? "" : " one"}">${opp}</div>
       ${!license.isPro && mv.length > 1 ? `<p class="hint">🔒 ${esc(T("{0} more suggestions for your other savings with MoneyCompass Pro.", mv.length - 1))}</p>` : ""}</div>`;
     // ---------- Savings Performance: what today's rates do to your savings over 1 / 3 / 5 years ----------
@@ -1214,7 +1214,7 @@ export const Portfolio = {
     const holdCard = dcard("bank", "res", T("Accounts & Holdings"), (d.Holdings.length ? `<div class="sv-hl">${hv.map(({ x, pl, r: rr }) => `<div class="sv-h" data-edit-holding="${x.Id}"><span class="sv-hi">${si(x.Place === "Cash" ? IC.coins || IC.bank : IC.bank, 26)}</span>
         <div class="sv-hn"><b>${esc(x.Name)}</b><small>${esc(T("Annual Return: {0}", pln(pl * rr / 100)))}</small>${promoBadge(x)}</div>
         <div class="sv-hv">${amount(x.Amount, x.Currency)}</div><div class="sv-hr">${esc(rate(rr))}</div>
-        <span class="sv-hx">${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></span></div>`).join("")}</div>` : hint(T("Nothing added yet."))), { klass: "sv-hold", extra: `<button class="pm-btn" data-action="sv-checks" title="${esc(T("Statement analyses"))}" aria-label="${esc(T("Statement analyses"))}">±</button>` });
+        <span class="sv-hx">${infoBtn("holding", x)}<button class="icon-btn danger" data-del-holding="${x.Id}">🗑</button></span></div>`).join("")}</div>` : `<p class="hint sv-go" data-sv-add role="button" tabindex="0">${esc(T("Nothing added yet."))} <b>${esc(T("Add your first savings account"))} →</b></p>`), { klass: "sv-hold", extra: `<button class="pm-btn" data-action="sv-checks" title="${esc(T("Statement analyses"))}" aria-label="${esc(T("Statement analyses"))}">±</button>` });
     const risk = x => x.Safe ? T("Low") : T("High");
     const perfCard = `<div class="nw-card dz sv-perf"><div class="nw-ch"><span class="rp-si i-res">${si(IC.trend, 22)}</span><h3>${esc(T("Performance Analysis"))}</h3></div><table class="sv-t"><thead><tr><th>${esc(T("Institution"))}</th><th>${esc(T("Balance"))}</th><th>${esc(T("Yield"))}</th><th>${esc(T("Annual Return"))}</th><th>${esc(T("Risk Profile"))}</th></tr></thead><tbody>${hv.map(({ x, pl, r: rr }) =>
       `<tr><td>${esc(x.Name)}</td><td>${esc(pln(pl))}</td><td>${esc(rate(rr))}</td><td>${esc(pln(pl * rr / 100))}</td><td><span class="sv-risk ${x.Safe ? "low" : "high"}">${esc(risk(x))}</span></td></tr>`).join("") || `<tr><td colspan="5" class="hint">–</td></tr>`}</tbody></table></div>`;
@@ -1272,6 +1272,7 @@ export const Portfolio = {
     form.place.onchange = () => { form.safe.checked = ["Bank", "Cash"].includes(form.place.value); };
     el.querySelector('[data-action="save-holding"]').onclick = saveIt;
     const c = el.querySelector('[data-action="cancel-holding"]'); if (c) c.onclick = () => { editHolding = null; App.refresh(); };
+    el.querySelectorAll("[data-sv-add]").forEach(x => { const go = () => { const c = el.querySelector(".sv-add"); if (!c) return; c.scrollIntoView({ behavior: "smooth", block: "center" }); c.classList.add("flash"); setTimeout(() => c.classList.remove("flash"), 1400); setTimeout(() => c.querySelector("input")?.focus({ preventScroll: true }), 350); }; x.onclick = go; x.onkeydown = ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); go(); } }; });
     el.querySelectorAll("[data-edit-holding]").forEach(x => x.onclick = ev => { if (ev.target.closest("[data-del-holding], [data-info]")) return; editHolding = x.dataset.editHolding; App.refresh(); window.scrollTo({ top: 0, behavior: "smooth" }); });
     el.querySelectorAll("[data-del-holding]").forEach(b => b.onclick = async () => {
       const x = d.Holdings.find(y => y.Id === b.dataset.delHolding);
