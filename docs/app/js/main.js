@@ -467,13 +467,19 @@ let closing = false;
 function finishClose(fileSaved) {
   save();
   closing = true;
-  try { window.close(); } catch { /* not allowed */ }
-  // The browser may not allow a page to close its own window or tab: then say so honestly
+  const tryClose = () => { try { window.close(); } catch { /* not allowed */ } try { window.open("", "_self").close(); } catch { /* not allowed */ } };
+  tryClose();
+  // A browser only closes windows that a script opened. Then show a clean goodbye screen instead of the lock screen
   setTimeout(() => {
     if (window.closed) return;
-    // The browser would not close the window: sign out by locking the app instead (no error message)
     closing = false;
-    lock(null, T("Your data is saved. Your browser does not let MoneyCompass close itself – you can close this window now."));
+    const g = document.createElement("div");
+    g.className = "lock-screen bye-screen";
+    g.innerHTML = `<div class="lock-box"><img src="../logo.svg" alt="" class="lock-logo"><h2>${esc(T("Goodbye!"))}</h2>
+      <p class="hint">${esc(T("Your data is saved. You can close this window now."))}</p>
+      <button class="btn second" data-x>${esc(T("Open MoneyCompass again"))}</button></div>`;
+    document.body.classList.add("is-locked"); document.body.appendChild(g);
+    g.querySelector("[data-x]").onclick = () => { g.remove(); document.body.classList.remove("is-locked"); };
   }, 400);
 }
 

@@ -1,6 +1,9 @@
 // New texts (redesign): German, French, Polish
 export const NEW = {
 "de": {
+"Goodbye!": "Auf Wiedersehen!",
+"Your data is saved. You can close this window now.": "Ihre Daten sind gespeichert. Sie können dieses Fenster jetzt schließen.",
+"Open MoneyCompass again": "MoneyCompass wieder öffnen",
 "Your data is saved. Your browser does not let MoneyCompass close itself – you can close this window now.": "Ihre Daten sind gespeichert. Ihr Browser erlaubt MoneyCompass nicht, sich selbst zu schließen – Sie können dieses Fenster jetzt schließen.",
 "Release Notes": "Versionshinweise",
 "Help Center": "Hilfezentrum",
@@ -830,6 +833,9 @@ export const NEW = {
 "This category will be available in:": "Diese Kategorie ist verfügbar in:"
 },
 "fr": {
+"Goodbye!": "Au revoir !",
+"Your data is saved. You can close this window now.": "Vos données sont enregistrées. Vous pouvez fermer cette fenêtre maintenant.",
+"Open MoneyCompass again": "Rouvrir MoneyCompass",
 "Your data is saved. Your browser does not let MoneyCompass close itself – you can close this window now.": "Vos données sont enregistrées. Votre navigateur ne permet pas à MoneyCompass de se fermer seul – vous pouvez fermer cette fenêtre maintenant.",
 "Release Notes": "Notes de version",
 "Help Center": "Centre d'aide",
@@ -1659,6 +1665,9 @@ export const NEW = {
 "This category will be available in:": "Cette catégorie sera disponible dans :"
 },
 "pl": {
+"Goodbye!": "Do zobaczenia!",
+"Your data is saved. You can close this window now.": "Twoje dane są zapisane. Możesz teraz zamknąć to okno.",
+"Open MoneyCompass again": "Otwórz MoneyCompass ponownie",
 "Your data is saved. Your browser does not let MoneyCompass close itself – you can close this window now.": "Twoje dane są zapisane. Przeglądarka nie pozwala MoneyCompass zamknąć się samodzielnie – możesz teraz zamknąć to okno.",
 "Release Notes": "Informacje o wersji",
 "Help Center": "Centrum pomocy",
