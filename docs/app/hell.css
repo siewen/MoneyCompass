@@ -654,6 +654,13 @@
 :root[data-theme="hell"] .ph-popup .ph-text{color:#1e312b}
 :root[data-theme="hell"] .ph-act{border:1px solid rgba(23,38,34,0.13);background:rgba(23,38,34,0.036);color:#000000}
 :root[data-theme="hell"] .ph-t small{color:#48645c}
+:root[data-theme="hell"] .ph-popup .ph-text{color:#3e5a52}
+:root[data-theme="hell"] .ph-act{border:1px solid rgba(23,38,34,0.104);background:rgba(23,38,34,0.027);color:#000000}
+:root[data-theme="hell"] .ph-act:hover,:root[data-theme="hell"] .ph-act:focus-visible{box-shadow:0 10px 28px rgba(0,0,0,0.084)}
+:root[data-theme="hell"] .ph-i{color:#1c8d5e;background:rgba(23,38,34,0.045);border:1px solid rgba(23,38,34,0.104)}
+:root[data-theme="hell"] .ph-t small{color:#48645c}
+:root[data-theme="hell"] .ph-sw{color:#48645c}
+:root[data-theme="hell"] .ph-sw i{background:rgba(23,38,34,0.126)}
 /* Hand-written Light theme fixes (appended by make-hell.py): neutral page, no green glow, calm cards */
 :root[data-theme="hell"] body{background:#CDD3D0 !important}
 :root[data-theme="hell"] .sidebar,:root[data-theme="hell"] aside{background:#D8DEDB !important}

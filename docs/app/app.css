@@ -2703,3 +2703,30 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 .ph-t{display:grid;gap:2px;flex:1}.ph-t b{font-size:15px}.ph-t small{color:#9fb3aa;font-size:12.5px}
 .ph-act em{font-style:normal;color:#2EDC9A;font-size:18px}
 .ph-popup .g2-foot{flex-wrap:wrap;gap:10px}
+
+/* Setup guidance window: premium layout (overrides the first version) */
+.ph-popup{overflow:hidden}
+.ph-popup .ph-hd{display:flex;gap:16px;align-items:flex-start;padding:24px 24px 6px;background:radial-gradient(120% 140% at 0% 0%,rgba(46,220,154,.14),transparent 60%)}
+.ph-mark{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;flex:none;color:#2EDC9A;background:rgba(46,220,154,.12);border:1px solid rgba(46,220,154,.28);box-shadow:0 8px 24px rgba(46,220,154,.12)}
+.ph-mark svg{width:24px;height:24px}
+.ph-ht{flex:1;min-width:0}.ph-ht h2{margin:2px 0 6px;font-size:21px;letter-spacing:.1px;font-weight:650}
+.ph-popup .ph-text{margin:0;color:#a9bdb5;line-height:1.55;font-size:14px}
+.ph-popup .ph-hd .nw-x{flex:none;margin-top:-4px}
+.ph-popup .ph-body{padding:16px 24px 4px}
+.ph-acts{display:grid;gap:10px}
+.ph-act{display:flex;align-items:center;gap:14px;text-align:left;padding:14px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#fff;cursor:pointer;transition:transform .15s,border-color .15s,background .15s,box-shadow .15s}
+.ph-act.main{border-color:rgba(46,220,154,.4);background:linear-gradient(135deg,rgba(46,220,154,.14),rgba(46,220,154,.04))}
+.ph-act:hover,.ph-act:focus-visible{transform:translateY(-1px);border-color:rgba(46,220,154,.6);background:rgba(46,220,154,.09);box-shadow:0 10px 28px rgba(0,0,0,.28);outline:none}
+.ph-i{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none;color:#8fe9c4;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.ph-act.main .ph-i{color:#06281c;background:linear-gradient(135deg,#43e6a9,#1fb77f);border-color:transparent}
+.ph-t{display:grid;gap:2px;flex:1;min-width:0}.ph-t b{font-size:15px;font-weight:600}.ph-t small{color:#9fb3aa;font-size:12.5px;line-height:1.4}
+.ph-go{color:#2EDC9A;opacity:.75;display:grid;transition:transform .15s,opacity .15s}.ph-act:hover .ph-go{transform:translateX(3px);opacity:1}
+.ph-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 24px 22px;margin-top:6px}
+.ph-sw{display:flex;align-items:center;gap:10px;color:#9fb3aa;font-size:13px;cursor:pointer;user-select:none}
+.ph-sw input{position:absolute;opacity:0;pointer-events:none}
+.ph-sw i{width:34px;height:20px;border-radius:20px;background:rgba(255,255,255,.14);position:relative;flex:none;transition:background .15s}
+.ph-sw i::after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s}
+.ph-sw input:checked+i{background:#1fb77f}.ph-sw input:checked+i::after{transform:translateX(14px)}
+.ph-sw input:focus-visible+i{outline:2px solid #2EDC9A;outline-offset:2px}
+.ph-later{flex:none;border-radius:999px;padding:9px 20px}
+@media(max-width:520px){.ph-popup .ph-hd{padding:18px 16px 4px}.ph-popup .ph-body{padding:12px 16px 2px}.ph-foot{padding:14px 16px 18px;flex-wrap:wrap}.ph-ht h2{font-size:18px}}
