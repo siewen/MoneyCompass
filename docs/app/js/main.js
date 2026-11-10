@@ -10,6 +10,7 @@ import { smartImport, openImportCenter } from "./import.js";
 import { Reports } from "./reports.js";
 import { openSavingsCheck } from "./savings-check.js";
 import { linkCards } from "./card-links.js";
+import { maybeHint } from "./page-hints.js";
 import { App, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
 import { WEB_VERSION, WEB_BUILD, WEB_DATE } from "./version.js";
@@ -565,6 +566,11 @@ function render() {
   el.querySelectorAll("[data-go]").forEach(x => x.addEventListener("click", ev => {
     const inner = ev.target.closest("button,a,input,select,label,[data-cat]");
     if (inner && inner !== x) return;
+    if (x.dataset.auto) {   // a card that only got a shortcut: leave anything inside it that does its own thing alone
+      for (let n = ev.target; n && n !== x; n = n.parentElement) {
+        if (n.getAttribute("role") === "button" || n.hasAttribute("tabindex") || n.tagName === "SUMMARY" || [...n.attributes].some(a => a.name.startsWith("data-") && a.name !== "data-go")) return;
+      }
+    }
     ev.stopPropagation();
     if (x.dataset.go) App.go(x.dataset.go);
   }));
@@ -576,6 +582,7 @@ function render() {
   el.querySelectorAll('[data-action="optimize"]').forEach(b => b.onclick = openOptimize);
   el.querySelectorAll("[data-open-opt]").forEach(b => b.onclick = e => { e.stopPropagation(); openOptimize(); });
   el.querySelectorAll('[data-action="export"]').forEach(b => b.onclick = openExport);
+  try { maybeHint(page.route, { smartImport, startDemo, openSavingsCheck }); } catch (e) { console.warn(e); }
   window.scrollTo(0, y);
   if (lastSaveFailed()) toast(T("Could not save in this browser. Save your profile to a file to keep your data."), "bad");
 }

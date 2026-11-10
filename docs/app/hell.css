@@ -651,6 +651,9 @@
 :root[data-theme="hell"] .rp-range small,:root[data-theme="hell"] .rp-meta small{color:#48645c}
 :root[data-theme="hell"] .rp-range b,:root[data-theme="hell"] .rp-meta b{color:#000000}
 :root[data-theme="hell"] .rp-row2+.grid>*{background:rgba(23,38,34,0.036) !important;border:1px solid rgba(23,38,34,0.117) !important}
+:root[data-theme="hell"] .ph-popup .ph-text{color:#1e312b}
+:root[data-theme="hell"] .ph-act{border:1px solid rgba(23,38,34,0.13);background:rgba(23,38,34,0.036);color:#000000}
+:root[data-theme="hell"] .ph-t small{color:#48645c}
 /* Hand-written Light theme fixes (appended by make-hell.py): neutral page, no green glow, calm cards */
 :root[data-theme="hell"] body{background:#CDD3D0 !important}
 :root[data-theme="hell"] .sidebar,:root[data-theme="hell"] aside{background:#D8DEDB !important}

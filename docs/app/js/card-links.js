@@ -46,6 +46,6 @@ export function linkCards(el, current) {
     if (!dest || to === current) { if (!c.title) c.title = name; return; }
     if (!c.title) c.title = T("{0} – click to open {1}", name, dest);
     if (c.dataset.go || c.dataset.action || c.querySelector(BLOCK)) return;                                     // already clickable, or has fields
-    c.dataset.go = to;
+    c.dataset.go = to; c.dataset.auto = "1";
   });
 }

@@ -50,7 +50,7 @@ export function newSettings() {
     HelpButtonX: 0, HelpButtonY: 0, Language: "", AutoSaveProfile: true, CloseChoice: "", AskOnStart: true,
     MenuPosition: "top", ExportCharts: true, Design: "light", OnlineRates: true, CheckForUpdates: true,
     LastUpdateCheck: null, AutoExchangeRates: true, LicenseKey: "", Modules: [], CardOrder: {},
-    LayoutIncluded: true, FreeExportsUsed: 0, LastProfileSaved: null, ProfileName: "", ProfilePicture: "", GuideHidden: false, NewsHidden: false,
+    LayoutIncluded: true, FreeExportsUsed: 0, LastProfileSaved: null, ProfileName: "", ProfilePicture: "", GuideHidden: false, NewsHidden: false, HintsOff: false, HintsHidden: [],
   };
 }
 export function newData() {
