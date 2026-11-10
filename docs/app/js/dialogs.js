@@ -333,7 +333,7 @@ export function openDelete() {
   const d = D();
   const parts = [["incomes", T("Income sources"), d.Incomes.length], ["expenses", T("Expenses, money received and transfers (bank imports)"), d.Expenses.length + d.Received.length + d.Transfers.length], ["holdings", T("Savings"), d.Holdings.length],
     ["offers", T("Saved savings offers"), d.Offers.length], ["emergency", T("Emergency fund settings"), T("monthly costs, yearly costs, months, buffer")],
-    ["rates", T("Exchange rates"), ""], ["modules", T("Modules: loans, budget and goals, calendar"), d.Goals.length + d.Loans.length + d.Budgets.length + (d.Recurring || []).length + (d.Investments || []).length],
+    ["rates", T("Exchange rates"), ""], ["modules", T("Modules: loans, budget, goals, calendar and taxes"), d.Goals.length + d.Loans.length + d.Budgets.length + (d.Recurring || []).length + (d.Investments || []).length],
     ["categories", T("Your own expense categories"), d.Categories.length || T("none")], ["bin", T("Deleted items"), (d.Deleted || []).length]];
   const ICO = { incomes: "💵", expenses: "🧾", holdings: "🏦", offers: "⭐", emergency: "🛡️", rates: "💱", modules: "🧩", categories: "🏷️", bin: "🗑️" };
   const cnt = x => (x[2] === "" || typeof x[2] !== "number" ? "" : `<span class="dl-n">${esc(String(x[2]))}</span>`);

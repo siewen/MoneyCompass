@@ -853,6 +853,7 @@ export const NEW = {
 "1 opportunity": "1 możliwość",
 "+{0}% on your {1} of savings": "+{0}% przy Twoich oszczędnościach ({1})",
 "Best opportunity": "Najlepsza możliwość",
+"Modules: loans, budget, goals, calendar and taxes": "Moduły: kredyty, budżet, cele, kalendarz i podatki",
 "Set up your income": "Skonfiguruj dochody",
 "Set up your expenses": "Skonfiguruj wydatki",
 "Set up your savings": "Skonfiguruj oszczędności",
