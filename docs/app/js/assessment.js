@@ -2,7 +2,8 @@
 // potential improvement), the Wealth Score, the Next Actions and the advisor team – all built from the Financial State Engine.
 import { T, pln, fmtDate, parseDate, today, monthsCount } from "./core.js";
 import { esc } from "./ui.js";
-import { ring } from "./page-head.js";
+import { ring, si, IC } from "./page-head.js";
+const hico = (icon, cls) => `<span class="rp-si i-${cls}">${si(IC[icon], 24)}</span>`;
 import { advise, opportunities, groupByAdvisor, ADVISORS } from "./engine/index.js";
 
 /** The overall states (plus "start" when there is no data yet): colour, icon and name. */
@@ -15,6 +16,7 @@ export const STATES = {
   opportunity: { name: "Optimization Opportunity", color: "#22D3EE", icon: "💡" },
   start:       { name: "Getting started",          color: "#94A3B8", icon: "🌱" },
 };
+const routeOf = g => !g ? "" : g.startsWith("@") ? "optcenter" : g;
 const pc = v => Math.round(v * 100) + "%";
 /** "Source: bank offers (checked 03.11.2026) · your own entries": where a number comes from. Older than two weeks is marked. */
 export function sourcesHtml(list) {
@@ -92,13 +94,13 @@ export function assess(c) {
   if (!s.has) { add({ icon: "💶", title: T("Add your income"), desc: T("Your salary and other income."), btn: T("Open Inflows"), go: "income" }); add({ icon: "🛒", title: T("Add your spending"), desc: T("Enter or import your expenses."), btn: T("Open Outflows"), go: "expenses" }); add({ icon: "🏦", title: T("Add your savings"), desc: T("Bank accounts and cash, with their interest."), btn: T("Open Savings"), go: "portfolio" }); }
   else r.states.forEach(x => { if (x.kind === "positive" || (x.kind === "opportunity" && !(x.potential > 0))) return; x.actions.forEach(add); });
   lastAssessment = r;
-  return { ...r, state: st, text, problem, win, risk, doNothing, actions: act.slice(0, 3), dti: s.dti };
+  return { ...r, state: st, text, problem, win, problemGo: routeOf(bad && bad.target), winGo: routeOf(opp && opp.target), risk, doNothing, actions: act.slice(0, 3), dti: s.dti };
 }
 
 /** The bands for the top of the Overview: assessment + wealth score, next actions, advisor team. */
 export function assessmentHtml(a, wealth, wl, part = "all") {
   const S = STATES[a.state];
-  const box = (ic, label, txt, cls) => `<div class="oa-box oa-b-${cls}"><span class="oa-bi">${ic}</span><div><small>${esc(label)}</small><p>${esc(txt)}</p></div></div>`;
+  const box = (ic, label, txt, cls, go) => `<div class="oa-box oa-b-${cls}"${go ? ` data-go="${go}" title="${esc(T("Click to see the details and what to do"))}"` : ""}><span class="oa-bi">${ic}</span><div><small>${esc(label)}</small><p>${esc(txt)}</p></div></div>`;
   const actList = a.actions.filter(x => !(x.go === "@optimize" && a.potential.total > 0)), act = actList.map((x, i) => `<div class="oa-act"><span class="oa-n">${i + 1}</span><span class="oa-ai">${x.icon}</span><div><b>${esc(x.title)}</b><p>${esc(x.desc)}</p></div>${x.go.startsWith("@") ? `<button class="sv-btn" data-action="${x.go.slice(1)}">${esc(x.btn)} →</button>` : `<button class="sv-btn" data-go="${x.go}">${esc(x.btn)} →</button>`}</div>`).join("");
   const pot = a.potential.total, has = a.snap.has;
   const potSrc = sourcesHtml(a.potential.counted.flatMap(x => x.sources));
@@ -107,8 +109,8 @@ export function assessmentHtml(a, wealth, wl, part = "all") {
   const sec = a.secondary.filter(x => x.kind !== "positive");
   const seenT = new Set(), uniq = a.states.filter(x => { if (x.kind === "positive" || seenT.has(x.title)) return false; seenT.add(x.title); return true; });
   const team = groupByAdvisor(uniq).map(g => `<div class="oa-adv"><div class="oa-ah"><span>${g.icon}</span><b>${esc(T(g.name))}</b></div>${g.list.map(x => `<button class="oa-st" data-go="${x.target.startsWith("@") ? g.route : x.target}" style="--k:${KIND_COLOR[x.kind]}"><i></i><span><b>${esc(x.title)}</b>${x.annualImpact > 0 && (x.kind !== "opportunity" || x.potential > 0) ? `<em>${esc(pln(x.annualImpact))} ${esc(T("per year"))}</em>` : ""}</span></button>`).join("")}</div>`).join("");
-  const nextH = `<div class="nw-card oa-next"><div class="oa-top"><h3>${esc(T("Next Actions"))}</h3><small>${esc(T("In this order"))}</small></div>${act || `<p class="hint">${esc(a.potential.total > 0 ? T("Start with the opportunity above.") : T("No action needed right now."))}</p>`}</div>`;
-  const teamH = sec.length || a.primary && a.primary.kind !== "positive" ? `<details class="nw-card oa-team" open><summary class="oa-top"><h3>${esc(T("Your advisors"))}</h3><small>${esc(uniq.length === 1 ? T("1 insight") : T("{0} insights", uniq.length))} · ${esc(T("Each advisor looks at its own part of your money"))}</small></summary><div class="oa-advs">${team}</div></details>` : "";
+  const nextH = `<div class="nw-card oa-next"><div class="oa-top">${hico("check", "res")}<h3>${esc(T("Next Actions"))}</h3><small>${esc(T("In this order"))}</small></div>${act || `<p class="hint">${esc(a.potential.total > 0 ? T("Start with the opportunity above.") : T("No action needed right now."))}</p>`}</div>`;
+  const teamH = sec.length || a.primary && a.primary.kind !== "positive" ? `<details class="nw-card oa-team" open><summary class="oa-top">${hico("shield", "table")}<h3>${esc(T("Your advisors"))}</h3><small>${esc(uniq.length === 1 ? T("1 insight") : T("{0} insights", uniq.length))} · ${esc(T("Each advisor looks at its own part of your money"))}</small></summary><div class="oa-advs">${team}</div></details>` : "";
   if (part === "pair") return `<div class="ov-pair" style="--st:${S.color}">${nextH}${teamH}</div>`;
   if (part === "next") return `<div class="ov-solo" style="--st:${S.color}">${nextH}</div>`;
   if (part === "team") return teamH ? `<div class="ov-solo">${teamH}</div>` : "";
@@ -116,11 +118,11 @@ export function assessmentHtml(a, wealth, wl, part = "all") {
     <div class="nw-card oa-main"><div class="oa-top"><span class="oa-badge">${S.icon} ${esc(T(S.name))}</span><h3>${esc(T("Financial Assessment"))}</h3>${a.primary && a.state !== "start" ? `<span class="oa-by">${esc(T("Led by"))} ${esc(T(groupByAdvisor([a.primary])[0].name))}</span>` : ""}</div>
       <p class="oa-text">${esc(a.text)}</p>
       ${a.state === "start" ? `<div class="oa-start"><button class="sv-btn" data-import-start>⬆ ${esc(T("Import a bank statement"))}</button><button class="sv-btn sec" data-demo>🧪 ${esc(T("Try the demo profile"))}</button><small>${esc(T("The demo is a separate profile with made-up numbers. Your own data is not touched."))}</small></div>` : ""}
-      <div class="oa-boxes">${box("⚠️", T("Biggest problem"), a.problem, "bad")}${box("📈", T("Biggest opportunity"), a.win, "good")}</div>
+      <div class="oa-boxes">${box("⚠️", T("Biggest problem"), a.problem, "bad", a.problemGo)}${box("📈", T("Biggest opportunity"), a.win, "good", a.winGo)}</div>
       <div class="oa-sub"><span>🛡️ <b>${esc(T("Main risk"))}:</b> ${esc(a.risk)}</span><span>⏳ <b>${esc(T("If you do nothing"))}:</b> ${esc(a.doNothing)}</span></div>
       ${potLine}
       <small class="oa-note">${esc(T("General information based on your own numbers. It is not personal financial advice."))} <button class="oa-tour" data-tour>${esc(T("Take the tour"))}</button></small></div>
-    <div class="nw-card oa-score" data-go="portfolio"><small>${esc(T("Wealth Score"))}</small>${a.state === "start" ? ring(0, "–", "/100", 132) : ring(wealth, String(wealth), "/100", 132)}<b>${esc(a.state === "start" ? T("Add your data") : wl)}</b></div>
+    <div class="nw-card oa-score" data-go="networth" title="${esc(T("Your Wealth Score – click to open Net Worth"))}"><small>${esc(T("Wealth Score"))}</small>${a.state === "start" ? ring(0, "–", "/100", 132) : ring(wealth, String(wealth), "/100", 132)}<b>${esc(a.state === "start" ? T("Add your data") : wl)}</b></div>
   </section>`;
 }
 

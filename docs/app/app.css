@@ -2674,3 +2674,9 @@ svg.gold-ic, .gold-ic svg { color: #FFC928 !important; }
 
 /* onboarding window must never run off-screen: scroll inside it */
 .guide-popup.nw-gd{max-height:calc(100vh - 24px);overflow-y:auto;overscroll-behavior:contain}
+.nwp-empty-act{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
+/* clickable cards on every page (same hover/focus as the Overview) */
+#page .nw-card[data-go]{cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s}
+#page .nw-card[data-go]:hover{transform:translateY(-2px);border-color:rgba(46,220,154,.45);box-shadow:0 8px 22px rgba(0,0,0,.28)}
+.oa-box[data-go]{cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s}.oa-box[data-go]:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.28);border-color:rgba(46,220,154,.5)}

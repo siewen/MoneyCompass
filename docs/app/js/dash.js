@@ -8,6 +8,8 @@ export const TICK = `<span class="nw-ok"><svg viewBox="0 0 24 24" fill="none" st
 export const WARN = `<span class="nw-warn"><svg viewBox="0 0 24 24" fill="#FFB020" stroke="none"><path d="M12 2L1 21h22zM11 9h2v6h-2zm0 8h2v2h-2z" fill-rule="evenodd"/></svg></span>`;
 /** A card with an icon and a title. cls picks the icon colour (bulb = yellow, table/rank = blue, res = green, warn = orange). */
 export const dcard = (icon, cls, title, body, { extra = "", klass = "" } = {}) => `<div class="nw-card dz ${klass}"><div class="nw-ch"><span class="rp-si i-${cls}">${si(IC[icon], 24)}</span><h3>${esc(title)}</h3>${extra}</div>${body}</div>`;
+/** Just the icon chip for a card heading (same look as dcard). */
+export const hico = (icon, cls) => `<span class="rp-si i-${cls}">${si(IC[icon], 24)}</span>`;
 export const PM = (a, t) => `<button class="pm-btn" data-action="${a}" title="${esc(t)}" aria-label="${esc(t)}">±</button>`;
 export const list = (items, warnFn) => `<ul class="nw-ul">${items.map((x, i) => `<li>${warnFn && warnFn(i) ? WARN : TICK}<span>${esc(x)}</span></li>`).join("")}</ul>`;
 export const keys = ks => `<span class="rp-leg">${ks.map(k => `<i style="background:${k[0]}"></i>${esc(k[1])}`).join(" ")}</span>`;

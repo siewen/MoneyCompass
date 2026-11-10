@@ -9,6 +9,7 @@ import { startBackup, drawBackupBar, backupProfileChanged, backupInfo } from "./
 import { smartImport, openImportCenter } from "./import.js";
 import { Reports } from "./reports.js";
 import { openSavingsCheck } from "./savings-check.js";
+import { linkCards } from "./card-links.js";
 import { App, DOWNLOAD_URL } from "./app.js";
 import { Rates } from "./rates.js";
 import { WEB_VERSION, WEB_BUILD, WEB_DATE } from "./version.js";
@@ -560,6 +561,7 @@ function render() {
   bindBin(el);
   const grid = el.querySelector(".grid");
   if (grid) grid.dataset.key = "web2:" + page.route;   // "web2": the new standard order of the cards (orders saved for the old one are not used)
+  try { linkCards(el, page.route); } catch (e) { console.warn(e); }
   el.querySelectorAll("[data-go]").forEach(x => x.addEventListener("click", ev => {
     const inner = ev.target.closest("button,a,input,select,label,[data-cat]");
     if (inner && inner !== x) return;
