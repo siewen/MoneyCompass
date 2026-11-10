@@ -6,7 +6,7 @@ import {
   parseDate, categoryLabel, monthName, ONE_TIME, store,
   markFileBase, savingsRateText, convertProfile, plnRate } from "./core.js";
 import { esc, card, heading, hint, row, field, textInput, select, check, button, values, popup, confirmBox, alertBox, promptBox, toast, pickFile, download, stamp } from "./ui.js";
-import { App, requirePro, windowsOrPro, DOWNLOAD_URL } from "./app.js";
+import { App, requirePro, windowsOrPro } from "./app.js";
 import { hasPin, lock, pinDialog, bioAvailable, bioOn, enableBio, removeBio } from "./lock.js";
 import { fileProtected, setFilePassword, removeFilePassword, profileFileText, backupFileText, isEncryptedFile, decryptFile, isBuiltinFile, openBuiltin } from "./crypt.js";
 import { Rates } from "./rates.js";
@@ -258,7 +258,7 @@ export function openOptions() {
       <div class="nw-card st-c">${hd("lock", T("Password for profile files"))}
         ${rowI("lock", T("Status"), fileProtected() ? T("Protected") : T("Off"), fileProtected())}
         <p class="hint">${esc(fileProtected() ? T("Profile files you save are encrypted (AES-256) and open only with the password.") : T("Set a password so that only you can open your profile files."))}</p>
-        <p class="hint">${esc(T("The password is never saved and can't be recovered. The Windows app can't open protected files."))}</p>
+        <p class="hint">${esc(T("The password is never saved and can't be recovered."))}</p>
         <div class="st-btns">${fileProtected() ? `<button class="btn second" data-action="file-pw">${esc(T("Change password…"))}</button><button class="btn second" data-action="file-pw-off">${esc(T("Turn off"))}</button>`
           : `<button class="btn main" data-action="file-pw">${ico("lock")} ${esc(T("Protect with a password…") + (license.isPro ? "" : " 🔒"))}</button>`}</div></div>
       <div class="nw-card st-c st-danger">${hd("shield", T("Reset"))}
@@ -397,8 +397,7 @@ export function openHelp(guide = false) {
     start: `<div class="hp-g2">${steps.map((x, i) => `<div class="hp-step"><b>${i + 1}</b><p>${esc(T(x))}</p></div>`).join("")}</div>` + hint(T("Numbers can be typed with a dot or a comma: 1234.50 or 1234,50.")),
     tabs: `<div class="hp-g3">${tabs.map(t => `<div class="hp-tile"><b>${esc(T(t[0]))}</b><span>${esc(T(t[1]))}</span></div>`).join("")}</div>` + hint(T("Loans & Debts, Budget Plan (with savings goals) and Calendar are modules: switch them on in Settings → Modules.")),
     pro: `<p class="hp-p">${esc(T("The free version has all the basics. A license key unlocks:"))}</p><div class="hp-g3">${pro.map(x => `<div class="hp-tile"><b>${esc(T(x[0]))}</b><span>${esc(T(x[1]))}</span></div>`).join("")}</div>` + hint(T("To unlock: click your name → Profile & license, paste your key under Activation and press Activate.")),
-    data: `<div class="hp-g2"><div class="hp-tile big"><b>${esc(T("Your data & backup"))}</b><span>${esc(T("Everything you enter is saved automatically, only in this browser on this device. Nothing is sent to the internet."))}</span><small>${esc(T("Clearing your browser data deletes your entries. With Pro, turn on the automatic encrypted backup (Settings) or save your profile (click your name → Profile). Loading a profile is free. The Windows app opens these files from version 2.1."))}</small></div>
-      <div class="hp-tile big"><b>${esc(T("Windows app"))}</b><span>${esc(T("The free Windows app has more than the free web version: reports and several profiles. From version 2.1 it also opens the encrypted profile files of the web app."))}</span><a class="sv-btn hp-dl" href="${DOWNLOAD_URL}" target="_blank" rel="noopener">⬇ ${esc(T("Download for Windows"))}</a></div></div>`,
+    data: `<div class="hp-g1"><div class="hp-tile big"><b>${esc(T("Your data & backup"))}</b><span>${esc(T("Everything you enter is saved automatically, only in this browser on this device. Nothing is sent to the internet."))}</span><small>${esc(T("Clearing your browser data deletes your entries. With Pro, turn on the automatic encrypted backup (Settings) or save your profile (click your name → Profile). Loading a profile is free."))}</small></div></div>`,
     note: `<div class="hp-tile big"><b>${esc(T("Please note"))}</b><span>${esc(T("MoneyCompass helps you keep an overview. All results are estimates based on what you enter. They are not financial, investment or tax advice. Interest rates and offers change - always check the bank's own terms."))}</span><small>${esc(T("© {0} MoneyCompass. All rights reserved.", new Date().getFullYear()))}</small><span><a href="../privacy.html#${lang()}" target="_blank">${esc(T("Privacy policy"))}</a> · <a href="../terms.html#${lang()}" target="_blank">${esc(T("Terms of use"))}</a></span></div>`
   };
   const p = popup(`<div class="nw-hd"><span class="nw-hi">${ico("book")}</span><div><h2>${esc(T("Help"))}</h2><p class="nw-sub">${esc(T("Everything you need to get started and get the most from MoneyCompass."))}</p></div><button class="nw-x" data-close aria-label="Close">✕</button></div>

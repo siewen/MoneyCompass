@@ -853,6 +853,8 @@ export const NEW = {
 "1 opportunity": "1 możliwość",
 "+{0}% on your {1} of savings": "+{0}% przy Twoich oszczędnościach ({1})",
 "Best opportunity": "Najlepsza możliwość",
+"The password is never saved and can't be recovered.": "Hasło nigdy nie jest zapisywane i nie można go odzyskać.",
+"Clearing your browser data deletes your entries. With Pro, turn on the automatic encrypted backup (Settings) or save your profile (click your name → Profile). Loading a profile is free.": "Wyczyszczenie danych przeglądarki usuwa Twoje wpisy. Z Pro włącz automatyczną zaszyfrowaną kopię (Ustawienia) lub zapisz profil (kliknij swoje imię → Profil). Wczytanie profilu jest bezpłatne.",
 "Modules: loans, budget, goals, calendar and taxes": "Moduły: kredyty, budżet, cele, kalendarz i podatki",
 "Set up your income": "Skonfiguruj dochody",
 "Set up your expenses": "Skonfiguruj wydatki",

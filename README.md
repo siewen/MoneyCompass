@@ -4,12 +4,11 @@
 
 <h1 align="center">MoneyCompass</h1>
 <p align="center"><b>Your money, in the right direction.</b><br>
-Personal finance for Poland – in your browser or on Windows. Private: your data stays on your own device.</p>
+Personal finance for Poland – in your browser, on any device. Private: your data stays on your own device.</p>
 
 <p align="center">
   <a href="https://siewen.github.io/MoneyCompass/app/"><b>▶ Open MoneyCompass in your browser</b></a> ·
-  <a href="https://siewen.github.io/MoneyCompass/">Website</a> ·
-  <a href="https://github.com/siewen/MoneyCompass/releases/latest">Download for Windows</a>
+  <a href="https://siewen.github.io/MoneyCompass/">Website</a>
 </p>
 
 <p align="center"><img src="docs/readme-banner.png" alt="MoneyCompass (example numbers)" width="900"></p>

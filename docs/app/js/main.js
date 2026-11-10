@@ -11,7 +11,7 @@ import { Reports } from "./reports.js";
 import { openSavingsCheck } from "./savings-check.js";
 import { linkCards } from "./card-links.js";
 import { maybeHint } from "./page-hints.js";
-import { App, DOWNLOAD_URL } from "./app.js";
+import { App } from "./app.js";
 import { Rates } from "./rates.js";
 import { WEB_VERSION, WEB_BUILD, WEB_DATE } from "./version.js";
 import { ico } from "./nw.js";
@@ -126,7 +126,7 @@ function buildShell() {
         <span class="me-text"><b>${esc(currentName())}</b><small class="me-badge ${license.isPro ? "pro" : "demo"}">${esc(license.isPro ? T("Pro Plan") : T("Demo"))}</small></span>
         <span class="me-more" aria-hidden="true">⌄</span></button>
     </div>
-    ${license.isPro ? "" : `<div class="free-bar">${esc(T("Free web version."))} <a href="${DOWNLOAD_URL}" target="_blank" rel="noopener">${esc(T("Download the Windows app"))}</a> · <a href="#" data-act="profile">${esc(T("Enter license key"))}</a></div>`}
+    ${license.isPro ? "" : `<div class="free-bar">${esc(T("Free web version."))} <a href="#" data-act="profile">${esc(T("Enter license key"))}</a></div>`}
     <div class="page-head"><h1 id="page-title"></h1><button class="btn main small head-import" id="head-import" hidden></button></div>
     <main id="page"></main>
     <div id="backup-bar" class="backup-bar" hidden></div>

@@ -17,7 +17,6 @@ export const App = {
   openOptimize: () => {},
 };
 
-export const DOWNLOAD_URL = "https://github.com/siewen/MoneyCompass/releases/latest";
 
 /** For Pro features: true when unlocked, else explains and offers the profile (license key). */
 export async function requirePro(feature) {
@@ -29,15 +28,8 @@ export async function requirePro(feature) {
   return false;
 }
 
-/** Free web version: only the Windows app (or Pro) has this. */
-export async function windowsOrPro(feature) {
-  if (license.isPro) return true;
-  const go = await confirmBox(T("MoneyCompass Pro"),
-    T("\"{0}\" is not part of the free web version. Download the free Windows app, or enter a Pro license key in your profile (top right).", feature),
-    T("Download for Windows"), T("Not now"));
-  if (go) window.open(DOWNLOAD_URL, "_blank", "noopener");
-  return false;
-}
+/** Features that need a Pro license (kept under its old name, many pages call it). */
+export async function windowsOrPro(feature) { return requirePro(feature); }
 
 export function changed() { save(); App.refresh(); }
 export { State };
