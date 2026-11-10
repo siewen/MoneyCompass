@@ -364,7 +364,7 @@ let installPrompt = null;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installPrompt = e; });
 window.addEventListener("appinstalled", () => { installPrompt = null; buildShell(); toast(T("MoneyCompass is installed. Open it from your home screen or apps.")); });
 function installed() {
-  return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true || !!window.chrome?.webview;   // the Windows app (WebView2) counts as installed
 }
 async function install() {
   if (installPrompt) {
