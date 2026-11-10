@@ -1,5 +1,5 @@
 // Dashboard blocks for the redesigned pages (Budget Plan, Expenses, Emergency Fund, Loans & Debts), built like the "Emerald Balanced" mockups.
-import { T, State, Calc, ChartData, pln, rate, fmtDate, parseDate, today, addMonths, monthName, categoryLabel, categoryIcon, COLORS, findCategory } from "./core.js";
+import { locale, T, State, Calc, ChartData, pln, rate, fmtDate, parseDate, today, addMonths, monthName, categoryLabel, categoryIcon, COLORS, findCategory } from "./core.js";
 import { esc } from "./ui.js";
 import { si, IC, ring, band } from "./page-head.js";
 import { lineChart, colBars, donutList } from "./ov-charts.js";
@@ -57,7 +57,7 @@ export function emergencyDash(d) {
   const pct = r.target > 0 ? Math.min(100, Math.round(safe / r.target * 100)) : 0, months = contrib > 0 ? Math.ceil(missing / contrib) : null;
   const at = k => addMonths(today(), k), mon = dt => dt.toLocaleDateString(undefined, { month: "long", year: "numeric" });
   const done = pct >= 100, est = done ? null : months != null ? at(months) : null;
-  const fcL = Array.from({ length: 7 }, (_, i) => at(i).toLocaleDateString(undefined, { month: "short" }));
+  const fcL = Array.from({ length: 7 }, (_, i) => at(i).toLocaleDateString(locale(), { month: "short" }));
   const cur = fcL.map((_, i) => Math.min(r.target || Infinity, safe + contrib * i));
   const fcC = dcard("trend", "res", T("Emergency Fund Forecast"), `<div class="dz-keys">${keys([["#22E39A", T("Current Plan")], ["#6FD6FF", T("Target Projection")]])}</div>${lineChart(fcL, [{ vals: Array(7).fill(r.target || 0), color: "#6FD6FF", dash: true }, { vals: cur, color: "#22E39A", dots: true }])}${est ? `<div class="bp-fc ok">${esc(T("Estimated completion: {0}", mon(est)))}</div>` : done ? `<div class="bp-fc ok">${esc(T("Target reached"))}</div>` : `<div class="bp-fc bad">${esc(T("Add savings or lower your costs to see a completion date"))}</div>`}`, { klass: "bp-fcc" });
   const prog = dcard("shield", "res", T("Emergency Fund Progress"), `<div class="bp-ov-b">${ring(pct, pct + "%", "", 150, "#22E39A")}<div class="bp-ov-f">${stat(T("Current"), pln(safe))}${stat(T("Target"), r.target > 0 ? pln(r.target) : "–")}${stat(T("Remaining"), pln(missing), missing ? "warn" : "good")}</div></div><div class="dz-two">${stat(T("Estimated Completion"), est ? mon(est) : done ? T("Done") : "–")}${stat(T("Monthly Contribution"), pln(contrib))}</div><button class="btn main ex-opt" data-go="portfolio">${esc(T("Boost My Fund"))}</button>`, { klass: "bp-ovc", extra: PM("em-manage", T("Edit costs and target")) });
@@ -88,7 +88,7 @@ export function loansDash(d, debtFree) {
   const sim = factor => { const b = running.map(x => now(x)), out = []; for (let m = 0; m <= 60; m++) { out.push(b.reduce((a, v) => a + v, 0)); running.forEach((x, i) => { b[i] = Math.max(0, b[i] * (1 + (x.RatePercent || 0) / 1200) - (x.MonthlyPayment || 0) * factor); }); if (!b.some(v => v > 0)) { out.push(0); break; } } return out; };
   const cur = sim(1), acc = sim(1.2), len = Math.max(cur.length, acc.length), step = Math.max(1, Math.ceil(len / 8));
   const idx = Array.from({ length: Math.ceil(len / step) }, (_, i) => i * step), at = k => addMonths(today(), k);
-  const labels = idx.map(k => at(k).toLocaleDateString(undefined, { month: "short", year: "2-digit" }));
+  const labels = idx.map(k => at(k).toLocaleDateString(locale(), { month: "short", year: "2-digit" }));
   const pick = arr => idx.map(k => k < arr.length ? arr[k] : 0);
   const plan = dcard("save", "res", T("Debt Freedom Plan"), `<div class="bp-ov-b">${ring(paid, paid + "%", T("Debt Paid Off"), 150, "#22E39A")}<div class="bp-ov-f">${stat(T("Remaining Debt"), pln(rem))}${stat(T("Already Repaid"), pln(Math.max(0, orig - rem)), "good")}${stat(T("Total Original Debt"), pln(orig))}</div></div><button class="btn main ex-opt" data-action="l-extra">${esc(T("Accelerate My Payoff Plan"))} →</button>`, { klass: "bp-ovc" });
   const fc = dcard("trend", "res", T("Debt Payoff Forecast"), `<div class="dz-keys">${keys([["#22E39A", T("Current Plan")], ["#3B9BFF", T("Accelerated Plan (+20% payment)")]])}</div>${running.length ? lineChart(labels, [{ vals: pick(cur), color: "#22E39A", dots: true }, { vals: pick(acc), color: "#3B9BFF", dots: true }]) : `<p class="hint">${esc(T("You have no active debts"))}</p>`}${running.length ? `<div class="bp-fc ok">${esc(T("Debt-Free"))}: ${esc(debtFree)}</div>` : ""}`, { klass: "bp-fcc" });

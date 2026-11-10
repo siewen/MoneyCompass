@@ -1198,7 +1198,7 @@ export const Portfolio = {
     const yrs = svRange, steps = yrs * 4, risky = hv.filter(y => !y.x.Safe).reduce((a, y) => a + y.pl, 0);
     const labs = [], tot = [], inv = [], intr = [];
     for (let k = 0; k <= steps; k++) {
-      const mo = k * 3, dt = addMonths(today(), mo); labs.push(dt.toLocaleDateString(undefined, { month: "short", year: "numeric" }));
+      const mo = k * 3, dt = addMonths(today(), mo); labs.push(dt.toLocaleDateString(LOC(), { month: "short", year: "numeric" }));
       let t = 0; for (const y of hv) t += y.x.Safe || !y.r ? y.pl * Math.pow(1 + y.r / 100 / 12, mo) : y.pl;
       tot.push(Math.round(t)); inv.push(Math.round(risky)); intr.push(Math.round(t - p.total));
     }

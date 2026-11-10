@@ -1,6 +1,6 @@
 // Net Worth: what you own minus what you owe, how it develops, how close you are to financial independence and to retirement.
 // The Wealth Advisor (engine/wealth-advisor.js) speaks at the top; every number here comes from the same snapshot as the Overview.
-import { T, pln, State, save, num, plain } from "./core.js";
+import { locale, T, pln, State, save, num, plain } from "./core.js";
 import { esc, field, numInput } from "./ui.js";
 import { App } from "./app.js";
 import { donut } from "./charts.js";
@@ -10,7 +10,7 @@ import { currentAssessment } from "./assessment.js";
 import { wealthFacts, fv, MILESTONES } from "./engine/wealth-math.js";
 
 const pc = v => Math.round(v * 100) + "%";
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MON = () => Array.from({ length: 12 }, (_, i) => new Date(2026, i, 1).toLocaleDateString(locale(), { month: "short" }).replace(".", ""));
 const COLORS = ["#35D399", "#3B82F6", "#F59E0B", "#A78BFA", "#F472B6", "#22D3EE"];
 const yrs = y => y === 1 ? T("1 year") : T("{0} years", y);
 const years = m => m === null ? T("more than 100 years") : m <= 0 ? T("reached") : m < 12 ? (m === 1 ? T("1 month") : T("{0} months", m)) : yrs(Math.round(m / 12 * 10) / 10);
@@ -32,7 +32,7 @@ export const NetWorth = {
     const kinds = {}; (s.accounts || []).forEach(a => { const k = a.place || "Bank"; kinds[k] = (kinds[k] || 0) + a.amount; });
     if (s.invest && s.invest.total > 0) kinds[T("Investments")] = s.invest.total;
     const items = Object.entries(kinds).map(([k, v], i) => ({ label: T(k), value: v, color: COLORS[i % COLORS.length] })).sort((a, b) => b.value - a.value);
-    const chart = hist.length >= 2 ? lineChart(hist.map(h => MON[+h.k.slice(5, 7) - 1] + (hist.length > 12 ? " " + h.k.slice(2, 4) : "")), [
+    const chart = hist.length >= 2 ? lineChart(hist.map(h => MON()[+h.k.slice(5, 7) - 1] + (hist.length > 12 ? " " + h.k.slice(2, 4) : "")), [
         { vals: hist.map(h => Math.round(h.assets)), color: "#3B82F6", dots: false }, { vals: hist.map(h => Math.round(h.net)), color: "#35D399", area: true, dots: true }], { w: 620, h: 260 })
       : `<p class="hint">${esc(T("Your history builds up by itself: MoneyCompass notes your net worth every month you open it. Come back next month to see the trend."))}</p>`;
     const base = Math.max(0, n.net), proj = [1, 5, 10, 20].map(y => [y, fv(base, w.contrib, P.ret, y)]);

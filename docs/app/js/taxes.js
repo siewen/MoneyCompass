@@ -96,7 +96,7 @@ const KINDS = {
 };
 const SHORT = { bonus: "Bonus", allowance: "Monthly extra pay", benefit: "Benefit", deduct: "Deduction from net", sick: "Sick leave" };
 const PRESETS = [["Private medical care", "benefit"], ["Sport card", "benefit"], ["Medical care for my child", "benefit"], ["Bonus", "bonus"], ["13th salary", "bonus"], ["Holiday pay", "bonus"], ["Overtime in one month", "bonus"], ["Overtime every month", "allowance"], ["Meal allowance", "allowance"], ["Union fee", "deduct"], ["Loan instalment", "deduct"], ["Sick leave", "sick"]];
-const MONTHS = () => Array.from({ length: 12 }, (_, i) => [String(i), new Intl.DateTimeFormat(undefined, { month: "long" }).format(new Date(2026, i, 1))]);
+const MONTHS = () => Array.from({ length: 12 }, (_, i) => [String(i), new Intl.DateTimeFormat(({ en: "en-GB", pl: "pl-PL" })[document.documentElement.lang] || "en-GB", { month: "long" }).format(new Date(2026, i, 1))]);
 const plan = () => { const s = State.data.Settings; if (!s.TaxPlan) s.TaxPlan = { mode: "gross", amount: "", raised: false, pit2: true, under26: false, ppk: false, items: [] }; const q = s.TaxPlan; if (!q.contract) Object.assign(q, { contract: "uop", taxForm: "linear", zus: "full", lumpRate: "0.12", costs: "" }); if (!Array.isArray(s.TaxPlan.items)) s.TaxPlan.items = []; if (!Array.isArray(s.TaxPlan.jobs)) s.TaxPlan.jobs = []; return s.TaxPlan; };
 /** The saved extras → the options of the calculation. */
 export function planOpts(P) {
