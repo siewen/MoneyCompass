@@ -26,6 +26,7 @@ const GO = {
   "Report Preview": "overview", "Report Insights": "optcenter", "Monthly Overview": "overview", "Financial Summary": "overview",
 };
 const FALLBACK = "optcenter";
+const NOLINK = new Set(["Report Contents", "Period Selection", "Export Formats"]);   // these cards are controls, not shortcuts
 const BLOCK = "input,select,textarea,form,details,summary";
 
 export function linkCards(el, current) {
@@ -38,7 +39,7 @@ export function linkCards(el, current) {
     if (c.closest("[data-go]") && c.closest("[data-go]") !== c) return;
     const h = c.querySelector("h2, h3, h4, .ei-msg b, small");
     const name = h ? h.textContent.trim().replace(/\s+/g, " ") : (c.classList.contains("ei-msg") ? c.textContent.trim().replace(/\s+/g, " ").slice(0, 60) : "");
-    if (!name) return;
+    if (!name || NOLINK.has(name) || (!(name in GO) && c.querySelector(BLOCK))) return;
     let to = c.dataset.go || GO[name] || FALLBACK;
     if (!ok(to)) to = ALT[to] || FALLBACK;
     const dest = label(to);
