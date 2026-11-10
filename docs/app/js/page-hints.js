@@ -9,38 +9,38 @@ const has = (a, b) => a.some(x => x === b);
 
 /** act: {i icon, l label, d description, go page to open first, click / focus: element to use once the page is open, fn: own action} */
 const HINTS = {
-  overview: { icon: "🧭", title: "Let's set up your Overview", empty: () => none("Incomes") && none("Expenses"),
-    text: "MoneyCompass needs two things to show you the full picture: what you earn and what you spend. Pick the quickest way:",
-    acts: [{ i: "💶", l: "Add your income", d: "Your salary and other income.", go: "income", focus: '[name="qname"]' },
-      { i: "🛒", l: "Add your spending", d: "Enter what you spend.", go: "expenses", click: '[data-action="ex-add"]' },
-      { i: "⬆", l: "Import a bank statement", d: "MoneyCompass reads the file and sorts it for you.", fn: "import" },
-      { i: "🧪", l: "Look at the demo first", d: "Made-up numbers – your own data is not touched.", fn: "demo" }] },
-  income: { icon: "💶", title: "Add your income", empty: () => none("Incomes") && none("Received"),
-    text: "Your salary and other income. Add it by hand, or import a bank statement and MoneyCompass finds it for you.",
-    acts: [{ i: "💶", l: "Add an income source", d: "Name, amount and how often you get it.", focus: '[name="qname"]' },
-      { i: "⬆", l: "Import a bank statement", d: "Salary payments are found automatically.", fn: "import" }] },
-  expenses: { icon: "🛒", title: "Add your spending", empty: () => none("Expenses"),
-    text: "Enter what you spend, or import a bank statement – MoneyCompass sorts it into categories.",
-    acts: [{ i: "＋", l: "Add an expense", d: "One purchase or bill.", click: '[data-action="ex-add"]' },
-      { i: "⬆", l: "Import a bank statement", d: "All your outflows at once.", fn: "import" }] },
-  emergency: { icon: "🛡️", title: "Build your safety net", empty: () => none("Expenses") && none("Holdings"),
-    text: "To show how long your money would last, MoneyCompass needs your monthly spending and your savings.",
-    acts: [{ i: "🛒", l: "Add your spending", d: "Gives the monthly cost of living.", go: "expenses", click: '[data-action="ex-add"]' },
-      { i: "🏦", l: "Add your savings", d: "What you could use in an emergency.", go: "portfolio" }] },
-  portfolio: { icon: "🏦", title: "Add your savings", empty: () => none("Holdings"),
-    text: "List your savings accounts to see what they really earn – and where you could earn more.",
+  overview: { icon: "🧭", title: "Welcome to MoneyCompass", empty: () => none("Incomes") && none("Expenses"),
+    text: "Add your income and expenses to unlock your personal financial assessment. Choose how you would like to begin:",
+    acts: [{ i: "💶", l: "Add income", d: "Salary and other sources of income.", go: "income", click: '[data-action="inc-add"]' },
+      { i: "🛒", l: "Add expenses", d: "Record your spending manually.", go: "expenses", click: '[data-action="ex-add"]' },
+      { i: "⬆", l: "Import a bank statement", d: "Transactions are read and categorised automatically.", fn: "import" },
+      { i: "🧪", l: "Explore with demo data", d: "Sample figures. Your own data is not affected.", fn: "demo" }] },
+  income: { icon: "💶", title: "Set up your income", empty: () => none("Incomes") && none("Received"),
+    text: "Record your salary and other income to see what remains each month. Enter it manually or import a bank statement.",
+    acts: [{ i: "💶", l: "Add an income source", d: "Name, amount and frequency.", click: '[data-action="inc-add"]' },
+      { i: "⬆", l: "Import a bank statement", d: "Salary payments are detected automatically.", fn: "import" }] },
+  expenses: { icon: "🛒", title: "Set up your expenses", empty: () => none("Expenses"),
+    text: "Record your spending manually, or import a bank statement and let MoneyCompass categorise it automatically.",
+    acts: [{ i: "＋", l: "Add an expense", d: "A single purchase or bill.", click: '[data-action="ex-add"]' },
+      { i: "⬆", l: "Import a bank statement", d: "All outflows in one step.", fn: "import" }] },
+  emergency: { icon: "🛡️", title: "Set up your emergency fund", empty: () => none("Expenses") && none("Holdings"),
+    text: "MoneyCompass needs your monthly expenses and savings to calculate how long your reserves would last.",
+    acts: [{ i: "🛒", l: "Add expenses", d: "Establishes your monthly cost of living.", go: "expenses", click: '[data-action="ex-add"]' },
+      { i: "🏦", l: "Add savings", d: "Funds available in an emergency.", go: "portfolio" }] },
+  portfolio: { icon: "🏦", title: "Set up your savings", empty: () => none("Holdings"),
+    text: "Add your savings accounts to see their real return and compare them with better offers.",
     acts: [{ i: "🏦", l: "Add a savings account", d: "Bank, balance and interest rate.", click: "[data-sv-add]" },
       { i: "⬆", l: "Import a savings statement", d: "Balance and interest are read from the file.", fn: "importSavings" }] },
-  loans: { icon: "💳", title: "Add your loans", empty: () => none("Loans"),
-    text: "Add a loan or card debt to see when you are debt-free and whether paying extra is worth it.",
-    acts: [{ i: "💳", l: "Add a loan", d: "Balance, rate and monthly payment.", click: '[data-action="l-new"]' }] },
-  budget: { icon: "🎯", title: "Plan your budget", empty: () => none("Budgets") && none("Goals"),
-    text: "Set a monthly limit for a category, or a savings goal – MoneyCompass keeps track for you.",
-    acts: [{ i: "📊", l: "Set a monthly limit", d: "For food, transport or anything else.", click: '[data-action="b-new"]' },
-      { i: "🎯", l: "Add a savings goal", d: "A car, a holiday, a flat.", click: '[data-action="b-goals"]' }] },
-  networth: { icon: "💎", title: "Track your net worth", empty: () => none("Holdings") && none("Loans"),
-    text: "Net worth is what you own minus what you owe. Add your savings and loans to start.",
-    acts: [{ i: "🏦", l: "Add your savings", d: "What you own.", go: "portfolio" }, { i: "💳", l: "Add your loans", d: "What you owe.", go: "loans" }] },
+  loans: { icon: "💳", title: "Set up your loans and debts", empty: () => none("Loans"),
+    text: "Add a loan or credit card balance to see your payoff date and whether overpaying is worthwhile.",
+    acts: [{ i: "💳", l: "Add a loan", d: "Balance, interest rate and monthly payment.", click: '[data-action="l-new"]' }] },
+  budget: { icon: "🎯", title: "Set up your budget", empty: () => none("Budgets") && none("Goals"),
+    text: "Define monthly spending limits and savings goals. MoneyCompass tracks your progress automatically.",
+    acts: [{ i: "📊", l: "Set a monthly limit", d: "For any spending category.", click: '[data-action="b-new"]' },
+      { i: "🎯", l: "Add a savings goal", d: "A purchase, holiday or deposit.", click: '[data-action="b-goals"]' }] },
+  networth: { icon: "💎", title: "Set up your net worth", empty: () => none("Holdings") && none("Loans"),
+    text: "Net worth is your assets minus your liabilities. Add your savings and loans to begin tracking.",
+    acts: [{ i: "🏦", l: "Add savings", d: "Your assets.", go: "portfolio" }, { i: "💳", l: "Add loans", d: "Your liabilities.", go: "loans" }] },
 };
 
 const hidden = () => (State.data.Settings.HintsHidden = State.data.Settings.HintsHidden || []);
@@ -62,8 +62,8 @@ export function openHint(route, ctx) {
   const p = popup(`<div class="nw-hd"><span class="nw-hi">${h.icon}</span><h2>${esc(T(h.title))}</h2><button class="nw-x" data-close aria-label="Close">✕</button></div>
     <div class="ph-body"><p class="ph-text">${esc(T(h.text))}</p>
       <div class="ph-acts">${h.acts.map((a, i) => `<button class="ph-act" data-i="${i}"><span class="ph-i">${a.i}</span><span class="ph-t"><b>${esc(T(a.l))}</b><small>${esc(T(a.d))}</small></span><em>→</em></button>`).join("")}</div></div>
-    <div class="g2-foot"><label class="check"><input type="checkbox" name="hide"${has(hidden(), route) ? " checked" : ""}><span>${esc(T("Don't show this tip on this page again"))}</span></label>
-      <div class="buttons"><button class="btn second" data-close>${esc(T("Not now"))}</button></div></div>`, { width: 560, cls: "ph-popup nw-win" });
+    <div class="g2-foot"><label class="check"><input type="checkbox" name="hide"${has(hidden(), route) ? " checked" : ""}><span>${esc(T("Don't show this again on this page"))}</span></label>
+      <div class="buttons"><button class="btn second" data-close>${esc(T("Later"))}</button></div></div>`, { width: 560, cls: "ph-popup nw-win" });
   p.el.querySelector('[name="hide"]').onchange = e => { const l = hidden(), i = l.indexOf(route); if (e.target.checked && i < 0) l.push(route); if (!e.target.checked && i >= 0) l.splice(i, 1); save(); };
   p.el.querySelectorAll(".ph-act").forEach(b => b.onclick = () => {
     const a = h.acts[+b.dataset.i]; p.close();
@@ -80,4 +80,4 @@ export function openHint(route, ctx) {
 }
 
 /** Settings: bring every tip back. */
-export function resetHints() { const s = State.data.Settings; s.HintsHidden = []; s.HintsOff = false; shown = ""; save(); toast(T("Page tips are back.")); }
+export function resetHints() { const s = State.data.Settings; s.HintsHidden = []; s.HintsOff = false; shown = ""; save(); toast(T("Setup guidance restored.")); }

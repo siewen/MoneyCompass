@@ -243,7 +243,7 @@ export function openOptions() {
       <div class="nw-card st-c">${hd("gear", T("General"))}
         <label class="check"><input type="checkbox" name="askstart"${s.AskOnStart ? " checked" : ""}><span>${esc(T("Ask what to do when MoneyCompass starts"))}</span></label>
         <label class="check"><input type="checkbox" name="showguide"${!s.GuideHidden ? " checked" : ""}><span>${esc(T("Show the step-by-step guide when MoneyCompass starts"))}</span></label>
-        <label class="check"><input type="checkbox" name="showhints"${!s.HintsOff ? " checked" : ""}><span>${esc(T("Show a short tip on pages that are still empty"))}</span></label>
+        <label class="check"><input type="checkbox" name="showhints"${!s.HintsOff ? " checked" : ""}><span>${esc(T("Show setup guidance on pages that have no data yet"))}</span></label>
         <label class="check"><input type="checkbox" name="shownews"${!s.NewsHidden ? " checked" : ""}><span>${esc(T("Show what's new after an update"))}</span></label>
         <label class="field"><span>${esc(T("When I close MoneyCompass"))}</span>${select("closechoice", [["", T("Ask every time")], ["with", T("Save profile and close")], ["without", T("Close without saving")]], s.CloseChoice === "none" ? "without" : s.CloseChoice || "")}</label>
         <button class="btn second st-wide" data-action="reset-layout">${ico("list")} ${esc(T("Reset layout"))}</button>
@@ -263,7 +263,7 @@ export function openOptions() {
           : `<button class="btn main" data-action="file-pw">${ico("lock")} ${esc(T("Protect with a password…") + (license.isPro ? "" : " 🔒"))}</button>`}</div></div>
       <div class="nw-card st-c st-danger">${hd("shield", T("Reset"))}
         <p class="hint">${esc(T("Delete all or only some of your entries. Your language and other options stay."))}</p>
-        <button class="btn second st-wide" data-action="reset-hints">${esc(T("Show the page tips again"))}</button>
+        <button class="btn second st-wide" data-action="reset-hints">${esc(T("Restore setup guidance"))}</button>
         <button class="btn danger st-wide" data-action="delete">${esc(T("Choose what to delete…"))}</button></div>
     </div></details>
     <div class="nw-foot"><div></div><button class="btn second" data-close>✕ ${esc(T("Close"))}</button></div>`, { width: 1100, cls: "wide-popup nw-win nw-set", onClose: () => App.rebuild() });
