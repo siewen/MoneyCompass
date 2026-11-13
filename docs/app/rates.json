@@ -1,7 +1,7 @@
 {
- "Usd": 3.9676,
- "Eur": 4.4018,
- "ExchangeDate": "2026-11-12",
+ "Usd": 3.9852,
+ "Eur": 4.407,
+ "ExchangeDate": "2026-11-13",
  "ReferenceRate": 3.75,
  "ReferenceSince": "2026-03-05",
  "Bonds": [
@@ -107,6 +107,15 @@
   {
    "Url": "",
    "Bank": "Toyota Bank",
+   "Name": "Lokata Plus",
+   "Rate": 4.4,
+   "MaxAmount": 100000,
+   "Days": 365,
+   "Details": "2 000 - 100 000 zł · Konto osobiste"
+  },
+  {
+   "Url": "",
+   "Bank": "Toyota Bank",
    "Name": "Lokata Standard",
    "Rate": 4.3,
    "MaxAmount": 100000,
@@ -123,7 +132,7 @@
    "Details": "1 000 - 50 000 zł (limit lokat do 1 000 000 zł) · Brak dodatkowych warunków"
   },
   {
-   "Url": "",
+   "Url": "https://rankomat.pl/finanse/redirect/lokaty/Facto-Lokata-Facto/2/",
    "Bank": "BFF Banking Group (Facto)",
    "Name": "Lokata Facto",
    "Rate": 4,
@@ -133,23 +142,14 @@
   },
   {
    "Url": "",
-   "Bank": "Credit Agricole",
-   "Name": "Lokata na Nowe pieniądze",
-   "Rate": 3.8,
-   "MaxAmount": 250000,
+   "Bank": "Santander Consumer Bank",
+   "Name": "Lokata Mobilna Nowe Środki",
+   "Rate": 4,
+   "MaxAmount": 400000,
    "Days": 365,
-   "Details": "1 000 - 250 000 zł · Konto dla Ciebie Prime"
-  },
-  {
-   "Url": "",
-   "Bank": "Nest Bank",
-   "Name": "Nest Lokata Nowe Środki",
-   "Rate": 3.7,
-   "MaxAmount": 2000000,
-   "Days": 365,
-   "Details": "1 000 - 2 000 000 zł · Konto osobiste Nowe środki"
+   "Details": "1 000 - 400 000 zł · Nowe środki Aplikacja mobilna"
   }
  ],
- "OffersChecked": "2026-11-12T13:44:42.177Z",
- "Updated": "2026-11-12T13:44:42.177Z"
+ "OffersChecked": "2026-11-13T13:04:44.765Z",
+ "Updated": "2026-11-13T13:04:44.765Z"
 }
