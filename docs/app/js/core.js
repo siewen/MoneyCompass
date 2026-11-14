@@ -1,5 +1,5 @@
 // MoneyCompass web: data, storage, translations, money maths and advice.
-// The data has exactly the same shape as the Windows app, so profile files work in both.
+// The data shape is fixed: profile files saved earlier must keep opening.
 import { TABLE } from "./lang-table.js";
 import { EXTRA } from "./lang-extra.js";
 import { NEW } from "./lang-new.js";
@@ -19,7 +19,7 @@ export const uuid = () => (crypto.randomUUID ? crypto.randomUUID()
       const r = Math.random() * 16 | 0; return (c === "x" ? r : (r & 3 | 8)).toString(16);
     }));
 
-// ---------------------------------------------------------------- dates (saved like .NET: "2026-10-31T00:00:00")
+// ---------------------------------------------------------------- dates (saved as "2026-10-31T00:00:00", local time, no zone)
 
 export function today() { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
 export function parseDate(v) {
@@ -34,7 +34,7 @@ export const inputDate = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad
 export const fmtDate = d => { d = parseDate(d); return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`; };
 export const monthStart = d => new Date(d.getFullYear(), d.getMonth(), 1);
 export function addMonths(d, n) {
-  // Like .NET AddMonths: the 31st becomes the last day of a shorter month
+  // The 31st becomes the last day of a shorter month
   const y = d.getFullYear(), m = d.getMonth() + n;
   const last = new Date(y, m + 1, 0).getDate();
   return new Date(y, m, Math.min(d.getDate(), last));
@@ -57,7 +57,7 @@ export function newData() {
   return { Incomes: [], Expenses: [], Holdings: [], Offers: [], Loans: [], Goals: [], Received: [],
            Transfers: [], Categories: [], Budgets: [], Recurring: [], Deleted: [], SavingsChecks: [], Investments: [], Settings: newSettings() };
 }
-/** Fills in anything missing (older files, files from the Windows app). */
+/** Fills in anything missing (older profile files). */
 export function normalise(d) {
   const base = newData();
   const out = Object.assign(base, d || {});
@@ -65,7 +65,7 @@ export function normalise(d) {
     if (!Array.isArray(out[k])) out[k] = [];
   out.Settings = Object.assign(newSettings(), out.Settings || {});
   if (!Array.isArray(out.Settings.Modules)) out.Settings.Modules = [];
-  // Savings goals are now part of the Budget plan: whoever used goals gets the Budget plan ("goals" stays for the Windows app)
+  // Savings goals are now part of the Budget plan: whoever used goals gets the Budget plan ("goals" is kept so that older profile files stay compatible)
   if (out.Settings.Modules.includes("goals") && !out.Settings.Modules.includes("budget")) out.Settings.Modules.push("budget");
   // Older loans had a "Last payment" typed in by hand: now it is worked out from the amount, payment and interest
   for (const l of out.Loans) if (!l.Planned && l.Remaining > 0) planLoan(l);
@@ -235,7 +235,7 @@ export function num(text) {
 }
 export const plain = v => (v === 0 || v) ? String(Math.round(v * 100) / 100).replace(".", ",") : "";
 
-// ---------------------------------------------------------------- license (same keys as the Windows app)
+// ---------------------------------------------------------------- license
 
 const PUBLIC_KEY = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE13kV127//P+BWPUsOX3hN2RZLj+EKAP2ANQYpknXmmsCAH2Bfb6osIz6+ro1qe7t+fZCXUuZrL1bRKu5CIvhEA==";
 const ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";

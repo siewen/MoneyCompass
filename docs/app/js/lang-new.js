@@ -219,7 +219,6 @@ export const NEW = {
 "A copy of your profile is saved in a file on this computer after every change. Choose a folder like Documents or OneDrive.": "Po każdej zmianie kopia profilu zapisuje się w pliku na tym komputerze. Wybierz folder, np. Dokumenty lub OneDrive.",
 "Profile files you save are encrypted (AES-256) and open only with the password.": "Zapisywane pliki profilu są szyfrowane (AES-256) i otwierają się tylko hasłem.",
 "Set a password so that only you can open your profile files.": "Ustaw hasło, aby tylko Ty miał dostęp do plików profilu.",
-"The password is never saved and can't be recovered. The Windows app can't open protected files.": "Hasło nigdy nie jest zapisywane i nie można go odzyskać. Aplikacja Windows nie otworzy chronionych plików.",
 "Delete all or only some of your entries. Your language and other options stay.": "Usuń wszystkie wpisy lub tylko wybrane. Język i inne opcje zostają.",
 "Loans & Debts, Budget Plan (with savings goals) and Calendar are modules: switch them on in Settings → Modules.": "Kredyty i długi, Plan budżetu (z celami oszczędnościowymi) i Kalendarz to moduły: włącz je w Ustawienia → Moduły.",
 "Everything you need to get started and get the most from MoneyCompass.": "Wszystko, czego potrzebujesz na start i by w pełni korzystać z MoneyCompass.",

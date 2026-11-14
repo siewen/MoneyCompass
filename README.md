@@ -29,6 +29,10 @@ Personal finance for Poland – in your browser, on any device. Private: your da
 
 Made for Poland: NBP rates, treasury bonds, IKE/IKZE and bank offers, checked every day. Available in Polish and English.
 
+## Development status
+
+MoneyCompass is developed and maintained as a web application (PWA). The former Windows desktop application has been retired: it is no longer developed, maintained or distributed. Profile files saved by it can still be loaded in the web app.
+
 ## Privacy
 
 No account, no sign-in, no cloud. Everything is saved on your own device. MoneyCompass only downloads public numbers (NBP rates, bond rates, bank offers).

@@ -28,8 +28,5 @@ export async function requirePro(feature) {
   return false;
 }
 
-/** Features that need a Pro license (kept under its old name, many pages call it). */
-export async function windowsOrPro(feature) { return requirePro(feature); }
-
 export function changed() { save(); App.refresh(); }
 export { State };
