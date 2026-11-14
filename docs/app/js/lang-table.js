@@ -1,4 +1,4 @@
-// Generated from the Windows app (Services/Lang.cs). German and French were removed; add them back from git history if needed.
+// German and French were removed; add them back from git history if needed.
 export const TABLE = {
 "pl": {
 "Overview": "Przegląd",
@@ -274,10 +274,7 @@ export const TABLE = {
 "In your online banking, open the account history, choose the period and download it as CSV.": "W bankowości internetowej otwórz historię konta, wybierz okres i pobierz ją jako CSV.",
 "Last checked: {0}": "Ostatnio sprawdzono: {0}",
 "Later": "Później",
-"MoneyCompass checks for a newer version every time it starts. Click Update now and it downloads and installs it by itself – your data stays. ? → About.": "MoneyCompass przy każdym uruchomieniu sprawdza, czy jest nowsza wersja. Kliknij „Aktualizuj teraz”, a pobierze ją i zainstaluje samodzielnie – Twoje dane zostaną. ? → O aplikacji.",
 "MoneyCompass could not tell what these are. Choose a category, or leave them as \"Other\".": "MoneyCompass nie rozpoznał tych pozycji. Wybierz kategorię albo zostaw „Inne”.",
-"MoneyCompass {0} (build {1}) is available.": "Dostępny jest MoneyCompass {0} (build {1}).",
-"MoneyCompass {0} (build {1}) is available. You have {2} (build {3}).\n\nDownload the installer now? Your data stays as it is.": "Dostępny jest MoneyCompass {0} (build {1}). Masz {2} (build {3}).\n\nPobrać instalator teraz? Twoje dane pozostaną bez zmian.",
 "No transactions found in this file. Please choose the CSV export of your account history.": "Nie znaleziono transakcji w tym pliku. Wybierz eksport CSV historii konta.",
 "Not sorted yet": "Jeszcze nieprzypisane",
 "Nothing new to add.": "Nic nowego do dodania.",
@@ -369,16 +366,6 @@ export const TABLE = {
 "The red \"Delete data…\" button at the top lets you choose exactly what to delete. A backup is saved first.": "Czerwony przycisk „Usuń dane…” u góry pozwala wybrać dokładnie, co usunąć. Najpierw zapisywana jest kopia zapasowa.",
 "The blue Import button at the top: a bank statement (CSV, Pro) or a saved MoneyCompass profile.": "Niebieski przycisk „Importuj” u góry: wyciąg bankowy (CSV, Pro) lub zapisany profil MoneyCompass.",
 "Reset help button position": "Przywróć pozycję przycisku pomocy",
-"Update now": "Aktualizuj teraz",
-"Downloading the update…": "Pobieranie aktualizacji…",
-"Downloading the update… {0} %": "Pobieranie aktualizacji… {0} %",
-"Starting the installer…": "Uruchamianie instalatora…",
-"The update was cancelled. You can try again any time.": "Aktualizacja została anulowana. Możesz spróbować ponownie w każdej chwili.",
-"The downloaded file is not correct, so it was not started. Please try again later.": "Pobrany plik jest nieprawidłowy, dlatego nie został uruchomiony. Spróbuj ponownie później.",
-"The update could not be downloaded. Check your internet connection and try again.": "Nie udało się pobrać aktualizacji. Sprawdź połączenie z internetem i spróbuj ponownie.",
-"MoneyCompass {0} (build {1}) is available. You have {2} (build {3}).": "Dostępny jest MoneyCompass {0} (build {1}). Masz {2} (build {3}).",
-"Your data, profiles and license stay as they are.": "Twoje dane, profile i licencja pozostaną bez zmian.",
-"Windows asks once for permission to install. MoneyCompass then closes, updates in the background and starts again by itself.": "Windows raz zapyta o zgodę na instalację. MoneyCompass zamknie się, zaktualizuje w tle i uruchomi ponownie samodzielnie.",
 "A very similar category already exists: {0}": "Bardzo podobna kategoria już istnieje: {0}",
 "Categories…": "Kategorie…",
 "Delete a category with the red button. Its expenses move to \"Other\".": "Usuń kategorię czerwonym przyciskiem. Jej wydatki trafią do „Inne”.",
@@ -462,7 +449,6 @@ export const TABLE = {
 "Ready to print or keep. Looks the same everywhere.": "Gotowy do druku lub archiwizacji. Wszędzie wygląda tak samo.",
 "Word (.docx)": "Word (.docx)",
 "A document you can still edit, add notes to or send.": "Dokument, który możesz jeszcze edytować, uzupełnić notatkami lub wysłać.",
-"Export is available in the Windows version.": "Eksport jest dostępny w wersji dla Windows.",
 "Creating {0}…": "Tworzenie: {0}…",
 "Saved: {0}": "Zapisano: {0}",
 "Report saved": "Raport zapisany",

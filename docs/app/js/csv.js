@@ -1,5 +1,5 @@
 import { Calc, State } from "./core.js";
-// Bank statements (CSV) – ported from BankCsv.cs of the Windows app.
+// Bank statements (CSV).
 
 export function decode(buffer) {
   try { return new TextDecoder("utf-8", { fatal: true }).decode(buffer).replace(/^﻿/, ""); }

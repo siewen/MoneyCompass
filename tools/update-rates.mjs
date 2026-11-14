@@ -1,5 +1,5 @@
 // Downloads the public rates for the MoneyCompass web app and writes docs/app/rates.json.
-// Runs every day on GitHub (see .github/workflows/rates.yml). Same sources as the Windows app.
+// Runs every day on GitHub (see .github/workflows/rates.yml).
 import { writeFileSync, readFileSync, existsSync } from "node:fs";
 
 const OUT = new URL("../docs/app/rates.json", import.meta.url);

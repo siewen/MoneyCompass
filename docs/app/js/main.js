@@ -364,7 +364,7 @@ let installPrompt = null;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installPrompt = e; });
 window.addEventListener("appinstalled", () => { installPrompt = null; buildShell(); toast(T("MoneyCompass is installed. Open it from your home screen or apps.")); });
 function installed() {
-  return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true || !!window.chrome?.webview;   // the Windows app (WebView2) counts as installed
+  return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 }
 async function install() {
   if (installPrompt) {
@@ -388,7 +388,7 @@ async function install() {
     <div class="popup-buttons"><button class="btn main" data-close>${esc(T("OK"))}</button></div>`, { width: 480 });
 }
 
-// ---------- "Welcome back" when MoneyCompass opens (same as the Windows app) ----------
+// ---------- "Welcome back" when MoneyCompass opens ----------
 // Shown first, before What's new and reminders; next() runs when it is answered.
 function welcome(next = () => {}) {
   const d = State.data, s = d.Settings;
@@ -437,7 +437,7 @@ function termsGate(next) {
   ok.onclick = () => { s.TermsAccepted = TERMS_VERSION; store.set("mc-terms", TERMS_VERSION); save(); p.close(); next(); };
 }
 
-// ---------- Closing: the same "Save your profile before closing?" box as the Windows app ----------
+// ---------- Closing: the "Save your profile before closing?" box ----------
 async function closeApp() {
   const s = State.data.Settings;
   const choice = s.CloseChoice || "";

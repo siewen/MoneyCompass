@@ -6,7 +6,7 @@ import {
   parseDate, categoryLabel, monthName, ONE_TIME, store,
   markFileBase, savingsRateText, convertProfile, plnRate } from "./core.js";
 import { esc, card, heading, hint, row, field, textInput, select, check, button, values, popup, confirmBox, alertBox, promptBox, toast, pickFile, download, stamp } from "./ui.js";
-import { App, requirePro, windowsOrPro } from "./app.js";
+import { App, requirePro } from "./app.js";
 import { hasPin, lock, pinDialog, bioAvailable, bioOn, enableBio, removeBio } from "./lock.js";
 import { fileProtected, setFilePassword, removeFilePassword, profileFileText, backupFileText, isEncryptedFile, decryptFile, isBuiltinFile, openBuiltin } from "./crypt.js";
 import { Rates } from "./rates.js";
@@ -111,7 +111,7 @@ export function openProfile() {
       if (await confirmBox(T("Delete profile?"), T("All entries of \"{0}\" are deleted from this browser.", x.name), T("Delete"), T("Cancel"), true)) { deleteProfile(x.id); switchTo(State.id); draw(); }
     });
     on('[data-action="new-profile"]', async () => {
-      if (!license.isPro && profiles().length >= 1) { await windowsOrPro(T("More profiles")); return; }
+      if (!license.isPro && profiles().length >= 1) { await requirePro(T("More profiles")); return; }
       const n = await promptBox(T("New profile"), T("Name"), "");
       if (!n || !n.trim()) return;
       createProfile(n.trim()); p.close(); App.rebuild();
