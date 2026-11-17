@@ -1,7 +1,7 @@
 {
- "Usd": 4.0007,
- "Eur": 4.4048,
- "ExchangeDate": "2026-11-16",
+ "Usd": 4.0022,
+ "Eur": 4.4032,
+ "ExchangeDate": "2026-11-17",
  "ReferenceRate": 3.75,
  "ReferenceSince": "2026-03-05",
  "Bonds": [
@@ -41,30 +41,21 @@
  "SavingsOffers": [
   {
    "Url": "",
+   "Bank": "Volkswagen Bank GmbH Sp. z o.o.",
+   "Name": "Plus Konto",
+   "Rate": 4.5,
+   "MaxAmount": 0,
+   "Days": 90,
+   "Details": "bez limitu kwoty · 3 miesiące · Zgody marketingowe Dla nowych Klientów oferta ważna do 18.12.2026"
+  },
+  {
+   "Url": "",
    "Bank": "Erste Bank Polska",
    "Name": "Konto Multi oszczędnościowe",
    "Rate": 4.5,
    "MaxAmount": 200000,
    "Days": 90,
    "Details": "do 200 tys. zł · od dnia przystąpienia do 29.11.2026 r. · Oferta na nowe środki Dzień bazowy 27.08.2026 r.; Przystąpienie do 20.11.2026 r."
-  },
-  {
-   "Url": "",
-   "Bank": "Volkswagen Bank GmbH Sp. z o.o.",
-   "Name": "Rachunek oszczędnościowy Plus Konto",
-   "Rate": 4,
-   "MaxAmount": 0,
-   "Days": 365,
-   "Details": "bez limitu kwoty · bezterminowo · Brak dodatkowych warunków aktywności Oferta ważna do odwołania"
-  },
-  {
-   "Url": "",
-   "Bank": "ING Bank Śląski",
-   "Name": "Otwarte Konto Oszczędnościowe",
-   "Rate": 4,
-   "MaxAmount": 400000,
-   "Days": 90,
-   "Details": "do kwoty niższej niż 400 tys. zł · 3 miesiące · Oferta dla nowych lub nieaktywnych posiadaczy rachunku oszczędnościowego Odsetki standardowe naliczane są co…"
   },
   {
    "Url": "",
@@ -92,6 +83,15 @@
    "MaxAmount": 400000,
    "Days": 365,
    "Details": "do 400 tys. zł · Oferta obowiązuje bezterminowo · Wymagane bezpłatne konto na platformie Raisin do obsługi środków Kwartalna kapitalizacja odsetek Bank odpro…"
+  },
+  {
+   "Url": "",
+   "Bank": "ING Bank Śląski",
+   "Name": "Otwarte Konto Oszczędnościowe Bonus",
+   "Rate": 3.5,
+   "MaxAmount": 300000,
+   "Days": 90,
+   "Details": "do 300 tys. zł · 3 miesiące · Oferta obowiązuje od 13.11.2026 do 15.12.2026 r. Nowe środki"
   }
  ],
  "DepositOffers": [
@@ -150,6 +150,6 @@
    "Details": "1 000 - 400 000 zł · Nowe środki Aplikacja mobilna"
   }
  ],
- "OffersChecked": "2026-11-16T13:36:38.886Z",
- "Updated": "2026-11-16T13:36:38.886Z"
+ "OffersChecked": "2026-11-17T14:21:45.235Z",
+ "Updated": "2026-11-17T14:21:45.235Z"
 }
