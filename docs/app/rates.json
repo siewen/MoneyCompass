@@ -1,7 +1,7 @@
 {
- "Usd": 4.0835,
- "Eur": 4.4802,
- "ExchangeDate": "2026-11-26",
+ "Usd": 4.0754,
+ "Eur": 4.4673,
+ "ExchangeDate": "2026-11-27",
  "ReferenceRate": 3.75,
  "ReferenceSince": "2026-03-05",
  "Bonds": [
@@ -150,6 +150,6 @@
    "Details": "1 000 - 400 000 zł · Nowe środki Aplikacja mobilna"
   }
  ],
- "OffersChecked": "2026-11-26T15:10:21.312Z",
- "Updated": "2026-11-26T15:10:21.312Z"
+ "OffersChecked": "2026-11-27T15:01:49.782Z",
+ "Updated": "2026-11-27T15:01:49.782Z"
 }
